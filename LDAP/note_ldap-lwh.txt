@@ -1,3 +1,10 @@
+--------------------------------------------------------------------------------
+
+主要参考：https://cloud.tencent.com/developer/article/1490857
+快速入门：https://segmentfault.com/a/1190000014683418
+
+--------------------------------------------------------------------------------
+
 OpenLDAP 
 	1.集中账号管理软件
 	2.LDAP:轻量级目录访问协议
@@ -144,12 +151,20 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		olcRootPW: <pass>
 
 	关于这个配置文件的说明
-		    修改olcRootDN， 设置为我们的admin: cn=admin,dc=demo,dc=com
+		    
+			修改olcRootDN， 设置为我们的admin: cn=admin,dc=demo,dc=com
 			修改olcSuffix， 设置为我们的域名dc=demo,dc=com
 			修改olcRootPW， 设置我们的admin密码, 这个需要加密，所以暂时放一个占位符，等下替换
-			changetype变更类型， 
-				1.replace表示替换/更改已存在的属性， 
-				2.add表示增加属性。
+			
+			dn是你要修改的东西的唯一标识，
+				此处是要修改数据库olcDatabase={2}hdb
+			changetype就算modify，表示我们要修改这个文件 
+				1.replace表示要替换已存在的某个属性的值
+				2.add表示增加
+			olcRootDN在这里就表示你整个OpenLDAP系统的管理员用户名是什么，
+				不要奇怪，后面这一砣都是用户名cn=admin,dc=demo,dc=com 
+				长的有点像email地址，实际意思也差不多，但总之就不是email就行了。
+				不要问为什么，总之cn就是email前面的那个名字(类似于用户名)，后面带dc的都是域名。
 		其中cn=config是全局配置，必须包含objectClass: olcGlobal（配置文件 cn=config.ldif）
 	----------------------------------------------------------------------------------
 	然后创建changeroot.sh
@@ -181,10 +196,12 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		3.ldapmodify(更新配置的命令)的参数使用
 			具体参数 查看 命令文档: http://man7.org/linux/man-pages/man1/ldapmodify.1.html
 			修改管理员秘密可以参考：https://blog.csdn.net/developerinit/article/details/76141065
-				-H指定host，这里 ldapi:/// 表示IPC (Unix-domain socket)协议， 
-				-f指定变更的内容来源(文件)。 
+				-H 指定host(指定ldap的服务器)，这里 ldapi:/// 表示IPC (Unix-domain socket)协议， 
+				-f 指定变更的内容来源(文件)。 
 				-Y 指定验证机制(client和server之间的应答过程以及传输内容的编码方式)
-
+					EXTERNAL 是以太网协议
+					不指定的话，似乎直接使用TCP/IPg
+				-Q 安静的执行
 			ldapmodify -Y EXTERNAL -H ldapi:/// -f tmp.ldif
 				利用 tmp.ldif 中的内容修改管理员密码
 
@@ -776,12 +793,56 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			indicate that this is a legacy implementation and using it is considered insecure.
 
 	8.4用户已知个人密码的情况下，如何自己修改密码：
+			
 			[root@bogon ldap]# ldappasswd -x -h 192.168.122.24 -p 389 -D "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com" -w ryanmiao -s abc123
 			Result: Insufficient access (50)
 			[root@bogon ldap]# 
 				这里提示Insufficient access（访问权限不足）。
 				注意：默认情况下系统没有开启权限，所有人都可以查询和操作。
-				查看默认设置
+				
+			//----------------------------------------------------------------------------------//
+			查看默认设置，把默认设置放到olcDatabase={2}hdb.def文件中去
+				[root@localhost ldap]# ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={2}hdb' > olcDatabase={2}hdb.def
+				
+
+			# cat acl.ldif
+				--------------
+				dn: olcDatabase={2}hdb,cn=config
+				changetype: modify
+				# user can change self password, not allow anonymous access
+				add: olcAccess
+				olcAccess: {0}to attrs=userPassword
+					by self write
+					by anonymous auth
+					by * none
+				-
+				# user can change self info
+				add: olcAccess
+				olcAccess: {1} to *
+					by self write
+					by * read
+				--------------
+
+			执行更改
+				[root@localhost ldap]# ldapmodify -Y EXTERNAL -H ldapi:// -f acl.dif 
+				SASL/EXTERNAL authentication started
+				SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+				SASL SSF: 0
+				modifying entry "olcDatabase={2}hdb,cn=config"
+
+			查看变更后的设置，放到olcDatabase={2}hdb.def文件中去
+				[root@localhost ldap]# ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={2}hdb' > olcDatabase={2}hdb.def
+
+			比较 老 新 设置的区别
+				[root@localhost ldap]# diff -Nur olcDatabase\=\{2\}hdb.def olcDatabase\=\{2\}hdb.new
+
+			更新权限配置后尝试自己修改自己的密码
+				# ldappasswd -x -h 192.168.122.24 -p 389 -D "cn=xxx,ou=HR,ou=People,dc=myldap,dc=com" -w 111111 -s abc123
+				# ldapsearch -x -D cn=xxx,ou=HR,ou=People,dc=myldap,dc=com -w 111111 -b "dc=myldap,dc=com" "cn=xxx"
+				ldap_bind: Invalid credentials (49)
+				# ldapsearch -x -D cn=xxx,ou=HR,ou=People,dc=myldap,dc=com -w abc123 -b "dc=myldap,dc=com" "cn=xxx"
+					密码修改成功。
+			//----------------------------------------------------------------------------------//
 
 			我们先不关注这种行为吧，默认所有第三方系统只有登录权限。
 			关于组织架构的维护，即ldap组织的更新，我们采用其他的方案去管理，ldap只是用来辅助第三方登录的。
@@ -792,23 +853,683 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 	----------------------------------------------------------------------------------
 
 9.添加组Group
+	
+	有人会问，我之前添加人员的时候添加了很多部门的ou，不就是group吗。
+	是的，理论上应该是group。但是由于我们丢了一步，没有设置ou的objectClass为group。所以，这里单独讲group的故事。
+
+	ldap的group是一种单独的类型objectClass: groupOfNames， 有个字段叫做member, value就是entry的dn。
+	如此，实现了group-user的映射关系。
+
+	我们可以通过group来查询member，
+	然而，并不能通过user直接获取到group。这在配置第三方系统的时候，没办法做group认证，
+ 	比如airflow要求输入group filter, 默认通过memberof的属性值来获取group。
+	所以，理论上user应该有个字段叫做memberof,value是group。	
+
+	大家可能会觉得dn已经很明显的分组了好吧，为啥还要这么复杂。
+	事实上，ldap也提供了Reverse Group Membership Maintenance.由系统来维护二者的映射关系。即：
+		group添加member的时候会自动给对应的entry添加memberof字段；
+    	当删除entry的时候，也会从group里删除member字段。
+	这个需要单独配置，默认是不支持的。
+
+	9.1添加memberof模块	
+		创建add_module_group.sh
+			-------------------------------------------
+			[root@localhost ldap]# cat add_module_group.sh 
+			dn: cn=module,cn=config
+			cn: module
+			objectClass: olcModuleList
+			olcModulePath: /usr/lib64/openldap
+
+			dn: cn=module{0},cn=config
+			changetype: modify
+			add: olcModuleLoad
+			olcModuleLoad: memberof.la
+			[root@localhost ldap]#
+			-------------------------------------------
+		执行添加
+			-------------------------------------------
+			[root@localhost ldap]# ldapadd -Q -Y EXTERNAL -H ldapi:/// -f add_module_group.sh 
+			adding new entry "cn=module,cn=config"
+			modifying entry "cn=module{0},cn=config"
+			[root@localhost ldap]# 
+			-------------------------------------------
+
+		创建add_group_objectClass.sh
+			-------------------------------------------
+			[root@localhost ldap]# cat add_group_objectClass.sh 
+			dn: olcOverlay=memberof,olcDatabase={2}hdb,cn=config
+			objectClass: olcConfig
+			objectClass: olcMemberOf
+			objectClass: olcOverlayConfig
+			objectClass: top
+			olcOverlay: memberof
+			olcMemberOfDangling: ignore
+			olcMemberOfRefInt: TRUE
+			olcMemberOfGroupOC: groupOfNames
+			olcMemberOfMemberAD: member     
+			olcMemberOfMemberOfAD: memberOf
+			[root@localhost ldap]# 	
+			-------------------------------------------
+		执行添加
+			-------------------------------------------
+			[root@localhost ldap]# ldapadd -Q -Y EXTERNAL -H ldapi:/// -f add_group_objectClass.sh 
+			adding new entry "olcOverlay=memberof,olcDatabase={2}hdb,cn=config"
+			[root@localhost ldap]# 
+			-------------------------------------------
+
+	9.2添加一个group
+		创建addgroup.ldif
+			-------------------------------------------
+			[root@localhost ldap]# cat addgroup.ldif 
+			dn: cn=g-admin,ou=Group,dc=demo,dc=com
+			objectClass: groupOfNames
+			cn: g-admin
+			member: cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+			[root@localhost ldap]# 
+			-------------------------------------------
+		执行
+			-------------------------------------------
+			[root@localhost ldap]# ldapmodify -a -H ldap://192.168.122.24:389 -D "cn=admin,dc=demo,dc=com" -w admin -f addgroup.ldif 
+			adding new entry "cn=g-admin,ou=Group,dc=demo,dc=com"
+
+			[root@localhost ldap]# 
+			-------------------------------------------
+		查看组
+			-------------------------------------------
+			[root@localhost ldap]# ldapsearch -H ldapi:/// -x -D "cn=admin,dc=demo,dc=com" -w admin -b "ou=Group,dc=demo,dc=com"
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <ou=Group,dc=demo,dc=com> with scope subtree
+			# filter: (objectclass=*)
+			# requesting: ALL
+			#
+
+			# Group, demo.com
+			dn: ou=Group,dc=demo,dc=com
+			objectClass: organizationalUnit
+			ou: Group
+
+			# g-admin, Group, demo.com
+			dn: cn=g-admin,ou=Group,dc=demo,dc=com
+			objectClass: groupOfNames
+			cn: g-admin
+			member:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlL
+			GRjPWRlbW8sZGM9Y29t
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+
+			# search result
+			search: 2
+			result: 0 Success
+
+			# numResponses: 3
+			# numEntries: 2
+			[root@localhost ldap]# 
+			
+			注意：上面输出结果中，“member::”行表示改行内容为hash处理后的值，可能有中文
+
+			-------------------------------------------
+		再来查看
+			entry是否添加了memberof, 
+			ldapsearch当不指定字段的时候，默认返回全部强制字段，memberof不属于强制，需要单独指明
+			-------------------------------------------
+			[root@localhost ldap]# ldapsearch -H ldapi:/// -x -D "cn=admin,dc=demo,dc=com" -w admin -b "ou=People,dc=demo,dc=com" "(|(cn=ryan.miao)(cn=hr-*))" memberof
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <ou=People,dc=demo,dc=com> with scope subtree
+			# filter: (|(cn=ryan.miao)(cn=hr-*))
+			# requesting: memberof 
+			#
+
+			# ryan.miao, \E5\90\8E\E5\8F\B0\E7\BB\84, \E7\A0\94\E5\8F\91\E9\83\A8\E9\97\A8,
+			People, demo.com
+			dn:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlLGRjP
+			WRlbW8sZGM9Y29t
+			memberOf: cn=g-admin,ou=Group,dc=demo,dc=com
+
+			# hr-ryan, HR, People, demo.com
+			dn: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+			memberOf: cn=g-admin,ou=Group,dc=demo,dc=com
+
+			# search result
+			search: 2
+			result: 0 Success
+
+			# numResponses: 3
+			# numEntries: 2
+			[root@localhost ldap]# 
+
+			可以看到，这两个人都link到了admin组。如此实现了我们的组添加和管理。
+			同时，再次引入了新的查询语法，filter的正则匹配。
+				(|(cn=ryan.miao)(cn=hr-*)) 表示或者满足某个条件，这里就是为了查询这两个人，另外*表示通配符
+				(&(objectClass=inetOrgPerson)(cn=ryan.miao)) 第三方系统，比如Python集成ldap的配置，
+					通常会有一个basedn, 就是我们的域名了，然后userfilter,这个filter就是这个。
+					我们通常填写objectClass=inetOrgPerson。然后让我们配置user_name_attr, 这就是唯一属性，我们说我们的cn唯一。
+			所以，一个Python的ldap配置，通常是这个样子的。
+					[ldap]
+					# set this to ldaps://<your.ldap.server>:<port>
+					uri = ldap://172.17.0.2:389
+					user_filter = objectClass=inetOrgPerson
+					user_name_attr = cn
+					group_member_attr = memberof
+					superuser_filter =
+					data_profiler_filter =
+					bind_user = cn=admin,dc=demo,dc=com
+					bind_password = admin
+					basedn = dc=demo,dc=com
+					cacert = 
+					search_scope = SUBTREE
+				源码 https://github.com/apache/airflow/blob/master/airflow/contrib/auth/backends/ldap_auth.py#L101 
+				search_filter = "(&({0})({1}={2}))".format(user_filter, user_name_att, username)
+			-------------------------------------------
+
+	9.3添加用户到group
 		
+		我们来创建一个common group， 表示所有人都应该在的一个group。	
+			-------------------------------------------
+			[root@localhost ldap]# cat commongroup.sh 
+			dn: cn=g-users,ou=Group,dc=demo,dc=com
+			objectClass: groupOfNames
+			cn: g-users
+			member: cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+			[root@localhost ldap]# 
+			-------------------------------------------
+		执行
+			-------------------------------------------
+			[root@localhost ldap]# ldapmodify -a -H ldap://192.168.122.24:389 -D cn=admin,dc=demo,dc=com -w admin -f commongroup.sh 
+			adding new entry "cn=g-users,ou=Group,dc=demo,dc=com"
+			[root@localhost ldap]# 
+			-------------------------------------------
+		到目前为止，我们添加了2个group：
+		查看
+			-------------------------------------------
+			[root@localhost ldap]# ldapsearch -H ldapi:/// -D cn=admin,dc=demo,dc=com -w admin -b dc=demo,dc=com -s sub "objectClass=groupOfNames" dn member
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <dc=demo,dc=com> with scope subtree
+			# filter: objectClass=groupOfNames
+			# requesting: dn member 
+			#
 
+			# g-admin, Group, demo.com
+			dn: cn=g-admin,ou=Group,dc=demo,dc=com
+			member:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlL
+			GRjPWRlbW8sZGM9Y29t
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
 
+			# g-users, Group, demo.com
+			dn: cn=g-users,ou=Group,dc=demo,dc=com
+			member:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlL
+			GRjPWRlbW8sZGM9Y29t
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
 
-	----------------------------------------------------------------------------------
+			# search result
+			search: 2
+			result: 0 Success
 
+			# numResponses: 3
+			# numEntries: 2
+			[root@localhost ldap]# 
+			-------------------------------------------
+		加上参数 -LLL   ， 只显示我们指定的返回信息
+			-------------------------------------------
+			[root@localhost ldap]# ldapsearch -H ldapi:/// -D cn=admin,dc=demo,dc=com -w admin -b dc=demo,dc=com -s sub "objectClass=groupOfNames" dn member -LLL
+			dn: cn=g-admin,ou=Group,dc=demo,dc=com
+			member:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlL
+			GRjPWRlbW8sZGM9Y29t
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
 
-	----------------------------------------------------------------------------------
+			dn: cn=g-users,ou=Group,dc=demo,dc=com
+			member:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlL
+			GRjPWRlbW8sZGM9Y29t
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
 
+			[root@localhost ldap]# 
+			-------------------------------------------
+		接下来，我们把剩下的用户加入到g-users这个group， 以后所有人加入的默认group。
+		创建addUserToGroup.sh
+			-------------------------------------------
+			[root@localhost ldap]# cat addUserToGroup.sh 
+			dn: cn=g-users,ou=Group,dc=demo,dc=com
+			changetype: modify
+			add: member
+			member: cn=fang.huang,ou=HR,ou=People,dc=demo,dc=com
+			member: cn=hr-miao,ou=HR,ou=People,dc=demo,dc=com
+			member: cn=someone,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+			member: cn=tester.miao,ou=测试组,ou=研发部门,ou=People,dc=demo,dc=com
+			[root@localhost ldap]# 
+			-------------------------------------------
+		执行添加
+			-------------------------------------------
+			[root@localhost ldap]# ldapmodify -x -H ldap:/// -D cn=admin,dc=demo,dc=com -w admin -f addUserToGroup.sh 
+			modifying entry "cn=g-users,ou=Group,dc=demo,dc=com"
+			[root@localhost ldap]# 
+			-------------------------------------------
+		查找验证
+			-------------------------------------------
+			[root@localhost ldap]# ldapsearch -H ldapi:/// -D cn=admin,dc=demo,dc=com -w admin -b dc=demo,dc=com -s sub "objectClass=groupOfNames"
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <dc=demo,dc=com> with scope subtree
+			# filter: objectClass=groupOfNames
+			# requesting: ALL
+			#
 
-10.
+			# g-admin, Group, demo.com
+			dn: cn=g-admin,ou=Group,dc=demo,dc=com
+			objectClass: groupOfNames
+			cn: g-admin
+			member:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlL
+			GRjPWRlbW8sZGM9Y29t
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
 
-	----------------------------------------------------------------------------------
+			# g-users, Group, demo.com
+			dn: cn=g-users,ou=Group,dc=demo,dc=com
+			objectClass: groupOfNames
+			cn: g-users
+			member:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlL
+			GRjPWRlbW8sZGM9Y29t
+			member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+			member: cn=fang.huang,ou=HR,ou=People,dc=demo,dc=com
+			member:: Y249c29tZW9uZSxvdT3lkI7lj7Dnu4Qsb3U956CU5Y+R6YOo6ZeoLG91PVBlb3BsZSxkY
+			z1kZW1vLGRjPWNvbQ==
+			member:: Y249dGVzdGVyLm1pYW8sb3U95rWL6K+V57uELG91PeeglOWPkemDqOmXqCxvdT1QZW9wb
+			GUsZGM9ZGVtbyxkYz1jb20=
+			member: cn=hr-miao,ou=HR,ou=People,dc=demo,dc=com
 
-	----------------------------------------------------------------------------------
+			# search result
+			search: 2
+			result: 0 Success
 
+			# numResponses: 3
+			# numEntries: 2
+			[root@localhost ldap]# 
 
+----------------------------------------------------------------------------------
+
+10.从Group中移除user		
+	
+	g-admin是一个管理员分组，我们去掉普通用户(参看9.2)
+	如：cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+	
+	创建removeUserFromGroup.sh
+		-------------------------------------------
+		[root@localhost ldap]# cat removeUserFromGroup.sh 
+		dn: cn=g-admin,ou=Group,dc=demo,dc=com
+		changetype: modify
+		delete: member
+		member: cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+		[root@localhost ldap]# 
+		-------------------------------------------
+	执行
+		-------------------------------------------
+		[root@localhost ldap]# ldapmodify -H ldap:/// -x -D cn=admin,dc=demo,dc=com -w admin -f removeUserFromGroup.sh 
+		modifying entry "cn=g-admin,ou=Group,dc=demo,dc=com"
+		[root@localhost ldap]# 
+		-------------------------------------------
+	查看
+		-------------------------------------------
+		[root@localhost ldap]# ldapsearch -H ldapi:/// -D cn=admin,dc=demo,dc=com -w admin -b dc=demo,dc=com -s sub "objectClass=groupOfNames" dn member -LLL
+		dn: cn=g-admin,ou=Group,dc=demo,dc=com
+		member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+
+		dn: cn=g-users,ou=Group,dc=demo,dc=com
+		member:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlL
+		GRjPWRlbW8sZGM9Y29t
+		member: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+		member: cn=fang.huang,ou=HR,ou=People,dc=demo,dc=com
+		member:: Y249c29tZW9uZSxvdT3lkI7lj7Dnu4Qsb3U956CU5Y+R6YOo6ZeoLG91PVBlb3BsZSxkY
+		z1kZW1vLGRjPWNvbQ==
+		member:: Y249dGVzdGVyLm1pYW8sb3U95rWL6K+V57uELG91PeeglOWPkemDqOmXqCxvdT1QZW9wb
+		GUsZGM9ZGVtbyxkYz1jb20=
+		member: cn=hr-miao,ou=HR,ou=People,dc=demo,dc=com
+		[root@localhost ldap]# 
+
+		可以看到 g-admin中已经不包含ryan.miao了
+
+----------------------------------------------------------------------------------
+
+11.最终Group和user的关系
+	
+	group可以有多个user， user可以归属于多个group，是多对多的关系。
+	group有多个member字段， user有多个memberof字段。
+
+----------------------------------------------------------------------------------
+
+12.ACL权限控制
+	
+	Access Control List (ACL) 表示权限控制。从前面的测试可以看到，默认是没开启权限的。任何人都可以连接查询和操作。
+	acl的设置方式很多，鉴于我们并没有将ldap作为主要的数据存储方案，即不做过多的权限设置了，只要关掉匿名访问，只允许read，
+ 	允许个人修改个人信息就好了。更多设置方案可以参照官网。
+
+	acl的配置文件
+	配置文件还是开始提到的，我们可以查看现有的配置：
+		-------------------------------------------
+		[root@localhost ldap]# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config dn
+		SASL/EXTERNAL authentication started
+		SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+		SASL SSF: 0
+		# extended LDIF
+		#
+		# LDAPv3
+		# base <cn=config> with scope subtree
+		# filter: (objectclass=*)
+		# requesting: dn 
+		#
+
+		# config
+		dn: cn=config
+
+		# module{0}, config
+		dn: cn=module{0},cn=config
+
+		# schema, config
+		dn: cn=schema,cn=config
+
+		# {0}core, schema, config
+		dn: cn={0}core,cn=schema,cn=config
+
+		# {1}cosine, schema, config
+		dn: cn={1}cosine,cn=schema,cn=config
+
+		# {2}nis, schema, config
+		dn: cn={2}nis,cn=schema,cn=config
+
+		# {3}inetorgperson, schema, config
+		dn: cn={3}inetorgperson,cn=schema,cn=config
+
+		# {-1}frontend, config
+		dn: olcDatabase={-1}frontend,cn=config
+
+		# {0}config, config
+		dn: olcDatabase={0}config,cn=config
+
+		# {1}monitor, config
+		dn: olcDatabase={1}monitor,cn=config
+
+		# {2}hdb, config
+		dn: olcDatabase={2}hdb,cn=config
+
+		# {0}memberof, {2}hdb, config
+		dn: olcOverlay={0}memberof,olcDatabase={2}hdb,cn=config
+
+		# search result
+		search: 2
+		result: 0 Success
+
+		# numResponses: 13
+		# numEntries: 12
+		[root@localhost ldap]# 
+		-------------------------------------------
+	acl就在dn: olcDatabase={2}hdb,cn=config, 我们可以查看具体的配置：
+		-------------------------------------------
+		[root@localhost ldap]# ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={2}hdb'
+		SASL/EXTERNAL authentication started
+		SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+		SASL SSF: 0
+		# extended LDIF
+		#
+		# LDAPv3
+		# base <cn=config> with scope subtree
+		# filter: olcDatabase={2}hdb
+		# requesting: ALL
+		#
+
+		# {2}hdb, config
+		dn: olcDatabase={2}hdb,cn=config
+		objectClass: olcDatabaseConfig
+		objectClass: olcHdbConfig
+		olcDatabase: {2}hdb
+		olcDbDirectory: /var/lib/ldap
+		olcSuffix: dc=demo,dc=com
+		olcRootDN: cn=admin,dc=demo,dc=com
+		olcRootPW: {SSHA}bm3GXhNX29SeigIDAZRHszvJDZOtws0f
+		olcDbIndex: objectClass eq,pres
+		olcDbIndex: ou,cn,mail,surname,givenname eq,pres,sub
+		olcAccess: {0}to attrs=userPassword   by self write   by anonymous auth   by *
+		none
+		olcAccess: {1} to *   by self write   by * read
+
+		# search result
+		search: 2
+		result: 0 Success
+
+		# numResponses: 2
+		# numEntries: 1
+		[root@localhost ldap]# 
+		-------------------------------------------
+	接下来，使用modify添加acl即可。
+	创建addacl.sh
+		-------------------------------------------
+		[root@localhost ldap]# cat addacl.sh 
+		dn: olcDatabase={2}hdb,cn=config
+		changetype: modify
+		# 只有自己可以修改密码， 不允许匿名访问, 允许g-admin组修改
+		add: olcAccess
+		olcAccess: {0}to attrs=userPassword 
+			by self write 
+			by anonymous auth 
+			by group.exact="cn=g-admin,ou=Group,dc=demo,dc=com"  write 
+			by * none
+		-
+		# 自己可以修改自己的信息，g-admin可以修改任何信息
+		add: olcAccess
+		olcAccess: {1}to * 
+			by self write 
+			by group.exact="cn=g-admin,ou=Group,dc=demo,dc=com"  write   
+			by * none
+		[root@localhost ldap]# 
+		-------------------------------------------
+	执行
+		-------------------------------------------
+		[root@localhost ldap]# ldapmodify -H ldapi:/// -Y EXTERNAL -f addacl.sh 
+		SASL/EXTERNAL authentication started
+		SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+		SASL SSF: 0
+		modifying entry "olcDatabase={2}hdb,cn=config"
+		[root@localhost ldap]# 
+		-------------------------------------------
+	验证权限
+	添加一个普通用户；
+		-------------------------------------------
+		[root@localhost ldap]# cat addtwo.sh 
+		dn: cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: inetOrgPerson
+		cn: hr-miaoMiao
+		userPassword: 123456
+		departmentNumber: 3
+		sn: hr-miaoMiao
+		title: HRBP
+		mail: hr-miaoMiao@demo.com
+		uid: 10006
+		displayName: 我是HR
+		[root@localhost ldap]# 
+
+		[root@localhost ldap]# ldapmodify -a -H ldapi:/// -D cn=admin,dc=demo,dc=com -w admin -f addtwo.sh 
+		adding new entry "cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com"
+		[root@localhost ldap]# 
+		-------------------------------------------
+	现在我们有两个用户来比较
+    	cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com  是普通用户
+    	cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com      是g-admin用户
+	分别来查询：
+		-------------------------------------------
+		[root@localhost ldap]# ldapsearch -H ldap:/// -x -D cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com -w 123456 -b dc=demo,dc=com "cn=hr-ryan" dn memberof
+		# extended LDIF
+		#
+		# LDAPv3
+		# base <dc=demo,dc=com> with scope subtree
+		# filter: cn=hr-ryan
+		# requesting: dn memberof 
+		#
+
+		# hr-ryan, HR, People, demo.com
+		dn: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+		memberOf: cn=g-admin,ou=Group,dc=demo,dc=com
+		memberOf: cn=g-users,ou=Group,dc=demo,dc=com
+
+		# search result
+		search: 2
+		result: 0 Success
+
+		# numResponses: 2
+		# numEntries: 1
+		[root@localhost ldap]#
+
+		------------------
+
+		[root@localhost ldap]# ldapsearch -H ldap:/// -x -D cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com -w 123456 -b dc=demo,dc=com "cn=hr-miaoMiao" dn memberof
+		# extended LDIF
+		#
+		# LDAPv3
+		# base <dc=demo,dc=com> with scope subtree
+		# filter: cn=hr-miaoMiao
+		# requesting: dn memberof 
+		#
+
+		# search result
+		search: 2
+		result: 32 No such object
+
+		# numResponses: 1
+		[root@localhost ldap]# 
+		-------------------------------------------
+	可以看到，g-admin成员可以查询其他所有， 普通用户只能连接。
+		-------------------------------------------
+	比较更新密码能力：
+		-------------------------------------------
+			[root@localhost ldap]# cat update_self_pass.sh 
+			dn: cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com
+			changetype: modify
+			replace: userPassword
+			userPassword: miaoMiao 
+			[root@localhost ldap]# 
+
+			#自己修改自己的密码
+			[root@localhost ldap]# ldapmodify -x -H ldap:/// -D cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com -w 123456 -f update_self_pass.sh 
+			modifying entry "cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com"
+			[root@localhost ldap]# 
+
+			#密码修改成功，原来的密码失效
+			[root@localhost ldap]# ldapmodify -x -H ldap:/// -D cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com -w 123456 -f update_self_pass.sh 
+			ldap_bind: Invalid credentials (49)
+			[root@localhost ldap]# 
+
+			#用新密码登陆成功
+			[root@localhost ldap]# ldapmodify -x -H ldap:/// -D cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com -w miaoMiao -f update_self_pass.sh 
+			modifying entry "cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com"
+			[root@localhost ldap]# 
+
+			#修改别人的密码失败
+				修改update_self_pass.sh 
+				把dn修改为别人的dn ， 如：dn: cn=hr-ryan,ou=HR,ou=People,dc=myldap,dc=com
+				此时利用update_self_pass.sh去修改别人的密码
+			[root@localhost ldap]# ldapmodify -x -H ldap:/// -D cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com -w miaoMiao -f update_self_pass.sh 
+			modifying entry "cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com"
+			ldap_modify: Insufficient access (50)
+			[root@localhost ldap]# 
+		-------------------------------------------
+----------------------------------------------------------------------------------
+13.总结ldap命令
+
+	ldap主要命令有ldapadd, ldapmodify, ldapsearch. 我们用到的操作项有
+
+	option          含义
+	-H              ldap server地址，
+						可以是ldap://192.168.122.24:389 表示tcp，
+						可以是ldap:/// 表示本地的tcp，
+						可以是ldapi:/// 本地unix socket连接
+	-x              启用简单认证，通过-D dn -w 密码的方式认证
+	-f              指定要修改的文件
+	-a              使用ldapmodify增加一个entry的时候等同于ldapadd
+	-b              basedn 根目录， 将在此目录下查询
+	-Y EXTERNAL     本地执行，修改配置文件，比如basedn, rootdn,rootpw,acl, module等信息
+	
+	-------------------------------------------
+
+	ldapadd: 添加一个entry
+		添加schema配置
+			ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
+		添加额外的module
+			ldapadd -Q -Y EXTERNAL -H ldapi:/// -f  add_module_group.sh
+		添加普通entry
+			ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f base.ldif
+	
+	-------------------------------------------
+
+	ldapmodify: 修改entry
+		更新配置信息
+			ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f tmp.ldif
+		对应的更新文件语法：
+			dn: 要更新的entry的dn， 配置为olcDatabase={2}hdb,cn=config， 用户为用户dn
+			changetype: modify
+			replace: olcRootDN   replace替换的字段
+			olcRootDN: cn=admin,dc=demo,dc=com
+			-
+			replace: olcSuffix
+			olcSuffix: dc=demo,dc=com
+			-
+			add: olcRootPW   add添加新的字段
+			olcRootPW: <pass>
+
+	-------------------------------------------
+	
+	ldapsearch: Search查询，主要集中在filter的使用上
+		ldapsearch -H ldapi:/// -D cn=admin,cn=demo,cn=com -w admin -s sub "filter"  attr  [memberof]
+			-s scope 指定查询范围， 有base|one|sub|children 
+				主要用sub表示base之下的所有子目录。对应Python里的SUBTREE filter语法，正则语法。
+				因为使用的时候传递过来的通常是username, 需要比较username在ldap中的字段， 
+				比如(|(cn=Steve*)(sn=Steve*)(mail=Steve*)(givenName=Steve*)(uid=Steve*))
+			attr 是要返回的字段， 必须返回的字段可以在配置文件里查看。
+			memberof 非必须。
+
+	-------------------------------------------
+----------------------------------------------------------------------------------
+
+14.安装phpldapadmin
+	
+	ldap提供了一个可视化的php web phpldapadmin
+	
+	yum install httpd phpldapadmin -y
+			#提示没有可用安装包
+			#解决办法，添加EPEL源，参考博客: https://blog.csdn.net/dahuzix/article/details/73033109 
+			yum install -y epel-release 
+			yum clean all && yum makecache
+	
+	备份配置文件
+		cp /etc/httpd/conf.d/phpldapadmin.conf /etc/httpd/conf.d/phpldapadmin.conf.bak
+		cp /etc/phpldapadmin/config.php /etc/phpldapadmin/config.php.bak
+	
+	修改配置文件/etc/httpd/conf.d/phpldapadmin.conf，允许其他人访问
+			Alias /phpldapadmin /usr/share/phpldapadmin/htdocs
+			Alias /ldapadmin /usr/share/phpldapadmin/htdocs
+
+			<Directory /usr/share/phpldapadmin/htdocs>
+				<RequireAny>
+				#Require ip 127.0.0.1
+				#Require ip ::1
+				Require all granted
+				</RequireAny>
+			</Directory>
+	修改配置文件/etc/phpldapadmin/config.php，使用dn登录
+			//$servers->setValue('login','attr','uid');      #注释掉这一行
+			$servers->setValue('login','attr','dn');         #添加这一行
+	启动httpd
+		systemctl start httpd
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+
+	-------------------------------------------
+	-------------------------------------------
+	-------------------------------------------
+	-------------------------------------------
 
 
 
