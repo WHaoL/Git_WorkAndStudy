@@ -1,0 +1,829 @@
+OpenLDAP 
+	1.集中账号管理软件
+	2.LDAP:轻量级目录访问协议
+	3.运行在TCP/IP上
+	4.支持LDAP最新标准
+	
+OpenLDAP以Berkeley DB作为后段数据库
+	Berkeley DB以散列的数据类型进行存储
+	主要用于搜索 浏览 更新查询操作
+	不支持事务操作
+
+OpenLDAP
+	1.目录中的信息按照树形结构进行组织
+	2.具体信息存储在条目/entry中，条目相当于表记录
+	3.条目是具有区别名DN的属性
+	4.DN用来引用条目
+	5.DN相当于主键，是唯一的
+	6.属性 由type和一个或多个value组成,相当于字段
+
+OpenLDAP工作流程/模型
+	1.客户端向OpenLDAP服务器发起验证请求
+	2.slapd进程向后端Berkeley DB数据库进行查询
+	3.slapd将查询结果返回给客户端
+//-----------------------------------------------------//
+schema
+	主要用于控制目录树上各条目 所拥有的对象类 以及各种属性的定义
+	条目可理解为一个具体的对象，均通过schema创建，并符合schema的标准
+//-----------------------------------------------------//
+LDAP的信息模型是建立在"条目"（entries）的基础上。
+	一个条目是一些属性的集合，并且具有一个全局唯一的"可区分名称"DN，
+	一个条目可以通过DN来引用。
+	
+	每一个条目的属性具有一个类型和一个或者多个值！！！。
+		类型通常是容易记忆的名称，
+			比如"cn"是通用名称（common name） ，
+			或者"mail"是电子邮件地址。
+		条目的值的语法取决于属性类型。
+//-----------------------------------------------------//
+
+LDAP通过属性objectClass
+	来控制哪一个属性必须出现或允许出现在一个条目中，
+	它的值决定了该条目必须遵守的模式
+
+//-----------------------------------------------------//
+
+LDAP的entry(条目)是由各种字段构成，可以理解为关系数据库的字段。
+	
+关键字			英文全称				含义
+
+dc		Domain Component		域名的部分，其格式是将完整的域名分成几部分，
+								如域名为example.com变成dc=example,dc=com
+
+uid		User Id					用户ID，如“tom”
+
+ou		Organization Unit		组织单位，类似于Linux文件系统中的子目录，
+								它是一个容器对象，
+								组织单位可以包含其他各种对象（包括其他组织单元），
+								如“market”
+
+cn		Common Name				公共名称，如“Thomas Johansson”
+
+sn		Surname					姓，如“Johansson”
+
+dn		Distinguished Name		惟一辨别名，类似于Linux文件系统中的绝对路径，
+								每个对象都有一个惟一的名称，
+								如“uid= tom,ou=market,dc=example,dc=com”，
+								在一个目录树中DN总是惟一的
+
+rdn		Relative dn				相对辨别名，类似于文件系统中的相对路径，
+								它是与目录树结构无关的部分，
+								如“uid=tom”或“cn= Thomas Johansson”
+
+c		Country					国家，如“CN”或“US”等。
+
+o		Organization			组织名，如“Example, Inc.”
+
+
+把dn当做用户唯一主键， 
+
+cn是common name,应该等同于用户名，因为用户名必须唯一，通常为邮箱前缀，
+比如ryan.miao.sn作为姓氏， uid作为用户id。通常用户id也是唯一的。
+所以在使用ldap做认证的时候，
+ 大概逻辑如下：
+    配置ldap host, admin, admin pass
+    用户登录时传递username
+    读取配置的ldap信息，查询cn或者uid等于username的数据
+    取出第一个记录， 获得dn， 根据dn和password再次去ldap服务器认证。
+		即我们必须保证cn或uid是全局唯一的，
+     	认证通常需要进行两次。原因就在于dn没办法根据用户名计算出来。
+
+//-----------------------------------------------------//
+1.
+安装openldap
+	yum install -y openldap openldap-clients openldap-servers  
+		#openldap-servers – This is the main LDAP server
+    	#openldap-clients – This contains all required LDAP client utilities
+    	#openldap – This packages contains the LDAP support libraries
+
+2.
+启动：systemctl start slapd
+开机启动：systemctl enable slapd
+
+3.
+添加防火墙允许
+	firewall-cmd --add-service=ldap --permanent
+	firewall-cmd --reload 
+
+4.
+安装后的配置目录是： /etc/openldap/
+默认配置文件，位于/etc/openldap/slapd.d/ 
+	配置文件后缀.ldif(LDAP Input Format (LDIF))
+	db存储格式，有bdb和hdb两种，这里是hdb
+核心配置文件，位于/etc/openldap/slapd.d/cn=config/ 
+	可以配置域名(olcSuffix)， 管理员账号(olcRootDN)等。
+	很多文件名和字段名都有前缀"olc" (OpenLDAP Configuration)
+
+5.
+通过ldapmodify来更新配置！！！
+	类似于update by pk, 这里的pk就是dn了
+
+	//-----------------------------------------------------//
+	尝试配置OpenLDAP
+	----------------------------------------------------------------------------------
+	mkdir ～/ldap
+
+	配置
+		管理员账号 olcRootDN
+		域名      olcSuffix
+		管理员秘密 olcRootPW
+
+	----------------------------------------------------------------------------------
+
+	[root@bogon ldap]# vim rootdn.ldif 
+		
+		dn: olcDatabase={2}hdb,cn=config
+		changetype: modify
+		replace: olcRootDN
+		olcRootDN: cn=admin,dc=demo,dc=com
+		-
+		replace: olcSuffix
+		olcSuffix: dc=demo,dc=com
+		-
+		replace: olcRootPW
+		olcRootPW: <pass>
+
+	关于这个配置文件的说明
+		    修改olcRootDN， 设置为我们的admin: cn=admin,dc=demo,dc=com
+			修改olcSuffix， 设置为我们的域名dc=demo,dc=com
+			修改olcRootPW， 设置我们的admin密码, 这个需要加密，所以暂时放一个占位符，等下替换
+			changetype变更类型， 
+				1.replace表示替换/更改已存在的属性， 
+				2.add表示增加属性。
+		其中cn=config是全局配置，必须包含objectClass: olcGlobal（配置文件 cn=config.ldif）
+	----------------------------------------------------------------------------------
+	然后创建changeroot.sh
+	[root@bogon ldap]# vim changeroot.sh 
+		admin_pass=`slappasswd -s admin`
+		echo "admin pass is:  ${admin_pass}"
+		sed "s!<pass>!${admin_pass}!g"   rootdn.ldif > tmp.ldif
+		
+		echo "备份默认配置"
+		cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif     \
+		   /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.bak
+		
+		echo "将要修改的内容："
+		cat tmp.ldif
+		
+		ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f tmp.ldif
+		echo "修改后的变化"
+		diff -Nur \
+				/etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif    \
+		     	/etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.bak
+	
+	关于这个配置文件的说明
+		1.获取机密后的秘密：
+		slappasswd -s admin
+			使用slappasswd命令可以生成LDAP管理员密码(加密后的秘密)。
+			然后下面几条语句是将秘密写入slapd.d/下面的文件中去
+		
+		2.备份原始文件
+		3.ldapmodify(更新配置的命令)的参数使用
+			具体参数 查看 命令文档: http://man7.org/linux/man-pages/man1/ldapmodify.1.html
+			修改管理员秘密可以参考：https://blog.csdn.net/developerinit/article/details/76141065
+				-H指定host，这里 ldapi:/// 表示IPC (Unix-domain socket)协议， 
+				-f指定变更的内容来源(文件)。 
+				-Y 指定验证机制(client和server之间的应答过程以及传输内容的编码方式)
+
+			ldapmodify -Y EXTERNAL -H ldapi:/// -f tmp.ldif
+				利用 tmp.ldif 中的内容修改管理员密码
+
+		4.diff -Nur 查看更改了哪些内容
+			diff可以参考博客：
+				显示格式 http://www.ruanyifeng.com/blog/2012/08/how_to_read_diff.html
+				参数 https://blog.csdn.net/qwe15954250805/article/details/79057821
+
+	----------------------------------------------------------------------------------
+
+	使用脚本进行变更，而不是直接命令行交互式变更，这样可以更容易梳理变更逻辑, 而且可以重复使用。
+
+	----------------------------------------------------------------------------------
+	
+	可以通过search语法来确定账号密码是否正确：
+		[root@bogon ldap]# ldapsearch  -H ldapi:/// -D "cn=admin,dc=demo_,dc=com" -w admin
+		ldap_bind: Invalid credentials (49)
+		[root@bogon ldap]# ldapsearch  -H ldapi:/// -D "cn=admin,dc=demo,dc=com" -w admia
+		ldap_bind: Invalid credentials (49)
+		[root@bogon ldap]# ldapsearch  -H ldapi:/// -D "cn=admin,dc=demo,dc=com" -w admin
+		# extended LDIF
+		#
+		# LDAPv3
+		# base <> (default) with scope subtree
+		# filter: (objectclass=*)
+		# requesting: ALL
+		#
+
+		# search result
+		search: 2
+		result: 32 No such object
+
+		# numResponses: 1
+	
+	ldapsearch 查询语法， 
+		-H指定host， 这里 ldapi:/// 表示IPC (Unix-domain socket)协议， 
+		-D指定admin的账号，即rootdn, 
+		-w指定密码, 
+		-x启用认证
+	
+	----------------------------------------------------------------------------------
+
+	以上完成了：管理员账号 管理员密码 域名 的添加 和验证
+
+	----------------------------------------------------------------------------------
+
+
+6.
+添加我们的base组织结构
+	有了管理员，还需要配置组织结构 base.ldif
+	
+	1.在这之前，我们需要导入一些模板。schema类似数据库表定义，定义了字段名称和类型。
+	schema地址：/etc/openldap/schema/
+
+	默认安装加载了core.ldif, 我们现在加载几个想要的schema:
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
+	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 
+		[root@bogon openldap]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
+		SASL/EXTERNAL authentication started
+		SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+		SASL SSF: 0
+		adding new entry "cn=cosine,cn=schema,cn=config"
+
+		[root@bogon openldap]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
+		SASL/EXTERNAL authentication started
+		SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+		SASL SSF: 0
+		adding new entry "cn=nis,cn=schema,cn=config"
+
+		[root@bogon openldap]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 
+		SASL/EXTERNAL authentication started
+		SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
+		SASL SSF: 0
+		adding new entry "cn=inetorgperson,cn=schema,cn=config"
+
+		[root@bogon openldap]# 
+
+	2.然后创建文件base.ldif
+		[root@bogon ldap]# cat base.ldif 
+			dn: dc=demo,dc=com
+			objectClass: top
+			objectClass: dcObject
+			objectClass: organization
+			o: ldap测试组织
+			dc: demo
+
+			dn: cn=Manager,dc=demo,dc=com
+			objectClass: organizationalRole
+			cn: Manager
+			description: 组织管理人
+
+			dn: ou=People,dc=demo,dc=com
+			objectClass: organizationalUnit
+			ou: People
+
+			dn: ou=Group,dc=demo,dc=com
+			objectClass: organizationalUnit
+			ou: Group
+		[root@bogon ldap]# 
+		
+		对于ldif文件：
+			1.每行结尾和空行不能有空格字符
+			2.可以使用cat -A file来检查文件每行（查看所有字符）
+			3.除了第一行，每个dn开始前有一个空行
+		否则会出现类似下面的错误：
+		“ldapadd: attributeDescription "dn": (possible missing newline after line 37, entry "ou=测试组,ou=研发部门,ou=People,dc=myldap,dc=com"?)”
+
+	3.使用ldapadd添加base:
+		[root@bogon ldap]# ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f base.ldif 
+		adding new entry "dc=demo,dc=com"
+
+		adding new entry "cn=Manager,dc=demo,dc=com"
+
+		adding new entry "ou=People,dc=demo,dc=com"
+
+		adding new entry "ou=Group,dc=demo,dc=com"
+
+		[root@bogon ldap]# 
+	4.使用ldapsearch来检查内容
+		[root@bogon ldap]# ldapsearch  -x -D cn=admin,dc=demo,dc=com -w admin -b "dc=demo,dc=com"
+		# extended LDIF
+		#
+		# LDAPv3
+		# base <dc=demo,dc=com> with scope subtree
+		# filter: (objectclass=*)
+		# requesting: ALL
+		#
+
+		# demo.com
+		dn: dc=demo,dc=com
+		objectClass: top
+		objectClass: dcObject
+		objectClass: organization
+		o:: bGRhcOa1i+ivlee7hOe7hw==
+		dc: demo
+
+		# Manager, demo.com
+		dn: cn=Manager,dc=demo,dc=com
+		objectClass: organizationalRole
+		cn: Manager
+		description:: 57uE57uH566h55CG5Lq6
+
+		# People, demo.com
+		dn: ou=People,dc=demo,dc=com
+		objectClass: organizationalUnit
+		ou: People
+
+		# Group, demo.com
+		dn: ou=Group,dc=demo,dc=com
+		objectClass: organizationalUnit
+		ou: Group
+
+		# search result
+		search: 2
+		result: 0 Success
+
+		# numResponses: 5
+		# numEntries: 4
+		[root@bogon ldap]# 
+
+		说明：
+			-x 启用认证
+			-D bind admin的dn
+			-w admin的密码
+			-b basedn/searchbase, 查询的基础dn
+				使用searchbase作为搜索的起点而不是默认。
+				
+			可以看到中文被替换成hash, 后面可以通过其他方式看到
+	----------------------------------------------------------------------------------
+
+	以上完成了：向组织中添加一个组织单元(部门)
+
+	----------------------------------------------------------------------------------
+
+7.添加人员
+	ou并不能当做分组，而仅仅是组织架构的一个单元。
+	ldap的分组都是通过单独的group来实现的。
+	
+	添加人员
+	添加人员对应的是树的叶子节点，使用的oebjectClass： inetOrgPerson。
+	添加组织部门对应的是目录，使用的objectClass: organizationalUnit.
+	我们要把人员添加到ou=People,dc=demo,dc=com下。
+
+	
+	1.创建adduser.ldif
+		[root@bogon ldap]# cat adduser.sh 
+		dn: ou=研发部门,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: organizationalUnit
+		ou: 研发部门
+
+		dn: ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: organizationalUnit
+		ou: 后台组
+
+
+
+		dn: cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: inetOrgPerson
+		cn: ryan.miao
+		departmentNumber: 1
+		sn: Miao
+		title: 大牛
+		mail: ryan.miao@demo.com
+		uid: 10000
+		displayName: 中文名
+
+
+
+		dn: cn=someone,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: inetOrgPerson
+		cn: someone
+		departmentNumber: 1
+		sn: someone
+		title: Java工程师
+		mail: someone@demo.com
+		uid: 10001
+		displayName: 某人
+
+
+		dn: ou=测试组,ou=研发部门,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: organizationalUnit
+		ou: 测试组
+
+
+		dn: cn=tester.miao,ou=测试组,ou=研发部门,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: inetOrgPerson
+		cn: tester.miao
+		departmentNumber: 2
+		sn: Miao
+		title: 测试工程师
+		mail: tester@demo.com
+		uid: 10002
+		displayName: 测试某人
+
+
+		dn: ou=HR,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: organizationalUnit
+		ou: HR
+
+
+		dn: cn=fang.huang,ou=HR,ou=People,dc=demo,dc=com
+		changetype: add
+		objectClass: inetOrgPerson
+		cn: fang.huang
+		departmentNumber: 3
+		sn: Huang
+		title: HRBP
+		mail: fang.huang@demo.com
+		uid: 10003
+		displayName: 黄芳
+
+		[root@bogon ldap]# 
+	
+	2.使用ldapadd来添加adduser.ldif中的用户
+		[root@bogon ldap]# ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f adduser.sh 
+		adding new entry "ou=研发部门,ou=People,dc=demo,dc=com"
+
+		adding new entry "ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com"
+
+		adding new entry "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com"
+
+		adding new entry "cn=someone,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com"
+
+		adding new entry "ou=测试组,ou=研发部门,ou=People,dc=demo,dc=com"
+
+		adding new entry "cn=tester.miao,ou=测试组,ou=研发部门,ou=People,dc=demo,dc=com"
+
+		adding new entry "ou=HR,ou=People,dc=demo,dc=com"
+
+		adding new entry "cn=fang.huang,ou=HR,ou=People,dc=demo,dc=com"
+
+		[root@bogon ldap]# 
+	
+	3.使用ldapsearch来查询用户
+		
+		和前面的ldapsearch示例相比，多了一个参数filter
+     	ldapsearch -x -D "admin的dn" -w "admin的密码" -b "basedn, 最外层的分组" "search filter:"
+     
+		指定唯一id来(作为filter)查询某个用户，比如cn唯一，则
+			[root@bogon ldap]# ldapsearch -x -D cn=admin,dc=demo,dc=com -w admin -b "dc=demo,dc=com" "cn=ryan.miao"
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <dc=demo,dc=com> with scope subtree
+			# filter: cn=ryan.miao
+			# requesting: ALL
+			#
+
+			# ryan.miao, \E5\90\8E\E5\8F\B0\E7\BB\84, \E7\A0\94\E5\8F\91\E9\83\A8\E9\97\A8,
+			People, demo.com
+			dn:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlLGRjP
+			WRlbW8sZGM9Y29t
+			objectClass: inetOrgPerson
+			cn: ryan.miao
+			departmentNumber: 1
+			sn: Miao
+			title:: 5aSn54mb
+			mail: ryan.miao@demo.com
+			uid: 10000
+			displayName:: 5Lit5paH5ZCN
+
+			# search result
+			search: 2
+			result: 0 Success
+
+			# numResponses: 2
+			# numEntries: 1
+			[root@bogon ldap]# 
+	
+	4.使用ldapsearch来查询用户时，还可以指定返回的字段
+		在配置第三方认证的时候，比如airflow, 就是通过这样userfilter来search用户的。
+
+			[root@bogon ldap]# ldapsearch -x -D cn=admin,dc=demo,dc=com -w admin -b "ou=HR,ou=People,dc=demo,dc=com" cn uid displayName
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <ou=HR,ou=People,dc=demo,dc=com> with scope subtree
+			# filter: (objectclass=*)
+			# requesting: cn uid displayName 
+			#
+
+			# HR, People, demo.com
+			dn: ou=HR,ou=People,dc=demo,dc=com
+
+			# fang.huang, HR, People, demo.com
+			dn: cn=fang.huang,ou=HR,ou=People,dc=demo,dc=com
+			cn: fang.huang
+			uid: 10003
+			displayName:: 6buE6Iqz
+
+			# search result
+			search: 2
+			result: 0 Success
+
+			# numResponses: 3
+			# numEntries: 2
+			[root@bogon ldap]# 
+	----------------------------------------------------------------------------------
+	
+	以上完成了：添加用户，查找用户
+	
+	----------------------------------------------------------------------------------
+
+
+8.添加用户密码
+	刚才添加用户太快，忘记添加用户密码了。
+	这就涉及到 添加用户的同时指定密码 和 admin修改密码以及 用户自己修改密码三个情况了。
+
+	8.1加用户的时候指定密码
+		一个hr肯定太累了，添加一个新的hr hr-ryan	
+		
+		创建文件addone.ldif
+			[root@bogon ldap]# cat addone.ldif 
+			dn: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+			changetype: add
+			objectClass: inetOrgPerson
+			cn: hr-ryan
+			userPassword: 123456
+			departmentNumber: 3
+			sn: hr-ryan
+			title: HRBP
+			mail: hr-ryan@demo.com
+			uid: 10004
+			displayName: 我是猎头
+			[root@bogon ldap]# 
+		执行添加
+			[root@bogon ldap]# ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f addone.ldif 
+			adding new entry "cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com"
+
+			[root@bogon ldap]# 
+		查询验证：是否添加成功
+			[root@bogon ldap]# ldapsearch -x -D cn=admin,dc=demo,dc=com -w admin -b dc=demo,dc=com "cn=hr-*"
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <dc=demo,dc=com> with scope subtree
+			# filter: cn=hr-*
+			# requesting: ALL
+			#
+
+			# hr-ryan, HR, People, demo.com
+			dn: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+			objectClass: inetOrgPerson
+			cn: hr-ryan
+			userPassword:: MTIzNDU2
+			departmentNumber: 3
+			sn: hr-ryan
+			title: HRBP
+			mail: hr-ryan@demo.com
+			uid: 10004
+			displayName:: 5oiR5piv54yO5aS0
+
+			# search result
+			search: 2
+			result: 0 Success
+
+			# numResponses: 2
+			# numEntries: 1
+			[root@bogon ldap]# 
+		
+		可以看到，filter里可以使用通配符。并且，用户密码被加密了。
+		我们前文说，
+			第三方系统
+				第一步通过search拿到用户的dn，也就是上面这一步。
+				然后第二个是验证密码，验证密码是怎么做的呢？
+					直接通过search语法连接ldap，通过则证明密码正确。
+		查询验证：密码是否正确
+			[root@bogon ldap]# ldapsearch -x -D cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com -w 123456
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <> (default) with scope subtree
+			# filter: (objectclass=*)
+			# requesting: ALL
+			#
+
+			# search result
+			search: 2
+			result: 32 No such object
+
+			# numResponses: 1
+			[root@bogon ldap]# 
+			
+			因为没有加类似-b dc=demo,dc=com "cn=hr-*"这样的过滤条件，
+			结果中会输出“result: 32 No such object”，这是正常的
+			如果密码错误会输出“ldap_bind: Invalid credentials (49)”
+
+			[root@bogon ldap]# ldapsearch -x -D cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com -w 123456 -b dc=demo,dc=com "cn=hr-*"
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <dc=demo,dc=com> with scope subtree
+			# filter: cn=hr-*
+			# requesting: ALL
+			#
+
+			# hr-ryan, HR, People, demo.com
+			dn: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
+			objectClass: inetOrgPerson
+			cn: hr-ryan
+			userPassword:: MTIzNDU2
+			departmentNumber: 3
+			sn: hr-ryan
+			title: HRBP
+			mail: hr-ryan@demo.com
+			uid: 10004
+			displayName:: 5oiR5piv54yO5aS0
+
+			# search result
+			search: 2
+			result: 0 Success
+
+			# numResponses: 2
+			# numEntries: 1
+			[root@bogon ldap]# 
+
+	8.2修改用户秘密
+		管理员权限最大，可以修改任意密码。使用ldapmodify
+
+		创建文件updatepass.ldif
+			[root@bogon ldap]# cat updatepass.ldif 
+			dn: cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
+			changetype: modify
+			replace: userPassword
+			userPassword: ryanmiao
+			[root@bogon ldap]# 
+		执行修改
+			[root@bogon ldap]# ldapmodify  -a -H ldap://192.168.122.24:389 -D cn=admin,dc=demo,dc=com -w admin -f updatepass.ldif 
+			modifying entry "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com"
+
+			[root@bogon ldap]# 
+		根据刚刚更改的密码，去查询确认能否正常登陆
+			[root@bogon ldap]# ldapsearch -x -D cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com -w ryanmiao -b dc=demo,dc=com "cn=ryan.miao"
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <dc=demo,dc=com> with scope subtree
+			# filter: cn=ryan.miao
+			# requesting: ALL
+			#
+
+			# ryan.miao, \E5\90\8E\E5\8F\B0\E7\BB\84, \E7\A0\94\E5\8F\91\E9\83\A8\E9\97\A8,
+			People, demo.com
+			dn:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlLGRjP
+			WRlbW8sZGM9Y29t
+			objectClass: inetOrgPerson
+			cn: ryan.miao
+			departmentNumber: 1
+			sn: Miao
+			title:: 5aSn54mb
+			mail: ryan.miao@demo.com
+			uid: 10000
+			displayName:: 5Lit5paH5ZCN
+			userPassword:: cnlhbm1pYW8=
+
+			# search result
+			search: 2
+			result: 0 Success
+
+			# numResponses: 2
+			# numEntries: 1
+			[root@bogon ldap]# 
+	
+		可以确认密码修改成功了，同时也暴露了一个问题，
+			：任意一个人都可以bind登录，然后查询所有用户的信息。
+			后面我们将关注acl权限问题，让每个人只能查询自己的信息，让指定的group可以查询所有人的信息。
+	
+	8.3 注意、
+		注意到，我们使用的明文作为密码存储在ldif文件中， 这样的传输方式是不推荐的， 
+			可以使用sha1，将加密字符串写在文件中。
+		
+		有多种加密方式可供选择
+			#hash
+			[root@bogon ldap]# slappasswd -s ryanmiao
+			{SSHA}XxffRVNnyAIKptGgpKWHtpztU/ahISwT
+			#sha1
+			[root@bogon ldap]# slappasswd -h {sha} -s ryanmiao
+			{SHA}vMV4cx3BhPVf0dRvEur3NOWIDEw=
+			#md5
+			[root@bogon ldap]# slappasswd -h {md5} -s ryanmiao
+			{MD5}J3sqNCJFas5wgycX4lJPsg==
+
+		updatepass.ldif改为
+			dn: cn=ryan.miao,ou=后台组,ou=研发部门,dc=demo,dc=com
+			changetype: modify
+			replace: userPassword
+			userPassword: {SSHA}XxffRVNnyAIKptGgpKWHtpztU/ahISwT
+
+		更改
+			[root@bogon ldap]# ldapmodify -a -H ldap://192.168.122.24:389 -D cn=admin,dc=demo,dc=com -w admin -f updatepass.ldif 
+			modifying entry "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com"
+
+			[root@bogon ldap]#
+		查询验证
+			[root@bogon ldap]# ldapsearch -x -D cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com -w ryanmiao -b dc=demo,dc=com "cn=ryan.miao" cn uid displayName
+			# extended LDIF
+			#
+			# LDAPv3
+			# base <dc=demo,dc=com> with scope subtree
+			# filter: cn=ryan.miao
+			# requesting: cn uid displayName 
+			#
+
+			# ryan.miao, \E5\90\8E\E5\8F\B0\E7\BB\84, \E7\A0\94\E5\8F\91\E9\83\A8\E9\97\A8,
+			People, demo.com
+			dn:: Y249cnlhbi5taWFvLG91PeWQjuWPsOe7hCxvdT3noJTlj5Hpg6jpl6gsb3U9UGVvcGxlLGRjP
+			WRlbW8sZGM9Y29t
+			cn: ryan.miao
+			uid: 10000
+			displayName:: 5Lit5paH5ZCN
+
+			# search result
+			search: 2
+			result: 0 Success
+
+			# numResponses: 2
+			# numEntries: 1
+			[root@bogon ldap]# 
+		
+		值得注意的是sha1的结果并不是通常我们用的hex结果，而是通过utf8转换的：
+			public static String sha1(String str)
+				throws NoSuchAlgorithmException, UnsupportedEncodingException {
+				if (null == str || str.length() == 0) {
+					return null;
+				}
+				MessageDigest mdTemp = MessageDigest.getInstance("SHA1");
+				mdTemp.update(str.getBytes("UTF-8"));
+				byte[] md = mdTemp.digest();
+
+				return "{SHA}" + Utf8.decode(java.util.Base64.getEncoder().encode(md));
+			}
+			Springboot提供了LdapShaPasswordEncoder， 但标记为deprecated, 理由是明文的加密算法不够安全。
+			由于ldap属于同步服务，即ldap不负责用户信息的维护，只负责查询。需要由用户中心来同步给ldap信息。
+			这就涉及到密码的问题，用户中心没有存储用户明文的，也就是不能直接同步到ldap。
+			好在可以获得用户密码的sha，通过sha来同步ldap的密码，即ldap中的密码是一个sha的方式存储的。
+			虽然不够安全，容易被撞，但用着也还行。
+			如果不信任这种算法，那就不用ldap。可以使用oauth的方式认证第三方系统，大部分系统已支持这种认证方案。
+			@deprecated Digest based password encoding is not considered secure. Instead use an 
+			adaptive one way function like BCryptPasswordEncoder, Pbkdf2PasswordEncoder, or 
+			password upgrades. There are no plans to remove this support. It is deprecated to 
+			indicate that this is a legacy implementation and using it is considered insecure.
+
+	8.4用户已知个人密码的情况下，如何自己修改密码：
+			[root@bogon ldap]# ldappasswd -x -h 192.168.122.24 -p 389 -D "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com" -w ryanmiao -s abc123
+			Result: Insufficient access (50)
+			[root@bogon ldap]# 
+				这里提示Insufficient access（访问权限不足）。
+				注意：默认情况下系统没有开启权限，所有人都可以查询和操作。
+				查看默认设置
+
+			我们先不关注这种行为吧，默认所有第三方系统只有登录权限。
+			关于组织架构的维护，即ldap组织的更新，我们采用其他的方案去管理，ldap只是用来辅助第三方登录的。
+			即，其他系统想要修改密码之类的，统一到我们的用户中心服务去修改变更，用户中心负责把信息同步给ldap
+
+	----------------------------------------------------------------------------------
+		以上完成了： 添加用户的时候指定密码 管理员修改用户密码 密码以加密字符串形式存储
+	----------------------------------------------------------------------------------
+
+9.添加组Group
+		
+
+
+
+	----------------------------------------------------------------------------------
+
+
+	----------------------------------------------------------------------------------
+
+
+10.
+
+	----------------------------------------------------------------------------------
+
+	----------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
