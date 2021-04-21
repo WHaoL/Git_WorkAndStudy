@@ -1,0 +1,40 @@
+#安装git
+sudo apt-get update -y
+sudo apt-get upgrade -y
+apt install git
+sudo apt install git
+git --version
+
+#配置用户名和密码
+git config --global user.name "WHaoL"
+git config --global user.email "1943080020@qq.com"
+#查看用户名和密码
+git config --list
+
+#创建本地仓库
+cd Git_WorkAndStudy/
+git init 
+
+#add文件到本地仓库，并commit文件到本地仓库
+git add README.md 
+git commit -m "README.md是学习记录"  
+git add note_ldap-lwh.txt 
+git commit -m  "note_ldap-lwh.txt是openLDAP的学习笔记(目前是2021-04-19晚上至2021-04-20晚上的学习记录)" 
+git add sshlwh.sh 
+git commit -m "sshlwh.sh是ssh连接virt-manager的CentOS7.9-Mini"
+
+#查看commit日志
+git log
+
+#本的创建子分支main 并切换到main
+git branch -M main
+
+#绑定远端git仓库到 origin
+git remote add origin https://github.com/WHaoL/Git_WorkAndStudy.git
+
+#把本地main分支推送到远端origin (输入用户名和密码)
+git push -u origin main 
+
+#查看自己属于哪个分支，与远端哪个分支对应
+#可以查看有哪些文件已经 add  但是没有 commit
+git status 
