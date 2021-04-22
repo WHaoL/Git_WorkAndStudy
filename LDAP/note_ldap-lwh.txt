@@ -1,144 +1,252 @@
 --------------------------------------------------------------------------------
 
-主要参考：https://cloud.tencent.com/developer/article/1490857
-快速入门：https://segmentfault.com/a/1190000014683418
+-------------------------------------基本概念-------------------------------------------
 
---------------------------------------------------------------------------------
+	OpenLDAP 
+		1.集中账号管理软件
+		2.LDAP:轻量级目录访问协议
+		3.默认运行在TCP/IP上
+		4.支持LDAP最新标准
+		
+	OpenLDAP以Berkeley DB作为后端数据库
+		Berkeley DB以散列的数据类型进行存储
+		主要用于搜索 浏览 更新查询操作
+		不支持事务操作
 
-OpenLDAP 
-	1.集中账号管理软件
-	2.LDAP:轻量级目录访问协议
-	3.运行在TCP/IP上
-	4.支持LDAP最新标准
-	
-OpenLDAP以Berkeley DB作为后段数据库
-	Berkeley DB以散列的数据类型进行存储
-	主要用于搜索 浏览 更新查询操作
-	不支持事务操作
+	OpenLDAP
+		1.目录中的信息按照树形结构进行组织
+		2.具体信息存储在条目/entry中，条目相当于表记录
+		3.条目是具有区别名DN的属性
+		4.DN用来引用条目
+		5.DN相当于主键，是唯一的
+		6.属性 由type和一个或多个value组成,相当于字段
 
-OpenLDAP
-	1.目录中的信息按照树形结构进行组织
-	2.具体信息存储在条目/entry中，条目相当于表记录
-	3.条目是具有区别名DN的属性
-	4.DN用来引用条目
-	5.DN相当于主键，是唯一的
-	6.属性 由type和一个或多个value组成,相当于字段
+	OpenLDAP工作流程/模型
+		1.客户端向OpenLDAP服务器发起验证请求
+		2.slapd进程向后端Berkeley DB数据库进行查询
+		3.slapd将查询结果返回给客户端
 
-OpenLDAP工作流程/模型
-	1.客户端向OpenLDAP服务器发起验证请求
-	2.slapd进程向后端Berkeley DB数据库进行查询
-	3.slapd将查询结果返回给客户端
-//-----------------------------------------------------//
-schema
-	主要用于控制目录树上各条目 所拥有的对象类 以及各种属性的定义
-	条目可理解为一个具体的对象，均通过schema创建，并符合schema的标准
-//-----------------------------------------------------//
-LDAP的信息模型是建立在"条目"（entries）的基础上。
-	一个条目是一些属性的集合，并且具有一个全局唯一的"可区分名称"DN，
-	一个条目可以通过DN来引用。
-	
-	每一个条目的属性具有一个类型和一个或者多个值！！！。
-		类型通常是容易记忆的名称，
-			比如"cn"是通用名称（common name） ，
-			或者"mail"是电子邮件地址。
-		条目的值的语法取决于属性类型。
-//-----------------------------------------------------//
+	schema
+		主要用于控制目录树上各条目 所拥有的对象类 以及各种属性的定义
+		条目可理解为一个具体的对象，均通过schema创建，并符合schema的标准
 
-LDAP通过属性objectClass
-	来控制哪一个属性必须出现或允许出现在一个条目中，
-	它的值决定了该条目必须遵守的模式
+	LDAP的信息模型是建立在"条目"（entries）的基础上。
+		一个条目是一些属性的集合，并且具有一个全局唯一的"可区分名称"DN，
+		一个条目可以通过DN来引用。
+		
+		每一个条目的属性具有一个类型和一个或者多个值！！！。
+			类型通常是容易记忆的名称，
+				比如"cn"是通用名称（common name）通常当作用户名使用 ，
+				或者"mail"是电子邮件地址。
+			条目的值的语法取决于属性类型。
 
-//-----------------------------------------------------//
+	LDAP通过属性objectClass
+		来控制哪一个属性必须出现或允许出现在一个条目中，
+		它的值决定了该条目必须遵守的模式
 
-LDAP的entry(条目)是由各种字段构成，可以理解为关系数据库的字段。
-	
-关键字			英文全称				含义
+	---------------------------------
+	LDAP的entry(条目)是由各种字段构成，可以理解为关系数据库的字段。
+		
+	关键字			英文全称				含义
 
-dc		Domain Component		域名的部分，其格式是将完整的域名分成几部分，
-								如域名为example.com变成dc=example,dc=com
+	dc		Domain Component		域名的部分，其格式是将完整的域名分成几部分，
+									如域名为example.com变成dc=example,dc=com
 
-uid		User Id					用户ID，如“tom”
+	uid		User Id					用户ID，如“tom”
 
-ou		Organization Unit		组织单位，类似于Linux文件系统中的子目录，
-								它是一个容器对象，
-								组织单位可以包含其他各种对象（包括其他组织单元），
-								如“market”
+	ou		Organization Unit		组织单位，类似于Linux文件系统中的子目录，
+									它是一个容器对象，
+									组织单位可以包含其他各种对象（包括其他组织单元），
+									如“market”
 
-cn		Common Name				公共名称，如“Thomas Johansson”
+	cn		Common Name				公共名称，如“Thomas Johansson”
 
-sn		Surname					姓，如“Johansson”
+	sn		Surname					姓，如“Johansson”
 
-dn		Distinguished Name		惟一辨别名，类似于Linux文件系统中的绝对路径，
-								每个对象都有一个惟一的名称，
-								如“uid= tom,ou=market,dc=example,dc=com”，
-								在一个目录树中DN总是惟一的
+	dn		Distinguished Name		惟一辨别名，类似于Linux文件系统中的绝对路径，
+									每个对象都有一个惟一的名称，
+									如“uid= tom,ou=market,dc=example,dc=com”，
+									在一个目录树中DN总是惟一的
 
-rdn		Relative dn				相对辨别名，类似于文件系统中的相对路径，
-								它是与目录树结构无关的部分，
-								如“uid=tom”或“cn= Thomas Johansson”
+	rdn		Relative dn				相对辨别名，类似于文件系统中的相对路径，
+									它是与目录树结构无关的部分，
+									如“uid=tom”或“cn= Thomas Johansson”
 
-c		Country					国家，如“CN”或“US”等。
+	c		Country					国家，如“CN”或“US”等。
 
-o		Organization			组织名，如“Example, Inc.”
+	o		Organization			组织名，如“Example, Inc.”
 
 
-把dn当做用户唯一主键， 
+	把dn当做用户唯一主键， 
 
-cn是common name,应该等同于用户名，因为用户名必须唯一，通常为邮箱前缀，
-比如ryan.miao.sn作为姓氏， uid作为用户id。通常用户id也是唯一的。
-所以在使用ldap做认证的时候，
- 大概逻辑如下：
-    配置ldap host, admin, admin pass
-    用户登录时传递username
-    读取配置的ldap信息，查询cn或者uid等于username的数据
-    取出第一个记录， 获得dn， 根据dn和password再次去ldap服务器认证。
-		即我们必须保证cn或uid是全局唯一的，
-     	认证通常需要进行两次。原因就在于dn没办法根据用户名计算出来。
+	cn是common name,应该等同于用户名，因为用户名必须唯一，通常为邮箱前缀，
+	比如ryan.miao.sn作为姓氏， uid作为用户id。通常用户id也是唯一的。
+	所以在使用ldap做认证的时候，
+	大概逻辑如下：
+		配置ldap host, admin, admin pass
+		用户登录时传递username
+		读取配置的ldap信息，查询cn或者uid等于username的数据
+		取出第一个记录， 获得dn， 根据dn和password再次去ldap服务器认证。
+			即我们必须保证cn或uid是全局唯一的，
+			认证通常需要进行两次。原因就在于dn没办法根据用户名计算出来。
+	---------------------------------
 
-//-----------------------------------------------------//
-1.
-安装openldap
+-------------------------------------安装和配置-------------------------------------------
+	主要参考：https://cloud.tencent.com/developer/article/1490857
+	快速入门：https://segmentfault.com/a/1190000014683418
+
+	---------------------------------
+	基本环境
+		openldap安装在虚拟机：CentOS7.9 Minimal
+			1- 2G + 2Core + 25G
+			2- 三个分区
+				/boot   1024M
+				/       22G
+				SWAP    2G
+			3- mount -oloop CentOS-7.9-Everything.iso /mnt
+			4- yum install net-tools vim links
+		openldap配置的（不是现在）域名为demo.com,管理员账号是admin，管理员密码是admin，
+
+		===== Snapshot1 =====
+
+		export PS1='[\u@\h \w]\$ '
+
+		#要么直接关闭防火墙，要么按照第3步 添加防火墙允许
+		systemctl stop firewalld
+		systemctl disable firewalld
+	---------------------------------
+----------------------------------------------------------------------------------
+
+1.安装openldap
 	yum install -y openldap openldap-clients openldap-servers  
 		#openldap-servers – This is the main LDAP server
     	#openldap-clients – This contains all required LDAP client utilities
     	#openldap – This packages contains the LDAP support libraries
+----------------------------------------------------------------------------------
 
 2.
 启动：systemctl start slapd
 开机启动：systemctl enable slapd
+----------------------------------------------------------------------------------
 
-3.
-添加防火墙允许
+3.添加防火墙允许
+	(或者 直接关闭防火墙)(不着急添加，每安装一个工具 然后再添加防火墙允许 然后启动)
+	#1.对slapd的允许
 	firewall-cmd --add-service=ldap --permanent
 	firewall-cmd --reload 
+	#2.对httpd和phpldapadmin的允许
+	firewall-cmd --add-service=http --permanent
+	firewall-cmd --reload
+----------------------------------------------------------------------------------
 
-4.
-安装后的配置目录是： /etc/openldap/
-默认配置文件，位于/etc/openldap/slapd.d/ 
-	配置文件后缀.ldif(LDAP Input Format (LDIF))
-	db存储格式，有bdb和hdb两种，这里是hdb
-核心配置文件，位于/etc/openldap/slapd.d/cn=config/ 
-	可以配置域名(olcSuffix)， 管理员账号(olcRootDN)等。
-	很多文件名和字段名都有前缀"olc" (OpenLDAP Configuration)
+4.配置文件
+	4.1安装后的配置文件目录是： /etc/openldap/
+	4.2默认配置文件，位于/etc/openldap/slapd.d/ 
+		配置文件后缀.ldif(LDAP Input Format (LDIF))
+		db存储格式，有bdb和hdb两种，这里是hdb
+	4.3核心配置文件，位于/etc/openldap/slapd.d/cn=config/ 
+		可以配置域名(olcSuffix)， 管理员账号(olcRootDN)等。
+		很多文件名和字段名都有前缀"olc" (OpenLDAP Configuration)
+	4.4内容包括下列这些文件
+						-----------------------
+						|cn=config            |
+						|Global config options|
+						-----------------------
+									|
+				------------------------------------------
+				|                   |                    |
+		------------------   ---------------   ---------------------
+		|cn=module{0}    |   |cn=schema    |   |olcDatabase={1}bdb |
+		|A set of modules|   |System schema|   |A back-bdb instance|
+		------------------   ---------------   ---------------------
+									|
+							------------------
+							|                |
+					-------------   ---------------
+					|cn={0}core |   |cn={1}cosine |
+					|Core schema|   |COSINE schema|
+					-------------   ---------------
+	4.5
+		[root@bogon lwh]# cd /etc/openldap/
+		[root@bogon openldap]# tree .
+		.
+		├── certs
+		│   ├── cert8.db
+		│   ├── key3.db
+		│   ├── password
+		│   └── secmod.db
+		├── check_password.conf
+		├── ldap.conf
+		├── schema
+		│   ├── collective.ldif
+		│   ├── collective.schema
+		│   ├── corba.ldif
+		│   ├── corba.schema
+		│   ├── core.ldif
+		│   ├── core.schema
+		│   ├── cosine.ldif
+		│   ├── cosine.schema
+		│   ├── duaconf.ldif
+		│   ├── duaconf.schema
+		│   ├── dyngroup.ldif
+		│   ├── dyngroup.schema
+		│   ├── inetorgperson.ldif
+		│   ├── inetorgperson.schema
+		│   ├── java.ldif
+		│   ├── java.schema
+		│   ├── misc.ldif
+		│   ├── misc.schema
+		│   ├── nis.ldif
+		│   ├── nis.schema
+		│   ├── openldap.ldif
+		│   ├── openldap.schema
+		│   ├── pmi.ldif
+		│   ├── pmi.schema
+		│   ├── ppolicy.ldif
+		│   └── ppolicy.schema
+		└── slapd.d
+			├── cn=config
+			│   ├── cn=module{0}.ldif
+			│   ├── cn=schema
+			│   │   ├── cn={0}core.ldif
+			│   │   ├── cn={1}cosine.ldif
+			│   │   ├── cn={2}nis.ldif
+			│   │   └── cn={3}inetorgperson.ldif
+			│   ├── cn=schema.ldif
+			│   ├── olcDatabase={0}config.ldif
+			│   ├── olcDatabase={-1}frontend.ldif
+			│   ├── olcDatabase={1}monitor.ldif
+			│   ├── olcDatabase={2}hdb
+			│   │   └── olcOverlay={0}memberof.ldif
+			│   ├── olcDatabase={2}hdb.ldif
+			│   └── olcDatabase={2}hdb.ldif.bak
+			└── cn=config.ldif
+	4.6文件：cn=config.ldif 用于指定全局配置
+		默认配置文件，位于/etc/openldap/slapd.d/
+	4.7文件：olcDatabase={2}hdb.ldif
+		db存储格式，有bdb和hdb两种，这里是hdb。可以直接查看文件，也可以使用下面命令查询：
+    	ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config dn | grep olcDatabase
 
-5.
-通过ldapmodify来更新配置！！！
+----------------------------------------------------------------------------------
+	
+5.(设置: 管理员 管理员密码 域名)通过ldapmodify来更新配置！！！
+	
+	看到前面两个配置文件，官方不推荐我们直接修改配置文件，而是通过ldapmodify来更新配置。
 	类似于update by pk, 这里的pk就是dn了
 
-	//-----------------------------------------------------//
+	-----------------------------------------------------
 	尝试配置OpenLDAP
-	----------------------------------------------------------------------------------
-	mkdir ～/ldap
-
-	配置
+	配置为
 		管理员账号 olcRootDN
 		域名      olcSuffix
 		管理员秘密 olcRootPW
+	-----------------------------------------------------
 
-	----------------------------------------------------------------------------------
+	mkdir ～/ldap
+	cd ~/ldap
 
-	[root@bogon ldap]# vim rootdn.ldif 
-		
+	5.1 [root@bogon ldap]# vim rootdn.ldif 
+		---------------------
 		dn: olcDatabase={2}hdb,cn=config
 		changetype: modify
 		replace: olcRootDN
@@ -149,7 +257,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		-
 		replace: olcRootPW
 		olcRootPW: <pass>
-
+		---------------------
 	关于这个配置文件的说明
 		    
 			修改olcRootDN， 设置为我们的admin: cn=admin,dc=demo,dc=com
@@ -167,8 +275,9 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 				不要问为什么，总之cn就是email前面的那个名字(类似于用户名)，后面带dc的都是域名。
 		其中cn=config是全局配置，必须包含objectClass: olcGlobal（配置文件 cn=config.ldif）
 	----------------------------------------------------------------------------------
-	然后创建changeroot.sh
-	[root@bogon ldap]# vim changeroot.sh 
+	5.2 然后创建changeroot.sh
+		[root@bogon ldap]# vim changeroot.sh 
+		---------------------
 		admin_pass=`slappasswd -s admin`
 		echo "admin pass is:  ${admin_pass}"
 		sed "s!<pass>!${admin_pass}!g"   rootdn.ldif > tmp.ldif
@@ -181,17 +290,17 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		cat tmp.ldif
 		
 		ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f tmp.ldif
+
 		echo "修改后的变化"
 		diff -Nur \
 				/etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif    \
 		     	/etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.bak
-	
+		---------------------
 	关于这个配置文件的说明
-		1.获取机密后的秘密：
+		1.获取加密后的密码：
 		slappasswd -s admin
-			使用slappasswd命令可以生成LDAP管理员密码(加密后的秘密)。
-			然后下面几条语句是将秘密写入slapd.d/下面的文件中去
-		
+			使用slappasswd命令可以生成LDAP管理员密码(加密后的密码)。
+			然后下面几条语句是将密码写入slapd.d/下面的配置文件中去
 		2.备份原始文件
 		3.ldapmodify(更新配置的命令)的参数使用
 			具体参数 查看 命令文档: http://man7.org/linux/man-pages/man1/ldapmodify.1.html
@@ -199,8 +308,8 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 				-H 指定host(指定ldap的服务器)，这里 ldapi:/// 表示IPC (Unix-domain socket)协议， 
 				-f 指定变更的内容来源(文件)。 
 				-Y 指定验证机制(client和server之间的应答过程以及传输内容的编码方式)
-					EXTERNAL 是以太网协议
-					不指定的话，似乎直接使用TCP/IPg
+					//本地执行，修改配置文件，这个最可信
+					//(不确定) 还有一种说法：EXTERNAL 是以太网协议；不指定的话，似乎直接使用TCP/IP
 				-Q 安静的执行
 			ldapmodify -Y EXTERNAL -H ldapi:/// -f tmp.ldif
 				利用 tmp.ldif 中的内容修改管理员密码
@@ -209,14 +318,14 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			diff可以参考博客：
 				显示格式 http://www.ruanyifeng.com/blog/2012/08/how_to_read_diff.html
 				参数 https://blog.csdn.net/qwe15954250805/article/details/79057821
-
+	执行
+		[root@bogon ldap]# bash changeroot.sh 
 	----------------------------------------------------------------------------------
 
 	使用脚本进行变更，而不是直接命令行交互式变更，这样可以更容易梳理变更逻辑, 而且可以重复使用。
 
 	----------------------------------------------------------------------------------
-	
-	可以通过search语法来确定账号密码是否正确：
+	5.3 可以通过search语法来确定账号密码是否正确：
 		[root@bogon ldap]# ldapsearch  -H ldapi:/// -D "cn=admin,dc=demo_,dc=com" -w admin
 		ldap_bind: Invalid credentials (49)
 		[root@bogon ldap]# ldapsearch  -H ldapi:/// -D "cn=admin,dc=demo,dc=com" -w admia
@@ -237,29 +346,30 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		# numResponses: 1
 	
 	ldapsearch 查询语法， 
-		-H指定host， 这里 ldapi:/// 表示IPC (Unix-domain socket)协议， 
-		-D指定admin的账号，即rootdn, 
-		-w指定密码, 
-		-x启用认证
+				-H指定host， 这里 ldapi:/// 表示IPC (Unix-domain socket)协议， 
+				-D指定admin的账号，即rootdn / DN, 
+				-w指定密码, 
+				-x启用认证
 	
-	----------------------------------------------------------------------------------
+	---------------------------------------------
 
 	以上完成了：管理员账号 管理员密码 域名 的添加 和验证
 
-	----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
-
-6.
-添加我们的base组织结构
+6.添加我们的base组织结构 （管理员使用ldapadd 进行添加）
 	有了管理员，还需要配置组织结构 base.ldif
-	
-	1.在这之前，我们需要导入一些模板。schema类似数据库表定义，定义了字段名称和类型。
-	schema地址：/etc/openldap/schema/
 
-	默认安装加载了core.ldif, 我们现在加载几个想要的schema:
-	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
-	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
-	ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 
+	base.ldif
+		1个组织管理者：Manager  ； objectClass: organizationalRole
+		2个部门：People Group  ； objectClass: organizationalUnit
+	
+	6.1.在这之前，我们需要导入一些模板。schema类似数据库表定义，定义了字段名称和类型。
+		schema地址：/etc/openldap/schema/
+		默认安装加载了core.ldif, 我们现在加载几个想要的schema:
+			ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
+			ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
+			ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 
 		[root@bogon openldap]# ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
 		SASL/EXTERNAL authentication started
 		SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
@@ -280,7 +390,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 
 		[root@bogon openldap]# 
 
-	2.然后创建文件base.ldif
+	6.2.然后创建文件base.ldif
 		[root@bogon ldap]# cat base.ldif 
 			dn: dc=demo,dc=com
 			objectClass: top
@@ -310,7 +420,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		否则会出现类似下面的错误：
 		“ldapadd: attributeDescription "dn": (possible missing newline after line 37, entry "ou=测试组,ou=研发部门,ou=People,dc=myldap,dc=com"?)”
 
-	3.使用ldapadd添加base:
+	6.3.使用ldapadd添加组织结构 base.ldif :
 		[root@bogon ldap]# ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f base.ldif 
 		adding new entry "dc=demo,dc=com"
 
@@ -321,7 +431,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		adding new entry "ou=Group,dc=demo,dc=com"
 
 		[root@bogon ldap]# 
-	4.使用ldapsearch来检查内容
+	6.4.使用ldapsearch来检查内容
 		[root@bogon ldap]# ldapsearch  -x -D cn=admin,dc=demo,dc=com -w admin -b "dc=demo,dc=com"
 		# extended LDIF
 		#
@@ -365,30 +475,38 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 
 		说明：
 			-x 启用认证
-			-D bind admin的dn
+			-D bind admin的dn 即指定dn
 			-w admin的密码
 			-b basedn/searchbase, 查询的基础dn
+				basedn, 查询的基础dn
 				使用searchbase作为搜索的起点而不是默认。
-				
+			-L 控制格式化输出结果，The default is to use an extended version of LDIF.
+				-L   restricts the  output to LDIFv1.
+				-LL  disables  comments.
+				-LLL disables printing of the LDIF version.	
 			可以看到中文被替换成hash, 后面可以通过其他方式看到
-	----------------------------------------------------------------------------------
+	
+	------------------------------------
 
-	以上完成了：向组织中添加一个组织单元(部门)
+	以上完成了：向组织中添加 组织单元(部门) 和 管理者
 
-	----------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
-7.添加人员
-	ou并不能当做分组，而仅仅是组织架构的一个单元。
+7.添加人员(管理员使用ldapadd添加 子部门和部门中的成员)
+
+	ou并不能当做分组，而仅仅是组织架构的一个单元(部门)。
 	ldap的分组都是通过单独的group来实现的。
 	
 	添加人员
-	添加人员对应的是树的叶子节点，使用的oebjectClass： inetOrgPerson。
-	添加组织部门对应的是目录，使用的objectClass: organizationalUnit.
-	我们要把人员添加到ou=People,dc=demo,dc=com下。
+		添加人员对应的是树的叶子节点，使用的 	 oebjectClass： inetOrgPerson。
+	添加组织部门
+		添加组织部门对应的是目录,使用的    		objectClass: organizationalUnit.
+	我们要把人员添加到 ou=People,dc=demo,dc=com 下。
 
 	
-	1.创建adduser.ldif
+	7.1.创建adduser.ldif
 		[root@bogon ldap]# cat adduser.sh 
+		------------------------------------
 		dn: ou=研发部门,ou=People,dc=demo,dc=com
 		changetype: add
 		objectClass: organizationalUnit
@@ -460,10 +578,11 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		mail: fang.huang@demo.com
 		uid: 10003
 		displayName: 黄芳
+		------------------------------------
 
 		[root@bogon ldap]# 
 	
-	2.使用ldapadd来添加adduser.ldif中的用户
+	7.2.管理员使用ldapadd来添加adduser.ldif中的子部门和部门中的成员
 		[root@bogon ldap]# ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f adduser.sh 
 		adding new entry "ou=研发部门,ou=People,dc=demo,dc=com"
 
@@ -483,7 +602,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 
 		[root@bogon ldap]# 
 	
-	3.使用ldapsearch来查询用户
+	7.3.管理员使用使用ldapsearch来查询用户
 		
 		和前面的ldapsearch示例相比，多了一个参数filter
      	ldapsearch -x -D "admin的dn" -w "admin的密码" -b "basedn, 最外层的分组" "search filter:"
@@ -519,7 +638,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			# numEntries: 1
 			[root@bogon ldap]# 
 	
-	4.使用ldapsearch来查询用户时，还可以指定返回的字段
+	7.4.使用ldapsearch来查询用户时，还可以指定返回的字段
 		在配置第三方认证的时候，比如airflow, 就是通过这样userfilter来search用户的。
 
 			[root@bogon ldap]# ldapsearch -x -D cn=admin,dc=demo,dc=com -w admin -b "ou=HR,ou=People,dc=demo,dc=com" cn uid displayName
@@ -547,12 +666,12 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			# numResponses: 3
 			# numEntries: 2
 			[root@bogon ldap]# 
-	----------------------------------------------------------------------------------
-	
-	以上完成了：添加用户，查找用户
-	
-	----------------------------------------------------------------------------------
 
+	-----------------------------------------------------------------
+	
+	以上完成了：管理员使用ldapadd添加 子部门和部门中的成员 查找用户并返回相关信息
+	
+----------------------------------------------------------------------------------
 
 8.添加用户密码
 	刚才添加用户太快，忘记添加用户密码了。
@@ -575,7 +694,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			uid: 10004
 			displayName: 我是猎头
 			[root@bogon ldap]# 
-		执行添加
+		管理员执行ldapadd添加成员
 			[root@bogon ldap]# ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f addone.ldif 
 			adding new entry "cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com"
 
@@ -666,7 +785,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			# numEntries: 1
 			[root@bogon ldap]# 
 
-	8.2修改用户秘密
+	8.2管理员使用ldapmodify修改用户秘密
 		管理员权限最大，可以修改任意密码。使用ldapmodify
 
 		创建文件updatepass.ldif
@@ -679,7 +798,6 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		执行修改
 			[root@bogon ldap]# ldapmodify  -a -H ldap://192.168.122.24:389 -D cn=admin,dc=demo,dc=com -w admin -f updatepass.ldif 
 			modifying entry "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com"
-
 			[root@bogon ldap]# 
 		根据刚刚更改的密码，去查询确认能否正常登陆
 			[root@bogon ldap]# ldapsearch -x -D cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com -w ryanmiao -b dc=demo,dc=com "cn=ryan.miao"
@@ -717,7 +835,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			：任意一个人都可以bind登录，然后查询所有用户的信息。
 			后面我们将关注acl权限问题，让每个人只能查询自己的信息，让指定的group可以查询所有人的信息。
 	
-	8.3 注意、
+	8.3 注将密码变为加密自字符串
 		注意到，我们使用的明文作为密码存储在ldif文件中， 这样的传输方式是不推荐的， 
 			可以使用sha1，将加密字符串写在文件中。
 		
@@ -741,7 +859,6 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 		更改
 			[root@bogon ldap]# ldapmodify -a -H ldap://192.168.122.24:389 -D cn=admin,dc=demo,dc=com -w admin -f updatepass.ldif 
 			modifying entry "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com"
-
 			[root@bogon ldap]#
 		查询验证
 			[root@bogon ldap]# ldapsearch -x -D cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com -w ryanmiao -b dc=demo,dc=com "cn=ryan.miao" cn uid displayName
@@ -793,6 +910,9 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			indicate that this is a legacy implementation and using it is considered insecure.
 
 	8.4用户已知个人密码的情况下，如何自己修改密码：
+
+			使用ldapmodify更改普通用户的权限
+				是的用户可以修改自己的密码和信息，但是其他人不允许
 			
 			[root@bogon ldap]# ldappasswd -x -h 192.168.122.24 -p 389 -D "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com" -w ryanmiao -s abc123
 			Result: Insufficient access (50)
@@ -822,25 +942,24 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 					by self write
 					by * read
 				--------------
-
 			执行更改
 				[root@localhost ldap]# ldapmodify -Y EXTERNAL -H ldapi:// -f acl.dif 
 				SASL/EXTERNAL authentication started
 				SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
 				SASL SSF: 0
 				modifying entry "olcDatabase={2}hdb,cn=config"
-
-			查看变更后的设置，放到olcDatabase={2}hdb.def文件中去
-				[root@localhost ldap]# ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={2}hdb' > olcDatabase={2}hdb.def
+			查看变更后的设置，放到olcDatabase={2}hdb.new文件中去
+				[root@localhost ldap]# ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={2}hdb' > olcDatabase={2}hdb.new
 
 			比较 老 新 设置的区别
 				[root@localhost ldap]# diff -Nur olcDatabase\=\{2\}hdb.def olcDatabase\=\{2\}hdb.new
 
 			更新权限配置后尝试自己修改自己的密码
-				# ldappasswd -x -h 192.168.122.24 -p 389 -D "cn=xxx,ou=HR,ou=People,dc=myldap,dc=com" -w 111111 -s abc123
-				# ldapsearch -x -D cn=xxx,ou=HR,ou=People,dc=myldap,dc=com -w 111111 -b "dc=myldap,dc=com" "cn=xxx"
-				ldap_bind: Invalid credentials (49)
-				# ldapsearch -x -D cn=xxx,ou=HR,ou=People,dc=myldap,dc=com -w abc123 -b "dc=myldap,dc=com" "cn=xxx"
+				#有个你自己添加的用户 dn: cn=xxx,ou=HR,ou=People,dc=demo,dc=com userPassword: 111111 把密码改为abc123
+				ldappasswd -x -h 192.168.122.24 -p 389 -D "cn=xxx,ou=HR,ou=People,dc=demo,dc=com" -w 111111 -s abc123
+				ldapsearch -x -D cn=xxx,ou=HR,ou=People,dc=demo,dc=com -w 111111 -b "dc=demo,dc=com" "cn=xxx"
+					ldap_bind: Invalid credentials (49)
+				ldapsearch -x -D cn=xxx,ou=HR,ou=People,dc=demo,dc=com -w abc123 -b "dc=demo,dc=com" "cn=xxx"
 					密码修改成功。
 			//----------------------------------------------------------------------------------//
 
@@ -967,7 +1086,7 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 			# numEntries: 2
 			[root@localhost ldap]# 
 			
-			注意：上面输出结果中，“member::”行表示改行内容为hash处理后的值，可能有中文
+			注意：上面输出结果中，“member::”行表示该行内容为hash处理后的值，可能有中文
 
 			-------------------------------------------
 		再来查看
@@ -1520,16 +1639,135 @@ cn是common name,应该等同于用户名，因为用户名必须唯一，通常
 	修改配置文件/etc/phpldapadmin/config.php，使用dn登录
 			//$servers->setValue('login','attr','uid');      #注释掉这一行
 			$servers->setValue('login','attr','dn');         #添加这一行
-	启动httpd
+	启动httpd(记得添加防火墙允许(上面的第3条))
 		systemctl start httpd
-----------------------------------------------------------------------------------
-----------------------------------------------------------------------------------
+	
+	默认80端口访问，
+		http://192.168.122.24/ldapadmin/ 或 http://192.168.122.24/phpldapadmin/ ip为我的虚拟机ip
+	由于本测试已经映射端口为本地的8070，直接访问
+ 		http://localhost:8071/phpldapadmin 或http://localhost:8071/ldapadmin即可。
+	登录dn: cn=admin,dc=demo,dc=com
+	登录密码： admin
 ----------------------------------------------------------------------------------
 
+15.ACL 附录
+	
+	关于acl语法
+		-------------------------------------------
+		olcAccess: <access directive>
+			<access directive> ::= to <what>
+				[by <who> [<access>] [<control>] ]+
+			<what> ::= * |
+				[dn[.<basic-style>]=<regex> | dn.<scope-style>=<DN>]
+				[filter=<ldapfilter>] [attrs=<attrlist>]
+			<basic-style> ::= regex | exact
+			<scope-style> ::= base | one | subtree | children
+			<attrlist> ::= <attr> [val[.<basic-style>]=<regex>] | <attr> , <attrlist>
+			<attr> ::= <attrname> | entry | children
+			<who> ::= * | [anonymous | users | self
+					| dn[.<basic-style>]=<regex> | dn.<scope-style>=<DN>]
+				[dnattr=<attrname>]
+				[group[/<objectclass>[/<attrname>][.<basic-style>]]=<regex>]
+				[peername[.<basic-style>]=<regex>]
+				[sockname[.<basic-style>]=<regex>]
+				[domain[.<basic-style>]=<regex>]
+				[sockurl[.<basic-style>]=<regex>]
+				[set=<setspec>]
+				[aci=<attrname>]
+			<access> ::= [self]{<level>|<priv>}
+			<level> ::= none | disclose | auth | compare | search | read | write | manage
+			<priv> ::= {=|+|-}{m|w|r|s|c|x|d|0}+
+			<control> ::= [stop | continue | break]
+		-------------------------------------------
+
+
+	关于acl中的who
+		-------------------------------------------
+		Table 6.3: Access Entity Specifiers
+
+		Specifier       Entities
+		*               All, including anonymous and authenticated users
+		anonymous       Anonymous (non-authenticated) users
+		users           Authenticated users
+		self            User associated with target entry
+		dn[.]=          Users matching a regular expression
+		dn.=            Users within scope of a DN
+		-------------------------------------------
+
+	关于dn的授权
+		-------------------------------------------
+		For example, if the directory contained entries named:
+
+			0: o=suffix
+			1: cn=Manager,o=suffix
+			2: ou=people,o=suffix
+			3: uid=kdz,ou=people,o=suffix
+			4: cn=addresses,uid=kdz,ou=people,o=suffix
+			5: uid=hyc,ou=people,o=suffix
+		Then:
+
+			dn.base="ou=people,o=suffix" match 2; 
+			dn.one="ou=people,o=suffix" match 3, and 5; 
+			dn.subtree="ou=people,o=suffix" match 2, 3, 4, and 5; and 
+			dn.children="ou=people,o=suffix" match 3, 4, and 5.
+
+	一个acl示例
+		-------------------------------------------
+		# ACL1
+		access to attrs=userpassword
+			by self       write
+			by anonymous  auth
+			by group.exact="cn=itpeople,ou=groups,dc=example,dc=com"
+							write
+			by *          none
+		# ACL2
+		access to attrs=carlicense,homepostaladdress,homephone
+			by self       write
+			by group.exact="cn=hrpeople,ou=groups,dc=example,dc=com"
+							write
+			by *          none
+		# ACL3
+		access to *
+			by self       write
+			by group.exact="cn=hrpeople,ou=groups,dc=example,dc=com"
+							write
+			by users      read
+			by *          none
+		-------------------------------------------
+----------------------------------------------------------------------------------
+
+16.参考
+	*官方文档: 
+		http://www.openldap.org/doc/admin24/guide.html
+
+	*比官网更友好的ldap文档： 
+		http://www.zytrax.com/books/ldap
+
+	*写的贼详细的ldap介绍： 
+		https://www.cnblogs.com/kevingrace/p/5773974.html
+
+	*写的贼详细的ldap安装记录: 
+		https://www.cnblogs.com/kevingrace/p/9052669.html
+
+	*memberOf模块 
+		https://www.jianshu.com/p/c877b317f294
+
+	*airflow的ldap配置源码： 
+		https://github.com/apache/airflow/blob/master/airflow/contrib/auth/backends/ldap_auth.py
+
+	*python ldap库: 
+		https://ldap3.readthedocs.io/searches.html?highlight=user%20filter#the-ldap-filter
+
+	*docker ldap: 
+		https://github.com/osixia/docker-openldap
+
+
+----------------------------------------------------------------------------------
+
+
+----------------------------------------------------------------------------------
 	-------------------------------------------
-	-------------------------------------------
-	-------------------------------------------
-	-------------------------------------------
+
 
 
 
