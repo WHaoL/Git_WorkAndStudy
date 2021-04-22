@@ -137,6 +137,9 @@
 	#2.对httpd和phpldapadmin的允许
 	firewall-cmd --add-service=http --permanent
 	firewall-cmd --reload
+
+	systemctl stop firewalld
+	systemctl disable firewalld
 ----------------------------------------------------------------------------------
 
 4.配置文件
