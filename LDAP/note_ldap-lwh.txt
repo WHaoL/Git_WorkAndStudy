@@ -89,10 +89,18 @@
 		取出第一个记录， 获得dn， 根据dn和password再次去ldap服务器认证。
 			即我们必须保证cn或uid是全局唯一的，
 			认证通常需要进行两次。原因就在于dn没办法根据用户名计算出来。
+	
+	o->   organization（组织-公司）
+	ou-> organization unit（组织单元-部门）
+	c->   countryName（国家）
+	dc-> domainComponent（域名）
+	sn-> suer name（姓）
+	cn-> common name（公共名 用户名）
 	---------------------------------
 
 -------------------------------------安装和配置-------------------------------------------
-	主要参考：https://cloud.tencent.com/developer/article/1490857
+	概念主要参考(可以梳理清楚很多概念)： https://www.cnblogs.com/kevingrace/p/5773974.html
+	操作主要参考：https://cloud.tencent.com/developer/article/1490857
 	快速入门：https://segmentfault.com/a/1190000014683418
 
 	---------------------------------
@@ -122,6 +130,9 @@
 		#openldap-servers – This is the main LDAP server
     	#openldap-clients – This contains all required LDAP client utilities
     	#openldap – This packages contains the LDAP support libraries
+		
+		yum install -y epel-release
+		yum clean all && yum makecache
 ----------------------------------------------------------------------------------
 
 2.
@@ -1747,7 +1758,7 @@
 		http://www.zytrax.com/books/ldap
 
 	*写的贼详细的ldap介绍： 
-		https://www.cnblogs.com/kevingrace/p/5773974.html
+		https://www.cnblogs.com/kevingrace/p/5773974.html !!!!
 
 	*写的贼详细的ldap安装记录: 
 		https://www.cnblogs.com/kevingrace/p/9052669.html

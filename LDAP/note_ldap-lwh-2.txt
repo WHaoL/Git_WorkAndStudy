@@ -18,18 +18,53 @@
 
     slurpd同步机制已经废除，2.4版本后采用syncrepl机制
 ----------------------------------------------------------------------------------
-
-先把《Linux+UNIX+OpenLDAP实战指南.郭大勇.2016.pdf》《OpenLDAP-2.4-AdminGuide-ZH_EN.pdf》看完
-然后，配置docker，运行起来集群
-然后阅读RFC 
-
+看《Linux+UNIX+OpenLDAP实战指南.郭大勇.2016.pdf》《OpenLDAP-2.4-AdminGuide-ZH_EN.pdf》阅读RFC 
+    梳理一遍概念：https://www.cnblogs.com/kevingrace/p/5773974.html 
+        https://blog.csdn.net/oyym_mv/article/details/94404663
 ----------------------------------------------------------------------------------
-
-
-
-
+暂时不做：配置docker，运行起来openLDAO的主从；
+        #我们使用docker-centos7作为容器环境
+        #以特权模式启动 并挂在本机的配置文件目录到docker的/home/
+        docker run -d -it --rm --name=ldap  --privileged -p 80:80 -p 389:389 -p 636:636 -v /home/gos/workspace/Git_WorkAndStudy/LDAP/my_OpenLDAP_Config/:/home/ centos:7 /usr/sbin/init
+        #进入容器
+        docker exec -it ldap bash 
+        #安装docker
+        yum install -y yum-utils
+        yum-config-manager \
+            --add-repo \
+            https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+        yum makecache fast
+        yum install docker-ce docker-ce-cli containerd.io
+        systemctl start docker      
+        #GitHub上维护的openLDAP的docker： https://github.com/osixia/docker-openldap
+        docker run -p 389:389 -p 636:636 -p 389:389 -p 80:80 --name my-openldap-container --detach osixia/openldap:1.5.0
 ----------------------------------------------------------------------------------
+LDAP-RFC 
+    http://www.faqs.org/rfcs/rfc4510.html
+      LDAP: The Protocol [RFC4511]
+      LDAP: Directory Information Models [RFC4512]
+      LDAP: Authentication Methods and Security Mechanisms [RFC4513]
+      LDAP: String Representation of Distinguished Names [RFC4514]
+      LDAP: String Representation of Search Filters [RFC4515]
+      LDAP: Uniform Resource Locator [RFC4516]
+      LDAP: Syntaxes and Matching Rules [RFC4517]
+      LDAP: Internationalized String Preparation [RFC4518]
+      LDAP: Schema for User Applications [RFC4519]
+
+
+https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  
 ----------------------------------------------------------------------------------
+    每个entry
+        含有一堆属性(attributes)和一个DN(a globally-unique Distinguished Name)
+        DN用来引用entry
+        每个属性 包含了一个type和一个或多个value;value取决于type
+        DN由自身的RDN(cn或者uid)和祖先的DN共同组成
+            The full DN format is described in RFC4514, "LDAP: String Representation of Distinguished Names."
+    
+    slapd(8)是个独立的守护进程，可以看作是轻量级的X.500目录服务器。
+
+    LDAPv3在1990年代后期开发，以取代LDAPv2。
+
 ----------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------
 -----------------------------------
