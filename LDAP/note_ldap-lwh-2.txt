@@ -52,7 +52,7 @@ LDAP-RFC
       LDAP: Schema for User Applications [RFC4519]
 
 
-https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  
+https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方2.4版本的手册
 ----------------------------------------------------------------------------------
     每个entry
         含有一堆属性(attributes)和一个DN(a globally-unique Distinguished Name)
@@ -64,6 +64,535 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide
     slapd(8)是个独立的守护进程，可以看作是轻量级的X.500目录服务器。
 
     LDAPv3在1990年代后期开发，以取代LDAPv2。
+
+    ------------chapter 04-官网推荐的配置和安装步骤--------------------------------------------------------------
+    
+    gunzip -c openldap-VERSION.tgz | tar xf -
+    cd openldap-VERSION
+
+    安装 OpenSSL，GnuTLS，or MozNSS      to provide Transport Layer Security services.
+    安装 Cyrus SASL                     to provide Simple Authentication and Security Layer services. 
+    安装 Kerberos                        为了提供强大的身份验证机制 
+
+    OpenLDAP 的 slapd(8)MDB 主数据库后端使用 OpenLDAP 源附带的 LMDB 软件
+    OpenLDAP 的 slapd(8)BDB 和 HDB 使用的数据库后端需要 Oracle Corporation 的 Berkeley DB
+
+    openLDAP 支持各种品种的线程
+
+    slapd(8)支持 TCP Wrappers(IP 级别访问控制过滤器)，对于包含非公共信息的服务器，建议使用 TCP Wrappers 或其他 IP 级别的访问过滤器(例如 IP 级别的防火墙提供的过滤器)。
+
+    ./configure --help
+    ./configure [options] [variable=value ...]
+
+    #启用 TCP Wrappers(默认没有启用)
+    ./configure --enable-wrappers
+
+    ./configure --enable-wrappers     \
+    CPPFLAGS="-I/usr/local/include"   \
+    LDFLAGS="-L/usr/local/lib -Wl,-rpath,/usr/local/lib"
+
+    #构建依赖
+    make depend
+
+    #编译
+    make
+
+    #测试
+    make test
+
+    #默认安装目录是 /usr/local ， 也可以在运行配置脚本时通过--prefix指定
+    #安装   通常，安装需要超级用户权限
+    su root -c 'make install'
+
+    #你将在 /usr/local/etc/openldap 或者 /etc/openldap 找到slpad(8)的配置文件
+    
+    ------------chapter 05-配置 slapd--------------------------------------------------------------
+
+    OpenLDAP2.3及更高版本 开始使用：运行时动态配置引擎 slapd-config(5)，
+        配置数据存储在LDIF数据库中，通常在/usr/local/etc/openldap/slapd.d/ 或者/etc/openldap/slapd.d/ 目录中；
+        允许即时更改slapd的所有配置选项，通常无需重新启动服务器即可使更改生效
+    
+    通过slapd.conf配置slap(8)将在chapter06介绍
+        如何使slapd自动从slapd.conf(5)转换为 slapd-config(5)的信息
+    
+    注意：尽管 lapd-config(5)系统将其配置存储为(基于文本的)LDIF 文件，但是您绝对不要直接编辑任何LDIF文件。
+        配置更改应通过LDAP操作执行，例如 ldapadd(1)，ldapdelete(1)或 ldapmodify(1)
+
+
+    slapd 配置存储为具有预定义schema(模式)和 DIT 的特殊 LDAP 目录。
+        有一些特定的objectClasses用于承载全局配置选项，模式定义，后端和数据库定义以及各种其他项目。
+        slapd-config 配置树具有非常具体的结构。
+            树的根名为 cn=config 并包含全局配置设置。
+            其他设置包含在单独的子条目中
+        Dynamically loaded modules
+        Schema definitions
+        Backend-specific configuration
+        Database-specific configuration
+    
+    图 5.1 中显示了一个示例 配置树(configuration tree.)
+                        -----------------------
+                        |cn=config            |
+                        |Global config options|
+                        -----------------------
+                                    |
+                ------------------------------------------
+                |                   |                    |
+        ------------------   ---------------   ---------------------
+        |cn=module{0}    |   |cn=schema    |   |olcDatabase={1}bdb |
+        |A set of modules|   |System schema|   |A back-bdb instance|
+        ------------------   ---------------   ---------------------
+                                    |
+                            ------------------
+                            |                |
+                    -------------   ---------------
+                    |cn={0}core |   |cn={1}cosine |
+                    |Core schema|   |COSINE schema|
+
+    LDIF文件的通常规则适用于配置信息：
+        以'#'字符开头的注释行将被忽略。
+        如果一行以单个空格开头，则将其视为前一行的延续(即使前一行是注释)，并且会删除单个前导空格。
+        条目由空白行分隔。
+
+    LDIF 配置的总体布局如下：
+        ----------------------------------
+        # global configuration settings
+        dn: cn=config
+        objectClass: olcGlobal
+        cn: config
+        <global config settings>
+
+        # schema definitions
+        dn: cn=schema,cn=config
+        objectClass: olcSchemaConfig
+        cn: schema
+        <system schema>
+
+        dn: cn={X}core,cn=schema,cn=config
+        objectClass: olcSchemaConfig
+        cn: {X}core
+        <core schema>
+
+        # additional user-specified schema
+        ...
+
+        # backend definitions
+        dn: olcBackend=<typeA>,cn=config
+        objectClass: olcBackendConfig
+        olcBackend: <typeA>
+        <backend-specific settings>
+
+        # database definitions
+        dn: olcDatabase={X}<typeA>,cn=config
+        objectClass: olcDatabaseConfig
+        olcDatabase: {X}<typeA>
+        <database-specific settings>
+
+        # subsequent definitions and settings
+        ...
+
+        ----------------------------------
+    
+    LDAP数据库本质上是无序的。
+        数字索引用于在配置数据库中强制执行一致的排序，以便保留所有排序依存关系。
+        在大多数情况下，不必提供索引。它会根据条目的创建顺序自动生成。
+    
+    slapd 配置中使用的大多数属性和 objectClasses 的名称中都带有前缀“olc”(OpenLDAP 配置)
+        使用关键字作为属性名称，并附加“olc”前缀
+    
+    配置指令可以带有参数
+        参数中若有空格，则用""把参数括起来
+        <> 应该用实际参数替换
+    
+    示例配置文件，
+        在/usr/local/etc/openldap 或/etc/openldap 目录中。
+        /usr/local/etc/openldap/schema/ 或/etc/openldap/schema/ 目录中还提供了许多包含模式定义的文件(属性类型和对象类)。
+
+    --------------------下面将从 cn=config 条目中的全局指令开始，详细介绍常用的配置指令-------------------------
+    --------------------cn=config 
+    cn=config
+        此条目中包含的指令通常适用于整个服务器。
+        它们大多数是面向系统或面向连接的，与数据库无关。
+        此条目必须具有 
+            objectClass: olcGlobal
+
+    olcIdleTimeout: <integer>
+        对于空闲的客户端连接，指定几秒后强制关闭
+        默认值为 0，将禁用此功能。
+
+    olcLogLevel: <level>
+        指定 调试语句 和 操作统计信息 应进行 syslog 的级别(当前记录到 syslogd(8)LOG_LOCAL4 设备)。
+        必须配置 OpenLDAP --enable-debug(默认设置)才能正常工作(两个统计级别除外，它们始终处于启用状态)。
+        日志级别可以指定为整数或关键字。
+        可以使用多个日志级别，并且这些级别是可叠加的。
+        要显示 哪种级别对应哪种调试，调用 slapd 的时候加上-d?
+            slapd -d?
+        
+        <level>的可能值为：
+                Table 5.1: Debugging Levels
+            Level	Keyword	        Description
+            -1	    any	            enable all debugging
+            0	 	                no debugging
+            1	    (0x1 trace)	    trace function calls
+            2	    (0x2 packets)	debug packet handling
+            4	    (0x4 args)	    heavy trace debugging
+            8	    (0x8 conns)	    connection management
+            16	    (0x10 BER)	    print out packets sent and received
+            32	    (0x20 filter)	search filter processing
+            64	    (0x40 config)	configuration processing
+            128	    (0x80 ACL)	    access control list processing
+            256	    (0x100 stats)	stats log connections/operations/results
+            512	    (0x200 stats2)	stats log entries sent
+            1024	(0x400 shell)	print communication with shell backends
+            2048	(0x800 parse)	print entry parsing debugging
+            16384	(0x4000 sync)	syncrepl consumer processing
+            32768	(0x8000 none)	only messages that get logged whatever log level is set
+        
+        所需的日志级别 可以以 十进制 十六进制输入，组合时使用或运算。例如 下面的这些都是等价的
+                olcLogLevel 129
+                olcLogLevel 0x81
+                olcLogLevel 128 1
+                olcLogLevel 0x80 0x1
+                olcLogLevel acl trace            
+        示例：
+            olcLogLevel -1           #记录大量调试信息
+            olcLogLevel conns filter #只 记录连接和搜索过滤器处理
+            olcLogLevel none         #仅记录任何设置的日志级别的消息，无论级别如何；但是没有日志放生时不等同于0
+            olcLogLevel stats        #默认情况下 配置 基本统计日志；如果从未定义过olcLogLevel，则不会发生任何日志记录(相当于 0 级)
+    
+    olcReferral <URI>
+        当 slapd 找不到本地数据库来处理请求时，指定要传回的引用
+        如  olcReferral: ldap://root.openldap.org
+
+    以上几个配置指令的 一个简单使用示例 Sample Entries(示例条目)如下：
+        -------------
+        dn: cn=config
+        objectClass: olcGlobal
+        cn: config
+        olcIdleTimeout: 30
+        olcLogLevel: Stats
+        olcReferral: ldap://root.openldap.org
+        -------------
+
+
+    --------------------cn=module
+    cn=module
+        如果在配置slapd的时候 启用了对 动态加载模块 的支持,则cn=module条目 可用于指定要加载的模块集
+        必须包含  objectClass: olcModuleList
+    olcModuleLoad: <filename>
+        指定要加载的 动态可加载模块的名称。
+        文件名 可以是绝对路径名或者简单文件名
+            写绝对路径名,就可以不写olcModulePath: <pathspec>
+            写文件名,就需要写olcModulePath: <pathspec>
+        将在 olcModulePath: <pathspec>指令 指定的目录中去 搜索 非绝对名称
+    olcModulePath: <pathspec>
+        指定目录列表,用以搜索可加载模块;
+        通常，路径以冒号分隔.但也取决于操作系统.
+    Sample Entries(示例条目)如下：
+        -------------
+        dn: cn=module{0},cn=config
+        objectClass: olcModuleList
+        cn: module{0}
+        olcModuleLoad: /usr/local/lib/smbk5pwd.la
+
+        dn: cn=module{1},cn=config
+        objectClass: olcModuleList
+        cn: module{1}
+        olcModulePath: /usr/local/lib:/usr/local/lib/slapd
+        olcModuleLoad: accesslog.la
+        olcModuleLoad: pcache.la
+        -------------
+        我的目录是
+            /usr/lib64/openldap/smbk5pwd.la
+            /usr/lib64/:/usr/lib64/openldap/
+
+    --------------------cn=schema
+    cn=schema
+        条目cn=schema包含所有以 slapd 形式硬编码的模式定义
+            此条目中的值由slapd生成，所以无需在配置文件中提供任何schema value
+            但是仍然需要定义该条目,以作为用户定义的架构的基础，以便在其下添加。
+        必须包含 objectClass: olcSchemaConfig
+    
+    olcAttributeTypes: <RFC4512 Attribute Type Description>
+        该指令定义属性类型
+        请参见 第13章 Schema Specification 
+    
+    olcObjectClasses: <RFC4512 Object Class Description>
+        该指令定义了一个对象类
+        请参见 第13章 Schema Specification 
+    
+    Sample Entries(示例条目)如下：
+        -------------
+        dn: cn=schema,cn=config
+        objectClass: olcSchemaConfig
+        cn: schema
+
+        dn: cn=test,cn=schema,cn=config
+        objectClass: olcSchemaConfig
+        cn: test
+        olcAttributeTypes: ( 1.1.1
+          NAME 'testAttr'
+          EQUALITY integerMatch
+          SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+        olcAttributeTypes: ( 1.1.2 NAME 'testTwo' EQUALITY caseIgnoreMatch
+         SUBSTR caseIgnoreSubstringsMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.44 )
+        olcObjectClasses: ( 1.1.3 NAME 'testObject'
+         MAY ( testAttr $ testTwo ) AUXILIARY )
+        -------------
+
+
+    --------------------olcBackend
+    后端参数指令(Backend-specific Directives)
+        适用于相同类型的所有数据库实例，并且取决于指令，数据库指令可能会覆盖后端指令。
+        必须包含 objectClass: olcBackendConfig
+    olcBackend: <type>  
+        <type>应该为下表之一
+                表 5.2：数据库后端
+                Table 5.2: Database Backends
+            Types	        Description
+            bdb	        Berkeley DB transactional backend (deprecated)
+            config	    Slapd configuration backend
+            dnssrv	    DNS SRV backend
+            hdb	        Hierarchical variant of bdb backend (deprecated)
+            ldap	    Lightweight Directory Access Protocol (Proxy) backend
+            ldif	    Lightweight Data Interchange Format backend
+            mdb	        Memory-Mapped DB backend
+            meta	    Meta Directory backend
+            monitor	    Monitor backend
+            passwd	    Provides read-only access to passwd(5)
+            perl	    Perl Programmable backend
+            shell	    Shell (extern program) backend
+            sql	SQL     Programmable backend
+        示例:
+            olcBackend: bdb
+        注意:
+            没有为该条目定义其他指令。
+            特定的后端类型可以为它们的特定用途定义其他属性，但是到目前为止，还没有定义。
+            因此，这些指令通常不会出现在任何实际配置中。
+    Sample Entry(示例条目)如下：
+        -------------
+        dn: olcBackend=bdb,cn=config
+        objectClass: olcBackendConfig
+        olcBackend: bdb
+        -------------
+
+
+    --------------------数据库参数指令(Database-specific Directives)
+    数据库参数指令(Database-specific Directives)
+        每种类型的数据库都支持本节中的指令。
+        数据库条目必须包含 objectClass: olcDatabaseConfig 
+    
+    olcDatabase: [{<index>}]<type>
+        该指令命名一个特定的数据库实例。
+        数字{<index>}用来区分相同类型的多个数据库。通常可以省略索引，而 slapd 会自动生成它。
+        <type>是表5.2中列出的受支持的数据库后端类型之一或前端类型。
+            (The frontend)前端是一个特殊的数据库，用于保存 应该被应用于所有其他数据库的数据库级选项。
+                后续的数据库定义也可能会覆盖某些前端设置。
+            (The config database)配置数据库也很特殊.
+            即使未显式配置 config 和 frontend 数据库，也总是隐式创建它们，并且它们在创建其他任何数据库之前都被创建。
+        示例:
+            olcDatabase: bdb
+                这标志着一个新的 BDB 数据库实例的开始
+    
+    olcAccess: to <what> [ by <who> [<accesslevel>] [<control>] ]+
+        该指令允许
+            一个或多个请求者(由<who>指定)
+            对一组条目和/或属性(由<what>指定)的
+            访问权限(由<accesslevel>指定)。
+        有关基本用法，请参见本指南的 第8章 Access Control
+        注意：
+            如果未指定 olcAccess 指令，则默认访问控制策略是 to * by * read，允许所有用户(经过身份验证的用户和匿名用户)进行读取访问。
+        注意：
+            前端中定义的访问控制将附加到所有其他数据库的控制中。
+    
+    olcReadonly { TRUE | FALSE }
+        该指令将数据库置于“只读”模式。任何修改数据库的尝试都将返回“不愿执行”错误。
+        如果在consumer上设置，则仍然会发生由 syncrepl 发送的修改
+        默认:olcReadonly: FALSE
+    
+    olcRootDN: <DN>
+        指定管理员DN; 
+            此DN对数据库的操作将不受限制
+            此DN可以引用 SASL 身份
+        基于Entry的示例:   olcRootDN: cn=Manager,dc=example,dc=com
+        基于SASL的示例:    olcRootDN: uid=root,cn=example.com,cn=digest-md5,cn=auth
+
+    olcRootPW: <password>
+        为olcRootDN: <DN>的DN指定密码
+            示例:  olcRootPW: 123456
+        可以使用slappasswd(8)生成密码的哈希  slappasswd -s 123456
+            示例:  olcRootPW: {SSHA}ePepK+E+QnYuDaUP1Fymdau9deDd0Hoe
+
+    olcSizeLimit: <integer>
+        该指令指定 从搜索操作返回的最大条目数
+        默认:  olcSizeLimit: 500
+
+    olcSuffix: <dn suffix>
+        该指令指定将传递到此后端数据库的查询的 DN 后缀。
+            可以指定多个后缀行，通常每个数据库定义至少需要一个后缀行。
+            (某些后端类型，例如“frontend”和“monitor”使用硬编码后缀，该后缀可能不会在配置中被覆盖。)
+        示例：olcSuffix: dc=example,dc=com
+            DN 以“dc=example，dc=com”结尾的查询将传递到此后端。
+        注意：
+            当选择要传递查询的后端时，slapd会按照配置的顺序查看每个数据库定义中的后缀值。
+                如果一个数据库后缀是另一个数据库的前缀，则它必须出现在配置之后。
+    
+    olcSyncrepl
+            olcSyncrepl: rid=<replica ID>
+                provider=ldap[s]://<hostname>[:port]
+                [type=refreshOnly|refreshAndPersist]
+                [interval=dd:hh:mm:ss]
+                [retry=[<retry interval> <# of retries>]+]
+                searchbase=<base DN>
+                [filter=<filter str>]
+                [scope=sub|one|base]
+                [attrs=<attr list>]
+                [attrsonly]
+                [sizelimit=<limit>]
+                [timelimit=<limit>]
+                [schemachecking=on|off]
+                [bindmethod=simple|sasl]
+                [binddn=<DN>]
+                [saslmech=<mech>]
+                [authcid=<identity>]
+                [authzid=<identity>]
+                [credentials=<passwd>]
+                [realm=<realm>]
+                [secprops=<properties>]
+                [starttls=yes|critical]
+                [tls_cert=<file>]
+                [tls_key=<file>]
+                [tls_cacert=<file>]
+                [tls_cacertdir=<path>]
+                [tls_reqcert=never|allow|try|demand]
+                [tls_cipher_suite=<ciphers>]
+                [tls_crlcheck=none|peer|all]
+                [logbase=<base DN>]
+                [logfilter=<filter str>]
+                [syncdata=default|accesslog|changelog]
+        该指令
+            将当前slapd(8)建立为 复制consumer站点  通过运行syncrepl复制引擎，从而将当前数据库指定为 内容提供者 的consumer。
+            consumer数据库 和 provider的最新内容保持同步
+        rid 
+            用于标识复制使用者(cosumer)服务器中的当前 syncrepl 指令
+            <replica ID>
+                唯一标识当前 syncrepl 指令所描述的 syncrepl 规范
+                为非负数且长度不超过三位十进制数
+        provider
+            provider的 LDAP URI
+                指定 包含provider content的 provider站点作为LDAP URI
+                这个参数指定了  可以找到provider slap instance 的 scheme host以及可选的port
+                <hostname> 可以是域名或者IP 
+                [:port]    端口是可选的,如果未提供<port>，则使用标准LDAP端口号(389 或 636)
+                例如 ldap://provider.example.com:389 或 ldaps://192.168.1.1:636      
+            请注意，syncrepl 使用 consumer启动的协议，因此其规范位于consumer上。
+        
+        使用 搜索规范 作为结果集 来定义 syncrepl使用者的内容
+            使用者slapd 将根据搜索规范 向 提供者slapd 发送搜索请求
+            搜索规范包含 searchbase, scope, filter, attrs, attrsonly, sizelimit, timelimit 
+                searchbase没有默认值，必须始终指定。
+                scope默认为 sub，
+                filter默认为(objectclass=*)，
+                attrs 默认为“*，+”以复制所有用户和操作属性，
+                attrsonly 默认情况下未设置。
+                sizelimit 和 timelimit 都默认为“unlimited”，并且只能指定正整数或“unlimited”。
+
+        type
+            LDAP内容同步协议有两种类型：refreshOnly 和 refreshAndPersist
+            refreshOnly 
+                在每个同步操作完成后的间隔时间内，周期性地重新调度下一个同步搜索操作。
+                间隔由间隔参数指定,默认是1天
+            refreshAndPersist
+                同步搜索在提供者slapd实例中保持不变
+                对提供者的进一步更新将对消费者产生“searchResultEntry”作为对持久同步搜索的搜索响应。
+        
+        retry=[<retry interval> <# of retries>]
+            如果复制发生错误,则consumer将根据retry参数尝试重新连接
+            <重试间隔><重试次数>
+                例如，retry="60 10 300 3" 
+                    使消费者在前 10 次中每 60 秒重试一次，然后在接下来的 3 次中每 300 秒重试一次，然后再停止重试。
+            在<重试次数>中的+表示无限次重试直到成功。
+
+        [schemachecking=on|off]
+            打开后,将在LDAP Sync使用者(consumer)站点上强制执行模式(schema)检查
+            如果将其关闭，则将在不检查schema一致性的情况下存储条目。
+            默认为关闭。
+        
+        [binddn=<DN>]
+            给出了要绑定的 DN
+            该DN 对提供者数据库中的复制内容具有读权限
+
+        [bindmethod=simple|sasl]
+            是simple还是sasl,取决于连接到 提供者slapd实例 时 是基于密码的简单(simple)身份验证还是使用SASL身份验证
+
+        simple身份验证
+            除非有足够的数据完整性和机密性保护(例如 TLS 或 IPsec)，否则不应使用简单身份验证。
+            简单身份验证 需要指定
+                binddn=<DN>
+                credentials=<passwd>
+        SASL身份验证
+            通常建议使用 SASL 身份验证
+            需要使用 saslmech=<mech> 来指定一种机制.
+                根据机制可以分别使用身份验证和/或凭据 指定身份验证身份和/或凭据
+                authzid=<identity>用于指定授权身份
+        
+        [realm=<realm>]         指定一个特定的机制进行身份验证  ???!!!
+        [secprops=<properties>] 指定Cyrus SASL安全属性
+        [starttls=yes|critical] 
+            starttls 指定在认证提供商之前使用 StartTLS 扩展操作来建立 TLS 会话。
+                当参数是critical时 如果 StartTLS 请求失败，会话将被中止; 否则，syncrepl 会话将继续运行而没有 TLS.
+            [tls_reqcert=never|allow|try|demand] 设置默认为"demand"
+            其他 TLS 设置默认与主要的 slapdTLS 设置相同。
+
+        [logbase=<base DN>]
+        [logfilter=<filter str>]
+        [syncdata=default|accesslog|changelog]
+            consumer可以查询数据修改日志，而不是复制整个条目
+            对于将要使用的日志,必须适当设置 [logbase=<base DN>]和[logfilter=<filter str>] 参数
+            如果日志符合slapo-accesslog,则必须将 [syncdata=default|accesslog|changelog] 设置为accesslog
+            如果日志符合 过时的changelog,则必须将 [syncdata=default|accesslog|changelog] 设置为changelog
+            如果忽略了 [syncdata=default|accesslog|changelog] 参数或将其设置为“默认”，则将忽略日志参数
+
+
+        使用 bdb，hdb 和 mdb 后端支持 syncrepl 复制机制
+
+    
+
+
+
+    
+    [olcTimeLimit: <integer>]
+        该指令指定了 slapd 响应搜索请求所花费的最大秒数(实时)。如果请求在此时间内未完成，则将返回: 指示超出时间限制的结果。
+        默认：
+            olcTimeLimit: 3600
+    
+    olcUpdateref: <URL>
+        仅适用于副本(或 shadow) slapd(8)实例.
+        用于指定 要返回给客户端的URL , 客户端将在副本上提交更新请求
+        如果多次指定，则提供每个 URL
+        Example:
+            olcUpdateref:   ldap://provider.example.net
+    
+    Sample Entries(示例条目)如下：
+        -------------
+        dn: olcDatabase=frontend,cn=config
+        objectClass: olcDatabaseConfig
+        objectClass: olcFrontendConfig
+        olcDatabase: frontend
+        olcReadOnly: FALSE
+        dn: olcDatabase=config,cn=config
+        objectClass: olcDatabaseConfig
+        olcDatabase: config
+        olcRootDN: cn=Manager,dc=example,dc=com
+        -------------
+
+
+
+
+    --------------------BDB 和 HDB 数据库指令(BDB and HDB Database Directives)
+
+
+
+    ----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
 ----------------------------------------------------------------------------------
