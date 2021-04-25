@@ -366,7 +366,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
             olcBackend: bdb
         注意:
             没有为该条目定义其他指令。
-            特定的后端类型可以为它们的特定用途定义其他属性，但是到目前为止，还没有定义。
+            特定的后端类型可以为它们的特定用途定义其他属性，但是到目前为止，还没有定义。 
             因此，这些指令通常不会出现在任何实际配置中。
     Sample Entry(示例条目)如下：
         -------------
