@@ -259,7 +259,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
             olcLogLevel none         #仅记录任何设置的日志级别的消息，无论级别如何；但是没有日志放生时不等同于0
             olcLogLevel stats        #默认情况下 配置 基本统计日志；如果从未定义过olcLogLevel，则不会发生任何日志记录(相当于 0 级)
     
-    olcReferral <URI>
+    olcReferral: <URI>
         当 slapd 找不到本地数据库来处理请求时，指定要传回的引用
         如  olcReferral: ldap://root.openldap.org
 
@@ -344,7 +344,8 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
     后端参数指令(Backend-specific Directives)
         适用于相同类型的所有数据库实例，并且取决于指令，数据库指令可能会覆盖后端指令。
         必须包含 objectClass: olcBackendConfig
-    olcBackend: <type>  
+    olcBackend: <type> 
+        该指令标志着后端声明的开始。 
         <type>应该为下表之一
                 表 5.2：数据库后端
                 Table 5.2: Database Backends
@@ -390,8 +391,8 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
             (The config database)配置数据库也很特殊.
             即使未显式配置 config 和 frontend 数据库，也总是隐式创建它们，并且它们在创建其他任何数据库之前都被创建。
         示例:
-            olcDatabase: bdb
-                这标志着一个新的 BDB 数据库实例的开始
+            olcDatabase: bdb    #这标志着一个新的 BDB 数据库实例的开始
+            olcDatabase: mdb    #这标志着一个新的 MDB 数据库实例的开始
     
     olcAccess: to <what> [ by <who> [<accesslevel>] [<control>] ]+
         该指令允许
@@ -427,7 +428,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         默认:  olcSizeLimit: 500
 
     olcSuffix: <dn suffix>
-        该指令指定将传递到此后端数据库的查询的 DN 后缀。
+        该指令指定 传递到此后端数据库执行查询的 DN 后缀。
             可以指定多个后缀行，通常每个数据库定义至少需要一个后缀行。
             (某些后端类型，例如“frontend”和“monitor”使用硬编码后缀，该后缀可能不会在配置中被覆盖。)
         示例：olcSuffix: dc=example,dc=com
@@ -589,7 +590,506 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
 
 
     --------------------BDB 和 HDB 数据库指令(BDB and HDB Database Directives)
+    BDB 和 HDB 数据库指令
+        此类别中的指令适用于 BDB 和 HDB 数据库。
+            除了上面定义的通用数据库指令外，它们还用于olcDatabase 条目中。
+            有关 BDB/HDB 配置指令的完整参考，请参见 slapd-bdb（5）。
+        除了objectClass: olcDatabaseConfig之外，BDB 和 HDB 数据库条目还必须分别具有 
+            objectClass: olcBdbConfig 和
+            objectClass: olcHdbConfig 
+    olcDbDirectory: <directory>
+        指定 包含数据库和相关索引的 BDB文件所在的目录
+        Default:
+            olcDbDirectory: /usr/local/var/openldap-data
+    olcDbCachesize: <integer>
+        指定由 BDB后端数据库实例 维护的内存中缓存条目 的大小。
+        Default:
+            olcDbCachesize: 1000
+    olcDbCheckpoint: <kbyte> <min>
+        指定 对BDB事务日志  进行检查点的频率
+            检查点操作 会将数据库缓冲刷到磁盘，并在日志中写入检查点记录。
+        检查点将会被触发 的情况：
+            1.上一个检查点已经写入   <kbyte>数据   或者
+            2.上一个检查点已经过去过 <min>分钟
+        这两个参数默认都为零，在这种情况下，它们将被忽略。
+        当<min>为非零值时，内部任务将每隔<min>分钟运行一次 以执行检查点。
+        Example:
+            olcDbCheckpoint: 1024 10
+    olcDbConfig: <DB_CONFIG setting>
+        此属性指定 要放置在 数据库目录的DB_CONFIG文件中的 配置指令。
+        在服务器启动时，
+            如果尚不存在DB_CONFIG文件，则将创建 DB_CONFIG 文件并将该属性中的设置写入其中。
+            如果DB_CONFIG文件存在，则将读取其内容并将其显示在此属性中。
+        该属性是多值的，以容纳多个配置指令。
+        没有提供默认值，但是必须！在此处使用适当的设置以获得最佳的服务器性能。
+            对此属性所做的任何更改都将写入 DB_CONFIG 文件中，并将导致数据库环境被重置，因此更改可以立即生效。
+            如果数据库环境缓存很大，并且最近未进行检查点检查，则此重置操作可能会花费很长时间。
+                建议：：在使用 LDAP Modify 更改此属性之前，建议使用 Berkeley DBdb_checkpoint 实用工具手动执行单个检查点。
+        Example:
+            olcDbConfig: set_cachesize 0 10485760 0
+            olcDbConfig: set_lg_bsize 2097512
+            olcDbConfig: set_lg_dir /var/tmp/bdb-log
+            olcDbConfig: set_flags DB_LOG_AUTOREMOVE
+            在此示例中：
+                BDB缓存 设置为 10MB，
+                BDB事务日志缓冲区的大小 设置为 2MB，
+                并且事务日志文件将存储在/var/tmp/bdb-log 目录中。
+                还设置了一个标志，告诉 BDB 一旦其内容已被(检查点)检查过并且不再需要它们，则删除事务日志文件
+                    没有此设置，事务日志文件将继续累积，直到其他一些清除过程将其删除为止
+        理想情况下，
+            BDB缓存 必须至少与数据库的工作集一样大，
+            日志缓冲区的大小 应足够大以容纳大多数事务而不会溢出，
+            并且日志目录必须独立于主数据库文件的物理磁盘(不在同一个物理磁盘上)。
+            并且数据库目录和日志目录都应该与用于常规系统活动（例如root，boot或swap filesystems）的磁盘分开。  
+    olcDbNosync: { TRUE | FALSE }
+         此选项导致 磁盘数据库内容在更改后不会立即与内存更改同步。
+         将此选项设置为 TRUE可能会提高性能，但会牺牲数据完整性。
+         该指令与使用下面指令的效果相同
+            olcDbConfig: set_flags DB_TXN_NOSYNC     
+    olcDbIDLcacheSize: <integer>
+        在index slots中指定 内存中索引缓存的大小。
+        默认值为零。
+        较大的值将加快索引条目的频繁搜索。
+            最佳大小取决于数据库的数据和搜索特征，
+            但是使用三倍于条目缓存大小(entry cache size)的数字是一个很好的开始。
+        Example:
+            olcDbIDLcacheSize: 3000
+    olcDbIndex: {<attrlist> | default} [pres,eq,approx,sub,none]
+        该指令指定 要为给定属性维护的 索引
+        如果仅给出<attrlist>，则将保留默认索引。
+        索引关键字对应于 可以在 LDAP搜索过滤器 中使用的常见匹配类型。
+        Example:
+            olcDbIndex: default pres,eq
+            olcDbIndex: uid
+            olcDbIndex: cn,sn pres,eq,sub
+            olcDbIndex: objectClass eq
+                在此示例中：
+                    第一行设置默认索引集， 以 保持/维护 pres(present 存在)和eq(equality 相等)
+                    第二行导致为 uid属性类型 保留/维护 默认的（pres，eq）索引集。
+                    第三行导致为 cn和sn属性类型 维护pres，eq和sub(substring 子字符串) 索引
+                    第四行导致为 objectClass属性类型 维护eq索引
+        没有不等式匹配的索引关键字。
+            通常，这些匹配不使用索引。
+            但是，某些属性确实支持 基于相等性索引的 不等式匹配的 索引。
+        可以将sub(substring index 子字符串索引)更明确地指定为 subinitial，subany 或 subfinal，与子字符串匹配过滤器(substring match filter)的三个可能的组件相对应。
+            subinitial(子初始索引)  仅索引出现在属性值开头的子字符串。
+            subfinal(子最终索引)    仅索引出现在属性值末尾的子字符串，
+            subany(子任何索引)      索引出现在值中任何地方的子字符串。
+        注意：
+            默认情况下，为属性设置索引也会影响该属性的每个子类型。
+            例如，在name属性上设置eq索引会导致 cn，sn 和从name属性继承的所有其他属性 被索引(具有name的同种索引)。
+        注意：
+            默认情况下，不维护任何索引。
+            通常建议在 objectClass 上至少保留一个eq索引(equality index)。
+                olcDbindex: objectClass eq
+        应根据 数据库上最常用的搜索 配置其他索引.
+            不应该为某个属性配置presence indexing，  除非该属性在数据库中很少出现,并且在目录的正常使用过程中对该属性的 presence searches 非常频繁。
+            大多数应用程序不使用presence searches，因此通常presence indexing不是很有用。
+        如果在 slapd 运行时更改此设置，则将运行内部任务以生成更改的索引数据。
+            在索引器执行工作时，所有服务器操作都可以照常继续。
+            如果在索引任务完成之前 slapd 已停止，则必须使用 slapindex 工具手动完成索引编制。
+    olcDbLinearIndex: { TRUE | FALSE }
+        如果设置为：TRUE，
+            1. slapindex 将一次索引一个属性。
+            2. 将使用整个数据库中的多次遍历分别处理每个索引属性
+                当 BDB缓存 小（数据库大小 超过 BDB缓存大小）时，此选项将提高 slapindex 性能。
+                当 BDB缓存 足够大时，不需要设置此选项，因为这会降低性能。
+            使用此选项，slapadd 不会建立索引，并且必须使用 slapindex。
+        默认设置为：FALSE，
+            1. 在这种情况下，一个条目的所有索引属性将同时被处理。
+            2. slapadd 会执行完全索引，因此不需要单独的 slapindex 运行。
+    olcDbMode: { <octal> | <symbolic> }
+        该指令指定 新创建的数据库索引文件 应具有的 文件保护模式。
+            格式可以是 0600 或-rw------
+        Default:
+            olcDbMode: 0600            
+    olcDbSearchStack: <integer>
+        指定 用于 搜索过滤器评估（search filter evaluation） 的堆栈深度。
+            搜索过滤器在堆栈上进行评估，以适应嵌套的 AND/OR子句。
+            为每个服务器线程分配一个单独的堆栈。
+            堆栈的深度决定了 无需任何额外的内存分配即可 评估过滤器的复杂程度。
+            嵌套 比搜索堆栈深度 更深的过滤器 将导致为 该特定搜索操作 分配一个单独的堆栈。
+                这些单独的分配可能会对服务器性能产生重大负面影响，
+                但是指定过多的堆栈也将消耗大量内存。
+        每次搜索 
+            在32位计算机上每级使用512K字节，
+            在64位计算机上每级使用1024K字节。
+                单个堆栈的 512KB 大小是由编译时常量设置的，
+                如果需要，可以更改此常量。必须重新编译代码才能使更改生效。
+        默认堆栈深度为 16，因此在 32 位和 64 位计算机上，每个线程分别使用 8MB 或 16MB
+        Default:
+            olcDbSearchStack: 16
+    olcDbShmKey: <integer>
+        指定 共享内存BDB环境(shared memory BDB environment) 的密钥。
+            如果指定了非零值，它将被用作标识 将容纳环境的 共享内存区域的键。
+        默认情况下,
+            BDB环境 使用 内存映射文件(memory mapped files)。
+        Example:
+            olcDbShmKey: 42
 
+    
+    Sample Entry(示例条目)如下：
+        -------------
+        dn: olcDatabase=hdb,cn=config
+        objectClass: olcDatabaseConfig
+        objectClass: olcHdbConfig
+        olcDatabase: hdb
+        olcSuffix: dc=example,dc=com
+        olcDbDirectory: /usr/local/var/openldap-data
+        olcDbCacheSize: 1000
+        olcDbCheckpoint: 1024 10
+        olcDbConfig: set_cachesize 0 10485760 0
+        olcDbConfig: set_lg_bsize 2097152
+        olcDbConfig: set_lg_dir /var/tmp/bdb-log
+        olcDbConfig: set_flags DB_LOG_AUTOREMOVE
+        olcDbIDLcacheSize: 3000
+        olcDbIndex: objectClass eq
+        -------------
+
+
+
+
+
+    --------------------5.3 配置示例(Configuration Example)
+    说明：
+        以下是示例配置，并在其中插入解释性文字。
+        它定义了两个数据库来处理 X.500 树的不同部分；
+        都是 BDB 数据库实例。
+        显示的行号仅供参考，不包含在实际文件中。
+        
+    首先，全局配置部分：
+        -------------
+        1. # example config file - global configuration entry
+        2. dn: cn=config
+        3. objectClass: olcGlobal
+        4. cn: config
+        5. olcReferral: ldap://root.openldap.org
+        6.
+        -------------
+                第 1 行是注释。
+                第 2-4 行将其标识为全局配置条目。
+                第 5 行上的 olcReferral：指令表示，
+                    对于以下定义的数据库之一而言  
+                    非本地的查询将被引用到 主机root.openldap.org的标准端口(389)上运行的LDAP服务 上。
+                第 6 行是空白行，指示该条目的结尾。
+        -------------
+        7. # internal schema
+        8. dn: cn=schema,cn=config
+        9. objectClass: olcSchemaConfig
+        10. cn: schema
+        11.
+        -------------
+                第 7 行是注释。
+                第 8-10 行将其标识为模式子树的根。
+                该条目中的实际模式定义被硬编码到slapd 中，因此此处未指定其他属性。
+                第 11 行是空白行，指示该条目的结尾。
+        -------------
+        12. # include the core schema
+        13. include: file:///usr/local/etc/openldap/schema/core.ldif
+        14.
+        -------------
+                第 12 行是注释。
+                第 13 行是一个LDIF包含指令，
+                    访问核心的模式，模式定义为LDIF文件格式。
+                第 14 行是空白行。
+    接下来是数据库定义。
+        第一个数据库是特殊的frontend(前段)数据库，其设置全局应用于所有其他数据库。
+        -------------
+        15. # global database parameters
+        16. dn: olcDatabase=frontend,cn=config
+        17. objectClass: olcDatabaseConfig
+        18. olcDatabase: frontend
+        19. olcAccess: to * by * read
+        20.
+        -------------
+                第 15 行是注释。
+                第 16-18 行将这个条目标识为全局数据库条目。
+                第 19 行是全局访问控制。
+                    它适用于所有条目（在任何适用的 数据库特定的 访问控制之后）。
+                第 20 行是空白行。
+    下一个条目定义配置后端。
+        -------------
+        21. # set a rootpw for the config database so we can bind.
+        22. # deny access to everyone else.
+        23. dn: olcDatabase=config,cn=config
+        24. objectClass: olcDatabaseConfig
+        25. olcDatabase: config
+        26. olcRootPW: {SSHA}XKYnrjvGT3wZFQrDD5040US592LxsdLy
+        27. olcAccess: to * by * none
+        28.
+        -------------
+                第 21-22 行是注释。
+                第 23-25 行将此条目标识为config database(配置数据库)条目。
+                第 26 行定义了此数据库的超级用户密码。（DN 默认为“cn=config”。）
+                第 27 行拒绝对该数据库的所有访问，因此只有超级用户才能访问它。
+                    （这已经是 config数据库上的默认访问权限。
+                    这里仅列出来进行说明，并重申，
+                    除非显式配置了作为超级用户进行身份验证的方法，
+                    否则将无法访问config 数据库。）
+                第 28 行是空白行。
+    下一个条目定义一个 BDB 后端，
+        该后端将处理 对 树的“dc=example，dc=com”部分 中的内容的查询。
+        将为几个属性维护索引，并保护 userPassword属性 免受未经授权的访问。
+        -------------
+        29.    # BDB definition for example.com
+        30.    dn: olcDatabase=bdb,cn=config
+        31.    objectClass: olcDatabaseConfig
+        32.    objectClass: olcBdbConfig
+        33.    olcDatabase: bdb
+        34.    olcSuffix: dc=example,dc=com
+        35.    olcDbDirectory: /usr/local/var/openldap-data
+        36.    olcRootDN: cn=Manager,dc=example,dc=com
+        37.    olcRootPW: secret
+        38.    olcDbIndex: uid pres,eq
+        39.    olcDbIndex: cn,sn pres,eq,approx,sub
+        40.    olcDbIndex: objectClass eq
+        41.    olcAccess: to attrs=userPassword
+        42.      by self write
+        43.      by anonymous auth
+        44.      by dn.base="cn=Admin,dc=example,dc=com" write
+        45.      by * none
+        46.    olcAccess: to *
+        47.      by self write
+        48.      by dn.base="cn=Admin,dc=example,dc=com" write
+        49.      by * read
+        50.
+        -------------
+                第 29 行是注释。
+                第 30-33 行将该条目标识为 BDB数据库 配置条目。
+                第 34 行指定了要传递给该数据库进行查询的 DN后缀。
+                第 35 行指定数据库文件所在的目录。
+                第 36 和 37 行标识数据库超级用户和相关密码。该条目不受访问控制，大小，时间限制的限制。
+                第 38 行到第 40 行表示要为各种属性维护的索引。
+                第 41 至 49 行指定了对该数据库中条目的访问控制。
+                    对于所有适用的条目，
+                            userPassword属性可由条目本身和“admin”条目 改写。
+                                它可以用于身份验证/授权目的，否则不可读(即不允许匿名用户读)。
+                            其他属性
+                                该条目和“admin”条目均可以写入所有其他属性，
+                                所有其他用户（已认证或未认证）都可以读取所有其他属性。
+                第 50 行是空白行，指示该条目的结尾。
+    下一个条目定义另一个 BDB 数据库。
+        该查询处理涉及dc=example，dc=net子树，
+            但由 与第一个数据库相同的实体 管理。
+        注意：如果没有第60行的话，由于第 19 行的全局访问规则，将允许所有读访问。
+        -------------
+        51.    # BDB definition for example.net
+        52.    dn: olcDatabase=bdb,cn=config
+        53.    objectClass: olcDatabaseConfig
+        54.    objectClass: olcBdbConfig
+        55.    olcDatabase: bdb
+        56.    olcSuffix: dc=example,dc=net
+        57.    olcDbDirectory: /usr/local/var/openldap-data-net
+        58.    olcRootDN: cn=Manager,dc=example,dc=com
+        59.    olcDbIndex: objectClass eq
+        60.    olcAccess: to * by users read
+        -------------
+
+
+
+
+
+    --------------------5.4 将老的slapd.conf配置文件转换为cn=config格式(Converting old style slapd.conf(5) file to cn=config format)
+    前提：
+        配置好config backend的rootDN和rootPW，因为默认是无法访问的
+    
+    如果你还未准备好拥有一个database config section，那么在slapd.conf文件的末尾添加如下内容
+        database config
+        rootpw VerySecret
+
+    注意：由于 config后端 可将任意代码加载到slapd进程中，
+            因此 警惕谁可以访问它 非常重要。
+        由于简单密码容易受到密码猜测攻击的而变得脆弱，
+            因此最好省略rootpw，
+            仅配置 rootDN ，并使用 SASL 进行身份验证。
+        
+        #转换
+        slaptest -f /usr/local/etc/openldap/slapd.conf -F /usr/local/etc/openldap/slapd.d
+        #验证
+        ldapsearch -x -D cn=config -w VerySecret -b cn=config
+        然后您可以丢弃旧的 slapd.conf文件
+
+        注意：从slapd.conf文件转换为slapd.d格式时，包含的所有文件也将集成到生成的配置数据库中。
+
+
+
+    --------------------chapter 6 slapd.conf配置文件（了解 ，算是对前一章所学的回顾）
+    slapd.conf文件已经被废弃
+        除非你的站点 仅仅只需要一个后端 并且你的站点没有更新(无法运行最新的slapd-config系统)
+        通常存在于 /usr/local/etc/openldap目录下 ，可以通过slapd的命令行指定文件路径
+    slapd.conf文件  
+        包含三种类型的配置信息：全局，特定于后端，特定于数据库
+            首先指定全局信息，然后指定特定于后端类型的信息，然后指定特定于数据库实例的信息
+            全局指令可以被后端指令/数据库指令覆盖 ， 后端指令可以被数据库指令覆盖
+        空行和注释(以'#'开头)被忽略；
+        若某行以空格开头，则此行是前一行的延续。
+    slapd.conf文件的一般格式如下：
+        -------------
+        # global configuration directives
+        <global config directives>
+
+        # backend definition
+        backend <typeA>
+        <backend-specific directives>
+
+        # first database definition & config directives
+        database <typeA>
+        <database-specific directives>
+
+        # second database definition & config directives
+        database <typeB>
+        <database-specific directives>
+
+        # second database definition & config directives
+        database <typeA>
+        <database-specific directives>
+
+        # subsequent backend & database definitions & config directives
+        ...
+        -------------
+                配置指令可以携带参数，以空格隔开
+                    如果参数包含空格，则应该将参数用双引号括起来
+                    如果参数包含双引号和反斜杠，则应该在字符前加上反斜杠
+                发行版
+                    携带了一个示例配置文件在/usr/local/etc/openldap 目录中
+                    提供了很多包含模式定义的文件在/usr/local/etc/openldap/schema 目录中
+    详细介绍常用的配置文件指令，完整列表参看第5章
+        本节将配置文件指令分为全局，特定于后端和特定于数据的，描述每个指令及其默认值（如果有），并给出其用法示例。
+        全局指令
+            本节中的指令适用于所有后端和数据库，除非在后端或数据库定义中明确覆盖了这些指令，应由实际文本替换 <>
+            access to <what> [ by <who> [<accesslevel>] [<control>] ]+
+                该指令允许一个或多个请求者（由<who>指定）对一组条目和/或属性（由<what>指定）的访问权限（由<accesslevel>指定）。
+                和 olcAccess: to <what> [ by <who> [<accesslevel>] [<control>] ]+ 功能相同，不再赘述
+                详见第8章access control
+            attributetype <RFC4512 Attribute Type Description>
+                该指令定义属性类型
+                和olcAttributeTypes: <RFC4512 Attribute Type Description>功能相同，不再赘述
+            idletimeout <integer>
+                强制关闭空闲的客户端连接之前要等待的秒数，默认情况下，为 0 将禁用此功能。
+                和olcIdleTimeout: <integer>功能相同，不再赘述
+            include <filename>
+                该指令指定 slapd 在继续当前文件的下一行之前，应从给定文件中读取其他配置信息。
+                    包含的文件应遵循正常的 slapd 配置文件格式。
+                    注意：使用此指令时要小心-嵌套 include 指令的数量没有限制，并且不会执行循环检测。
+            loglevel <level>
+                指定 调试语句 和 操作统计信息 应进行 syslog 的级别(当前记录到 syslogd(8)LOG_LOCAL4 设备)。
+                和olcLogLevel: <level>功能相同，不再赘述
+            objectclass <RFC4512 Object Class Description>
+                该指令定义了一个对象类
+                和olcObjectClasses: <RFC4512 Object Class Description>功能相同，不再赘述
+            referral <URI>
+                当 slapd 找不到本地数据库来处理请求时，指定要传回的引用
+                如  olcReferral: ldap://root.openldap.org
+                和olcReferral: <URI>功能相同，不再赘述
+            sizelimit <integer>
+                该指令指定 从搜索操作返回的最大条目数
+                和olcSizeLimit: <integer>功能相同，不再赘述
+            timelimit <integer>
+                和[olcTimeLimit: <integer>]功能相同，不再赘述
+                该指令指定了 slapd 响应搜索请求所花费的最大秒数(实时)。如果请求在此时间内未完成，则将返回: 指示超出时间限制的结果。
+        一般后端指令
+            本节中的指令仅适用于定义它们的后端。
+                每种类型的后端都支持它们
+                后端指令适用于相同类型的所有数据库实例，并且数据库指令可能会覆盖后端指令
+            backend <type>
+                该指令标志着后端声明的开始。 
+                <type>应该为后端类型之一
+                和olcBackend: <type> 功能相同，不再赘述 
+        一般数据库指令
+            本节中的指令仅适用于定义它们的数据库。
+                每种类型的数据库都支持它们。
+            database <type>
+                该指令标志着数据库实例声明的开始
+                和olcDatabase: [{<index>}]<type>功能相同，不再赘述
+            limits <selector> <limit> [<limit> [...]]
+                根据操作的发起者或基本 DN 指定时间和大小限制。
+            readonly { on | off }
+                该指令将数据库置于“只读”模式。任何修改数据库的尝试都将返回“不愿执行”错误。
+                如果在consumer上设置，则仍然会发生由 syncrepl 发送的修改
+                和olcReadonly { TRUE | FALSE }功能相同，不再赘述
+            rootdn <DN>
+                指定管理员DN; 此DN对数据库的操作将不受限制
+                和olcRootDN: <DN>功能相同，不再赘述
+            rootpw <password>
+                为olcRootDN: <DN>的DN指定密码
+                和olcRootPW: <password>功能相同，不再赘述
+            suffix <dn suffix>
+                该指令指定 传递到此后端数据库执行查询的 DN 后缀。
+                和olcSuffix: <dn suffix>功能相同，不再赘述
+            syncrepl
+                该指令
+                    将当前slapd(8)建立为 复制consumer站点  通过运行syncrepl复制引擎，从而将当前数据库指定为 内容提供者 的consumer。
+                    consumer数据库 和 provider的最新内容保持同步
+                和olcSyncrepl功能相同，不再赘述
+            updateref <URL>
+                仅适用于副本(或 shadow) slapd(8)实例.
+                用于指定 要返回给客户端的URL , 客户端将在副本上提交更新请求
+                和olcUpdateref: <URL>功能相同，不再赘述
+        BDB 和 HDB 数据库指令
+            directory <directory>
+                指定 包含数据库和相关索引的 BDB文件所在的目录
+                和olcDbDirectory: <directory>功能相同，不再赘述
+    slapd.conf配置文件示例
+        首先，全局配置部分：
+        -------------
+        1.    # example config file - global configuration section
+        2.    include /usr/local/etc/schema/core.schema
+        3.    referral ldap://root.openldap.org
+        4.    access to * by * read
+        -------------
+                第 1 行是注释。
+                第 2 行包含另一个包含核心模式定义的配置文件。
+                第 3 行上的“referral”意味着，以下定义的数据库之一 不在本地的查询 则转到root.openldap.org 的标准端口（389）上运行的 LDAP 服务中。
+                第 4 行是全局访问控制。它适用于所有条目（在任何适用的数据库特定的访问控制之后）。
+        下一部分定义了一个 BDB 后端，该后端将处理对树的“dc=example，dc=com”部分中内容的查询。
+            该数据库将被复制到两个副本 slapd 中，一个在 truelies，另一个在judgmentday。
+            将为几个属性维护索引，并保护 userPassword 属性免受未经授权的访问。            
+        -------------
+        5.    # BDB definition for the example.com
+        6.    database bdb
+        7.    suffix "dc=example,dc=com"
+        8.    directory /usr/local/var/openldap-data
+        9.    rootdn "cn=Manager,dc=example,dc=com"
+        10.    rootpw secret
+        11.    # indexed attribute definitions
+        12.    index uid pres,eq
+        13.    index cn,sn pres,eq,approx,sub
+        14.    index objectClass eq
+        15.    # database access control definitions
+        16.    access to attrs=userPassword
+        17.        by self write
+        18.        by anonymous auth
+        19.        by dn.base="cn=Admin,dc=example,dc=com" write
+        20.        by * none
+        21.    access to *
+        22.        by self write
+        23.        by dn.base="cn=Admin,dc=example,dc=com" write
+        24.        by * read
+        -------------
+                第 5 行是注释。
+                第 6 行上的 database 关键字标记了数据库定义的开始。
+                第 7 行指定了将查询传递到此数据库的 DN 后缀。
+                第 8 行指定数据库文件所在的目录。
+                第 9 和 10 行标识数据库超级用户和相关密码。该条目不受访问控制或大小或时间限制的限制。
+                第 12 到 14 行表示各种属性要维护的索引。
+                第 16 至 24 行指定对此数据库中条目的访问控制。
+                    对于所有适用的条目，
+                        userPassword 属性
+                            可由条目本身和“admin”条目写入。用于身份验证/授权目的，验证不通过则不可读。
+                        其他属性
+                            该条目和“admin”条目均可以写入所有其他属性，所有用户（已认证或未认证）都可以读取所有其他属性。
+        下一部分定义了另一个 BDB 数据库。
+            该查询处理涉及 dc=example,dc=net子树的查询，但由与第一个数据库相同的实体管理。
+            请注意，如果没有第 39 行，则由于第4 行有全局访问规则，因此将允许读访问。
+        -------------
+        33.    # BDB definition for example.net
+        34.    database bdb
+        35.    suffix "dc=example,dc=net"
+        36.    directory /usr/local/var/openldap-data-net
+        37.    rootdn "cn=Manager,dc=example,dc=com"
+        38.    index objectClass eq
+        39.    access to * by users read
+        -------------
 
 
     ----------------------------------------------------------------------------------------------------
