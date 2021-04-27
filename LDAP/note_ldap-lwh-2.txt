@@ -222,6 +222,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
     olcLogLevel: <level>
         指定 调试语句 和 操作统计信息 应进行 syslog 的级别(当前记录到 syslogd(8)LOG_LOCAL4 设备)。
         必须配置 OpenLDAP --enable-debug(默认设置)才能正常工作(两个统计级别除外，它们始终处于启用状态)。
+            注意：slapd 必须已经使用--enable-debug 进行编译
         日志级别可以指定为整数或关键字。
         可以使用多个日志级别，并且这些级别是可叠加的。
         要显示 哪种级别对应哪种调试，调用 slapd 的时候加上-d?
@@ -593,7 +594,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
     BDB 和 HDB 数据库指令
         此类别中的指令适用于 BDB 和 HDB 数据库。
             除了上面定义的通用数据库指令外，它们还用于olcDatabase 条目中。
-            有关 BDB/HDB 配置指令的完整参考，请参见 slapd-bdb（5）。
+            有关 BDB/HDB 配置指令的完整参考，请参见 slapd-bdb(5)。
         除了objectClass: olcDatabaseConfig之外，BDB 和 HDB 数据库条目还必须分别具有 
             objectClass: olcBdbConfig 和
             objectClass: olcHdbConfig 
@@ -640,7 +641,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
             BDB缓存 必须至少与数据库的工作集一样大，
             日志缓冲区的大小 应足够大以容纳大多数事务而不会溢出，
             并且日志目录必须独立于主数据库文件的物理磁盘(不在同一个物理磁盘上)。
-            并且数据库目录和日志目录都应该与用于常规系统活动（例如root，boot或swap filesystems）的磁盘分开。  
+            并且数据库目录和日志目录都应该与用于常规系统活动(例如root，boot或swap filesystems)的磁盘分开。  
     olcDbNosync: { TRUE | FALSE }
          此选项导致 磁盘数据库内容在更改后不会立即与内存更改同步。
          将此选项设置为 TRUE可能会提高性能，但会牺牲数据完整性。
@@ -665,7 +666,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
             olcDbIndex: objectClass eq
                 在此示例中：
                     第一行设置默认索引集， 以 保持/维护 pres(present 存在)和eq(equality 相等)
-                    第二行导致为 uid属性类型 保留/维护 默认的（pres，eq）索引集。
+                    第二行导致为 uid属性类型 保留/维护 默认的(pres，eq)索引集。
                     第三行导致为 cn和sn属性类型 维护pres，eq和sub(substring 子字符串) 索引
                     第四行导致为 objectClass属性类型 维护eq索引
         没有不等式匹配的索引关键字。
@@ -692,7 +693,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         如果设置为：TRUE，
             1. slapindex 将一次索引一个属性。
             2. 将使用整个数据库中的多次遍历分别处理每个索引属性
-                当 BDB缓存 小（数据库大小 超过 BDB缓存大小）时，此选项将提高 slapindex 性能。
+                当 BDB缓存 小(数据库大小 超过 BDB缓存大小)时，此选项将提高 slapindex 性能。
                 当 BDB缓存 足够大时，不需要设置此选项，因为这会降低性能。
             使用此选项，slapadd 不会建立索引，并且必须使用 slapindex。
         默认设置为：FALSE，
@@ -704,7 +705,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         Default:
             olcDbMode: 0600            
     olcDbSearchStack: <integer>
-        指定 用于 搜索过滤器评估（search filter evaluation） 的堆栈深度。
+        指定 用于 搜索过滤器评估(search filter evaluation) 的堆栈深度。
             搜索过滤器在堆栈上进行评估，以适应嵌套的 AND/OR子句。
             为每个服务器线程分配一个单独的堆栈。
             堆栈的深度决定了 无需任何额外的内存分配即可 评估过滤器的复杂程度。
@@ -805,7 +806,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                 第 15 行是注释。
                 第 16-18 行将这个条目标识为全局数据库条目。
                 第 19 行是全局访问控制。
-                    它适用于所有条目（在任何适用的 数据库特定的 访问控制之后）。
+                    它适用于所有条目(在任何适用的 数据库特定的 访问控制之后)。
                 第 20 行是空白行。
     下一个条目定义配置后端。
         -------------
@@ -820,12 +821,12 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         -------------
                 第 21-22 行是注释。
                 第 23-25 行将此条目标识为config database(配置数据库)条目。
-                第 26 行定义了此数据库的超级用户密码。（DN 默认为“cn=config”。）
+                第 26 行定义了此数据库的超级用户密码。(DN 默认为“cn=config”。)
                 第 27 行拒绝对该数据库的所有访问，因此只有超级用户才能访问它。
-                    （这已经是 config数据库上的默认访问权限。
+                    (这已经是 config数据库上的默认访问权限。
                     这里仅列出来进行说明，并重申，
                     除非显式配置了作为超级用户进行身份验证的方法，
-                    否则将无法访问config 数据库。）
+                    否则将无法访问config 数据库。)
                 第 28 行是空白行。
     下一个条目定义一个 BDB 后端，
         该后端将处理 对 树的“dc=example，dc=com”部分 中的内容的查询。
@@ -866,7 +867,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                                 它可以用于身份验证/授权目的，否则不可读(即不允许匿名用户读)。
                             其他属性
                                 该条目和“admin”条目均可以写入所有其他属性，
-                                所有其他用户（已认证或未认证）都可以读取所有其他属性。
+                                所有其他用户(已认证或未认证)都可以读取所有其他属性。
                 第 50 行是空白行，指示该条目的结尾。
     下一个条目定义另一个 BDB 数据库。
         该查询处理涉及dc=example，dc=net子树，
@@ -913,7 +914,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
 
 
 
-    --------------------chapter 6 slapd.conf配置文件（了解 ，算是对前一章所学的回顾）
+    --------------------chapter 6 slapd.conf配置文件(了解 ，算是对前一章所学的回顾)
     slapd.conf文件已经被废弃
         除非你的站点 仅仅只需要一个后端 并且你的站点没有更新(无法运行最新的slapd-config系统)
         通常存在于 /usr/local/etc/openldap目录下 ，可以通过slapd的命令行指定文件路径
@@ -954,11 +955,11 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                     携带了一个示例配置文件在/usr/local/etc/openldap 目录中
                     提供了很多包含模式定义的文件在/usr/local/etc/openldap/schema 目录中
     详细介绍常用的配置文件指令，完整列表参看第5章
-        本节将配置文件指令分为全局，特定于后端和特定于数据的，描述每个指令及其默认值（如果有），并给出其用法示例。
+        本节将配置文件指令分为全局，特定于后端和特定于数据的，描述每个指令及其默认值(如果有)，并给出其用法示例。
         全局指令
             本节中的指令适用于所有后端和数据库，除非在后端或数据库定义中明确覆盖了这些指令，应由实际文本替换 <>
             access to <what> [ by <who> [<accesslevel>] [<control>] ]+
-                该指令允许一个或多个请求者（由<who>指定）对一组条目和/或属性（由<what>指定）的访问权限（由<accesslevel>指定）。
+                该指令允许一个或多个请求者(由<who>指定)对一组条目和/或属性(由<what>指定)的访问权限(由<accesslevel>指定)。
                 和 olcAccess: to <what> [ by <who> [<accesslevel>] [<control>] ]+ 功能相同，不再赘述
                 详见第8章access control
             attributetype <RFC4512 Attribute Type Description>
@@ -1039,8 +1040,8 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         -------------
                 第 1 行是注释。
                 第 2 行包含另一个包含核心模式定义的配置文件。
-                第 3 行上的“referral”意味着，以下定义的数据库之一 不在本地的查询 则转到root.openldap.org 的标准端口（389）上运行的 LDAP 服务中。
-                第 4 行是全局访问控制。它适用于所有条目（在任何适用的数据库特定的访问控制之后）。
+                第 3 行上的“referral”意味着，以下定义的数据库之一 不在本地的查询 则转到root.openldap.org 的标准端口(389)上运行的 LDAP 服务中。
+                第 4 行是全局访问控制。它适用于所有条目(在任何适用的数据库特定的访问控制之后)。
         下一部分定义了一个 BDB 后端，该后端将处理对树的“dc=example，dc=com”部分中内容的查询。
             该数据库将被复制到两个副本 slapd 中，一个在 truelies，另一个在judgmentday。
             将为几个属性维护索引，并保护 userPassword 属性免受未经授权的访问。            
@@ -1077,7 +1078,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                         userPassword 属性
                             可由条目本身和“admin”条目写入。用于身份验证/授权目的，验证不通过则不可读。
                         其他属性
-                            该条目和“admin”条目均可以写入所有其他属性，所有用户（已认证或未认证）都可以读取所有其他属性。
+                            该条目和“admin”条目均可以写入所有其他属性，所有用户(已认证或未认证)都可以读取所有其他属性。
         下一部分定义了另一个 BDB 数据库。
             该查询处理涉及 dc=example,dc=net子树的查询，但由与第一个数据库相同的实体管理。
             请注意，如果没有第 39 行，则由于第4 行有全局访问规则，因此将允许读访问。
@@ -1092,6 +1093,690 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         -------------
 
 
+
+    --------------------chapter 7 运行 slapd配置文件(Running slapd)
+    slapd(8)作为一个独立服务运行。
+        这使服务器可以利用缓存的优势，管理基础数据库的并发问题，并节省系统资源。
+    slapd(8)支持许多命令行选项，如手册页中所述。本节详细介绍了一些常用选项。
+        -f <filename>
+            为slapd 指定备用配置文件
+            默认为/usr/local/etc/openldap/slapd.conf
+        -F <slapd-config-directory>
+            指定 slapd配置目录
+            默认为/usr/local/etc/openldap/slapd.d/
+                    如果同时指定了-f 和-F，则将读取配置文件 并将其转换为配置目录格式 并写入指定的目录。
+                    如果未指定任何选项，则 slapd 将在尝试使用默认配置文件之前尝试读取默认配置目录。
+                    如果存在有效的配置目录，则默认配置文件将被忽略。
+        -h <URLs>
+            此选项指定替代的侦听器配置。
+                默认值为 ldap:///，这意味着默认 LDAP389端口 的所有接口上使用 基于TCP的LDAP。
+                您可以指定特定的host-pair对或其他协议方案(例如 ldaps://或ldapi://)。
+                        URL         Protocol        Transport
+                        ldap:///    LDAP            TCP port 389
+                        ldaps:///   LDAP over SSL   TCP port 636
+                        ldapi:///   LDAP            IPC (Unix-domain socket)
+                例如，-h "ldaps:// ldap://127.0.0.1:666" 将创建两个侦听器：
+                    一个侦听器用于ldaps://默认的636端口上所有接口上的(非标准)ldaps://方案，
+                    另一个是在666端口上的localhost(环回)接口上用于标准 ldap://方案。
+                    可以使用主机名或 IPv4 或 IPv6 地址来指定主机。端口值必须是数字。
+                对于基于IPC的LDAP，可以在URL中编码 Unix 域套接字的路径名。
+                    请注意，目录分隔符必须像其他任何专用于URL的字符一样，都经过 URL 编码。
+                    因此套接字/usr/local/var/ldapi必须被编码为 ldapi://%2Fusr%2Flocal%2Fvar%2Fldapi
+                        请注意：
+                            ldapi:///传输并未得到广泛实现：非 OpenLDAP 客户端可能无法使用它。
+        -n <service-name>
+            此选项指定用于日志记录和其他目的的服务名称。
+                默认服务名称为 slapd
+        -l <syslog-local-user>
+            指定 syslog(8)工具的本地用户。
+                值可以是 LOCAL0，LOCAL1，LOCAL2，...和 LOCAL7。
+                默认值为 LOCAL4。
+                并非所有系统都支持此选项。
+        -u user -g group
+            分别指定 用户和组 以其身份运行。
+                用户可以是 用户名或uid。
+                组可以是 组名或gid。
+        -r directory
+            指定运行时目录。
+                在打开侦听器之后，但在读取任何配置文件或初始化任何后端之前，slapd 会将 chroot(2)切换到该目录。
+        -d <level> | ?
+            项将 slapd 调试级别设置为<level>
+                级别为"?"时字符，将打印各种调试级别，并退出slapd
+                    在上面的  olcLogLevel: <level>  下 有个调试级别表
+                注意：
+                    调试级别可叠加
+                注意：
+                    slapd 必须已经使用--enable-debug 进行编译
+    启动 slapd
+        slapd 的运行方式如下：/usr/local/libexec/slapd [<option>]*
+                我的slapd目录
+                    [root@localhost openldap]# find / -name "slapd"
+                    /etc/sysconfig/slapd
+                    /usr/sbin/slapd
+            其中/usr/local/libexec 由 configure 确定，而<option>是上述选项之一
+            除非您指定了调试级别(包括级别 0)，否则 slapd 会自动从其控制终端ffork and detach，并在后台运行。
+    停止 slapd 
+        为了安全地杀死 Slapd(8)，你应该
+            kill -INT `cat /usr/local/var/slapd.pid`  
+                    我的目录是
+                        [root@localhost openldap]# find / -name "slapd.pid"
+                        /run/openldap/slapd.pid
+                其中/usr/local/var 由配置决定
+                用更粗暴的方法杀死 slapd 可能会导致信息丢失或数据库损坏。
+
+
+
+
+    --------------------chapter 8. 访问控制(Access Control)
+    随着越来越多的 具有不同敏感度的数据 填充目录，控制 对目录各种各样的访问权限 变得越来越重要。
+        例如，目录可能包含 您需要通过合同或法律保护的机密性质的数据。
+        或者，如果使用目录控制对其他服务的访问，
+            则 对该目录的不适当访问可能会为您的站点安全性创建攻击途径，从而严重破坏您的资产。
+        可通过两种方法配置对目录的访问，
+            一种使用 slapd 配置文件，
+            另一种使用 slapd-config(5)格式(配置 slapd)。
+        默认的访问控制策略是允许所有客户端读取。
+            无论定义了什么访问控制策略，rootdn拥有对所有内容的全部权限(即：身份验证，搜索，比较，读取和写入)。
+                因此，列出rootdn的权限是没有用的（并导致性能下降)
+                
+    以下各节将更深入地描述访问控制列表，并给出一些示例和建议。有关完整的详细信息，请参见 slapd.access(5)
+    8.2. 通过静态配置做访问控制
+        对条目和属性的访问由 访问配置文件指令(access configuration file directive) 控制。通用的访问语句形式为：
+                -----------------------------------
+                <access directive> ::= access to <what>
+                    [by <who> [<access>] [<control>] ]+
+                <what> ::= * |
+                    [dn[.<basic-style>]=<regex> | dn.<scope-style>=<DN>]
+                    [filter=<ldapfilter>] [attrs=<attrlist>]
+                <basic-style> ::= regex | exact
+                <scope-style> ::= base | one | subtree | children
+                <attrlist> ::= <attr> [val[.<basic-style>]=<regex>] | <attr> , <attrlist>
+                <attr> ::= <attrname> | entry | children
+                <who> ::= * | [anonymous | users | self
+                        | dn[.<basic-style>]=<regex> | dn.<scope-style>=<DN>]
+                    [dnattr=<attrname>]
+                    [group[/<objectclass>[/<attrname>][.<basic-style>]]=<regex>]
+                    [peername[.<basic-style>]=<regex>]
+                    [sockname[.<basic-style>]=<regex>]
+                    [domain[.<basic-style>]=<regex>]
+                    [sockurl[.<basic-style>]=<regex>]
+                    [set=<setspec>]
+                    [aci=<attrname>]
+                <access> ::= [self]{<level>|<priv>}
+                <level> ::= none | disclose | auth | compare | search | read | write | manage
+                <priv> ::= {=|+|-}{m|w|r|s|c|x|d|0}+
+                <control> ::= [stop | continue | break]
+                -----------------------------------
+                        <what>部分选择   要应用访问权限的 条目和/或属性，
+                        <who>部分指定    给哪些实体 授予访问权限，
+                        <access>部分指定 授予访问权限。
+                        支持多个<who> <access> <control>三元组，从而允许 向许多实体授予 对同一组条目和属性的 不同访问权限。
+                        此处未描述所有这些访问控制选项；有关更多详细信息，请参见 slapd.access(5)手册页。
+        8.2.1 访问权限控制哪些内容(What to control access to)
+            <what>部分确定 把访问控制应用到哪些 条目和属性上。
+                通常以两种方式选择条目：
+                    通过DN 和通过filter(过滤器)。
+                可以同时使用DN和filter
+            -----------------------------------
+                以下限定符按 DN 选择条目：
+                    -----------------------------------
+                    to *
+                    to dn[.<basic-style>]=<regex>
+                    to dn.<scope-style>=<DN>
+                    -----------------------------------
+                            第一种形式用于   选择 所有 条目。
+                            第二种形式用于   通过 正则表达式与条目的DN进行匹配 来选择 条目。
+                            第三种形式用于   选择 DN请求范围内的 条目。
+                                范围可以是 base，one，subtree 或 children。
+                                base     仅匹配 具有DN的条目(仅仅DN一个)，
+                                one        匹配 其父代是 DN 的条目(这个DN的第一代儿子)，
+                                subtree    匹配 子树中(树的根是DN)的所有条目(DN + 这个DN的所有儿子和后代)，
+                                children   匹配 DN 下的所有条目（这个DN的所有儿子和后代，但不匹配DN自己)。
+                                    例如
+                                    -----------------------------------
+                                    0: o=suffix
+                                    1: cn=Manager,o=suffix
+                                    2: ou=people,o=suffix
+                                    3: uid=kdz,ou=people,o=suffix
+                                    4: cn=addresses,uid=kdz,ou=people,o=suffix
+                                    5: uid=hyc,ou=people,o=suffix
+                                    -----------------------------------
+                                    则
+                                    -----------------------------------
+                                    dn.base="ou=people,o=suffix" match 2;
+                                    dn.one="ou=people,o=suffix" match 3, and 5;
+                                    dn.subtree="ou=people,o=suffix" match 2, 3, 4, and 5; 
+                                    dn.children="ou=people,o=suffix" match 3, 4, and 5.
+                                    -----------------------------------
+                使用filter(过滤器)选择条目
+                    to filter=<ldap filter>
+                        <ldap filter>是字符串，例如： to filter=(objectClass=person)
+                在<what>字句中可以同时使用DN和filter 来选择条目
+                    to dn.one="ou=people,o=suffix" filter=(objectClass=person)
+            -----------------------------------
+                attrs=<attribute list>
+                    包含 逗号分隔的 属性名称列表 来选择条目中的属性
+                attrs=<attribute> val[.<style>]=<regex>
+                    使用 单个属性名称以及值选择器 来选择属性的特定值
+                有两个特殊的伪属性项和子项。
+                    要读取(并返回)目标条目，必须具有对目标条目属性的读取权限。
+                    要执行搜索，必须对搜索库的条目属性具有搜索权限。
+                    要添加或删除条目，必须对条目的条目属性具有写权限，并且必须对条目的父级子属性具有写权限。
+                    要重命名条目，必须对条目的条目属性具有写权限，并且对旧父和新父的子属性都具有写权限。
+                    本节末尾的完整示例应有助于解决问题。
+                有一个特殊的条目选择器"*"
+                    用于选择任何条目。
+                    未提供<what>时使用 等效于"dn=.*"
+        8.2.2. 赋予谁访问权限(Who to grant access to)
+            <who> 标识 被授予访问权限的 一个或多个实体。
+                注意：访问权限被授予“实体”而不是“条目”。
+                -----------------------------------
+                        able 6.3: Access Entity Specifiers(表 6.3: 访问权限实体说明符)
+                Specifier	                Entities                
+                *	                        All, including anonymous and authenticated users    所有用户，包括匿名用户和认证用户
+                anonymous	                Anonymous (non-authenticated) users                 匿名(未认证)用户
+                users	                    Authenticated users                                 通过身份验证的用户
+                self	                    User associated with target entry                   与目标条目关联的用户
+                dn[.<basic-style>]=<regex>	Users matching a regular expression                 匹配正则表达式的用户
+                dn.<scope-style>=<DN>	    Users within scope of a DN                          一个DN范围内的用户
+                -----------------------------------
+                    此处DN和<what>字句中的DN 行为非常相似
+                    还支持其他控制因素。
+                        例如：
+                            <who>可以被DN-valued属性中列出的条目所限制:
+                                dnattr=<dn-valued attribute name>
+                                dnattr用于对 条目的属性中列出了DN的条目 授予访问权限   ？？？？？？？？？？？？？没看懂！！！
+                                    例如： 向 被列为组条目的所有者的任何人授予对组条目的访问权限
+                    有些因素可能并不适合所有环境(或任何环境)     
+                        例如，
+                            域因子(domain factor)依赖于 IP 到域名的查找。
+                            由于这些很容易被欺骗，因此应避免使用域因子。           
+        8.2.3. 赋予哪些访问权限(The access to grant)
+            <access>
+                -----------------------------------
+                    Table 6.4: Access Levels(表 6.4: 访问级别)
+                Level           Privileges Description
+                none =         0 no access
+                disclose =     d needed for information disclosure on error
+                auth =        dx needed to authenticate (bind)
+                compare =    cdx needed to compare
+                search =    scdx needed to apply search filters
+                read =     rscdx needed to read search results
+                write =   wrscdx needed to modify/rename
+                manage = mwrscdx needed to manage
+                -----------------------------------
+                        每个级别都意味着所有较低级别的访问权限会被同时赋予。
+                            例如，授予某人对某项的 写访问权限 也将授予他们读，搜索，比较，身份验证和公开访问权限。
+                            但是，可以使用权限说明符来授予特定权限。
+        8.2.4. 访问控制评估(Access Control Evaluation)
+            --------先比较<what>
+            在评估是否应授予 某些请求者 访问条目和/或属性的权限时，
+                slapd将 条目和/或属性 与 配置文件中给出的<what> selectors进行比较。
+            
+            对于每个条目，首先应用 保存该条目的数据库中提供的访问控制（如果没有保存在任何数据库中，则应用全局访问控制），
+            然后应用全局访问指令。
+                概述：对于每个条目 先应用数据库中存储的该条目的访问控制，然后应用全局的访问控制
+                
+            但是，在处理访问列表时，由于全局访问列表被有效地附加到每个数据库列表中，
+            因此如果结果列表为非空列表，则访问列表隐式的以 access to * by * none 指令结尾。
+            
+            如果没有适用于后端的访问指令，则使用默认读取。
+            
+            (在此优先级内)按访问指令在配置文件中出现的顺序 对其进行检查。
+                Slapd停在与 条目和/或属性 匹配的第一个<what> selector上。
+                相应的访问指令是 一个slapd 将用来评估访问的指令。
+            
+            --------然后比较<who>
+            接下来，slapd 按照请求出现的顺序比较 请求访问 上面选择的访问指令 的<who> selectors的实体。
+            它停在 与请求者匹配的第一个<who> selector上。
+                这确定了请求访问的实体 对条目和/或属性的 访问权。
+
+            --------最后比较<who>
+            最后，slapd 将所选<access>条款中授予的访问权限与客户端请求的访问权限进行比较。
+                如果允许更大或相等的访问权限，则授予访问权限。
+                否则，访问将被拒绝
+                
+            --------指令的顺序非常重要
+            访问指令的评估顺序使其在配置文件中的位置很重要。
+                如果就其选择的条目而言，
+                    一个访问指令比另一个访问指令更具体，则它应该"首先"出现在配置文件中。
+                同样，
+                    如果一个<who>选择器比另一个选择器更具体，则应在访问指令中排在第一位。
+                下面给出的访问控制示例应有助于使这一点变得清楚。
+
+        8.2.5. 访问控制示例(Access Control Examples)
+            
+            -----------------------------------
+            access to * by * read
+            -----------------------------------
+                    此访问指令 向所有人授予读取访问权限。
+            
+            -----------------------------------
+            access to *
+                by self write
+                by anonymous auth
+                by * read
+            -----------------------------------
+                    该指令 
+                        允许用户修改其条目，
+                        允许匿名者针对这些条目进行身份验证，
+                        并允许所有其他人读取这些条目（其实只有验证并通过的user能read，因为禁止了匿名访问）。
+                    请注意，只有第一个符合条件的<who>条款适用。
+                        因此，匿名用户被授予身份验证，而不是读取权限。
+                    最后一个子句也可以是“by users read”。
+            
+            -----------------------------------
+            access to *
+                by ssf=128 self write
+                by ssf=64 anonymous auth
+                by ssf=64 users read
+            -----------------------------------
+                    根据适当的保护级别来限制操作。示例显示了如何使用安全强度因子（SSF)。
+                        如果已建立强度为 128 或更高的安全保护，则此指令允许用户修改自己的条目；
+                        允许匿名用户进行身份验证访问；
+                        在已建立 64 或更高的安全保护时，则可以进行读取访问。
+                        如果客户端没有建立足够的安全保护，则将应用隐式的 by * none 条款。
+            
+            下面的示例显示了如何使用 样式说明符 在两个"顺序很重要!!!"的访问指令中 按DN选择条目
+            -----------------------------------
+            access to dn.children="dc=example,dc=com"
+                by * search
+            access to dn.children="dc=com"
+                by * read
+            -----------------------------------
+                    dc=example,dc=com子树下的条目 被赋予"搜索"权限
+                    dc=com子树下的条目 被授予"读取"权限； 
+                        但dc=example,dc=com子树下的条目没有读取权限
+                    dc=com，没有被赋予权限，因为这两个指令均与DN不匹配
+                注意：
+                    如果这些访问控制指令的顺序颠倒了，
+                    那么将永远不会执行位于后面的指令语句，因为dc=example,dc=com下的条目也都在dc=com下
+                注意：
+                    如果 无法访问指令匹配项 或 <who>子句无法访问，则拒绝访问
+                    也就是说，对指令的每次访问均以 by * none 子句结尾。
+                    
+            在处理访问列表时，由于全局访问列表已有效地加到每个数据库列表中，
+                因此如果结果列表为非空列表，则访问列表将以隐式的 access to* by * none 结尾。
+            
+            如果没有适用于后端的访问指令，则使用默认读取。
+
+
+            下一个示例再次显示了排序的重要性，无论是访问指令还是 by <who>子句。
+                它还显示了如何使用 属性选择器 来授予对 特定属性和各种<who>选择器 的访问权限。
+            -----------------------------------
+                access to dn.subtree="dc=example,dc=com" attrs=homePhone
+                    by self write
+                    by dn.children="dc=example,dc=com" search
+                    by peername.regex=IP=10\..+ read
+                access to dn.subtree="dc=example,dc=com"
+                    by self write
+                    by dn.children="dc=example,dc=com" search
+                    by anonymous auth
+            -----------------------------------
+                    本示例适用于“dc=example,dc=com”子树中的所有条目的所有属性，除了homePhone属性。
+
+                        条目可以写入自身，
+                        example.com 条目下的条目可以进行搜索，
+                        除了身份验证/授权（始终以匿名方式进行）之外，其他任何人都没有访问权限（暗含 by * none）。
+
+                        homePhone属性可由该条目写入，
+                        可由 example.com 下的条目搜索，
+                        可由网络 10 连接的客户端可读，否则不可读（隐含 by * none）。
+                    
+                    所有其他访问都被 access to * by * none 的隐式访问所拒绝。
+
+
+            有时允许特定的 DN 在属性中添加或删除自身很有用。
+                例如，如果您想创建一个组并允许人们从 member 属性中添加和删除他们自己的 DN，
+                则可以使用如下访问指令来完成此操作：
+            -----------------------------------
+            access to attrs=member,entry
+                by dnattr=member selfwrite   ？？？？？？？？？？？？？没看懂！！！
+            -----------------------------------
+                    dnattr <who> selector 表示该访问权限 适用于成员属性中列出的条目。
+                    selfwrite access selector表示此类成员只能从属性中添加或删除自己的 DN，而不能从其他值中添加或删除它们。
+                    需要添加条目属性，因为需要访问条目才能访问任何条目的属性。
+
+            -----------------------------------
+
+    8.3. 通过动态配置做访问控制(Access Control via Dynamic Configuration)
+        对 slapd 条目和属性的访问由 olcAccess属性控制，
+            该属性的值是访问指令的序列。
+            olcAccess 配置的一般形式为：
+            -----------------------------------
+            olcAccess: <access directive>
+            <access directive> ::= to <what>
+                [by <who> [<access>] [<control>] ]+
+            <what> ::= * |
+                [dn[.<basic-style>]=<regex> | dn.<scope-style>=<DN>]
+                [filter=<ldapfilter>] [attrs=<attrlist>]
+            <basic-style> ::= regex | exact
+            <scope-style> ::= base | one | subtree | children
+            <attrlist> ::= <attr> [val[.<basic-style>]=<regex>] | <attr> , <attrlist>
+            <attr> ::= <attrname> | entry | children
+            <who> ::= * | [anonymous | users | self
+                    | dn[.<basic-style>]=<regex> | dn.<scope-style>=<DN>]
+                [dnattr=<attrname>]
+                [group[/<objectclass>[/<attrname>][.<basic-style>]]=<regex>]
+                [peername[.<basic-style>]=<regex>]
+                [sockname[.<basic-style>]=<regex>]
+                [domain[.<basic-style>]=<regex>]
+                [sockurl[.<basic-style>]=<regex>]
+                [set=<setspec>]
+                [aci=<attrname>]
+            <access> ::= [self]{<level>|<priv>}
+            <level> ::= none | disclose | auth | compare | search | read | write | manage
+            <priv> ::= {=|+|-}{m|w|r|s|c|x|d|0}+
+            <control> ::= [stop | continue | break]
+            -----------------------------------
+                    <what>部分选择   要应用访问权限的 条目和/或属性，
+                    <who>部分指定    给哪些实体 授予访问权限，
+                    <access>部分指定 授予访问权限。
+                    支持多个<who> <access> <control>三元组，从而允许 向许多实体授予 对同一组条目和属性的 不同访问权限。
+                    此处未描述所有这些访问控制选项；有关更多详细信息，请参见 slapd.access(5)手册页。
+        8.3.1 访问权限控制哪些内容(What to control access to)
+            <what>部分确定 把访问控制应用到哪些 条目和属性上。
+                通常以两种方式选择条目：
+                    通过DN 和通过filter(过滤器)。
+                可以同时使用DN和filter
+            -----------------------------------
+                以下限定符按 DN 选择条目：
+                    -----------------------------------
+                    to *
+                    to dn[.<basic-style>]=<regex>
+                    to dn.<scope-style>=<DN>
+                    -----------------------------------
+                            第一种形式用于   选择 所有 条目。
+                            第二种形式用于   通过 正则表达式与条目的DN进行匹配 来选择 条目。
+                            第三种形式用于   选择 DN请求范围内的 条目。
+                                范围可以是 base，one，subtree 或 children。
+                                base     仅匹配 具有DN的条目(仅仅DN一个)，
+                                one        匹配 其父代是 DN 的条目(这个DN的第一代儿子)，
+                                subtree    匹配 子树中(树的根是DN)的所有条目(DN + 这个DN的所有儿子和后代)，
+                                children   匹配 DN 下的所有条目（这个DN的所有儿子和后代，但不匹配DN自己)。
+                                    例如
+                                    -----------------------------------
+                                    0: o=suffix
+                                    1: cn=Manager,o=suffix
+                                    2: ou=people,o=suffix
+                                    3: uid=kdz,ou=people,o=suffix
+                                    4: cn=addresses,uid=kdz,ou=people,o=suffix
+                                    5: uid=hyc,ou=people,o=suffix
+                                    -----------------------------------
+                                    则
+                                    -----------------------------------
+                                    dn.base="ou=people,o=suffix" match 2;
+                                    dn.one="ou=people,o=suffix" match 3, and 5;
+                                    dn.subtree="ou=people,o=suffix" match 2, 3, 4, and 5; 
+                                    dn.children="ou=people,o=suffix" match 3, 4, and 5.
+                                    -----------------------------------
+                使用filter(过滤器)选择条目
+                    to filter=<ldap filter>
+                        <ldap filter>是字符串，例如： to filter=(objectClass=person)
+                在<what>字句中可以同时使用DN和filter 来选择条目
+                    to dn.one="ou=people,o=suffix" filter=(objectClass=person)
+            -----------------------------------
+                attrs=<attribute list>
+                    包含 逗号分隔的 属性名称列表 来选择条目中的属性
+                attrs=<attribute> val[.<style>]=<regex>
+                    使用 单个属性名称以及值选择器 来选择属性的特定值
+                有两个特殊的伪属性项和子项。
+                    要读取(并返回)目标条目，必须具有对目标条目属性的读取权限。
+                    要执行搜索，必须对搜索库的条目属性具有搜索权限。
+                    要添加或删除条目，必须对条目的条目属性具有写权限，并且必须对条目的父级子属性具有写权限。
+                    要重命名条目，必须对条目的条目属性具有写权限，并且对旧父和新父的子属性都具有写权限。
+                    本节末尾的完整示例应有助于解决问题。
+                有一个特殊的条目选择器"*"
+                    用于选择任何条目。
+                    未提供<what>时使用 等效于"dn=.*"
+        8.3.2. 赋予谁访问权限(Who to grant access to)
+            <who> 标识 被授予访问权限的 一个或多个实体。
+                注意：访问权限被授予“实体”而不是“条目”。
+                -----------------------------------
+                        able 6.3: Access Entity Specifiers(表 6.3: 访问权限实体说明符)
+                Specifier	                Entities                
+                *	                        All, including anonymous and authenticated users    所有用户，包括匿名用户和认证用户
+                anonymous	                Anonymous (non-authenticated) users                 匿名(未认证)用户
+                users	                    Authenticated users                                 通过身份验证的用户
+                self	                    User associated with target entry                   与目标条目关联的用户
+                dn[.<basic-style>]=<regex>	Users matching a regular expression                 匹配正则表达式的用户
+                dn.<scope-style>=<DN>	    Users within scope of a DN                          一个DN范围内的用户
+                -----------------------------------
+                    此处DN和<what>字句中的DN 行为非常相似
+                    还支持其他控制因素。
+                        例如：
+                            <who>可以被DN-valued属性中列出的条目所限制:
+                                dnattr=<dn-valued attribute name>
+                                dnattr用于对 条目的属性中列出了DN的条目 授予访问权限   ？？？？？？？？？？？？？没看懂！！！
+                                    例如： 向 被列为组条目的所有者的任何人授予对组条目的访问权限
+                    有些因素可能并不适合所有环境(或任何环境)     
+                        例如，
+                            域因子(domain factor)依赖于 IP 到域名的查找。
+                            由于这些很容易被欺骗，因此应避免使用域因子。 
+        8.3.3. 赋予哪些访问权限(The access to grant)
+            <access>
+                -----------------------------------
+                    Table 6.4: Access Levels(表 6.4: 访问级别)
+                Level           Privileges Description
+                none =         0 no access
+                disclose =     d needed for information disclosure on error
+                auth =        dx needed to authenticate (bind)
+                compare =    cdx needed to compare
+                search =    scdx needed to apply search filters
+                read =     rscdx needed to read search results
+                write =   wrscdx needed to modify/rename
+                manage = mwrscdx needed to manage
+                -----------------------------------
+                        每个级别都意味着所有较低级别的访问权限会被同时赋予。
+                            例如，授予某人对某项的 写访问权限 也将授予他们读，搜索，比较，身份验证和公开访问权限。
+                            但是，可以使用权限说明符来授予特定权限。
+        8.3.4. 访问控制评估(Access Control Evaluation)
+            
+            在评估是否应授予 某些请求者 访问条目和/或属性的权限时，
+                slapd将 条目和/或属性 与 配置文件中给出的<what> selectors进行比较。
+            
+            对于每个条目，首先应用 保存该条目的数据库中提供的访问控制（如果没有保存在任何数据库中，则应用全局访问控制），
+            然后应用全局访问指令（在前端数据库定义中保存）    
+                概述：对于每个条目 先应用数据库中存储的该条目的访问控制，然后应用全局的访问控制
+                
+            但是，在处理访问列表时，由于全局访问列表被有效地附加到每个数据库列表中，
+            因此如果结果列表为非空列表，则访问列表隐式的以 access to * by * none 指令结尾。
+            
+            如果没有适用于后端的访问指令，则使用默认读取。
+            
+            (在此优先级内)按访问指令在配置文件中出现的顺序 对其进行检查。
+                Slapd停在与 条目和/或属性 匹配的第一个<what> selector上。
+                相应的访问指令是 一个slapd 将用来评估访问的指令。
+            
+            --------然后比较<who>
+            接下来，slapd 按照请求出现的顺序比较 请求访问 上面选择的访问指令 的<who> selectors的实体。
+            它停在 与请求者匹配的第一个<who> selector上。
+                这确定了请求访问的实体 对条目和/或属性的 访问权。
+
+            --------最后比较<who>
+            最后，slapd 将所选<access>条款中授予的访问权限与客户端请求的访问权限进行比较。
+                如果允许更大或相等的访问权限，则授予访问权限。
+                否则，访问将被拒绝
+                
+            --------指令的顺序非常重要
+            访问指令的评估顺序使其在配置文件中的位置很重要。
+                如果就其选择的条目而言，
+                    一个访问指令比另一个访问指令更具体，则它应该"首先"出现在配置文件中。
+                同样，
+                    如果一个<who>选择器比另一个选择器更具体，则应在访问指令中排在第一位。
+                下面给出的访问控制示例应有助于使这一点变得清楚。
+
+        8.3.5. 访问控制示例(Access Control Examples)
+            
+            -----------------------------------
+            access to * by * read
+            -----------------------------------
+                    此访问指令 向所有人授予读取访问权限。
+            
+            -----------------------------------
+            access to *
+                by self write
+                by anonymous auth
+                by * read
+            -----------------------------------
+                    该指令 
+                        允许用户修改其条目，
+                        允许匿名者针对这些条目进行身份验证，
+                        并允许所有其他人读取这些条目（其实只有验证并通过的user能read，因为禁止了匿名访问）。
+                    请注意，只有第一个符合条件的<who>条款适用。
+                        因此，匿名用户被授予身份验证，而不是读取权限。
+                    最后一个子句也可以是“by users read”。
+            
+            -----------------------------------
+            access to *
+                by ssf=128 self write
+                by ssf=64 anonymous auth
+                by ssf=64 users read
+            -----------------------------------
+                    根据适当的保护级别来限制操作。示例显示了如何使用安全强度因子（SSF)。
+                        如果已建立强度为 128 或更高的安全保护，则此指令允许用户修改自己的条目；
+                        允许匿名用户进行身份验证访问；
+                        在已建立 64 或更高的安全保护时，则可以进行读取访问。
+                        如果客户端没有建立足够的安全保护，则将应用隐式的 by * none 条款。
+            
+            下面的示例显示了如何使用 样式说明符 在两个"顺序很重要!!!"的访问指令中 按DN选择条目
+            -----------------------------------
+            access to dn.children="dc=example,dc=com"
+                by * search
+            access to dn.children="dc=com"
+                by * read
+            -----------------------------------
+                    dc=example,dc=com子树下的条目 被赋予"搜索"权限
+                    dc=com子树下的条目 被授予"读取"权限； 
+                        但dc=example,dc=com子树下的条目没有读取权限
+                    dc=com，没有被赋予权限，因为这两个指令均与DN不匹配
+                注意：
+                    如果这些访问控制指令的顺序颠倒了，
+                    那么将永远不会执行位于后面的指令语句，因为dc=example,dc=com下的条目也都在dc=com下
+                注意：
+                    如果 没有olcAccess: 去匹配指令 或 没有<who>子句，则拒绝访问
+                    也就是说，对指令的每次访问均以 by * none 子句结尾。
+                    
+            在处理访问列表时，由于全局访问列表已有效地加到每个数据库列表中，
+                因此如果结果列表为非空列表，则访问列表将以隐式的 access to* by * none 结尾。
+            
+            如果没有适用于后端的访问指令，则使用默认读取。
+
+            下一个示例再次显示了排序的重要性，无论是访问指令还是 by <who>子句。
+                它还显示了如何使用 属性选择器 来授予对 特定属性和各种<who>选择器 的访问权限。
+            -----------------------------------
+                access to dn.subtree="dc=example,dc=com" attrs=homePhone
+                    by self write
+                    by dn.children="dc=example,dc=com" search
+                    by peername.regex=IP=10\..+ read
+                access to dn.subtree="dc=example,dc=com"
+                    by self write
+                    by dn.children="dc=example,dc=com" search
+                    by anonymous auth
+            -----------------------------------
+                    本示例适用于“dc=example,dc=com”子树中的所有条目的所有属性，除了homePhone属性。
+
+                        条目可以写入自身，
+                        example.com 条目下的条目可以进行搜索，
+                        除了身份验证/授权（始终以匿名方式进行）之外，其他任何人都没有访问权限（暗含 by * none）。
+
+                        homePhone属性可由该条目写入，
+                        可由 example.com 下的条目搜索，
+                        可由网络 10 连接的客户端可读，否则不可读（隐含 by * none）。
+                    
+                    所有其他访问都被 access to * by * none 的隐式访问所拒绝。
+
+
+            有时允许特定的 DN 在属性中添加或删除自身很有用。
+                例如，如果您想创建一个组并允许人们从 member 属性中添加和删除他们自己的 DN，
+                则可以使用如下访问指令来完成此操作：
+            -----------------------------------
+            access to attrs=member,entry
+                by dnattr=member selfwrite   ？？？？？？？？？？？？？没看懂！！！
+            -----------------------------------
+                    dnattr <who> selector 表示该访问权限 适用于成员属性中列出的条目。
+                    selfwrite access selector表示此类成员只能从属性中添加或删除自己的 DN，而不能从其他值中添加或删除它们。
+                    需要添加条目属性，因为需要访问条目才能访问任何条目的属性。
+
+
+        8.3.6. 访问控制顺序(Access Control Ordering)
+            olcAccess 指令的顺序对于正确评估至关重要,
+            但是 LDAP 属性通常不保留其值的顺序,因此 OpenLDAP 使用自定义的扩展架构来维护这些值的固定顺序
+                该排序是在每个值之前添加一个数字索引“{X}”，类似于对配置条目进行排序。
+                这些索引标签由 slapd 自动维护，并且在最初定义值时无需指定。
+                例如
+                -----------------------------------
+                olcAccess: to attrs=member,entry
+                by dnattr=member selfwrite
+                olcAccess: to dn.children="dc=example,dc=com"
+                by * search
+                olcAccess: to dn.children="dc=com"
+                by * read
+                -----------------------------------
+                当您使用 slapcat 或 ldapsearch 读回它们时，它们将包含
+                -----------------------------------
+                olcAccess: {0}to attrs=member,entry
+                by dnattr=member selfwrite
+                olcAccess: {1}to dn.children="dc=example,dc=com"
+                by * search
+                olcAccess: {2}to dn.children="dc=com"
+                by * read
+                -----------------------------------
+            当使用 ldapmodify 编辑访问规则时，数字索引可用于指定要更改的特定值。
+                可以使用此索引代替实际访问值（或在实际访问值之外）。
+                当管理多个访问规则时，使用此数字索引非常有帮助。
+                例如，
+                    如果我们需要更改上面的第二条规则以授予写访问权限而不是搜索权限，则可以尝试以下 LDIF：
+                    -----------------------------------
+                    changetype: modify
+                    delete: olcAccess
+                    olcAccess: to dn.children="dc=example,dc=com" by * search
+                    -
+                    add: olcAccess
+                    olcAccess: to dn.children="dc=example,dc=com" by * write
+                    -
+                    -----------------------------------
+                    但是此示例无法保证现有值保持其原始顺序，因此很可能会导致安全配置损坏。
+                应使用数字索引！！！：
+                    -----------------------------------
+                    changetype: modify
+                    delete: olcAccess
+                    olcAccess: {1}
+                    -
+                    add: olcAccess
+                    olcAccess: {1}to dn.children="dc=example,dc=com" by * write
+                    -
+                    -----------------------------------
+                    此示例
+                        删除 olcAccess 属性值＃1 中的任何规则（无论其值如何），
+                        并添加一个值＃1 的新值。结果将是
+                    -----------------------------------
+                    olcAccess: {0}to attrs=member,entry
+                    by dnattr=member selfwrite
+                    olcAccess: {1}to dn.children="dc=example,dc=com"
+                    by * write
+                    olcAccess: {2}to dn.children="dc=com"
+                    by * read
+                    -----------------------------------
+
+
+    8.4. 访问控制常见示例(Access Control Common Examples)
+        8.4.1. 基本 ACLs(Basic ACLs)
+
+                    -----------------------------------
+                    -----------------------------------
+                    -----------------------------------
+                    -----------------------------------
+
+        -----------------------------------
+        -----------------------------------
+        -----------------------------------
+        -----------------------------------
+        -----------------------------------
+
+
+        
+    8.5. 集合-根据关系授予权限
     ----------------------------------------------------------------------------------------------------
 
 ----------------------------------------------------------------------------------
