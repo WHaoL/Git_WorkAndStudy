@@ -1802,7 +1802,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
             -----------------------------------     
                 此 ACL 
                     已认证用户 读权限，
-                    其他用户（即匿名用户) 没有任何权限。          
+                    其他用户(即匿名用户) 没有任何权限。          
             
         8.4.3. 控制 rootdn 访问(Controlling rootdn access)            
 
@@ -1841,7 +1841,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
             +---cn=administrators,dc=example,dc=com
             +---cn=fred blogs,dc=example,dc=com             
             -----------------------------------    
-            组中的对象（采用 LDIF 格式)：           
+            组中的对象(采用 LDIF 格式)：           
             -----------------------------------   
             dn: cn=administrators,dc=example,dc=com
             cn: administrators of this region
@@ -2021,7 +2021,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                         由于.*dc 那么以dc结尾的任何字符串，例如mydc 也将匹配。
                         如果您确实需要一个仅允许dc=example，dc=com 或其任何子树的正则表达式，
                             请使用^(.+,)?dc=example,dc=com$，
-                            这意味着：左侧的任何内容 dc=...（如果有的话)必须以逗号结尾；
+                            这意味着：左侧的任何内容 dc=...(如果有的话)必须以逗号结尾；
                     价格昂贵，
                         因为如果您不需要子匹配项，则可以使用范围界定，例如：dn.subtree="dc=example,dc=com"
                 
@@ -2035,7 +2035,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                     3.不要将rootdn添加到by子句中。因为对于以rootdn身份执行的操作，甚至不处理 ACL
                     4.使用速记, user匹配经过身份验证的用户，anonymous匹配匿名用户。
                     5.如果您需要的是范围界定和/或子字符串替换，请不要在<by>子句中使用 dn.regex；
-                        使用作用域样式（例如exact, onelevel, children or subtree），
+                        使用作用域样式(例如exact, onelevel, children or subtree)，
                         并且样式修饰符扩展以引起子字符串扩展。For instance, 例如，
                             -----------------------------------    
                             access to dn.regex=".+,dc=([^,]+),dc=([^,]+)$"
@@ -2050,15 +2050,15 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                                     而<by>子句中的正则表达式被 具有子字符串扩展功能的 onelevel 代替。
 
 
-        8.4.9. 根据安全强度因子（ssf）授予和拒绝访问(Granting and Denying access based on security strength factors (ssf))     
+        8.4.9. 根据安全强度因子(ssf)授予和拒绝访问(Granting and Denying access based on security strength factors (ssf))     
 
-            可以基于安全强度因子（SSF）限制访问
+            可以基于安全强度因子(SSF)限制访问
             -----------------------------------  
             access to dn="cn=example,cn=edu"
                 by * ssf=256 read  
             -----------------------------------    
 
-            0（0）表示无保护，
+            0(0)表示无保护，
             1 表示仅完整性保护，
             56 DES 或其他弱密码，
             112 三重 DES 和其他强密码，
@@ -2139,7 +2139,7 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                 by * read   
             ----------------------------------- 
                 此ACL设置表示：
-                    使用 cn=sudoadm 这个 DN，检查其成员属性（其中的*表示递归），然后将结果与经过身份验证的用户的 DN 相交。
+                    使用 cn=sudoadm 这个 DN，检查其成员属性(其中的*表示递归)，然后将结果与经过身份验证的用户的 DN 相交。
                     如果结果为非空，则ACL视其为匹配项，并授予写访问权限。
                         首先我们得到 uid=john 这个 DN。该条目没有member属性，因此扩展在此处停止。
                         现在我们进入 cn=accountadm。这确实有一个member属性，即 uid=mary。但是 uid=mary 条目没有成员，因此我们再次在这里停止。
@@ -2408,32 +2408,610 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
             -----------------------------------    
 
     9.6. 更多信息(Further Information)
-            有关更多信息，请参见 slapd.conf（5），ldapsearch（1）和 slapd.access（5）
+            有关更多信息，请参见 slapd.conf(5)，ldapsearch(1)和 slapd.access(5)
 
 
 10. 数据库创建和维护工具(Database Creation and Maintenance Tools)
+    如何从头来时创建一个数据库，遇到问题时如何进行故障排除。
+    两种创建数据库的方法：
+        1.使用LDAP在线创建(法一)
+            启动slapd并使用LDAP客户端添加条目；
+            适用于较小的数据库(几百或者几千个条目)
+        2.使用slapd附带的可执行程序(法二)
+            当你需要创建成千上万个条目，或者 确保在创建数据库时不访问数据库，
+            此方法是最佳选择
+            注意：并非所有的数据库类型都支持这些可执行程序
     
-    10.1. 通过 LDAP 创建数据库Creating a database over LDAP
+    10.1. (法一)通过 LDAP 创建数据库Creating a database over LDAP
         
         使用你所选的LDAP client(例如ldapadd)添加条目
-        在启动slapd之前，确保你已经在配置文件中设置好了以下选项
-            suffix <dn> 
-                将此设置为您要创建的子树的根的DN
-                例如：suffix "dc=example,dc=com"
-            directory <directory>
-                指定一个目录，在该目录中创建索引文件
-                    需要使用适当的权限创建该目录，以便 slapd 可以写入该目录
-                例如：directory /usr/local/var/openldap-data
-            rootdn <dn>
-            rootpw <passwd>
-                定义超级用户(root用户)
-                    具有添加体条目的权限
-                例如：
-                    rootdn "cn=Manager,dc=example,dc=com"
-                    rootpw secret
+            在启动slapd之前，确保你已经在配置文件中设置好了以下选项
+                suffix <dn> 
+                    将此设置为您要创建的子树的根的DN
+                    例如：suffix "dc=example,dc=com"
+                directory <directory>
+                    指定一个目录，在该目录中创建索引文件
+                        需要使用适当的权限创建该目录，以便 slapd 可以写入该目录
+                    例如：directory /usr/local/var/openldap-data
+                rootdn <dn>
+                rootpw <passwd>
+                    定义超级用户(root用户)
+                        具有添加体条目的权限
+                    例如：
+                        rootdn "cn=Manager,dc=example,dc=com"
+                        rootpw secret
+                index {<attrlist> | default} [pres,eq,approx,sub,none]
+                    确保数据库定义包含所需的索引定义(一个或多个索引选项)
+                    例如：
+                        index cn,sn,uid pres,eq,approx,sub
+                        index objectClass eq
+                            这将为cn，sn和uid属性，创建presence，equality(相等)，approximate(近似)和substring(子字符串)索引
+                            为objectClass属性创建equality(相等)索引
+                                注意：并非所有索引类型都适用于所有属性类型
+            启动slapd，与LDAP客户端连接，开始添加条目
+                创建一个entries.ldif
+                -----------------------------------
+                # Organization for Example Corporation
+                dn: dc=example,dc=com
+                objectClass: dcObject
+                objectClass: organization
+                dc: example
+                o: Example Corporation
+                description: The Example Corporation
+
+                # Organizational Role for Directory Manager
+                dn: cn=Manager,dc=example,dc=com
+                objectClass: organizationalRole
+                cn: Manager
+                description: Directory Manager
+                -----------------------------------
+            然后使用命令创建这个条目：
+                 ldapadd -f entries.ldif -x -D "cn=Manager,dc=example,dc=com" -w secret
+    
+    10.2. (法二)离线创建数据库Creating a database off-line
+        使用sladp数据库工具进行离线创建
+            适用于：成千上万的条目需要创建
+            这些工具读取slapd配置文件和一个输入文件，并且 输入文件中的文本代表了要添加的条目
+            对于支持这些工具的数据库类型，它们直接产生出数据库文件
+            有一些重要的参数，确保已经设置在了 包含数据库定义的 配置文件中
+                suffix <dn> 
+                    将此设置为您要创建的子树的根的DN
+                    例如：suffix "dc=example,dc=com"
+                directory <directory>
+                    指定一个目录，在该目录中创建索引文件
+                        需要使用适当的权限创建该目录，以便 slapd 可以写入该目录
+                    例如：directory /usr/local/var/openldap-data
+                index {<attrlist> | default} [pres,eq,approx,sub,none]
+                    确保数据库定义包含所需的索引定义(一个或多个索引选项)
+                    例如：
+                        index cn,sn,uid pres,eq,approx,sub
+                        index objectClass eq
+                            这将为cn，sn和uid属性，创建presence，equality(相等)，approximate(近似)和substring(子字符串)索引
+                            为objectClass属性创建equality(相等)索引
+                                注意：并非所有索引类型都适用于所有属性类型
+        
+        10.2.1. slapadd (The slapadd program)    
+            配置完毕后，运行 slapadd程序来创建主数据库和关联的索引：
+                slapadd -l <inputfile> -f <slapdconfigfile>
+                    [-d <debuglevel>] [-n <integer>|-b <suffix>]
+
+                    -l <inputfile>
+                        指定LDIF格式的输入文件，文件包含了要以文本形式添加的条目
+                    -f <slapdconfigfile>
+                        指定slapd配置文件，该文件告诉我们在哪里创建索引，创建什么索引
+                    -F <slapdconfdirectory>
+                        指定slapd的配置目录
+                            如果同时指定了-f和-F：将读取slapd配置文件，然后转换为slapd配置目录格式并写入指定目录
+                                如果还指定了dryrun模式，则不会进行任何转换
+                            如果未指定-f和-F中任何一个，那么在尝试使用默认配置文件之前 将尝试读取默认配置目录 
+                                如果存在有效的配置目录，则默认的配置文件将被忽略
+                    -d <debuglevel>
+                        打开调试
+                        调试级别和slapd相同【7.1节中有个 调试级别表】
+                    -n <databasenumber>
+                        (可选的参数)指定要修改的数据库
+                            配置文件中列出的第一个数据库是1，第二个是2，以此类推
+                            默认情况下，使用配置文件中的第一个数据库
+                            该参数，不可以和-b一起使用
+                    -b <suffix>
+                        (可选的参数)指定要修改的数据库 
+                            提供的suffix和数据库的suffix(后缀)进行匹配，以确定数据库号
+                            不应与-n一起使用
+                    
+
+        10.2.2. slapindex(The slapindex program)
+            有时可能需要重新生成索引(例如在修改 slapd.conf之后),使用 slapindex可以做到这一点
+            语法： 
+                slapindex -f <slapdconfigfile>
+                    [-d <debuglevel>] [-n <databasenumber>|-b <suffix>]
+
+                    -f -d -n -b选项和slapadd相同
+                    slapindex根据当前数据库内容重建所有索引
+        
+        10.2.3. slapcat(The slapcat program)
+            slapcat用于将数据库转储到LDIF文件中
+                当你想对数据库进行易于理解的备份时，或者 当你要离线编辑数据库时
+            语法： 
+                slapcat -l <filename> -f <slapdconfigfile>
+                    [-d <debuglevel>] [-n <databasenumber>|-b <suffix>]
+
+                    -n -b选项用于在 -f指定的slapd.conf 中选择数据库
+                    相应的LDIF输出写入到 标准输出 或 -l指定的文件  中
+
+        10.3. LDIF文本条目格式(The LDIF text entry format)
+            LDAP数据交换格式(LDAP Data Interchange Format (LDIF)),简称为LDIF，
+                它使用简单文本格式来表示LDAP条目
+            
+            条目的基本形式是：
+            -----------------------------------    
+            # comment
+            dn: <distinguished name>
+            <attrdesc>: <attrvalue>
+            <attrdesc>: <attrvalue>
+            ...
+            -----------------------------------    
+                '#' :     注释
+                <attrdesc>: 
+                    可以是简单的属性类型，例如：cn，objectClass 
+                        或者 1.2.3 (与属性类型关联的OID)
+                        或者 包含诸如cn;lang_en_US或userCertificate;inary之类的选项
+
+            以一个空格或者tab开头的行，是上一行的继续    
+                -----------------------------------   
+                dn: cn=Barbara J Jensen,dc=example,dc=
+                 com 
+                cn: Barbara J
+                 Jensen 
+                -----------------------------------   
+            等价于 
+                -----------------------------------  
+                dn: cn=Barbara J Jensen,dc=example,dc=com
+                cn: Barbara J Jensen  
+                -----------------------------------    
+
+            在不同的行上指定多个属性值(<attrvalue>)。例如
+                -----------------------------------  
+                cn: Barbara J Jensen
+                cn: Babs Jensen  
+                -----------------------------------    
+            
+            1.如果<attrvalue>包含非打印字符或以空格，冒号(':')或小于('<')开头，
+                则 <attrdesc> 后跟一个双冒号("::")，并使用 base64 编码值。
+                例如，值“以空格开头”将这样编码：
+                    cn:: IGJlZ2lucyB3aXRoIGEgc3BhY2U=
+            2.<attrvalue>
+                也可以指定一个包含 属性值 的URL
+                例如，从指定文件件/path/to/file.jpeg获取jpegPhoto值：
+                    cn:< file:///path/to/file.jpeg
+            
+            在同一LDIF文件中使用空行来间隔各个条目
+            下面的示例包含了3个条目：
+            -----------------------------------    
+            # Barbara's Entry
+            dn: cn=Barbara J Jensen,dc=example,dc=com
+            cn: Barbara J Jensen
+            cn: Babs Jensen
+            objectClass: person
+            sn: Jensen
+
+            # Bjorn's Entry
+            dn: cn=Bjorn J Jensen,dc=example,dc=com
+            cn: Bjorn J Jensen
+            cn: Bjorn Jensen
+            objectClass: person
+            sn: Jensen
+            # Base64 encoded JPEG photo
+            jpegPhoto:: /9j/4AAQSkZJRgABAAAAAQABAAD/2wBDABALD
+            A4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQ
+            ERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVG
+
+            # Jennifer's Entry
+            dn: cn=Jennifer J Jensen,dc=example,dc=com
+            cn: Jennifer J Jensen
+            cn: Jennifer Jensen
+            objectClass: person
+            sn: Jensen
+            # JPEG photo from file
+            jpegPhoto:< file:///path/to/file.jpeg
+            -----------------------------------    
+                注意
+                    Bjorn条目中的jpegPhoto使用base64编码，
+                    Jennifer条目中的jpegPhoto从URL所指示的位置获得。
+
+            注意： 
+                每一行的结尾不要包含多余的空格
+
 
 
 11. 后端(Backends)
+    
+    后端执行实际的存储和检索，以相应LDAP的请求。
+        后端可以被静态编译进slapd，
+        或者
+        当启用模块支持后，可以动态加载后端
+    
+    如果你的安装使用动态模块
+        需要添加相关的moduleload指令
+        后端模块的通用名称是：
+            back_<backend name>.la
+        例如，你需要加载hdb后端：
+            moduleload back_hdb.la 
+
+    11.1. Berkeley DB Backends
+        11.1.1. Overview
+            slapd的hdb后端，是一个正常/普通的的slapd数据库后端。
+                它使用Oracle Berkeley DB (BDB)包来存储数据，
+                它广泛的使用索引和缓存来加速数据访问
+            
+            hdb是原始bdb后端的变体，最初是为与 BDB 一起使用而编写的；
+            hdb使用支持子树重命名的分层数据库布局；
+            它在其他方面和bdb的行为完全相同，并且所有相同的配置选项都适用。
+
+            注意：
+                hdb数据库需要一个更大的idlcachesize(idl缓存)，才能获得更好的搜索性能，
+                通常是cachesize (entry cache size)(缓存大小(条目缓存大小))的三倍或者更大
+            
+            注意：
+                hdb后端已经取代了bdb后端，并且很快将不推荐使用两者，
+                而推荐使用新的mdb后端。
+        11.1.2. back-bdb/back-hdb Configuration
+            略
+        11.1.3. Further Information
+            略
+    
+    11.2. LDAP
+        11.2.1. 概览(Overview)
+            slapd的LDAP后端不是一个实际的数据库，
+                相反 它作为一个proxy 将传入请求转发给另一个LDAP服务器。
+                在处理请求时，它会追踪referrals，使得/以便 referrals进行完全处理，而不是将其返回给slapd客户端
+            
+            明确绑定到back-ldap数据库的会话会创建它们自己与远端LDAP服务器的专用连接。
+            匿名会话会和远端服务器共享一个匿名连接。
+            对于通过其他机制绑定的会话，相同的DN的所有会话会，将共享相同的连接。
+            此连接池策略，可以通过 减少重复建立/断开多个连接的开销，来提高代理的效率。
+
+            ldap数据库可以作为一个信息服务，即本地通过了身份验证的客户端 可能以某种修改的形式 声明(asserted)给远端服务器。
+            出于此目的，proxy(代理)使用管理员身份绑定到远端的服务器，并且，如果需要，授权声明的(asserted)身份
+
+            许多其他后端(Backends)和叠加层(Overlays)都大量使用它
+
+        11.2.2. back-ldap 配置(back-ldap Configuration)
+            如前所述，slapd-ldap被很多其他后端(Backends)和叠加层(Overlays)用在幕后。
+                它们中的一些，仅仅提供了一些配置指令，但是管理员可以使用所有的slapd-ldap选项。
+            
+            例如，
+                “(Translucent Proxy)半透明代理”从远程LDAP服务器检索条目，这些条目可以被定义的数据库部分覆盖，
+                它只有四个特定的(translucent- directives)半透明指令，但是可以使用任何普通/正常的slapd-ldap选项进行配置。
+                详见{[slapo-translucent]}。
+            
+            其他"(Overlays)叠加层"允许您在常规的 slapd-ldap指令之前标记指令。
+            例如，slapo-chain覆盖层可以做到这一点
+                “很少有特定的链覆盖(chain overlay)指令;
+                然而，与ldap后端实例相关的指令可能被覆盖层(overlay)隐式实例化，当与覆盖层结合使用时，可能会假定有特殊含义。
+                它们在slapd-ldap中被描述，它们也需要以chain-作为前缀。”
+
+            在本指南的“基于推送的Replication(复制)”部分，你可能还看到了slapd-ldap的使用和描述。
+
+            很明显，slapd-ldap后端非常灵活 并且在OpenLDAP套间中大量使用。
+
+            以下是一个非常简单的例子，但是slapd-ldap后端的强大功能已经可以通过使用uri列表看到了:
+            -----------------------------------    
+            database ldap
+            suffix "dc=suretecsystems,dc=com"
+            rootdn "cn=slapd-ldap"
+            uri ldap://localhost/ ldap://remotehost ldap://remotehost2
+            -----------------------------------   
+                    URI 列表以空格或逗号分隔。
+                    每当响应的服务器不是列表中的第一个服务器时，都会重新排列列表，
+                    并将响应的服务器移至最前端，以便在下次需要建立连接时首先与它联系。 
+
+            使用"MirrorMode复制(MirrorMode replication)"时，此功能可用于提供一种负载均衡。
+        
+        11.2.3. Further Information
+            略
+
+    11.3. LDIF     
+        11.3.1. 概览Overview
+            slapd的 LDIF后端 是一个基本的存储后端，它以 LDIF格式 在文本文件中存储条目，并利用文件系统创建数据库的树形结构。
+            它旨在作为便宜，低性能的易于使用的后端。
+
+            当使用具有持久性存储的 cn=config动态配置数据库 时，配置数据将使用此后端存储。
+                更多信息请参见slapd-config
+
+        11.3.2. back-ldif配置(back-ldif Configuration)
+            像许多其他后端一样，可以使用很少的配置行来实例化 LDIF后端：
+            -----------------------------------  
+            include ./schema/core.schema
+
+            database  ldif
+            directory ./ldif
+            suffix    "dc=suretecsystems,dc=com"
+            rootdn    "cn=LDIF,dc=suretecsystems,dc=com"
+            rootpw    LDIF  
+            -----------------------------------  
+            如果，我们为dc=suretecsystems,dc=com添加dcObject，可以看到它是如何在文件系统的幕后添加的
+            -----------------------------------
+            dn: dc=suretecsystems,dc=com
+            objectClass: dcObject
+            objectClass: organization
+            dc: suretecsystems
+            o: Suretec Systems Ltd    
+            -----------------------------------    
+            -----------------------------------  
+            ldapadd -x -H ldap://localhost:9011 -f suretec.ldif -D "cn=LDIF,dc=suretecsystems,dc=com" -w LDIF  
+            -----------------------------------    
+                    现在，已经将dcObject添加到目录中了
+
+            现在，在 ./ldif/文件夹下，有如下文件
+            -----------------------------------  
+            # ls ./ldif
+            dc=suretecsystems,dc=com.ldif  
+            -----------------------------------
+            我们查看下这个文件的内容
+            -----------------------------------    
+            # cat ldif/dc\=suretecsystems\,dc\=com.ldif
+
+            dn: dc=suretecsystems
+            objectClass: dcObject
+            objectClass: organization
+            dc: suretecsystems
+            o: Suretec Systems Ltd.
+            structuralObjectClass: organization
+            entryUUID: 2134b714-e3a1-102c-9a15-f96ee263886d
+            creatorsName: cn=LDIF,dc=suretecsystems,dc=com
+            createTimestamp: 20080711142643Z
+            entryCSN: 20080711142643.661124Z#000000#000#000000
+            modifiersName: cn=LDIF,dc=suretecsystems,dc=com
+            modifyTimestamp: 20080711142643Z
+            -----------------------------------    
+            这是使用 slapcat 等导出目录时将获得的完整格式。
+        
+        11.3.3. Further Information
+            略
+    
+    11.4. LMDB
+        11.4.1. 概述(Overview)
+            推荐使用slapd的mdb后端作为 普通slapd数据库的主后端。
+                mdb使用OpenLDAP自己的"Lightning Memory-Mapped Database（LMDB)"库来存储数据，
+                并打算替换Berkeley DB后端。
+            
+            它像BDB后端一样支持索引，但它不使用缓存，也不需要进行调整/调优即可提供最大的搜索性能。
+            和hdb一样，它也是完全分层的，并支持在常量时间内重命名子树。
+        
+        11.4.2. back-mdb 配置(back-mdb Configuration)
+            与 BDB 后端不同，可以用很少的配置行实例化 mdb 后端：
+            -----------------------------------  
+            include ./schema/core.schema
+
+            database  mdb
+            directory ./mdb
+            suffix    "dc=suretecsystems,dc=com"
+            rootdn    "cn=mdb,dc=suretecsystems,dc=com"
+            rootpw    mdb
+            maxsize   1073741824  
+            -----------------------------------  
+                    除了最小配置所需的常规参数外，mdb后端还需要设置最大值。
+                    这是数据库有望达到的最大记录(以字节为单位)。文件系统必须提供足够的可用空间以容纳此大小。  
+        
+        11.4.3. Further Information
+            略 
+        
+
+    11.5. Metadirectory
+        11.5.1. 概览Overview
+
+            slapd的 元后端(meta backend) 对一组称为“目标”的 远程LDAP服务器执行基本的LDAP代理。
+                这些服务器中包含的信息可以表示为属于单个目录信息树(DIT)。
+
+            建议你：了解slapd-ldap后端的基本功能。
+                slapd-ldap后端被设计为ldap后端的增强(版),
+                这两个后端共享很多功能(实际上，它们也共享部分代码)，
+            
+            ldap后端：用于代理指向但个服务器的操作
+            元后端(meta backend)：主要用于代理多个服务器，并可能命名上下文。
+
+            这些特性虽然在许多场景中都很有用，但可能会给某些应用程序带来过多的开销，因此应该仔细考虑其使用。
+
+        11.5.2. back-mate配置(back-meta Configuration)
+            稍后
+        11.5.3. Further Information
+            略 
+    
+
+    11.6. Monitor
+        11.6.1. 概览Overview
+
+            slapd的 监视器后端(monitor backend) 不是实际的数据库；
+                如果启用，它将由 slapd 自动生成并动态维护，其中包含有关守护程序的运行状态的信息。
+
+            要检查所有监视器信息，发出一个以cn= monitor为基础的子树搜索，请求返回属性“+”和“*”。
+                监视器后端主要生成操作属性，LDAP仅返回显式请求的操作属性。
+                请求属性“+”是一个请求所有操作属性的扩展。
+
+            请参阅“监控(Monitoring)”部分。
+
+
+        11.6.2. back-monitor Configuration
+
+            (monitor database)监控器数据库只能实例化一次，
+                即，slapd.conf文件中只能出现一次“数据库监控器(database monitor)”。
+                后缀(suffix)也自动设置为“cn=Monitor”。
+
+            可以设置 rootdn 和 rootpw
+                以下是实例化一个监视器后端(monitor backend)所需的全部：
+            -----------------------------------  
+            include ./schema/core.schema
+
+            database monitor
+            rootdn "cn=monitoring,cn=Monitor"
+            rootpw monitoring  
+            -----------------------------------    
+            可以像其他任何数据库一样 将访问控制应用于此数据库，
+                例如：
+            ----------------------------------- 
+            access to dn.subtree="cn=Monitor"
+                by dn.exact="uid=Admin,dc=my,dc=org" write
+                by users read
+                by * none   
+            -----------------------------------  
+
+            注意：
+                必须加载core.schema才能使 监视器数据库(monitor database) 正常工作。  
+
+            小例子， 
+                通过ldapsearch返回数据：
+            ----------------------------------- 
+            ldapsearch -x -H ldap://localhost:9011 -b 'cn=Monitor'
+            # extended LDIF
+            #
+            # LDAPv3
+            # base <cn=Monitor> with scope subtree
+            # filter: (objectclass=*)
+            # requesting: ALL
+            #
+
+            # Monitor
+            dn: cn=Monitor
+            objectClass: monitorServer
+            cn: Monitor
+            description: This subtree contains monitoring/managing objects.
+            description: This object contains information about this server.
+            description: Most of the information is held in operational attributes, which
+            must be explicitly requested.
+
+            # Backends, Monitor
+            dn: cn=Backends,cn=Monitor
+            objectClass: monitorContainer
+            cn: Backends
+            description: This subsystem contains information about available backends.   
+            -----------------------------------  
+
+            请参阅“监控(Monitoring)”部分，以获取 通过此后端获取可用信息的 完整示例。  
+
+
+        11.6.3. Further Information
+            略
+
+    11.7. Null
+        11.7.1. 概览Overview
+
+            slapd的 Null后端(Null backend) 肯定是 slapd 最有用的部分：
+                搜索: 返回成功，但没有条目。
+                比较: 返回compareFalse。
+                更新: 返回成功(除非readonly处于开启状态)，但不执行任何操作。
+                除非给出了数据库选项“bind on”，否则除了rootdn之外的绑定将失败。
+                slapadd和slapcat工具同样令人兴奋。
+
+            受/dev/null 的启发。
+
+        11.7.2. back-null配置(back-null Configuration)
+
+            配置,
+                你的slapd.conf配置文件像下面这样：
+            -----------------------------------    
+            database null
+            suffix "cn=Nothing"
+            bind on
+            -----------------------------------    
+                bind on意味着，你可以给这个suffix绑定任何DN和password；默认是 bind off
+            
+            用ldapsearch测试这个后端
+            -----------------------------------  
+            ldapsearch -x -H ldap://localhost:9011 -D "uid=none,cn=Nothing" -w testing -b 'cn=Nothing'
+            # extended LDIF
+            #
+            # LDAPv3
+            # base <cn=Nothing> with scope subtree
+            # filter: (objectclass=*)
+            # requesting: ALL
+            #
+
+            # search result
+            search: 2
+            result: 0 Success
+
+            # numResponses: 1  
+            -----------------------------------  
+        
+        11.7.3. Further Information
+            略
+
+    11.8. Passwd
+        11.8.1. 概览Overview
+
+            slapd的 PASSWD后端(PASSWD backend) 提供 系统passwd文件中 列出的用户帐户信息（默认为/etc/passwd）
+
+            提供此后端仅用于演示目的。每个条目的 DN 为“uid=<username>,<suffix>”。
+        
+        11.8.2. back-passwd 配置(back-passwd Configuration)
+            -----------------------------------    
+            include ./schema/core.schema
+
+            database passwd
+            suffix "cn=passwd"
+            -----------------------------------
+            使用 ldapsearch 进行测试    
+            -----------------------------------    
+            ldapsearch -x -H ldap://localhost:9011 -b 'cn=passwd'
+            # extended LDIF
+            #
+            # LDAPv3
+            # base <cn=passwd> with scope subtree
+            # filter: (objectclass=*)
+            # requesting: ALL
+            #
+
+            # passwd
+            dn: cn=passwd
+            cn: passwd
+            objectClass: organizationalUnit
+
+            # root, passwd
+            dn: uid=root,cn=passwd
+            objectClass: person
+            objectClass: uidObject
+            uid: root
+            cn: root
+            sn: root
+            description: root
+        
+        11.8.3. Further Information
+            略
+        
+    
+    11.9. Perl/Shell
+        slapd的 Perl后端 通过将 perl解释器嵌入slapd来工作
+
+
+
+    11.10. Relay
+        11.10.1. 概览Overview
+            这个slapd后端的主要目的是
+                将在同一个slapd实例中运行的 数据库中定义的命名上下文 映射到 虚拟命名上下文，
+                如果需要，可以使用attributeType和objectClass。
+                它需要rwm覆盖(rwmo verlay)。
+            此后端和上面提到的覆盖层是实验性的。
+        11.10.2. back-relay配置(back-relay Configuration)
+            稍后
+        11.10.3. Further Information
+            略
+
+    11.11. SQL
+        未看！！！
+
+12. Overlays
+    Overlays 是软件组件，
+        可提供 类似于后端提供的 功能钩子，
+        可以将其堆在后端调用的顶部，
+        也可以作为 后端响应顶部的回调 来更改其行为。
+
+            -----------------------------------    
+            -----------------------------------    
+            -----------------------------------    
+            -----------------------------------    
+            -----------------------------------    
+
+                    
 12. Overlays
 13. Schema Specification 模式规范
 14. Security Considerations 安全注意事项
