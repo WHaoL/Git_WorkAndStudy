@@ -3000,13 +3000,688 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         未看！！！
 
 12. Overlays
+    
     Overlays 是软件组件，
         可提供 类似于后端提供的 功能钩子，
-        可以将其堆在后端调用的顶部，
-        也可以作为 后端响应顶部的回调 来更改其行为。
+        可以将其堆在后端调用的顶部，作为 后端响应顶部的回调 来更改其行为。
+    
+    Overlays 
+        可以静态编译到 slapd，
+        或者启用模块支持后，可以动态加载它们。
+    大多数 overlays仅允许在单个数据库上进行配置。
 
+    有些也可以堆叠在前端上，以供全局使用。
+        这意味着它们可以在 请求被解析和验证之后，但恰好在选择适当的数据库之前执行。
+            主要目的是影响与数据库无关的操作，
+            并且在某些情况下，通过 消息请求的DN 来影响数据库的选择。
+    
+    从本质上讲，overlays 代表了一种实现以下目的的手段：
+        1.在不更改后端代码的情况下 定制现有后端行为，也不需要编写具有完整功能的新的自定义后端
+        2.编写 可应用于不同后端类型的 通用功能
+
+    如上所述，使用slapd.conf时，在任何其他数据库之前配置的 overlays 将被视为全局的。
+        实际上，它们隐式堆叠在前端数据库(frontend database)的顶部。
+        也可以将它们显式配置为：
+        -----------------------------------    
+        database frontend
+        overlay <overlay name>
+        -----------------------------------    
+                Overlays 通常在man手册页的第 5 部分；命名约定是slapo-<overlay name>
+    
+    以下各节中列出并详细描述了 OpenLDAP 中所有当前的overlays
+
+    12.1. 访问日志(Access Logging)
+
+        12.1.1. 概览(Overview)
+            
+            该overlay可以记录 对另一个数据库上给定后端数据库 的访问。
+            
+            允许使用任意LDAP查询查看给定数据库上的所有活动，而不仅仅是将日志记录到本地纯文本文件中。
+                配置选项可用于选择要记录的操作类型子集，以及自动删除日志数据库中的旧日志记录。
+                日志记录与审计模式一起存储，以确保其可读性，无论是作为LDIF查看还是以raw(原始)形式查看。
+
+            它也用于 delta-syncrepl 复制
+
+            注意：
+                Accesslog 数据库对于给定的提供者是唯一的。
+                永远不要复制它。
+        
+        12.1.2. 配置访问日志(Access Logging Configuration)
+            
+            一个实现访问日志(Access Logging)的例子：
+            -----------------------------------  
+            database mdb
+            suffix dc=example,dc=com
+            maxsize 85899345920
+            ...
+            overlay accesslog
+            logdb cn=log
+            logops writes reads
+            logold (objectclass=person)
+
+            database mdb
+            suffix cn=log
+            maxsize 85899345920
+            ...
+            index reqStart eq
+            access to *
+             by dn.base="cn=admin,dc=example,dc=com" read  
+            -----------------------------------  
+
+            以下是用于 delta-syncrepl复制  的示例：  
+            -----------------------------------
+            database mdb
+            suffix cn=accesslog
+            rootdn cn=accesslog
+            maxsize 85899345920
+            directory /usr/local/var/openldap-accesslog
+            index default eq
+            index entryCSN,objectClass,reqEnd,reqResult,reqStart,reqDN  
+            -----------------------------------  
+
+            主数据库的 Accesslog overlay定义
+            ----------------------------------- 
+            database mdb
+            suffix dc=example,dc=com
+            maxsize 85899345920
+            ...
+            overlay accesslog
+            logdb cn=accesslog
+            logops writes
+            logsuccess TRUE
+            # scan the accesslog DB every day, and purge entries older than 7 days
+            logpurge 07+00:00 01+00:00 
+            ----------------------------------- 
+
+            针对 cn=accesslog 的搜索结果可能如下所示：
+            -----------------------------------  
+            [ghenry@suretec ghenry]# ldapsearch -x -b cn=accesslog
+            # extended LDIF
+            #
+            # LDAPv3
+            # base <cn=accesslog> with scope subtree
+            # filter: (objectclass=*)
+            # requesting: ALL
+            #
+
+            # accesslog
+            dn: cn=accesslog
+            objectClass: auditContainer
+            cn: accesslog
+
+            # 20080110163829.000004Z, accesslog
+            dn: reqStart=20080110163829.000004Z,cn=accesslog
+            objectClass: auditModify
+            reqStart: 20080110163829.000004Z
+            reqEnd: 20080110163829.000005Z
+            reqType: modify
+            reqSession: 196696
+            reqAuthzID: cn=admin,dc=suretecsystems,dc=com
+            reqDN: uid=suretec-46022f8$,ou=Users,dc=suretecsystems,dc=com
+            reqResult: 0
+            reqMod: sambaPwdCanChange:- ###CENSORED###
+            reqMod: sambaPwdCanChange:+ ###CENSORED###
+            reqMod: sambaNTPassword:- ###CENSORED###
+            reqMod: sambaNTPassword:+ ###CENSORED###
+            reqMod: sambaPwdLastSet:- ###CENSORED###
+            reqMod: sambaPwdLastSet:+ ###CENSORED###
+            reqMod: entryCSN:= 20080110163829.095157Z#000000#000#000000
+            reqMod: modifiersName:= cn=admin,dc=suretecsystems,dc=com
+            reqMod: modifyTimestamp:= 20080110163829Z
+
+            # search result
+            search: 2
+            result: 0 Success
+
+            # numResponses: 3
+            # numEntries: 2
+            -----------------------------------  
+        12.1.3. Further Information
+            slapo-accesslog和 delta-syncrepl 复制部分。
+    
+
+    12.2. 审计日志(Audit Logging)
+        审核日志层(The Audit Logging overlay) 可用于将 给定后端数据库上的所有更改 记录到 指定的日志文件 中。
+
+        12.2.1. 概览(Overview)
+            略 
+        12.2.2. 配置审计日志(Audit Logging Configuration)
+
+            如果目录正在通过slapd.d运行，
+                则可以使用以下LDIF将overlay添加到cn=config中的overlay列表中，
+                并设置LDIF被记录到哪个文件
+            -----------------------------------   
+            dn: olcOverlay=auditlog,olcDatabase={1}mdb,cn=config
+            changetype: add
+            objectClass: olcOverlayConfig
+            objectClass: olcAuditLogConfig
+            olcOverlay: auditlog
+            olcAuditlogFile: /tmp/auditlog.ldif 
+            ----------------------------------- 
+                在这个测试示例中，我们将更改记录到/tmp/auditlog.ldif
+            slapo-auditlog创建的典型LDIF文件如下所示:   
+            ----------------------------------- 
+            # add 1196797576 dc=suretecsystems,dc=com cn=admin,dc=suretecsystems,dc=com
+            dn: dc=suretecsystems,dc=com
+            changetype: add
+            objectClass: dcObject
+            objectClass: organization
+            dc: suretecsystems
+            o: Suretec Systems Ltd.
+            structuralObjectClass: organization
+            entryUUID: 1606f8f8-f06e-1029-8289-f0cc9d81e81a
+            creatorsName: cn=admin,dc=suretecsystems,dc=com
+            modifiersName: cn=admin,dc=suretecsystems,dc=com
+            createTimestamp: 20051123130912Z
+            modifyTimestamp: 20051123130912Z
+            entryCSN: 20051123130912.000000Z#000001#000#000000
+            auditContext: cn=accesslog
+            # end add 1196797576
+
+            # add 1196797577 dc=suretecsystems,dc=com cn=admin,dc=suretecsystems,dc=com
+            dn: ou=Groups,dc=suretecsystems,dc=com
+            changetype: add
+            objectClass: top
+            objectClass: organizationalUnit
+            ou: Groups
+            structuralObjectClass: organizationalUnit
+            entryUUID: 160aaa2a-f06e-1029-828a-f0cc9d81e81a
+            creatorsName: cn=admin,dc=suretecsystems,dc=com
+            modifiersName: cn=admin,dc=suretecsystems,dc=com
+            createTimestamp: 20051123130912Z
+            modifyTimestamp: 20051123130912Z
+            entryCSN: 20051123130912.000000Z#000002#000#000000
+            # end add 1196797577
+            ----------------------------------- 
+        
+        12.2.3. Further Information
+            略 
+
+
+    12.3. Chaining
+        12.3.1. 概述Overview
+
+            (The chain overlay)链覆盖 为基础数据库提供了基本的链功能。
+
+            链接是什么?它表明了 DSA代表客户端追踪referrals的能力，
+                这样分布式系统就被客户端视为一个单一的虚拟DSA，
+                否则客户端就无法自己“chase(追踪)”referrals。
+
+            (The chain overlay)链覆盖 建立在ldap后端的顶部；
+            默认情况下--enable-ldap 进行编译。
+        
+        12.3.2. Chaining Configuration
+            为了演示此覆盖层(overlay)如何工作，
+                我们将讨论一个典型的场景，该场景可能是一个 提供服务器 和三个 Syncrepl(复制)副本。
+                    在每个副本上，在任何数据库定义之前 将其添加到 slapd.conf文件 全局的顶部附近：
+                -----------------------------------    
+                overlay                    chain
+                chain-uri                  "ldap://ldapprovider.example.com"
+                chain-idassert-bind        bindmethod="simple"
+                                        binddn="cn=Manager,dc=example,dc=com"
+                                        credentials="<secret>"
+                                        mode="self"
+                chain-tls                  start
+                chain-return-error         TRUE
+                -----------------------------------    
+                将此添加到您的 syncrepl 语句下面：
+                -----------------------------------  
+                updateref "ldap://ldapprovider.example.com/"  
+                -----------------------------------    
+        12章 余下未看
+
+13. 模式规范(Schema Specification)
+    待看
+
+14. 安全注意事项(Security Considerations) 
+    OpenLDAP 软件旨在 在从严格控制的封闭网络 到 全球Internet的 各种计算环境中运行。
+    因此，OpenLDAP支持许多不同的安全性机制。
+    本章介绍了这些机制，并讨论了使用 OpenLDAP的安全注意事项。
+
+    14.1. 网络安全(Network Security)
+        14.1.1. 选择性侦听(Selective Listening)
+            
+            默认情况下，slapd将同时侦听 IPv4 和 IPv6 “any”地址。
+            通常希望 slapd 在指定的ip/port上监听。例如，仅监听 IPv4的127.0.0.1 那么将不允许远程访问目录服务器。
+            例如：
+                slapd -h ldap://127.0.0.1
+
+            要有选择地限制远程访问，建议使用 IP 防火墙来限制访问。
+
+        14.1.2. IP防火墙(IP Firewall)
+            服务器系统的 IP防火墙功能 
+                可用于 基于客户端的IP地址 和/或 用于与客户端通信的网络接口来 限制访问。
+
+            通常，slapd
+                在端口 389/tcp上侦听  ldap://会话，
+                在端口 636/tcp 上侦听 ldaps://会话
+            slapd可以配置为侦听其他端口。
+
+            如何配置IP防火墙的细节取决于所使用的IP防火墙的特定种类。
+
+        14.1.3. TCP Wrappers
+            slapd支持 TCP wrappers
+                TCP wrappers 提供了基于规则的访问控制系统，用于控制对服务器的 TCP/IP 访问。
+                例如，host_options 规则：
+                -----------------------------------
+                slapd: 10.0.0.0/255.0.0.0 127.0.0.1 : ALLOW
+                slapd: ALL : DENY    
+                -----------------------------------  
+                        仅允许来自 专用网络10.0.0.0 和 本地主机127.0.0.1的 传入连接 访问目录服务。  
+                注意：
+                    slapd使用的IP地址，通常不配置反向查找。
+
+                注意，TCP wrappers 要求连接被接受。
+                    由于 仅仅拒绝连接 就需要进行大量处理，
+                    因此通常建议使用 IP防火墙 保护而不是 TCP wrappers。
+    
+    
+    14.2. 数据完整性和机密性保护(Data Integrity and Confidentiality Protection)
+
+        传输层安全(Transport Layer Security, TLS)可用于提供 数据完整性和机密性保护
+            OpenLDAP支持通过 StartTLS和ldaps:// 进行TLS(SSL)协商
+            StartTLS 是标准的跟踪机制
+        
+        多种 简单身份验证和安全层(Simple Authentication and Security Layer，SASL)机制,(例如 DIGEST-MD5 和 GSSAPI)也提供了数据完整性和机密性保护。
+
+
+        14.2.1. 安全强度因子(Security Strength Factors)
+            
+            服务器使用安全强度因子(Security Strength Factors, SSF)指示保护的相对强度。
+                SSF 为0表示没有保护措施
+                SSF 为1表示完整性保护已到位。
+                >1 的 SSF 大致与有效加密密钥长度相关
+                    例如，
+                        DES为56, 
+                        3DES为112， 
+                        AES为128、192或256。
+
+            许多管理控件依赖于 LDAP会话中存在的 TLS/SASL相关联的 SSF。
+
+            如果没有适当的保护措施，安全控制措施将禁止操作。
+            例如：
+                security ssf=1 update_ssf=112
+            
+            要求对所有操作进行完整性保护，并对更新操作(例如添加，删除，修改等)要求加密保护（等效于 3DES）。
+            请参见 slapd.conf（5）
+
+            对于细粒度的控制，可以在访问控制中使用 SSF。
+        
+
+    14.3. 认证方式(Authentication Methods)
+        
+        14.3.1. “简单”方式("simple" method)
+
+            LDAP的 “简单”方式 有三种操作模式：
+                ● anonymous                     匿名
+                ● unauthenticated               未验证身份
+                ● user/password authenticated   已验证身份(用户名/密码)
+            匿名访问是通过 不向“简单”绑定操作 提供名称和密码 来请求的。 anonymous
+            通过 提供名称而不提供密码来 请求未经身份验证的访问。        unauthenticated
+            通过 提供有效的名称和密码来 请求经过身份验证的访问。        user/password authenticated
+
+            (anonymous)匿名 绑定 会导致匿名授权关联。
+                默认情况下会 启用 匿名绑定机制，
+                    但可以通过在 slapd.conf中指定“disallow bind_anon”来禁用匿名绑定机制。
+
+            注意：
+                禁用匿名绑定机制不会阻止匿名访问目录。
+                要 要求身份验证来访问目录，应改为指定“require authc”。
+            
+            (unauthenticated)未验证身份 的绑定 也会导致匿名授权关联。
+                未验证身份的绑定机制 默认情况下处于禁用状态，
+                    但可以通过在 slapd.conf中指定“allow bind_anon_cred”来启用。
+                由于许多LDAP程序在进行 身份验证(user/password authenticated)访问时，错误地生成了未验证身份(unauthenticated)的绑定请求
+                （也就是说，它们不确保提供了密码），
+                    因此通常应保持禁用此机制。
+
+            成功的 "用户/密码验证(user/password authenticated)"绑定 将导致用户授权身份(提供的名称)与会话关联。
+                缺省/默认情况下，启用 用户/密码验证绑定。
+                    但是，由于这种机制本身不提供窃听保护(例如，密码是明文设置的)，
+                    所以建议只在 严格控制的系统中使用，或者 当LDAP会话被其他方式(例如: TLS,IPsec)保护的情况下使用。
+                当管理员依赖TLS来保护密码时，建议禁用不受保护的身份验证(authenticated)。
+                    使用simple_bind选项，
+                    该选项提供了对机密保护级别的细粒度控制，要求进行简单的用户/密码身份验证。
+                        例如，使用simple_bind=56将需要简单的绑定 才能使用等同于DES或更好的加密。
+
+                "用户/密码验证(user/password authenticated)"绑定机制
+                    通过设置"disallow bind_simple"来完全禁用。
+
+            注意：绑定失败会导致会话具有匿名授权关联。
+
+
+        14.3.2. SASL方式(SASL method)
+            LDAP SASL 方式允许使用任何 SASL 身份验证机制。
+
+    14.4. 密码存储(Password Storage)
+        
+        LDAP 密码通常存储在 userPassword 属性中。
+            RFC4519 指定密码 不以加密（或散列）形式存储（即 默认存储的是明文）。
+            这允许使用多种基于密码的身份验证机制，例如 DIGEST-MD5。
+            这也是最可互操作的存储方案。
+        
+        但是，可能希望改为存储密码的哈希。slapd支持多种存储方案，供管理员选择。
+        注意：
+            密码属性的值，无论使用哪种存储方案，都应受到保护，就像它们是纯文本一样。
+            哈希密码容易受到字典式攻击和暴力攻击。
+        
+        userPassword 属性允许有多个值，并且每个值都可以以不同的形式存储。
+        在身份验证过程中，Slapd 将迭代这些值，直到找到与提供的密码匹配的值，或者直到用尽所有值进行检查为止。
+        存储方案作为值的前缀存储，因此使用 Salted SHA1（SSHA）方案的哈希密码如下所示:
+            userPassword: {SSHA}DkMTwBl+a/3DQTxCYEApdUtNXGgdUac3
+
+        哈希(哈希即散列)密码的优点是，哈希的攻击者不能直接访问实际的密码。
+            不幸的是，由于字典和暴力攻击通常很容易让攻击者成功，所以这种优势是微不足道的
+            (这就是为什么所有现代Unix系统都使用影子(shadow)密码文件的原因)。
+
+        散列存储的缺点是它们是非标准的，可能会导致互操作性问题，
+        并且通常无法使用比Simple(或SASL/PLAIN)更强的基于密码的身份验证机制，如DIGEST-MD5。
+
+
+        14.4.1. SSHA 密码存储方案(SSHA password storage scheme)
+            SSHA 是SHA方案的加盐版本。它被认为是slapd支持的最安全的（！！！！）密码存储方案。
+            这些值表示相同的密码：
+                userPassword: {SSHA}DkMTwBl+a/3DQTxCYEApdUtNXGgdUac3
+                userPassword: {SSHA}d0Q0626PSH9VUld7yWpR0k6BlpQmtczb
+        
+        14.4.2. CRYPT 密码存储方案(CRYPT password storage scheme)
+            此方案使用操作系统的 crypt哈希函数。
+                它通常会产生传统的Unix风格的 13个字符的哈希，
+                但是在具有 glibc2 的系统上，它也可以生成更安全的 34字节MD5哈希。
+                    userPassword: {CRYPT}aUihad99hmev6
+                    userPassword: {CRYPT}$1$czBJdDqS$TmkzUAb836oMxg/BmIwN.1
+            CRYPT 方案的优点在于，
+                可以在不知道明文形式的情况下，将密码传输到现有的Unix密码文件或从现有的Unix密码文件传输。
+                两种形式的 crypt 都包含 salt，因此它们对字典攻击具有一定的抵抗力。
+            注意：
+                由于此方案使用操作系统的 crypt哈希函数，因此它是特定于操作系统的。
+        
+        14.4.3. MD5密码存储方案(MD5 password storage scheme)
+            此方案仅采用密码的 MD5哈希并将其以 base64编码形式存储：
+                userPassword: {MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==
+            尽管比明文存储更安全，但这不是一个非常安全的方案。
+                MD5 算法速度很快，并且由于不添加 salt，因此该方案 容易受到字典攻击（！！！！）。
+
+        14.4.4. SMD5 密码存储方案(SMD5 password storage scheme)
+            这通过添加salt(随机数据，这意味着给定明文密码有许多可能的表示)改进了基本的MD5方案。
+                例如，这两个值表示相同的密码:
+                    userPassword: {SMD5}4QWGWZpj9GCmfuqEvm8HtZhZS6E=
+                    userPassword: {SMD5}g2/J/7D5EO6+oPdklp5p8YtNFk4=
+        
+        14.4.5. SHA 密码存储方案(SHA password storage scheme)
+            像MD5方案一样，这只是通过 SHA哈希过程来提供密码。 
+            SHA 被认为比 MD5 更安全，但是缺少 salt 会使该方案 容易受到字典攻击（！！！！）。
+                userPassword: {SHA}5en6G6MezRroT3XKqkdPOmY/BfQ=
+        
+        14.4.6. SASL 密码存储方案(SASL password storage scheme)
+            这根本不是一个真正的密码存储方案。
+                它使用userPassword属性的值将 密码验证 委托给另一个进程。
+            注意:这与使用SASL对LDAP会话进行身份验证不同。
+
+
+    14.5. 直通身份验证(Pass-Through authentication)
+        
+        slapd能够将密码验证委派给一个单独的进程。
+            使用了 sasl_checkpass函数，因此它可以使用 Cyrus SASL 支持的任何后端服务来检查密码。
+            选择范围非常广泛，
+                其中一种选择是使用saslauthd(8)，它可以使用本地文件、Kerberos、一个IMAP服务器、另一个LDAP服务器或PAM机制支持的任何东西。
+            必须使用 enable-spasswd配置选项 构建服务器，以启用直通身份验证。
+        
+        注意：这与使用 SASL 机制对 LDAP 会话进行身份验证不同。
+
+        直通身份验证仅适用于 “simple bind”和“SASL PLAIN”身份验证机制中使用的 纯文本密码。
+
+        直通身份验证是选择性的：
+            仅影响 userPassword属性 值使用“{SASL}”方案标记的用户。
+            该属性的格式为：
+                userPassword: {SASL}username@realm
+                    username和realm 已传递到SASL身份验证机制，用于标识要验证此账户的密码。 
+                    这允许在 OpenLDAP中的条目 与 后端身份验证服务已知的帐户之间进行任意映射。
+        
+        最好使用访问控制来 防止用户在启用了直通身份验证的情况下 通过LDAP更改密码。
+
+
+        14.5.1. 配置 slapd 身份认证提供方(Configuring slapd to use an authentication provider)
+            如果条目的密码值为“{SASL}”，则 OpenLDAP 将验证条目密码的整个过程委托给 Cyrus SASL。
+            因此，所有配置都在 SASL 配置文件中完成。
+
+            第一个要考虑的文件被混淆地命名为 slapd.conf，通常在 SASL 库目录中找到，通常是/usr/lib/sasl2/slapd.conf。
+                该文件控制将 LDAP与slapd通信时 SASL的使用以及 用于身份验证的SASL后端。
+                有关完整详细信息，请参见 CyrusSASL 文档中的options.html。
+            
+            这是一个使用 saslauthd 验证密码的"服务器"的简单示例：
+            -----------------------------------    
+            mech_list: plain
+            pwcheck_method: saslauthd
+            saslauthd_path: /var/run/sasl2/mux
+            -----------------------------------    
+        
+        14.5.2. 配置 saslauthd(Configuring saslauthd)
+            saslauthd 能够使用许多不同的 身份验证服务
+                通常的要求是将部分或全部身份验证委派给另一台 LDAP 服务器。
+                这是一个使用 MicrosoftActive Directory（AD）的示例 saslauthd.conf：
+                -----------------------------------
+                ldap_servers: ldap://dc1.example.com/ ldap://dc2.example.com/
+
+                ldap_search_base: cn=Users,DC=ad,DC=example,DC=com
+                ldap_filter: (userPrincipalName=%u)
+
+                ldap_bind_dn: cn=saslauthd,cn=Users,DC=ad,DC=example,DC=com
+                ldap_password: secret    
+                -----------------------------------  
+                        在这个例子中，saslauthd 与 ldap 身份验证机制一起运行，
+                        并且设置为将 SASL realm 与login name 结合在一起：saslauthd -a ldap -r
+
+                    这意味着，LDAP 客户端提供的 userPassword 属性中的“username@realm”字符串
+                        最终被用于在 AD 中搜索“userPrincipalName=username@realm”
+                        然后，通过尝试使用 搜索找到的条目与AD绑定，来验证密码。
+        
+        14.5.3. 测试直通身份认证(Testing pass-through authentication)
+
+            通常最好是 从后端身份验证提供者开始，并通过 saslauthd 和 slapd 连接到 LDAP 客户端。
+
+            在上面的 AD 示例中，首先检查 saslauthd 连接到 AD 时将使用的 DN 和密码是否有效：
+            ----------------------------------- 
+            ldapsearch -x -H ldap://dc1.example.com/ \
+                -D cn=saslauthd,cn=Users,DC=ad,DC=example,DC=com \
+                -w secret \
+                -b '' \
+                -s base   
+            ----------------------------------- 
+            下一步检查是否可以找到示例 AD 用户：   
+            -----------------------------------   
+            ldapsearch -x -H ldap://dc1.example.com/ \
+                -D cn=saslauthd,cn=Users,DC=ad,DC=example,DC=com \
+                -w secret \
+                -b cn=Users,DC=ad,DC=example,DC=com \
+                "(userPrincipalName=user@ad.example.com)" 
+            -----------------------------------    
+            检查用户是否可以绑定到 AD：
+            -----------------------------------  
+            ldapsearch -x -H ldap://dc1.example.com/ \
+                -D cn=user,cn=Users,DC=ad,DC=example,DC=com \
+                -w userpassword \
+                -b cn=user,cn=Users,DC=ad,DC=example,DC=com \
+                -s base \
+                    "(objectclass=*)"  
+            -----------------------------------    
+            如果一切正常，那么 saslauthd 应该能够做到这一点：
+            ----------------------------------- 
+            testsaslauthd -u user@ad.example.com -p userpassword
+            testsaslauthd -u user@ad.example.com -p wrongpassword   
+            -----------------------------------  
+            现在，将令牌放入 OpenLDAP 中的条目中：
+                userPassword: {SASL}user@ad.example.com 
+            
+            现在应该可以使用该条目的 DN 和 AD 用户的密码绑定到 OpenLDAP。
+             
+
+
+15. Using SASL
+
+    OpenLDAP 客户端和服务器能够通过简单身份验证和安全层（SASL）框架进行身份验证
+
+    SASL可以与几个行业标准的身份验证机制一起使用，
+        包括用于Kerberos V的GSSAPI、DIGEST-MD5以及用于传输层安全(TLS)的PLAIN和EXTERNAL。
+
+    默认情况下，
+        OpenLDAP的标准客户端工具(如 ldapsearch和 ldapmodify)
+        将尝试使用 SASL 对用户进行 LDAP 目录服务器的身份验证。
+    LDAP管理员 可以通过几个步骤来设置 基本身份验证服务，
+        从而使用户可以作为其LDAP条目 被 slapd服务器进行身份验证。
+    通过一些额外的步骤，
+        可以允许某些用户和服务利用 SASL 的代理授权功能，
+        从而使他们能够进行身份验证，
+        然后将其身份切换为其他用户或服务的身份。
+    
+    请注意，
+        在下文中，术语“用户user”用于描述通过 LDAP 客户端（例如 ldapsearch（1））连接到 LDAP 服务器的个人或应用程序实体。
+        也就是说，术语“用户”不仅适用于使用 LDAP客户端的个人，
+        而且适用于在没有直接用户控制的情况下发出 LDAP 客户端操作的应用程序实体。
+    
+
+    15.1. SASL 安全注意事项(SASL Security Considerations)
+        SASL 提供了许多不同的身份验证机制。本节简要概述了安全注意事项。
+
+        某些机制（例如 PLAIN 和 LOGIN）比 LDAP简单身份验证 更不安全性。
+            和 简单身份验证 一样，除非您有足够的安全保护措施，否则不应该使用 简单身份验证/PLAIN/LOGIN 这些机制。
+            建议
+                仅将这些机制与传输层安全性（TLS）结合使用。
+                在本文档中不再讨论 PLAIN 和 LOGIN 的使用。
+        
+        DIGEST-MD5 机制是 LDAPv3 的强制实施身份验证机制。
+        不推荐使用 CRAM-MD5 机制，而推荐使用 DIGEST-MD5。
+
+        GSSAPI 机制利用 GSS-API Kerberos V 提供安全的身份验证服务。
+            KERBEROS_V4 机制适用于使用 Kerberos IV 的用户。
+            Kerberos 被视为适用于小型企业和大型企业的安全的分布式身份验证系统。
+
+        EXTERNAL 机制利用低层网络服务提供的身份验证服务，例如“传输层安全性”（TLS）。
+            与基于 TLS X.509 的公钥技术结合使用时，
+            EXTERNAL 可提供强大的身份验证功能。    
+        EXTERNAL 也可以与 ldapi:/// transport 一起使用，
+            因为 Unix 域套接字可以报告客户端进程的 UID 和 GID。
+    
+    15.2. SASL 身份认证(SASL Authentication)
+    
+    15章余下部分 待看
+
+16. Using TLS
+16. 使用 TLS
+    
+    待看
+
+
+
+
+17. 构造分布式目录服务(Constructing a Distributed Directory Service)
+    
+    对于许多站点而言，运行一个或多个保存整个数据子树的 slapd就足够了。
+    但是通常希望对树的某个部分（可能正在运行或可能不在运行slapd）有一个 slapd 引用其他目录服务。
+
+    17.1. 下级知识信息（Subordinate Knowledge Information）
+        
+        提供下级知识信息来委托子树。
+            下级知识信息 作为 委托点的 特殊引用对象 在目录中维护。
+            引用对象充当一个委托点，将两个服务粘合在一起。
+            这种机制允许构建分层目录服务。
+
+        引用对象具有一个结构的对象类objectClass: referral，并且与被委托的子树具有相同的DN。
+            通常，引用对象还将提供辅助对象类objectClass: extensibleObject。
+            这允许条目包含适当的相对DN值。
+
+        如果服务器a.example.net持有dc=example,dc=net，
+        并希望将子树ou=subtree,dc=example,dc=net委托给另一个服务器b.example.net，
+            则会将以下命名的引用对象添加到a.example.net:
+            -----------------------------------   
+            dn: dc=subtree,dc=example,dc=net
+            objectClass: referral
+            objectClass: extensibleObject
+            dc: subtree
+            ref: ldap://b.example.net/dc=subtree,dc=example,dc=net 
+            -----------------------------------   
+    
+    17.2. 上级知识信息(Superior Knowledge Information)
+        
+        使用referral(引用/推荐)指令指定上级知识信息
+            值是引用上级目录服务的 URI 列表
+        
+        对于没有直接上级的服务器（例如上例中的 a.example.net），可以将服务器配置为 使用具有全局知识的目录服务，
+            例如 OpenLDAP Root Service
+                referral        ldap://root.openldap.org/
+        
+        但是，由于 a.example.net 是 b.example.net 的直接上级，
+        因此 b.example.net 的配置应如下所示：
+            referral ldap://a.example.net/
+    
+
+    17.3. ManageDsaIT 控件(The ManageDsaIT Control)
+
+        通常使用 ldapmodify或支持 ManageDsaIT控件的类似工具
+            来添加，修改和删除 引用对象。
+        
+        ManageDsaIT 控件通知服务器您打算将引用对象作为常规条目进行管理。
+            这样可以防止/阻止服务器为 查询或更新引用对象的请求 发送引用结果。
+
+        管理常规条目时，不应指定 ManageDsaIT 控件。
+
+        ldapmodify的-M选项启用 ManageDsaIT
+            例如：
+                ldapmodify -M -f referral.ldif -x -D "cn=Manager,dc=example,dc=net" -W
+            或者和ldapsearch一起使用：
+                ldapsearch -M -b "dc=example,dc=net" -x "(objectclass=referral)" '*' ref
+
+        注意：
+            ref 属性是可操作的，如果需要显示在搜索结果中 必须在请求显示指定。
+
+        注意：
+            使用 referral(引用/推荐) 来构建分布式目录服务非常笨拙（！！！！！），普通客户端也不太支持。
+            如果已经使用引用构建了现有安装，则使用chain overlay来隐藏引用将大大提高 Directory 系统的可用性。
+            更好的方法是在从属配置中使用显式定义的本地和代理数据库，以提供分布式目录的无缝视图。
+        
+        注意：
+            LDAP 操作，即使是子树搜索，通常也只能访问一个数据库。
+            可以通过将数据库与subordinate/olcSubordinate 关键字结合在一起来更改它。
+
+
+
+18. 复制Replication
+
+    复制目录是交付企业弹性部署的基本需求。
+
+    multimaster
+    
+    由于OpenLDAP现在支持多种复制拓扑，
+        这些术语已经被提供者/多提供者和使用者所取代:
+            提供者可以接受外部写操作，并让使用者可以检索它们;
+            使用者向提供者请求复制更新。
+        与严格定义的主/从关系不同，提供者/使用者角色是非常流动的:
+            在使用者中接收到的复制更新可以由该使用者进一步传播到其他服务器，因此使用者也可以同时充当提供者。
+            此外，使用者不必是实际的LDAP服务器;它可能只是一个LDAP客户机。
+
+
+
+以下部分将描述复制技术，并讨论各种可用的复制选项。
             -----------------------------------    
             -----------------------------------    
+            -----------------------------------    
+            -----------------------------------    
+            -----------------------------------    
+
+
+                -----------------------------------    
+                -----------------------------------    
+                -----------------------------------    
+                -----------------------------------    
+                -----------------------------------    
+                -----------------------------------    
+
+
+
+            ----------------------------------- 
+            ----------------------------------- 
+
+        -----------------------------------    
             -----------------------------------    
             -----------------------------------    
             -----------------------------------    
