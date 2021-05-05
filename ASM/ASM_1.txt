@@ -1,0 +1,1150 @@
+-----------------------------------
+汇编语言学习笔记1
+    主要包含了：
+        硬件基础
+        汇编实验环境安装
+        几个例子
+本文是《汇编语言(基于Linux)》的学习笔记
+    作者：北邮Young老师
+    视频地址：https://www.bilibili.com/video/BV1gC4y1b7y8 
+    视频里的代码和课件：https://github.com/txs72/assembly_language 
+    
+
+-----------------------------------P1 01知识回顾及扩充-----------------------------------
+-----------------------------------
+Execution Environment -- 32位模式(寄存器是E开头)
+编程相关的寄存器
+    8个32bit的 通用寄存器
+    6个16bit的 段寄存器
+    1个32bit的 状态保存寄存器 EFLAGS
+    1个32bit的 EIP/EPC(Instruction Pointer Register)(Program counter) 指令指针位置，存储了要执行的下一个指令的位置
+    等
+Execution Environment -- 64位模式(寄存器是R开头)
+编程相关的寄存器
+    16个64bit的 通用寄存器
+    6个16bit的 段寄存器
+    1个64bit的 状态保存寄存器 RFLAGS
+    1个64bit的 RIP/RPC(Instruction Pointer Register)(Program counter) 指令指针位置，存储了要执行的下一个指令的位置
+    等
+-----------------------------------
+
+
+----------------------------------- 通用寄存器
+学校里面的 微机原理 基于intel8086讲解的(16位)
+
+General-Purpose Registers (GPR) 通用寄存器 -- 16位
+    AX   AH(高8位) AL(低8位) 
+    BX   BH BL
+    CX   CH CL
+    DX   DX DL
+
+General-Purpose Registers (GPR) 通用寄存器 -- 32位模式
+    EAX — Accumulator for operands and results data (累加的数值，返回值)
+    EBX — Pointer to data in the DS segment (指针 指向DS数据段)
+    ECX — Counter for string and loop operations (for循环中的i 或者 遍历字符串)
+    EDX — I/O pointer (指向某个IO/端口的指针)
+
+    ESI — Pointer to data in the segment pointed to by the DS
+        register; source pointer for string operations (起始位置)
+    EDI — Pointer to data (or destination) in the segment pointed
+        to by the ES register; destination pointer for string operations (结束位置)
+
+    ESP — Stack pointer (in the SS segment) (通过栈的段地址SS 来确定当前栈具体在什么位置) (SP指向栈顶 push/pop)
+    EBP — Pointer to data on the stack (in the SS segment) (当前栈帧的基地址)
+    (ESP EBP 来访问栈中的具体元素) 
+
+General-Purpose Registers (GPR) 通用寄存器 -- 64位模式
+    在64bit模式下: 16个通用的寄存器，但是默认操作数是32bit
+        在32bit操作数
+            EAX EBX ECX EDX ESI EDI ESP EBP R8D-R15D
+        在64bit操作数
+            RAX RBX RCX RDX RSI RDI RSP RBP R8D-R15D
+    Byte Registers          字节  1个字节
+    Word Registers          字    2个字节
+    Doubleword Registers    双字  4个字节    
+    Quadword Registers           8个字节
+-----------------------------------
+
+
+----------------------------------- 段寄存器(Segment Registers)
+CS / DS / SS / ES / FS / GS : 16位段选择器, 存储内存地址
+    CS 代码段
+    DS 数据段
+    SS 栈段
+    FS
+    GS 
+汇编语言中 数据有三种数据类型: 代码(code) / 数据(data) / 栈(stack)
+CS: code segment, CS+EIP即为代码执行位置
+    CS      代码段
+    EIP     偏移量
+    CS+EIP  代码执行位置
+DS/ES/FS/GS: 四个数据段, 可用来分类存储不同类型数据,
+    如当前模块的数据结构, 从高层模块导入的数据, 
+    动态创建的数据结构, 与其他代码共享的数据...
+SS: stack segment
+    栈数据
+    具体访问： SS+SP(SP可以认为是偏移量)
+-----------------------------------
+
+
+----------------------------------- EFLAGS寄存器(状态信息寄存器)
+EFLAGS为32位模式
+RFLAGS为64位模式
+-----------------------------------
+
+
+----------------------------------- 指令寄存器
+EIP 32位 
+RIP 64位 
+    每次执行的语句是通过这个指令寄存器取出来的，
+        无法直接读取，
+        但是可以间接修改
+            修改call指令存储在栈中的数值
+-----------------------------------
+
+
+-----------------------------------寄存器操作符 (32位模式)
+• 32位通用寄存器 (EAX, EBX, ECX, EDX, ESI, EDI, ESP, EBP)
+• 16位通用寄存器 (AX, BX, CX, DX, SI, DI, SP, BP)
+• 8位通用寄存器 (AH, BH, CH, DH, AL, BL, CL, DL)
+• 段寄存器 (CS, DS, ES, FS, GS, SS)
+• EFLAGS
+• X87 FPU寄存器 (ST0—ST7)       (32位模式下的 浮点数寄存器)
+• MMX寄存器 (MM0—MM7)
+• XMM寄存器 (XMM0—XMM7, MXCSR)
+• control寄存器 (CR0, CR2, CR3, CR4, GDTR, LDTR, IDTR...)
+• debug寄存器 (DR0, DR1, DR2, DR3, DR6, DR7)
+• MSR寄存器
+-----------------------------------寄存器操作符 (64位模式)
+• 64位通用寄存器 (RAX, RBX, RCX, RDX, RSI, RDI, RSP, RBP, R8-R15)
+• 32位通用寄存器 (EAX, EBX, ECX, EDX, ESI, EDI, ESP, EBP, R8D—R15D)
+• 16位通用寄存器 (AX, BX, CX, DX, SI, DI, SP, BP, R8W—R15W)
+• 8位通用寄存器 (AH, BH, CH, DH, AL, BL, CL, DL, SIL, DIL, SPL, BPL, R8L—R15L) with REX prefixes
+• 段寄存器 (CS, DS, ES, FS, GS, SS)
+• RFLAGS
+• X87 FPU寄存器 (ST0—ST7)   (64位模式下的 浮点数寄存器)
+• MMX寄存器 (MM0—MM7)
+• XMM寄存器 (XMM0—XMM7, MXCSR)
+• control寄存器 (CR0, CR2, CR3, CR4, CR8, GDTR, LDTR, IDTR...)
+• debug寄存器 (DR0, DR1, DR2, DR3, DR6, DR7)
+• MSR寄存器
+• RDX:RAX对,表示128位的操作数
+-----------------------------------
+
+-----------------------------------数据类型
+-----------------------------------数值型数据类型
+-----------------------------------指令集
+-----------------------------------通用功能指令集
+-----------------------------------栈
+函数调用过程生成栈帧,函数的局部变量和接收的参数,均存储于当前栈帧
+-----------------------------------
+
+-----------------------------------参数传递
+• 过程调用时,可以使用如下三种方式进行参数传递:
+    • 通用功能寄存器:通用寄存器共计8个,除去ESP和EBP,调用过程前,可使用这
+        些寄存器存储6个参数,然后调用被调用的过程
+    • 参数列表:将大量数据置于内存某数据段,将存储该地址的指针通过栈(亦可通过
+        通用寄存器)传递给被调用过程
+    • 通过栈:将数据压入堆栈,然后进行过程调用,被调用函数通过EBP访问栈帧数据
+• 以上三种方式,亦均可用于过程回传数据
+-----------------------------------
+
+-----------------------------------保存过程状态信息
+• 过程调用时,处理器不会自动保存状态
+• 过程调用函数需要显式完成状态保存,可将需要保存的寄存器存储至栈或者某个数据段里
+• PUSHA和POPA为8个通用寄存器的存储和恢复提供便利(后面详述)
+    PUSHA 把8个寄存器全部存储
+    POPA  把8个寄存器 全部弹出
+• 被调用过程如果显式修改某个段寄存器,惯例上,应该在返回前将其恢复
+• 调用过程如果要保存EFLAGS寄存器状态,可使用PUSHF (lower word of
+    EFLAGS) / PUSHFD (entire EFLAGS register)保存,POPF / POPFD恢复
+        PUSHF  存储EFLAGS寄存器的低字节(一半)
+        PUSHFD 存EFLAGS储寄存器的全部内容
+        POPF   弹出一半
+        POPFD  弹出全部 
+-----------------------------------关于保护级别 (Privilege Levels) - 1
+• 保护机制共四个特权级别,
+    0—3, 数字越小级别越高
+• 这么设定是为了增强操作系统的安全性
+-----------------------------------关于保护级别 (Privilege Levels) - 2
+• 最高特权级别的level 0 (常说的核心态),一般用来存放最关键的代码模块,如,操作系统的内核,
+    级别越低,存放的代码重要性亦越低,用户应用一般在level 3执行 (常说的用户态)
+• 系统内部设置了名为gate的严格控制的接口,低级别代码访问高级别代码时,需要经过gate验证,
+    如果没有足够访问权限,会生成#GP (general-protection exception)
+• 不同level之间代码调用时发生了什么
+    • call gate descriptor的使用,其中包括如下信息
+        • 权限访问信息
+        • 调用过程的代码执行点 (CS+IP)
+    • 不同栈之间的切换,每个级别都有自己的栈,各个栈的信息都存储于TSS (task state segment)
+• call gate以及tss的使用,对于过程调用代码来说是透明的,除非产生#GP
+-----------------------------------不同级别之间的call和ret操作
+•CALL
+    • 权限检测
+    • (内部)临时存储SS ESP CS EIP
+    • 从TSS加载SS和SP for the new stack(另一级别)并切换至新栈
+    • 将SS和SP的值压入新栈
+    • 将参数从调用栈拷⻉至新栈(call gate中的值确定参数个数)
+    • 将调用进程的CS和EIP压入新栈
+    • 从call gate中加载新代码段CS和新指令指针EIP
+    • 在新级别中开始执行
+•RET(return)
+    • 权限检测
+    • 恢复CS和EIP的值
+    • 根据RET n的参数n的值,修改堆栈指针
+    • 恢复SS和ESP到调用前的值,并切换到调用前的栈
+    • 根据RET n可选的参数n值,调整堆栈指针
+    • 接续调用进程的执行
+-----------------------------------Interrupts & Exceptions
+• 处理器提供两种打断程序执行的机制
+    • Interrupt: 异步事件,典型情形为由I/O设备触发
+    • Exception: 同步事件, 由处理器检测到一个或多个预先定义过的条件时产生,
+        IA-32架构具体声明了三种异常, 分别是faults, traps和aborts
+• 处理器采用同样的方式处理interrupts和exceptions, 均为暂停当前程序运行,并切
+    换到相应的处理例程(handler)执行,处理器通过IDT(interrupt descriptor table)查
+    找处理例程,执行完毕后,再回到被中断的程序继续执行
+• IA-32架构预定义了18种中断和异常,并预留了224个中断号给用户自定义使用,每个
+    IDT表中的每个中断和异常均由一个数字标识,叫做vector
+其实对中断和异常的处理，也可以沿袭我们在8086微机原理中学到的概念
+    当产生中断时：
+        保存现场，
+        跳转执行例程，
+        返回，
+        恢复现场，
+        接着执行。
+-----------------------------------Interrupts & Exceptions
+• 调用执行过程
+    • 1. 无栈切换 (相同级别)
+        • 将EFLAGS, CS, EIP依次压栈
+        • 将错误代码压栈
+        • 依据需要,从interrupt gate或trap gate中加载新代码段和新指令指针的数值到CS和EIP寄存器
+        • 如果该调用使用了interrupt gate, 清除EFLAGS中的IF标记
+        • 开始执行处理例程
+    • 2. 有栈切换 (不同级别) - 更多寄存器压栈,栈切换
+• 返回执行过程
+    • 调用执行过程的反过程
+-----------------------------------指令选讲 — 栈相关
+•PUSH, POP, PUSHA, POPA
+    • PUSH: 减少ESP的值,将数据拷⻉到栈顶
+    • POP : 增加ESP的值,将数据从栈顶取出
+    • PUSHA: 将所有寄存器(8个)压入堆栈, 依次为EAX, ECX, EDX, EBX, ESP(EAX压入前的值), EBP, ESI, EDI
+    • POPA : 将刚刚压入的8个寄存器的值取出来, 依次为EAX, ECX, EDX, EBX, ESP(EAX压入前的值), EBP, ESI, EDI
+        • 注意: 忽略了ESP(因为ESP指向当前栈的栈顶的，不能覆盖了，如果覆盖了就乱了)
+-----------------------------------Intel 64及IA-32概览(参考资料)
+• 参考资料:
+    • https://software.intel.com/en-us/articles/intel-sdm
+    • https://software.intel.com/sites/default/files/managed/39/c5/325462-sdm-vol-1-2abcd-3abcd.pdf 
+
+
+
+-----------------------------------P2 02Linux下汇编实验-环境搭建&&编程实践-----------------------------------
+
+-----------------------------------
+• 环境搭建
+    • Ubuntu 20.04 LTS (软件配置基本可参⻅Linux教程视频)
+    • sudo apt install ddd (调试器, gdb的GUI前端)(非常老 字体难看 需要装个字体)
+    • sudo apt install xfonts-100dpi (ddd使用,安装后建议重启)
+    • sudo apt install nasm (汇编语言编译器)
+    • pwndbg (gdb最火插件之一, optional)
+    • sudo apt install gcc-multilib (多版本C语言库,为了生成32/64位不同版本的可执行文件)
+-----------------------------------
+
+-----------------------------------gas和nasm比较
+            gas (AT&T style)                                nasm (Intel style)
+            语法比较老, 现代gas支持.intel_syntax指示字          较现代, TASM和MASM亦支持此类语法
+mov操作      mov $4, %eax                                   mov eax, 4
+操作数       pushl $4 (有$前导字符)                           push 4
+寄存器访问   寄存器前要求添加%                                  直接访问
+操作数大小   movb foo, %al (b8/w16/l32/q64)                  mov al, byte ptr foo (word, dword ... )
+跳转和调用   lcall/ljmp $section, offset                     call/jmp far section:offset
+           lret $stack-adjust                               ret far stack-adjust
+指示字      directives使用.开头                               不是
+代码段      .globl/.global使得一个符号为其他模块可⻅             global _start
+数字表示     0x开头,如$0x80                                  h结尾,如80h
+           int $0x80系统调用, eax存储调用例程编号              ebx存储返回值,可使用echo $?查看
+注释       C⻛格/* */, C++⻛格//, shell⻛格#                  以;开头的单行注释
+-----------------------------------
+
+-----------------------------------int 0x80 vs. syscall
+• syscall x86-64模式下,系统调用默认方式,intel cpu中,32位模式无法使用该指令
+• int 0x80 历史遗留的系统调用方式,有说法是不建议使用
+    64位下使用syscall
+    32位下使用0x80
+• sysenter 32位模式下,进行系统调用的常⻅方式,类似syscall
+• Linux下减少系统开销的内核机制 - vDSO (IA-32)
+    • vDSO (virtual dynamic shared object) is a Linux kernel mechanism for
+        exporting a carefully selected set of kernel space routines to user
+        space applications so that applications can call these kernel space
+        routines in-process, without incurring the performance penalty of a
+        mode switch from user to kernel mode that is inherent when calling
+        these same kernel space routines by means of the system call interface.
+-----------------------------------Linux下 Syscall Table - 32bits
+• https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md
+• http://shell-storm.org/shellcode/files/syscalls.html
+• /usr/include/asm/unistd_32.h
+• /usr/include/asm/unistd_64.h
+    存储了 系统调用编号和对应的功能
+-----------------------------------Linux下 Syscall Table - 64bits
+•https://filippo.io/linux-syscall-table/
+•/usr/include/asm/unistd_64.h 
+    存储了 系统调用编号和对应的功能
+-----------------------------------
+
+
+
+-----------------------------------编译 链接 调试
+• 编译: nasm -f elf -F stabs hello.asm -o hello_stabs.o
+• 编译: nasm -f elf64 -F stabs hello.asm -o hello_stabs.o
+    • -f 指定格式
+    • -f elf   源文件是32位
+    • -f elf64 源文件是64位 
+    • -F stabs 告知汇编器向输出文件添加调试信息
+        • STABS是调试信息的格式 (nasm -f elf32 -y查看)
+            • nasm -f 某种具体的格式(如elf32 elf64) -y
+                • 使用 nasm -hf查看-f后面可以跟哪些参数
+        • gdb和ddd可以利用其中的调试信息
+    • nasm查看支持的输出格式,使用 nasm -hf
+        • 查看-f后面可以跟哪些参数  
+• 链接:
+    • ld -m elf_i386 hello_stabs.o -o hello_stabs
+    • gcc -o hello_stabs hello_stabs.o
+• 调试:
+    • gdb hello_stabs (gnu debugger)(最强大的调试器)
+    • ddd hello_stabs (gdb’s UI)
+
+
+
+#####################################################对intel风格的汇编文件 的编译和链接
+#编译链接的一般步骤
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ nasm -f elf64 hello_intel.asm  #1.编译 
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ nm hello_intel.o  #查看文件的内容
+0000000000000000 d message  #数据段:message
+0000000000000000 T _start   #函数 : _start
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ ld hello_intel.o -o hello_intel #2.链接生成可执行文件 不指定则默认为a.out
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ ./hello_intel #3.运行
+Hello, World
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ 
+
+
+#编译链接的 快捷步骤
+#配置我们的bash，添加两个函数，使得可以编译intel风格的汇编文件
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ vim ~/.bashrc  #添加如下内容：
+asm64(){
+        nasm -g -f elf64 $1 -o ${1%.*}.o
+        ld -m elf_x86_64 ${1%.*}.o -o ${1%.*}
+}
+asm32(){
+        nasm -g -f elf32 $1 -o ${1%.*}.o
+        ld -m elf_i386 ${1%.*}.o -o ${1%.*}
+}
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ source  ~/.bashrc #加载
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ type asm64  #可以看到asm64已经添加成功
+asm64 是函数
+asm64 () 
+{ 
+    nasm -g -f elf64 $1 -o ${1%.*}.o;
+    ld -m elf_x86_64 ${1%.*}.o -o ${1%.*}
+}
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ ./hello_intel  #运行
+Hello, World
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ 
+
+
+
+#####################################################对AT&T风格的汇编文件 的编译和链接
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ as hello_as_64bit.asm -o hello_as_64bit.o #1.编译 
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ nm hello_as_64bit.o #查看文件的内容
+0000000000000000 d hello_world
+000000000000000c a hello_world_len
+0000000000000000 T _start
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ ld hello_as_64bit.o -o hello_as_64bit #2.链接生成可执行文件 不指定则默认为a.out
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ ./hello_as_64bit #运行
+hello world
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ 
+
+
+
+##################################################### 使用gdb对汇编生成的可执行程序(含有调试信息) 进行调试
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ gdb -q hello_intel  #加上-q是为了安静执行，不打印与调试无关的
+Reading symbols from hello_intel...
+(gdb) list #查看代码
+1       ; ----------------------------------------------------------------------------------------
+2       ; Writes "Hello, World" to the console using only system calls. Runs on 64-bit Linux only.
+3       ; To assemble and run:
+4       ;
+5       ;     nasm -felf64 hello.asm && ld hello.o && ./a.out
+6       ; ----------------------------------------------------------------------------------------
+7
+8       global    _start
+9
+10      section   .text
+(gdb) 
+11      _start:   
+12      mov       rax, 1       ; system call for write
+13      mov       rdi, 1       ; file handle 1 is stdout
+14      mov       rsi, message ; address of string to output
+15      mov       rdx, 13      ; number of bytes
+16      syscall            ; invoke operating system to do the write
+17      mov       rax, 60      ; system call for exit
+18      xor       rdi, rdi     ; exit code 0
+19      syscall                ; invoke operating system to exit
+20
+(gdb) 
+21      section   .data
+22      message:  
+23      db  "Hello, World", 10 ; note the newline at the end
+24
+(gdb) break _start          #在函数上打个断点
+Breakpoint 1 at 0x401000
+(gdb) run                   #运行一下
+Starting program: /home/gos/Projs/ASM/assembly_language-master/00_helloworld/hello_intel 
+
+Breakpoint 1, 0x0000000000401000 in _start ()
+(gdb) disassemble           #查看当前到底运行到哪儿了，反编译一下，会输出反汇编的语句
+Dump of assembler code for function _start:
+=> 0x0000000000401000 <+0>:     mov    $0x1,%eax # =>表明当前执行到了哪条语句； <+0>中的数字 表明了与 _start偏移了几个字节  ； 后面是对应的汇编指令
+   0x0000000000401005 <+5>:     mov    $0x1,%edi
+   0x000000000040100a <+10>:    movabs $0x402000,%rsi
+   0x0000000000401014 <+20>:    mov    $0xd,%edx
+   0x0000000000401019 <+25>:    syscall 
+   0x000000000040101b <+27>:    mov    $0x3c,%eax
+   0x0000000000401020 <+32>:    xor    %rdi,%rdi
+   0x0000000000401023 <+35>:    syscall 
+End of assembler dump.
+(gdb) disassemble /r        #加上/r ，不仅输出反汇编的语句，也输出每条语句对应的机器码指令是什么
+Dump of assembler code for function _start:
+=> 0x0000000000401000 <+0>:     b8 01 00 00 00  mov    $0x1,%eax # b8 表示向eax中move数据； 在32位系统下所有数值都是4个字节，01 00 00 00表示数据0x01(内存中从低位开始存储：即低位在前 高位在后)
+   0x0000000000401005 <+5>:     bf 01 00 00 00  mov    $0x1,%edi
+   0x000000000040100a <+10>:    48 be 00 20 40 00 00 00 00 00   movabs $0x402000,%rsi # 48 be ； 00 20 40 00 00 00 00 00
+   0x0000000000401014 <+20>:    ba 0d 00 00 00  mov    $0xd,%edx
+   0x0000000000401019 <+25>:    0f 05   syscall 
+   0x000000000040101b <+27>:    b8 3c 00 00 00  mov    $0x3c,%eax
+   0x0000000000401020 <+32>:    48 31 ff        xor    %rdi,%rdi
+   0x0000000000401023 <+35>:    0f 05   syscall 
+End of assembler dump.
+(gdb) si                    #每次在汇编级别 执行一条指令
+0x0000000000401005 in _start ()
+(gdb) disassemble /r
+Dump of assembler code for function _start:
+   0x0000000000401000 <+0>:     b8 01 00 00 00  mov    $0x1,%eax
+=> 0x0000000000401005 <+5>:     bf 01 00 00 00  mov    $0x1,%edi    # => 和刚刚比较，已经移动一个指令
+   0x000000000040100a <+10>:    48 be 00 20 40 00 00 00 00 00   movabs $0x402000,%rsi
+   0x0000000000401014 <+20>:    ba 0d 00 00 00  mov    $0xd,%edx
+   0x0000000000401019 <+25>:    0f 05   syscall 
+   0x000000000040101b <+27>:    b8 3c 00 00 00  mov    $0x3c,%eax
+   0x0000000000401020 <+32>:    48 31 ff        xor    %rdi,%rdi
+   0x0000000000401023 <+35>:    0f 05   syscall 
+End of assembler dump.      #查看 寄存器 当前的值
+(gdb) info registers  #查看 通用寄存器 当前的值 (查看所有寄存器的值 用 i all-registers)
+rax            0x1                 1  # 可以看到eax中 存储了值1 (eax是rax的低4字节)
+rbx            0x0                 0
+rcx            0x0                 0
+rdx            0x0                 0
+rsi            0x0                 0
+rdi            0x0                 0
+rbp            0x0                 0x0
+rsp            0x7fffffffde80      0x7fffffffde80
+r8             0x0                 0
+r9             0x0                 0
+r10            0x0                 0
+r11            0x0                 0
+r12            0x0                 0
+r13            0x0                 0
+r14            0x0                 0
+r15            0x0                 0
+rip            0x401005            0x401005 <_start+5>
+eflags         0x202               [ IF ]
+cs             0x33                51
+ss             0x2b                43
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+--Type <RET> for more, q to quit, c to continue without paging--
+gs             0x0                 0
+(gdb) si                    # 再执行一条汇编指令
+0x000000000040100a in _start ()
+(gdb) disassemble /r        #查看指令执行到了哪儿
+Dump of assembler code for function _start:
+   0x0000000000401000 <+0>:     b8 01 00 00 00  mov    $0x1,%eax
+   0x0000000000401005 <+5>:     bf 01 00 00 00  mov    $0x1,%edi
+=> 0x000000000040100a <+10>:    48 be 00 20 40 00 00 00 00 00   movabs $0x402000,%rsi
+   0x0000000000401014 <+20>:    ba 0d 00 00 00  mov    $0xd,%edx
+   0x0000000000401019 <+25>:    0f 05   syscall 
+   0x000000000040101b <+27>:    b8 3c 00 00 00  mov    $0x3c,%eax
+   0x0000000000401020 <+32>:    48 31 ff        xor    %rdi,%rdi
+   0x0000000000401023 <+35>:    0f 05   syscall 
+End of assembler dump.
+(gdb) i registers 
+rax            0x1                 1
+rbx            0x0                 0
+rcx            0x0                 0
+rdx            0x0                 0
+rsi            0x0                 0
+rdi            0x1                 1  # 可以看到edi中 存储了值1 (edi是rdi的低4字节)
+rbp            0x0                 0x0
+rsp            0x7fffffffde80      0x7fffffffde80
+r8             0x0                 0
+r9             0x0                 0
+r10            0x0                 0
+r11            0x0                 0
+r12            0x0                 0
+r13            0x0                 0
+r14            0x0                 0
+r15            0x0                 0
+rip            0x40100a            0x40100a <_start+10>
+--Type <RET> for more, q to quit, c to continue without paging--
+eflags         0x202               [ IF ]
+cs             0x33                51
+ss             0x2b                43
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+(gdb) p $edi                #并不关心所有的寄存器，只关心某一个寄存器的值，那么直接打印这个寄存器即可，及的加上$
+$1 = 1
+(gdb) p $eax
+$2 = 1
+(gdb) disassemble /r
+Dump of assembler code for function _start:
+   0x0000000000401000 <+0>:     b8 01 00 00 00  mov    $0x1,%eax
+   0x0000000000401005 <+5>:     bf 01 00 00 00  mov    $0x1,%edi
+=> 0x000000000040100a <+10>:    48 be 00 20 40 00 00 00 00 00   movabs $0x402000,%rsi
+   0x0000000000401014 <+20>:    ba 0d 00 00 00  mov    $0xd,%edx
+   0x0000000000401019 <+25>:    0f 05   syscall 
+   0x000000000040101b <+27>:    b8 3c 00 00 00  mov    $0x3c,%eax
+   0x0000000000401020 <+32>:    48 31 ff        xor    %rdi,%rdi
+   0x0000000000401023 <+35>:    0f 05   syscall 
+--Type <RET> for more, q to quit, c to continue without paging--
+End of assembler dump.
+(gdb) si 
+0x0000000000401014 in _start ()
+(gdb) p $rsi
+$1 = 4202496
+(gdb) si 
+0x0000000000401019 in _start ()
+(gdb) p $edx
+$2 = 13
+(gdb) si 
+Hello, World
+0x000000000040101b in _start ()
+(gdb) si
+0x0000000000401020 in _start ()
+(gdb) p $eax
+$3 = 60
+(gdb) si
+0x0000000000401023 in _start ()
+(gdb) si
+[Inferior 1 (process 30278) exited normally]
+(gdb) q
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ ./hello_intel 
+Hello, World
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ echo $? #获取返回值
+0
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ 
+
+
+
+##################################################### 使用ddd对汇编生成的可执行程序(含有调试信息) 进行调试
+rm -rf /home/gos/.ddd
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ ddd hello_intel  #ddd算是gdb的GUI界面，gdb大部分指令都可以用
+Creating "/home/gos/.ddd/"...
+Creating "/home/gos/.ddd/"...done.
+Creating "/home/gos/.ddd/sessions/"...
+Creating "/home/gos/.ddd/sessions/"...done.
+Creating "/home/gos/.ddd/themes/"...
+Creating "/home/gos/.ddd/themes/"...done.
+
+下面进入ddd的界面
+推荐打开 
+    View -> Machine code window (汇编指令的窗口)
+    Status -> Registers (打开 通用寄存器 窗口)(即 默认勾选Integer registers)
+    Status -> Registers 然后在弹出的窗口中 勾选All registers(打开 全部寄存器)
+
+调试步骤和上面的一样，但是可以直接通过DDD窗口 进行调试(不需要输入gdb的调试指令  你也可以输入指令来调试)
+
+
+##################################################### 推荐一个汇编/逆向工程方面的一个工具
+idafree-7.0
+
+
+
+-----------------------------------P3 03代码示例-----------------------------------
+
+-----------------------------------汇编程序结构
+• LABELS: 标签
+• INSTRUCTIONS: 指令
+• OPERANDS: 操作数
+• DIRECTIVES: 指示
+• SECTIONS: 段
+https://cs.lmu.edu/~ray/notes/nasmtutorial/
+-----------------------------------
+
+
+-----------------------------------部分指令 - Intel style
+• mov x, y 操作 x ← y
+• and x, y 操作 x ← x and y
+• or x, y 操作 x ← x or y
+• xor x, y 操作 x ← x xor y
+• add x, y 操作 x ← x + y
+• sub x, y 操作 x ← x – y
+• inc x 操作 x ← x + 1
+• dec x 操作 x ← x – 1
+• syscall 操作 Invoke an operating system routine
+    系统调用
+• db 操作 A pseudo-instruction that declares bytes that will be in memory when the program runs
+    伪指令，指示 后面的内容是在内存中的 我们操作的时候会对这个位置所指定的数据进行操作
+-----------------------------------
+-----------------------------------操作数1 - 寄存器
+• 64位
+• 32位
+• 16位
+• 8位
+• R0…R3的8~15位
+• XMM寄存器 128bits
+-----------------------------------
+-----------------------------------操作数2 - 内存
+• [ number ]
+    访问number这个地址 处的数字
+• [ reg ]
+    访问寄存器 所指向位置 处的数
+• [ reg + reg*scale ]       scale is 1, 2, 4, or 8 only
+• [ reg + number ]
+• [ reg + reg*scale + number ]
+• 示例
+    • [750] ; displacement only
+    • [rbp] ; base register only
+    • [rcx + rsi*4] ; base + index * scale
+    • [rbp + rdx] ; scale is 1
+    • [rbx - 8] ; displacement is -8
+    • [rax + rdi*8 + 500] ; all four components
+    • [rbx + counter] ; uses the address of the variable 'counter' as the displacement
+-----------------------------------
+-----------------------------------操作数3 - 直接操作数
+• 200 ; decimal
+• 0200 ; still decimal - the leading 0 does not make it octal
+• 0200d ; explicitly decimal - d suffix
+• 0d200 ; also decimal - 0d prefex
+• 0c8h ; hex - h suffix, but leading 0 is required because c8h looks like a var
+• 0xc8 ; hex - the classic 0x prefix
+• 0hc8 ; hex - for some reason NASM likes 0h
+• 310q ; octal - q suffix
+• 0q310 ; octal - 0q prefix
+• 11001000b ; binary - b suffix
+• 0b1100_1000 ; binary - 0b prefix, and by the way, underscores are allowed
+-----------------------------------
+-----------------------------------数据定义
+• db 0x55 ; just the byte 0x55
+• db 0x55,0x56,0x57 ; three bytes in succession
+• db 'a',0x55 ; character constants are OK
+• db 'hello',13,10,'$' ; so are string constants
+• dw 0x1234 ; 0x34 0x12
+• dw 'a' ; 0x61 0x00 (it's just a number)
+• dw 'ab' ; 0x61 0x62 (character constant)
+• dw 'abc' ; 0x61 0x62 0x63 0x00 (string)
+• dd 0x12345678 ; 0x78 0x56 0x34 0x12
+• dd 1.234567e20 ; floating-point constant
+• dq 0x123456789abcdef0 ; eight byte constant
+• dq 1.234567e20 ; double-precision float
+• dt 1.234567e20 ; extended-precision float
+定义数据
+    db 1字节
+    dw 2字节
+    dd 4字节 及 float 
+    dq 8字节 及 double
+    dt 扩展的float
+-----------------------------------
+-----------------------------------预留空间
+• buffer: resb 64 ; reserve 64 bytes        64字节
+• wordvar: resw 1 ; reserve a word          2 字节
+• realarray: resq 10 ; array of ten reals
+-----------------------------------
+
+
+
+
+-----------------------------------asm调⽤C函数
+• 函数调⽤时参数传递约定
+• 整数和指针: rdi rsi rdx rcx r8 r9
+• 浮点数: xmm0 xmm1 xmm2 … xmm7
+• 其他参数被压⼊堆栈，⾃右⾄左，函数调⽤完毕后，由调⽤者负责清除
+• 返回值: 整数存储在rax或rdx:rax中，浮点数存储在xmm0或xmm1:xmm0中
+
+#在asm中调用C函数(记得使用gcc完成最后的链接)
+    global main     # main函数
+    extern puts     # 调用C中的puts函数
+    section .text   # 代码段开始
+main:                           ; This is called by the C library startup code
+    mov rdi, message            ; First integer (or pointer) argument in rdi
+    call puts                   ; puts(message)
+    ret                         ; Return from main back into C library wrapper
+message:
+    db  “Hello, world!”, 0 ; Note strings must be terminated with 0 in C
+
+#
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/03_asm_call_c/01_hello$ cat hello.asm 
+global    main
+extern    puts
+
+section   .text
+main:                             ; This is called by the C library startup code
+    mov       rdi, message            ; First integer (or pointer) argument in rdi
+    call      puts                    ; puts(message)
+    ret                               ; Return from main back into C library wrapper
+message:
+    db        "Hello, world!", 0        ; Note strings must be terminated with 0 in C
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/03_asm_call_c/01_hello$ cat Makefile 
+hello: hello.o
+        gcc -no-pie hello.o -o hello
+
+hello.o: hello.asm
+        nasm -felf64 hello.asm
+
+clean:
+        rm -f hello.o hello
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/03_asm_call_c/01_hello$ 
+
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/03_asm_call_c/02_fib$ cat fib.asm 
+; -----------------------------------------------------------------------------
+; A 64-bit Linux application that writes the first 90 Fibonacci numbers. To
+; assemble and run:
+;
+;     nasm -felf64 fib.asm && gcc fib.o && ./a.out
+; -----------------------------------------------------------------------------
+
+        global  main    #main函数
+        extern  printf  #调用C的printf函数
+
+        section .text   #代码段开始
+main:
+        push    rbx                     ; we have to save this since we use itASM
+
+        mov     ecx, 90                 ; ecx will countdown to 0           #
+        xor     rax, rax                ; rax will hold the current number  #把rax清零
+        xor     rbx, rbx                ; rbx will hold the next number     #把rbx清零
+        inc     rbx                     ; rbx is originally 1               #rbx自增 变为1 
+print:
+        ; We need to call printf, but we are using rax, rbx, and rcx.  printf
+        ; may destroy rax and rcx so we will save these before the call and
+        ; restore them afterwards.
+
+        push    rax                     ; caller-save register                  #0  初始值
+        push    rcx                     ; caller-save register                  #90 循环次数
+
+        mov     rdi, format             ; set 1st parameter (format)            #设置打印格式
+        mov     rsi, rax                ; set 2nd parameter (current_number)    #设置要打印的值  0 1 1 2
+        xor     rax, rax                ; because printf is varargs
+
+        ; Stack is already aligned because we pushed three 8 byte registers
+        call    printf                  ; printf(format, current_number)        #打印
+
+        pop     rcx                     ; restore caller-save register
+        pop     rax                     ; restore caller-save register
+
+        mov     rdx, rax                ; save the current number rdx           #0  1  1
+        mov     rax, rbx                ; next number is now current rax rbx    #1  1  2
+        add     rbx, rdx                ; get the new next number rbx           #1  2  3
+        dec     ecx                     ; count down #计数器减1
+        jnz     print                   ; if not done counting, do some more    #90没有减为0之前，跳回去执行，相当于C中的循环
+
+        pop     rbx                     ; restore rbx before returning
+        ret
+format: 
+        db  "%20ld", 10, 0
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/03_asm_call_c/02_fib$ cat Makefile 
+fib: fib.o
+        gcc -no-pie fib.o -o fib
+
+fib.o: fib.asm
+        nasm -g -felf64 fib.asm
+
+clean:
+        rm -f fib.o fib
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/03_asm_call_c/02_fib$ 
+-----------------------------------
+
+
+
+-----------------------------------C调⽤asm函数
+• 示例
+    • maxofthree.asm
+    • callmaxofthree.c
+• 关于跳转和条件检测
+    • s (sign 有符号位) z (zero 产生0) c (carry 有进位了) o (overflow 有溢出了)
+    • j: jump(跳转)  cmov: conditional move(有条件的move)  set: conditional set
+    • suffix: 
+        s(有符号位) ns(无符号位) z(是0) nz(不是0) c(有进位) nc(无进位) o no(没有溢出) 
+        p np pe po 
+        e ne l nl le nle(不小于等于) 
+        g(大于) ng(不大于) ge(大于等于) nge 
+        a na ae nae b nb be nbe 
+        (30种)
+• 示例
+    • cmovno x, y - 如果没有overflow, 则x←y  #cmov no
+    • setc x - 如果c被设置 则x←1, 否则x←0     #
+
+
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/04_c_call_asm$ cat maxofthree.asm  #被调用的汇编代码
+; -----------------------------------------------------------------------------
+; A 64-bit function that returns the maximum value of its three 64-bit integer
+; arguments.  The function has signature:
+;
+;   int64_t maxofthree(int64_t x, int64_t y, int64_t z)
+;
+; Note that the parameters have already been passed in rdi, rsi, and rdx.  We
+; just have to return the value in rax.
+; -----------------------------------------------------------------------------
+
+        global  maxofthree
+        section .text
+maxofthree:
+        mov     rax, rdi                ; result (rax) initially holds x    #保存了第一个参数
+        cmp     rax, rsi                ; is x less than y?                 #比较第一个参数和第二个参数 
+        cmovl   rax, rsi                ; if so, set result to y            #把较大的放在rax里
+        cmp     rax, rdx                ; is max(x,y) less than z?          #和第三个比较
+        cmovl   rax, rdx                ; if so, set result to z            #把较大的放在rax里
+        ret                             ; the max will be in rax            #return rax
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/04_c_call_asm$ cat callmaxofthree.c #C代码
+/*
+ * A small program that illustrates how to call the maxofthree function we wrote in
+ * assembly language.
+ */
+
+#include <stdio.h>
+#include <inttypes.h>
+
+int64_t maxofthree(int64_t, int64_t, int64_t);
+
+int main() {
+    printf("%ld\n", maxofthree(1, -4, -7));
+    printf("%ld\n", maxofthree(2, -6, 1));
+    printf("%ld\n", maxofthree(2, 3, 1));
+    printf("%ld\n", maxofthree(-2, 4, 3));
+    printf("%ld\n", maxofthree(2, -6, 5));
+    printf("%ld\n", maxofthree(2, 4, 6));
+    return 0;
+}
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/04_c_call_asm$ cat Makefile  #Makefile文件
+maxofthree: maxofthree.o callmaxofthree.c
+        gcc -o maxofthree callmaxofthree.c maxofthree.o
+
+maxofthree.o: maxofthree.asm
+        nasm -g -felf64 maxofthree.asm
+
+clean:
+        rm -f maxofthree.o maxofthree
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/04_c_call_asm$ 
+-----------------------------------
+
+
+
+
+-----------------------------------命令⾏参数的处理
+• int main(int argc,char** argv)
+    • argc ← rdi
+    • argv ← rsi
+
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 05_argc_argv/echo.asm  #汇编文件
+; -----------------------------------------------------------------------------
+; A 64-bit program that displays its command line arguments, one per line.
+;
+; On entry, rdi will contain argc and rsi will contain argv.
+; -----------------------------------------------------------------------------
+
+        global  main
+        extern  puts    ;使用puts函数 对字符串进行输出
+        section .text
+main:
+        push    rdi                     ; save registers that puts uses ; 保存现场 rdi存储了argc
+        push    rsi                                                     ; 保存现场 因为执行过程中要对rdi rsi做一些修改 rsi存储了argv
+        sub     rsp, 8                  ; must align stack before call          ;对栈中的字节进行对齐
+        mov     rdi, [rsi]              ; the argument string to display;把 每个参数(字符串 argcv[0] argv[1]...)的首地址 赋给rdi
+        call    puts                    ; print it                      ;打印每个参数
+        add     rsp, 8                  ; restore %rsp to pre-aligned value     ;对栈中的字节进行对齐
+        pop     rsi                     ; restore registers puts used   ;恢复现场
+        pop     rdi                                                     ;恢复现场
+
+        add     rsi, 8                  ; point to next argument        ;rsi指向下一个地址
+        dec     rdi                     ; count down                    ;计数器减1
+        jnz     main                    ; if not done counting keep going;计数器没有减到0的话，接着执行main
+
+        ret
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 05_argc_argv/Makefile 
+
+echo: echo.o 
+        gcc -no-pie -o echo echo.o
+
+echo.o: echo.asm
+        nasm -g -felf64 echo.asm
+
+clean:
+        rm -f echo.o echo
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ 
+-----------------------------------
+
+
+
+
+-----------------------------------浮点数的处理 - 1
+• xmm寄存器的使⽤
+    • rdi ← test
+    • rsi ← number
+
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 06_floating_point/sum.asm #汇编文件 求数组元素的和
+; -----------------------------------------------------------------------------
+; A 64-bit function that returns the sum of the elements in a floating-point
+; array. The function has prototype:
+;
+;   double sum(double[] array, uint64_t length)  rdi是数组首地址  rsi是长度
+; -----------------------------------------------------------------------------
+
+        global  sum
+        section .text
+sum:
+        xorpd   xmm0, xmm0              ; initialize the sum to 0       ;自己和自己异或，相当于把xmm0清空
+        cmp     rsi, 0                  ; special case for length = 0   ;比较长度是不是为0
+        je      done                                                    ;若是0，则直接结束
+next:
+        addsd   xmm0, [rdi]             ; add in the current array element ;把当前指向的数组元素 加到 addsd上
+        add     rdi, 8                  ; move to next array element       ;移动到下一个数组元素的位置
+        dec     rsi                     ; count down                       ;长度-1
+        jnz     next                    ; if not done counting, continue   ;如果长度不等于0，继续执行
+done:
+        ret                             ; return value already in xmm0
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 06_floating_point/callsum.c #C文件 调用汇编代码 求浮点数组的和
+/*
+ * Illustrates how to call the sum function we wrote in assembly language.
+ */
+
+#include <stdio.h>
+#include <inttypes.h>
+
+double sum(double[], uint64_t);
+
+int main() {
+    double test[] = {
+        40.5, 26.7, 21.9, 1.5, -40.5, -23.4
+    };
+    printf("%20.7f\n", sum(test, 6));
+    printf("%20.7f\n", sum(test, 2));
+    printf("%20.7f\n", sum(test, 0));
+    printf("%20.7f\n", sum(test, 3));
+    return 0;
+}
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 06_floating_point/Makefile #Makefile
+sum: sum.o callsum.c
+        gcc -o sum callsum.c sum.o
+
+sum.o: sum.asm
+        nasm -g -felf64 sum.asm
+
+clean:
+        rm -f sum.o sum
+-----------------------------------
+
+
+-----------------------------------浮点数的处理 -2
+•cvtsi2sd xmmreg, r/m32                 #把int转为double    d double 双精度
+    •xmmreg[63..0] ← intToDouble(r/m32) #村到xmm0的低8字节
+•cvtsi2ss xmmreg, r/m32                 #把int转为float     s single单精度
+    •xmmreg[31..0] ← intToFloat(r/m32)
+•cvtsd2si reg32, xmmr/m64
+    •reg32 ← doubleToInt(xmmr/m64)
+•cvtss2si reg32, xmmr/m32
+    •reg32 ← floatToInt(xmmr/m32)
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 07_average_cmdline_arguments/average.asm #汇编代码
+; -----------------------------------------------------------------------------
+; 64-bit program that treats all its command line arguments as integers and
+; displays their average as a floating point number.  This program uses a data
+; section to store intermediate results, not that it has to, but only to
+; illustrate how data sections are used.
+; -----------------------------------------------------------------------------
+
+        global   main   ;main函数
+        extern   atoi   ;把字符串转成整数
+        extern   printf ;打印
+        default  rel
+
+        section  .text  ;代码段
+main:
+        dec      rdi                    ; argc-1, since we don't count program name ;argc至少是1
+        jz       nothingToAverage                                                   ;如果argc-1后是0，证明没有任何参数，直接跳转返回
+        mov      [count], rdi           ; save number of real arguments
+accumulate:     ;累加
+        push     rdi                    ; save register across call to atoi     ;这两个我们要使用，先保存起来
+        push     rsi                                                            ;
+        mov      rdi, [rsi+rdi*8]       ; argv[rdi]                             ;把每个命令行参数的首地址 赋给rdi
+        call     atoi                   ; now rax has the int value of arg      ;把参数(字符串)转换为数字
+        pop      rsi                    ; restore registers after atoi call
+        pop      rdi
+        add      [sum], rax             ; accumulate sum as we go               ;累加到sum这块内存中去                   
+        dec      rdi                    ; count down
+        jnz      accumulate             ; more arguments?
+average:        ;求平均数
+        cvtsi2sd xmm0, [sum]    ;cvtsi2sd把[sum]中的int转成double 并存到xmm0的后8字节里
+        cvtsi2sd xmm1, [count]  ;cvtsi2sd把[count]中的int转成double 并存到xmm1的后8字节里
+        divsd    xmm0, xmm1             ; xmm0 is sum/count     ;求平均值
+        mov      rdi, format            ; 1st arg to printf                             ;给printf设定输出格式
+        mov      rax, 1                 ; printf is varargs, there is 1 non-int argument;告诉printf 有一个不是整数的参数
+
+        sub      rsp, 8                 ; align stack pointer           ;栈对齐
+        call     printf                 ; printf(format, sum/count)     ;输出
+        add      rsp, 8                 ; restore stack pointer         ;
+
+        ret
+
+nothingToAverage:
+        mov      rdi, error
+        xor      rax, rax
+        call     printf
+        ret
+
+        section  .data
+count:  dq       0
+sum:    dq       0
+format: db       "%g", 10, 0
+error:  db       "There are no command line arguments to average", 10, 0
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 07_average_cmdline_arguments/Makefile #Makefile文件
+
+
+average: average.o 
+        gcc -no-pie -o average average.o
+
+average.o: average.asm
+        nasm -g -felf64 average.asm
+
+clean:
+        rm -f average.o average
+
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ 
+
+-----------------------------------
+
+
+-----------------------------------其他示例
+• 递归调⽤
+    • factorial.asm
+    • callfactorial.c
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 08_recursion/callfactorial.c # 阶乘 C语言
+/*
+ * An application that illustrates calling the factorial function defined elsewhere.
+ */
+
+#include <stdio.h>
+#include <inttypes.h>
+
+uint64_t factorial(uint64_t n);
+
+int main() {
+    for (uint64_t i = 0; i < 20; i++) {
+        printf("factorial(%2lu) = %lu\n", i, factorial(i));
+    }
+    return 0;
+}
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 08_recursion/factorial.asm #汇编实现阶乘函数
+; ----------------------------------------------------------------------------
+; An implementation of the recursive function:
+;
+;   uint64_t factorial(uint64_t n) {
+;       return (n <= 1) ? 1 : n * factorial(n-1);
+;   }
+;  
+;   传进去的参数 放在 rdi 里面
+; ----------------------------------------------------------------------------
+
+        global  factorial
+
+        section .text
+factorial:
+        cmp     rdi, 1                  ; n <= 1?
+        jnbe    L1                      ; if not, go do a recursive call        ; >1 跳转到L1
+        mov     rax, 1                  ; otherwise return 1
+        ret
+L1:
+        push    rdi                     ; save n on stack (also aligns %rsp!)
+        dec     rdi                     ; n-1
+        call    factorial               ; factorial(n-1), result goes in %rax
+        pop     rdi                     ; restore n
+        imul    rax, rdi                ; n * factorial(n-1), stored in %rax    ; 1*....(n-1)*n ;imul是整数的乘
+        ret
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 08_recursion/Makefile #Makefile文件
+factorial: factorial.o callfactorial.c
+        gcc -o factorial callfactorial.c factorial.o
+
+factorial.o: factorial.asm
+        nasm -g -felf64 factorial.asm
+
+clean:
+        rm -f factorial.o factorial
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ 
+
+
+
+
+• SIMD多数据并⾏处理
+    • add_four_floats.asm
+    • test_add_four_floats.c
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 09_SIMD/test_add_four_floats.c # C语言 调用汇编代码
+#include <stdio.h>
+void add_four_floats(float[], float[]); //汇编实现
+
+int main() {
+    float x[] = {-29.750, 244.333, 887.29, 48.1E22};
+    float y[] = {29.750,  199.333, -8.29,  22.1E23};
+    add_four_floats(x, y);
+    printf("%f\n%f\n%f\n%f\n", x[0], x[1], x[2], x[3]);
+    return 0;
+}
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 09_SIMD/add_four_floats.asm #汇编代码，实现了对浮点数的运算
+; void add_four_floats(float x[4], float y[4])
+; x[i] += y[i] for i in range(0..4)
+
+        global   add_four_floats
+        section  .text
+
+add_four_floats:
+        movdqa   xmm0, [rdi]            ; all four values of x  ;把x中的4个float(32bit)拼接在一起 放在xmm0里 因为xmm0刚好128bit
+        movdqa   xmm1, [rsi]            ; all four values of y  ；把y中的...xmm1
+        addps    xmm0, xmm1             ; do all four sums in one shot  ;相加后的结果存在xmm0里
+        movdqa   [rdi], xmm0                                            ;把xmm0的地址，赋给[rdi]([rdi]代表了传进来的x) 因为rdi是返回值
+        ret
+
+; The XMM registers can do arithmetic on floating point values one operation at a time (scalar) or multiple operations at a time (packed). The operations have the form:
+
+; op xmmreg_or_memory, xmmreg
+; For floating point addition, the instructions are:
+
+; addpd         do 2 double-precision additions in parallel (add packed double)
+; addsd do just one double-precision addition, using the low 64-bits of the register (add scalar double)
+; addps do 4 single-precision additions in parallel (add packed single)
+; addss do just one single-precision addition, using the low 32-bits of the register (add scalar single)
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ cat 09_SIMD/Makefile #Makefile文件
+add_four_floats: add_four_floats.o test_add_four_floats.c
+        gcc -o add_four_floats test_add_four_floats.c add_four_floats.o
+
+add_four_floats.o: add_four_floats.asm
+        nasm -g -felf64 add_four_floats.asm
+
+clean:
+        rm -f add_four_floats.o add_four_floats
+
+
+gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master$ 
+-----------------------------------
+-----------------------------------
