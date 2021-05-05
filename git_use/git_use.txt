@@ -42,3 +42,10 @@ git status
 #查询仓库中某个版本的某个文件夹下有多少文件
 #https://www.zhihu.com/question/50772668
 git ls-tree HEAD | awk '{if($2="blob"){print $0}}' | wc -l
+
+
+
+安装gitKraken for free  (Git的可视化工具)
+
+```bash
+```
