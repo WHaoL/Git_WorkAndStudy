@@ -52,8 +52,11 @@ LDAP-RFC
       LDAP: Schema for User Applications [RFC4519]
 
 
-https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方2.4版本的手册
+https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP官方2.4版本的手册
 ----------------------------------------------------------------------------------
+
+    OpenLDAP: 通过IP协议提供访问控制和维护分布式信息的目录信息
+
     每个entry
         含有一堆属性(attributes)和一个DN(a globally-unique Distinguished Name)
         DN用来引用entry
@@ -66,30 +69,60 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
     LDAPv3在1990年代后期开发，以取代LDAPv2。
 
     ------------chapter 04-官网推荐的配置和安装步骤--------------------------------------------------------------
-    
+4.1. 获取和提取软件
     gunzip -c openldap-VERSION.tgz | tar xf -
     cd openldap-VERSION
+    #查看发行版随附的 COPYRIGHT，LICENSE，README 和 INSTALL 文档
 
-    安装 OpenSSL，GnuTLS，or MozNSS      to provide Transport Layer Security services.
-    安装 Cyrus SASL                     to provide Simple Authentication and Security Layer services. 
+4.2. 必备软件
+4.2.1. 传输层安全
+    OpenLDAP 客户端和服务器需要安装 OpenSSL，GnuTLS 或 MozNSS TLS库 以提供传输层安全性服务。
+    安装 OpenSSL，GnuTLS，or MozNSS      to provide Transport Layer Security services.                   # TLS
+
+4.2.2. 简单身份验证和安全层
+    OpenLDAP 客户端和服务器需要安装 Cyrus SASL库 以提供简单的身份验证和安全层服务。
+    安装 Cyrus SASL                     to provide Simple Authentication and Security Layer services.   # SASL
+
+4.2.3. Kerberos 身份验证服务
+    OpenLDAP 客户端和服务器支持 Kerberos 身份验证服务
     安装 Kerberos                        为了提供强大的身份验证机制 
 
-    OpenLDAP 的 slapd(8)MDB 主数据库后端使用 OpenLDAP 源附带的 LMDB 软件
-    OpenLDAP 的 slapd(8)BDB 和 HDB 使用的数据库后端需要 Oracle Corporation 的 Berkeley DB
+4.2.4. 数据库软件
+    OpenLDAP 的slapd MDB主数据库后端 使用OpenLDAP自身附带的LMDB软件
+    OpenLDAP 的slapd BDB和HDB的数据库后端 需要 Oracle Corporation的Berkeley DB
 
+4.2.5. 多线程
     openLDAP 支持各种品种的线程
 
-    slapd(8)支持 TCP Wrappers(IP 级别访问控制过滤器)，对于包含非公共信息的服务器，建议使用 TCP Wrappers 或其他 IP 级别的访问过滤器(例如 IP 级别的防火墙提供的过滤器)。
+4.2.6. TCP Wrappers
+    slapd(8)支持 TCP Wrappers(IP级别的访问控制过滤器)。
+        对于包含非公共信息的服务器，建议使用 TCP Wrappers 或其他 IP级别的访问过滤器(例如 IP级别的防火墙提供的过滤器)。
+            后面会讲到，对于IP级别的防控： 不推荐使用TCP Wrappers，建议使用防火墙
 
-    ./configure --help
+4.3. 运行配置
+    ./configure --help      #查看可用选项
     ./configure [options] [variable=value ...]
 
-    #启用 TCP Wrappers(默认没有启用)
-    ./configure --enable-wrappers
+    配置脚本还在命令行和环境中查找某些变量
+            CC          C编译器
+            CFLAGS      C编译选项
+            CPPFLAGS    C预处理选项
+            LDFLAGS     链接选项
+            LIBS        库
 
-    ./configure --enable-wrappers     \
-    CPPFLAGS="-I/usr/local/include"   \
-    LDFLAGS="-L/usr/local/lib -Wl,-rpath,/usr/local/lib"
+    #举例子：
+        启用 TCP Wrappers(默认没有启用)
+        ./configure --enable-wrappers
+        如果TCP Wrappers 头文件和库分别安装在/usr/local/include 和/usr/local/lib 中
+            ./configure --enable-wrappers     \
+                CPPFLAGS="-I/usr/local/include"   \
+                LDFLAGS="-L/usr/local/lib -Wl,-rpath,/usr/local/lib"
+
+4.4. 编译软件
+
+    #运行配置脚本后，输出的最后一行应为：
+        Please "make depend" to build dependencies
+    否则根据 提示及具体平台 检查配置选项
 
     #构建依赖
     make depend
@@ -97,37 +130,53 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
     #编译
     make
 
-    #测试
+4.5. 测试软件
+    #测试 如果您的配置不支持某些测试，例如复制测试，则可以跳过。
     make test
 
+4.6. 安装软件
     #默认安装目录是 /usr/local ， 也可以在运行配置脚本时通过--prefix指定
     #安装   通常，安装需要超级用户权限
     su root -c 'make install'
 
     #你将在 /usr/local/etc/openldap 或者 /etc/openldap 找到slpad(8)的配置文件
     
+
+
+
     ------------chapter 05-配置 slapd--------------------------------------------------------------
 
-    OpenLDAP2.3及更高版本 开始使用：运行时动态配置引擎 slapd-config(5)，
-        配置数据存储在LDIF数据库中，通常在/usr/local/etc/openldap/slapd.d/ 或者/etc/openldap/slapd.d/ 目录中；
-        允许即时更改slapd的所有配置选项，通常无需重新启动服务器即可使更改生效
+5. 配置 slapd
+
+    OpenLDAP2.3及更高版本 开始使用：运行时 动态配置引擎slapd-config(5)，
+        1.完全启用 LDAP
+        2.使用 标准LDAP操作(ldapmodify...) 进行管理
+        3.配置数据存储在LDIF数据库中，通常在/usr/local/etc/openldap/slapd.d/ 或者/etc/openldap/slapd.d/ 目录中；
+        4.允许即时更改slapd的所有配置选项，通常无需重新启动服务器即可使更改生效
     
-    通过slapd.conf配置slap(8)将在chapter06介绍
-        如何使slapd自动从slapd.conf(5)转换为 slapd-config(5)的信息
+    最新版本中已经不使用slapd.conf，使用slapd-config
+        虽然目前支持slapd.conf
+        但将来的版本将不支持
+    通过slapd.conf配置slap将在chapter06介绍
+        如何使slapd自动从slapd.conf转换为 slapd-config的信息
     
     注意：尽管 lapd-config(5)系统将其配置存储为(基于文本的)LDIF 文件，但是您绝对不要直接编辑任何LDIF文件。
-        配置更改应通过LDAP操作执行，例如 ldapadd(1)，ldapdelete(1)或 ldapmodify(1)
+        配置更改应通过LDAP操作执行，
+        例如 ldapadd，ldapdelete或 ldapmodify
 
+5.1. Configuration Layout
+5.1. 配置布局
 
-    slapd 配置存储为具有预定义schema(模式)和 DIT 的特殊 LDAP 目录。
+    slapd配置存储为 具有预定义schema(模式)和DIT的 特殊LDAP目录。
         有一些特定的objectClasses用于承载全局配置选项，模式定义，后端和数据库定义以及各种其他项目。
-        slapd-config 配置树具有非常具体的结构。
-            树的根名为 cn=config 并包含全局配置设置。
-            其他设置包含在单独的子条目中
-        Dynamically loaded modules
-        Schema definitions
-        Backend-specific configuration
-        Database-specific configuration
+        
+    slapd-config 配置树具有非常具体的结构。
+        树的根名为 cn=config 并包含全局配置设置。
+        其他设置包含在单独的子条目中
+            Dynamically loaded modules      #module     # --enable-modules配置后才能使用该功能
+            Schema definitions              #schema     # 包含了：从配置文件加载或者运行时添加的 user schema
+            Backend-specific configuration              # 定义在数据库条目的子级(下一级)中
+            Database-specific configuration #olcDatabase
     
     图 5.1 中显示了一个示例 配置树(configuration tree.)
                         -----------------------
@@ -148,10 +197,10 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
                     |cn={0}core |   |cn={1}cosine |
                     |Core schema|   |COSINE schema|
 
-    LDIF文件的通常规则适用于配置信息：
+    LDIF格式的配置文件，规则如下：
         以'#'字符开头的注释行将被忽略。
         如果一行以单个空格开头，则将其视为前一行的延续(即使前一行是注释)，并且会删除单个前导空格。
-        条目由空白行分隔。
+        各个条目由空白行分隔。
 
     LDIF 配置的总体布局如下：
         ----------------------------------
@@ -193,13 +242,14 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         ----------------------------------
     
     LDAP数据库本质上是无序的。
-        数字索引用于在配置数据库中强制执行一致的排序，以便保留所有排序依存关系。
-        在大多数情况下，不必提供索引。它会根据条目的创建顺序自动生成。
+        数字索引 {X} 
+            用于在配置数据库时 强制执行一致的排序，以便保留所有排序依存关系。
+            在大多数情况下，不必提供索引。它会根据条目的创建顺序自动生成。
     
-    slapd 配置中使用的大多数属性和 objectClasses 的名称中都带有前缀“olc”(OpenLDAP 配置)
-        使用关键字作为属性名称，并附加“olc”前缀
+    slapd 配置中使用的 大多数属性 和 objectClasses 的名称中都带有前缀“olc”( olc是 OpenLDAP Configuration的简写 )
+        通常 属性 == “olc”前缀 + 旧式slapd.conf配置文件的关键字
     
-    配置指令可以带有参数
+    配置指令的参数：
         参数中若有空格，则用""把参数括起来
         <> 应该用实际参数替换
     
@@ -207,8 +257,13 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         在/usr/local/etc/openldap 或/etc/openldap 目录中。
         /usr/local/etc/openldap/schema/ 或/etc/openldap/schema/ 目录中还提供了许多包含模式定义的文件(属性类型和对象类)。
 
-    --------------------下面将从 cn=config 条目中的全局指令开始，详细介绍常用的配置指令-------------------------
-    --------------------cn=config 
+
+5.2. Configuration Directives
+5.2. 配置指令
+    下面将从 cn=config 条目中的全局指令开始，详细介绍常用的配置指令
+
+5.2.1. cn=config
+    
     cn=config
         此条目中包含的指令通常适用于整个服务器。
         它们大多数是面向系统或面向连接的，与数据库无关。
@@ -222,23 +277,25 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
     olcLogLevel: <level>
         指定 调试语句 和 操作统计信息 应进行 syslog 的级别(当前记录到 syslogd(8)LOG_LOCAL4 设备)。
         必须配置 OpenLDAP --enable-debug(默认设置)才能正常工作(两个统计级别除外，它们始终处于启用状态)。
-            注意：slapd 必须已经使用--enable-debug 进行编译
+            注意：必须已经使用--enable-debug 进行编译
+        
         日志级别可以指定为整数或关键字。
         可以使用多个日志级别，并且这些级别是可叠加的。
+        
         要显示 哪种级别对应哪种调试，调用 slapd 的时候加上-d?
             slapd -d?
         
         <level>的可能值为：
                 Table 5.1: Debugging Levels
             Level	Keyword	        Description
-            -1	    any	            enable all debugging
-            0	 	                no debugging
+            -1	    any	            enable all debugging                        #打开全部日志
+            0	 	                no debugging                                #不包含调试信息
             1	    (0x1 trace)	    trace function calls
             2	    (0x2 packets)	debug packet handling
             4	    (0x4 args)	    heavy trace debugging
-            8	    (0x8 conns)	    connection management
+            8	    (0x8 conns)	    connection management                       #connection
             16	    (0x10 BER)	    print out packets sent and received
-            32	    (0x20 filter)	search filter processing
+            32	    (0x20 filter)	search filter processing                    #filter
             64	    (0x40 config)	configuration processing
             128	    (0x80 ACL)	    access control list processing
             256	    (0x100 stats)	stats log connections/operations/results
@@ -257,11 +314,11 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
         示例：
             olcLogLevel -1           #记录大量调试信息
             olcLogLevel conns filter #只 记录连接和搜索过滤器处理
-            olcLogLevel none         #仅记录任何设置的日志级别的消息，无论级别如何；但是没有日志放生时不等同于0
+            olcLogLevel none         #仅记录任何设置的日志级别的消息，无论级别如何；但是没有日志发生时不等同于0
             olcLogLevel stats        #默认情况下 配置 基本统计日志；如果从未定义过olcLogLevel，则不会发生任何日志记录(相当于 0 级)
     
     olcReferral: <URI>
-        当 slapd 找不到本地数据库来处理请求时，指定要传回的引用
+        当 slapd 找不到本地数据库来处理请求时，指定要传回的引用(即：指定能处理此次请求的slapd server)
         如  olcReferral: ldap://root.openldap.org
 
     以上几个配置指令的 一个简单使用示例 Sample Entries(示例条目)如下：
@@ -3650,18 +3707,65 @@ https://www.openldap.org/doc/ OpenLDAP 2.4 Administrator's Guide  OpenLDAP官方
     复制目录是交付企业弹性部署的基本需求。
 
     multimaster
+
+    OpenLDAP复制 相关术语， 
+        provider/multi-provider和consumer: 
+            provider可以接受外部写操作并将其提供给consumer以供检索;
+            consumer向provider请求复制更新。
+        与严格定义的master/slave关系不同，provider/consumer角色非常灵活：
+            consumer中接收的复制更新可以由该consumer进一步传播到其他服务器，因此consumer也可以同时充当provider。
+            而且，consumer不必是实际的 LDAP 服务器,它可能只是一个 LDAP 客户端。
     
-    由于OpenLDAP现在支持多种复制拓扑，
-        这些术语已经被提供者/多提供者和使用者所取代:
-            提供者可以接受外部写操作，并让使用者可以检索它们;
-            使用者向提供者请求复制更新。
-        与严格定义的主/从关系不同，提供者/使用者角色是非常流动的:
-            在使用者中接收到的复制更新可以由该使用者进一步传播到其他服务器，因此使用者也可以同时充当提供者。
-            此外，使用者不必是实际的LDAP服务器;它可能只是一个LDAP客户机。
+    以下各节将介绍复制技术并讨论可用的各种复制选项。
 
 
+    18.1. 复制技术(Replication Technology) 
 
-以下部分将描述复制技术，并讨论各种可用的复制选项。
+        18.1.1. 同步复制(LDAP Sync Replication)
+            
+            LDAP同步复制引擎（简称 syncrepl）
+                是消费者方的复制引擎，
+                使消费者(consumer)LDAP服务器能够维护 DIT 片段的卷影副本。
+            syncrepl引擎驻留在consumer上，并作为 slapd线程之一执行。
+                它通过连接到 复制provider程序以执行 初始DIT内容加载，
+                然后进行 定期内容轮询或根据内容更改及时更新 来创建和维护副本。
+            
+            Syncrepl 使用 LDAP内容同步协议（或简称 LDAP Sync）作为consumer同步协议。 
+                LDAP Sync提供有状态复制，该状态复制支持基于拉式和基于推式的同步，并且不要求使用历史记录存储。
+                    在基于 拉取 的复制中，consumer定期轮询provider以获取更新。
+                    在基于 推送 的复制中，consumer可以实时收听provider发送的更新。
+                由于该协议不需要历史记录存储，因此提供程序不需要维护已收到的任何更新日志
+                （请注意，syncrepl 引擎是可扩展的，将来可能会支持其他复制协议。）。
+            
+            Syncrepl通过维护和交换 同步cookie 来跟踪复制内容的状态。
+                因为 syncrepl consumer和provider保持其内容状态，
+                    consumer可以通过轮询 provider的内容 (拿到: 能使得consumer和provider保持最新同步 所需的条目) 以执行增量同步。
+            Syncrepl 还可以通过 维护复制状态 来方便地管理consumer。
+                consumer数据库 可以从 consumer端或provider端 的备份 以任何同步状态构建。
+                Syncrepl 可以自动将consumer数据库与最新的provider内容重新同步。
+
+            Syncrepl 支持基于拉和基于推的同步。
+                在基本的 refreshOnly 同步模式下，
+                    provider使用基于"拉"的同步，
+                        在这种情况下，无需跟踪consumer服务器，并且不维护任何历史记录信息。
+                        provider 处理 定期轮询 请求所需的信息 包含在 请求本身的同步cookie中。
+                    为了优化基于拉取的同步，syncrepl 利用了 LDAP Sync协议的 当前阶段及其删除阶段，而不是依靠频繁的完全重载来进行回退。
+                    为了进一步优化基于拉的同步，provider可以将 每个作用域的会话日志 作为历史记录存储。
+                在其 refreshAndPersist 同步模式下，
+                    provider使用基于"推"的同步。
+                    provider跟踪 请求了持久搜索的consumer服务器，并在provider复制内容被修改时向它们发送必要的更新。
+            
+            如果consumer服务器具有要复制的 DIT 片段的适当访问特权，则使用 syncrepl，
+                consumer可以创建一个复制协议而无需更改provider的配置，也无需重新启动provider服务器。
+                使用者服务器也可以停止复制，也是无需更改provider端和重新启动。
+
+            Syncrepl 支持部分，稀疏和部分复制。
+                影子 DIT 片段由常规搜索标准定义，该标准由 base，scope，filter 和 attribute list 组成。
+                consumer内容还受 syncrepl 复制连接的绑定标识的访问特权的约束。
+        
+        18.1.1.1. The LDAP Content Synchronization Protocol
+18.1.1.1. LDAP 内容同步协议
+
             -----------------------------------    
             -----------------------------------    
             -----------------------------------    

@@ -1,0 +1,9 @@
+slaptest 
+    出现错误：
+        bdb_db_open: warning – no DB_CONFIG file found in directory /var/lib/ldap: 
+    解决：
+        [root@localhost ldap]# locate DB_CONFIG
+        /usr/share/openldap-servers/DB_CONFIG.example
+        [root@localhost ldap]# mkdir -p /var/lib/ldap
+        [root@localhost ldap]# cp  /usr/share/openldap-servers/DB_CONFIG.example   /var/lib/ldapDB_CONFIG
+        [root@localhost ldap]# slaptest 

@@ -80,14 +80,14 @@
 	把dn当做用户唯一主键， 
 
 	cn是common name,应该等同于用户名，因为用户名必须唯一，通常为邮箱前缀，
-	比如ryan.miao.sn作为姓氏， uid作为用户id。通常用户id也是唯一的。
+	比如ryan.miao.sn作为姓氏， uid作为用户id 通常用户id也是唯一的。
 	所以在使用ldap做认证的时候，
 	大概逻辑如下：
 		配置ldap host, admin, admin pass
 		用户登录时传递username
 		读取配置的ldap信息，查询cn或者uid等于username的数据
 		取出第一个记录， 获得dn， 根据dn和password再次去ldap服务器认证。
-			即我们必须保证cn或uid是全局唯一的，
+			我们必须保证cn或uid是全局唯一的，
 			认证通常需要进行两次。原因就在于dn没办法根据用户名计算出来。
 	
 	o->   organization（组织-公司）
@@ -238,8 +238,9 @@
 	4.6文件：cn=config.ldif 用于指定全局配置
 		默认配置文件，位于/etc/openldap/slapd.d/
 	4.7文件：olcDatabase={2}hdb.ldif
-		db存储格式，有bdb和hdb两种，这里是hdb。可以直接查看文件，也可以使用下面命令查询：
-    	ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config dn | grep olcDatabase
+		db存储格式，有bdb和hdb两种，这里是hdb。
+			可以直接查看文件，也可以使用下面命令查询：
+    		ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config dn | grep olcDatabase
 
 ----------------------------------------------------------------------------------
 	
@@ -259,7 +260,7 @@
 	mkdir ～/ldap
 	cd ~/ldap
 
-	5.1 [root@bogon ldap]# vim rootdn.ldif 
+	5.1 [root@bogon ldap]# vim 01_rootdn.ldif 
 		---------------------
 		dn: olcDatabase={2}hdb,cn=config
 		changetype: modify
@@ -290,18 +291,18 @@
 		其中cn=config是全局配置，必须包含objectClass: olcGlobal（配置文件 cn=config.ldif）
 	----------------------------------------------------------------------------------
 	5.2 然后创建changeroot.sh
-		[root@bogon ldap]# vim changeroot.sh 
+		[root@bogon ldap]# vim 01_changeroot.sh 
 		---------------------
 		admin_pass=`slappasswd -s admin`
 		echo "admin pass is:  ${admin_pass}"
-		sed "s!<pass>!${admin_pass}!g"   rootdn.ldif > tmp.ldif
+		sed "s!<pass>!${admin_pass}!g"   rootdn.ldif > 01_tmp.ldif
 		
 		echo "备份默认配置"
 		cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif     \
 		   /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.bak
 		
 		echo "将要修改的内容："
-		cat tmp.ldif
+		cat 01_tmp.ldif
 		
 		ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f tmp.ldif
 
@@ -313,19 +314,18 @@
 	关于这个配置文件的说明
 		1.获取加密后的密码：
 		slappasswd -s admin
-			使用slappasswd命令可以生成LDAP管理员密码(加密后的密码)。
+			使用slappasswd命令可以生成LDAP管理员密码(对 admin 加密后的密文)。
 			然后下面几条语句是将密码写入slapd.d/下面的配置文件中去
-		2.备份原始文件
+		2.备份原始配置文件
 		3.ldapmodify(更新配置的命令)的参数使用
 			具体参数 查看 命令文档: http://man7.org/linux/man-pages/man1/ldapmodify.1.html
 			修改管理员秘密可以参考：https://blog.csdn.net/developerinit/article/details/76141065
 				-H 指定host(指定ldap的服务器)，这里 ldapi:/// 表示IPC (Unix-domain socket)协议， 
 				-f 指定变更的内容来源(文件)。 
 				-Y 指定验证机制(client和server之间的应答过程以及传输内容的编码方式)
-					//本地执行，修改配置文件，这个最可信
-					//(不确定) 还有一种说法：EXTERNAL 是以太网协议；不指定的话，似乎直接使用TCP/IP
 				-Q 安静的执行
-			ldapmodify -Y EXTERNAL -H ldapi:/// -f tmp.ldif
+		
+		ldapmodify -Y EXTERNAL -H ldapi:/// -f tmp.ldif
 				利用 tmp.ldif 中的内容修改管理员密码
 
 		4.diff -Nur 查看更改了哪些内容
@@ -334,6 +334,7 @@
 				参数 https://blog.csdn.net/qwe15954250805/article/details/79057821
 	执行
 		[root@bogon ldap]# bash changeroot.sh 
+		[root@bogon ldap]# ldapmodify -Y EXTERNAL -H ldapi:/// -f tmp.ldif
 	----------------------------------------------------------------------------------
 
 	使用脚本进行变更，而不是直接命令行交互式变更，这样可以更容易梳理变更逻辑, 而且可以重复使用。
@@ -372,7 +373,7 @@
 ----------------------------------------------------------------------------------
 
 6.添加我们的base组织结构 （管理员使用ldapadd 进行添加）
-	有了管理员，还需要配置组织结构 base.ldif
+	有了管理员，还需要配置组织结构 02_base.ldif
 
 	base.ldif
 		1个组织管理者：Manager  ； objectClass: organizationalRole
@@ -404,8 +405,8 @@
 
 		[root@bogon openldap]# 
 
-	6.2.然后创建文件base.ldif
-		[root@bogon ldap]# cat base.ldif 
+	6.2.然后创建文件 02_base.ldif
+		[root@bogon ldap]# cat 02_base.ldif 
 			dn: dc=demo,dc=com
 			objectClass: top
 			objectClass: dcObject
@@ -434,8 +435,9 @@
 		否则会出现类似下面的错误：
 		“ldapadd: attributeDescription "dn": (possible missing newline after line 37, entry "ou=测试组,ou=研发部门,ou=People,dc=myldap,dc=com"?)”
 
-	6.3.使用ldapadd添加组织结构 base.ldif :
-		[root@bogon ldap]# ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f base.ldif 
+	6.3.使用ldapadd添加组织结构 02_ase.ldif :
+	注意：ldapmodify -a 和 ldapadd 功能一样
+		[root@bogon ldap]# ldapadd -x -D cn=admin,dc=demo,dc=com -w admin -f 02_base.ldif 
 		adding new entry "dc=demo,dc=com"
 
 		adding new entry "cn=Manager,dc=demo,dc=com"
@@ -446,6 +448,7 @@
 
 		[root@bogon ldap]# 
 	6.4.使用ldapsearch来检查内容
+	使用管理员身份登陆，并查看dc=demo,dc=com树下的所有信息
 		[root@bogon ldap]# ldapsearch  -x -D cn=admin,dc=demo,dc=com -w admin -b "dc=demo,dc=com"
 		# extended LDIF
 		#
@@ -695,7 +698,7 @@
 		一个hr肯定太累了，添加一个新的hr hr-ryan	
 		
 		创建文件addone.ldif
-			[root@bogon ldap]# cat addone.ldif 
+			[root@bogon ldap]# cat 04_addone.ldif 
 			dn: cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com
 			changetype: add
 			objectClass: inetOrgPerson
@@ -802,7 +805,7 @@
 	8.2管理员使用ldapmodify修改用户秘密
 		管理员权限最大，可以修改任意密码。使用ldapmodify
 
-		创建文件updatepass.ldif
+		创建文件05_updatepass.ldif
 			[root@bogon ldap]# cat updatepass.ldif 
 			dn: cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com
 			changetype: modify
@@ -810,7 +813,7 @@
 			userPassword: ryanmiao
 			[root@bogon ldap]# 
 		执行修改
-			[root@bogon ldap]# ldapmodify  -a -H ldap://192.168.122.24:389 -D cn=admin,dc=demo,dc=com -w admin -f updatepass.ldif 
+			[root@bogon ldap]# ldapmodify  -a -H ldap://192.168.122.24:389 -D cn=admin,dc=demo,dc=com -w admin -f 05_updatepass.ldif 
 			modifying entry "cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=demo,dc=com"
 			[root@bogon ldap]# 
 		根据刚刚更改的密码，去查询确认能否正常登陆
@@ -854,7 +857,7 @@
 			可以使用sha1，将加密字符串写在文件中。
 		
 		有多种加密方式可供选择
-			#hash
+			#hash 最安全！！！
 			[root@bogon ldap]# slappasswd -s ryanmiao
 			{SSHA}XxffRVNnyAIKptGgpKWHtpztU/ahISwT
 			#sha1
@@ -939,7 +942,7 @@
 				[root@localhost ldap]# ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={2}hdb' > olcDatabase={2}hdb.def
 				
 
-			# cat acl.ldif
+			# cat 06_acl.ldif
 				--------------
 				dn: olcDatabase={2}hdb,cn=config
 				changetype: modify
@@ -957,7 +960,7 @@
 					by * read
 				--------------
 			执行更改
-				[root@localhost ldap]# ldapmodify -Y EXTERNAL -H ldapi:// -f acl.dif 
+				[root@localhost ldap]# ldapmodify -Y EXTERNAL -H ldapi:// -f 06_acl.ldif 
 				SASL/EXTERNAL authentication started
 				SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
 				SASL SSF: 0
@@ -1005,7 +1008,7 @@
 	这个需要单独配置，默认是不支持的。
 
 	9.1添加memberof模块	
-		创建add_module_group.sh
+		071_add_module_group.sh.sh
 			-------------------------------------------
 			[root@localhost ldap]# cat add_module_group.sh 
 			dn: cn=module,cn=config
@@ -1021,15 +1024,15 @@
 			-------------------------------------------
 		执行添加
 			-------------------------------------------
-			[root@localhost ldap]# ldapadd -Q -Y EXTERNAL -H ldapi:/// -f add_module_group.sh 
+			[root@localhost ldap]# ldapadd -Q -Y EXTERNAL -H ldapi:/// -f 071_add_module_group.sh.sh 
 			adding new entry "cn=module,cn=config"
 			modifying entry "cn=module{0},cn=config"
 			[root@localhost ldap]# 
 			-------------------------------------------
 
-		创建add_group_objectClass.sh
+		创建072_add_group_objectClass.sh
 			-------------------------------------------
-			[root@localhost ldap]# cat add_group_objectClass.sh 
+			[root@localhost ldap]# cat 072_add_group_objectClass.sh 
 			dn: olcOverlay=memberof,olcDatabase={2}hdb,cn=config
 			objectClass: olcConfig
 			objectClass: olcMemberOf
@@ -1045,15 +1048,15 @@
 			-------------------------------------------
 		执行添加
 			-------------------------------------------
-			[root@localhost ldap]# ldapadd -Q -Y EXTERNAL -H ldapi:/// -f add_group_objectClass.sh 
+			[root@localhost ldap]# ldapadd -Q -Y EXTERNAL -H ldapi:/// -f 072_add_group_objectClass.sh 
 			adding new entry "olcOverlay=memberof,olcDatabase={2}hdb,cn=config"
 			[root@localhost ldap]# 
 			-------------------------------------------
 
 	9.2添加一个group
-		创建addgroup.ldif
+		创建073_addgroup.ldif
 			-------------------------------------------
-			[root@localhost ldap]# cat addgroup.ldif 
+			[root@localhost ldap]# cat 073_addgroup.ldif 
 			dn: cn=g-admin,ou=Group,dc=demo,dc=com
 			objectClass: groupOfNames
 			cn: g-admin
@@ -1063,7 +1066,7 @@
 			-------------------------------------------
 		执行
 			-------------------------------------------
-			[root@localhost ldap]# ldapmodify -a -H ldap://192.168.122.24:389 -D "cn=admin,dc=demo,dc=com" -w admin -f addgroup.ldif 
+			[root@localhost ldap]# ldapmodify -a -H ldap://192.168.122.24:389 -D "cn=admin,dc=demo,dc=com" -w admin -f 073_addgroup.ldif 
 			adding new entry "cn=g-admin,ou=Group,dc=demo,dc=com"
 
 			[root@localhost ldap]# 
@@ -1470,7 +1473,7 @@
 	验证权限
 	添加一个普通用户；
 		-------------------------------------------
-		[root@localhost ldap]# cat addtwo.sh 
+		[root@localhost ldap]# cat 082_adduser.sh 
 		dn: cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com
 		changetype: add
 		objectClass: inetOrgPerson
@@ -1484,7 +1487,7 @@
 		displayName: 我是HR
 		[root@localhost ldap]# 
 
-		[root@localhost ldap]# ldapmodify -a -H ldapi:/// -D cn=admin,dc=demo,dc=com -w admin -f addtwo.sh 
+		[root@localhost ldap]# ldapmodify -a -H ldapi:/// -D cn=admin,dc=demo,dc=com -w admin -f 082_adduser.sh 
 		adding new entry "cn=hr-miaoMiao,ou=HR,ou=People,dc=demo,dc=com"
 		[root@localhost ldap]# 
 		-------------------------------------------
@@ -1600,7 +1603,7 @@
 		更新配置信息
 			ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f tmp.ldif
 		对应的更新文件语法：
-			dn: 要更新的entry的dn， 配置为olcDatabase={2}hdb,cn=config， 用户为用户dn
+			dn: 要更新的entry的dn， (配置为: olcDatabase={2}hdb,cn=config)， (用户为: 用户dn)
 			changetype: modify
 			replace: olcRootDN   replace替换的字段
 			olcRootDN: cn=admin,dc=demo,dc=com
@@ -1619,6 +1622,11 @@
 				主要用sub表示base之下的所有子目录。对应Python里的SUBTREE filter语法，正则语法。
 				因为使用的时候传递过来的通常是username, 需要比较username在ldap中的字段， 
 				比如(|(cn=Steve*)(sn=Steve*)(mail=Steve*)(givenName=Steve*)(uid=Steve*))
+							范围可以是 base，one，subtree 或 children。
+                                base     仅匹配 具有DN的条目(仅仅DN一个)，
+                                one        匹配 其父代是 DN 的条目(这个DN的第一代儿子)，
+                                subtree    匹配 子树中(树的根是DN)的所有条目(DN + 这个DN的所有儿子和后代)，
+                                children   匹配 DN 下的所有条目(这个DN的所有儿子和后代，但不匹配DN自己)。
 			attr 是要返回的字段， 必须返回的字段可以在配置文件里查看。
 			memberof 非必须。
 
@@ -1662,6 +1670,10 @@
  		http://localhost:8071/phpldapadmin 或http://localhost:8071/ldapadmin即可。
 	登录dn: cn=admin,dc=demo,dc=com
 	登录密码： admin
+
+	注意：在使用phpldapadmin创建新条目时，一定要选择 "默认"
+		创建user时  指定 inetOrgPerson
+		创建group时 指定 roupOfNames
 ----------------------------------------------------------------------------------
 
 15.ACL 附录
@@ -1720,10 +1732,10 @@
 			5: uid=hyc,ou=people,o=suffix
 		Then:
 
-			dn.base="ou=people,o=suffix" match 2; 
-			dn.one="ou=people,o=suffix" match 3, and 5; 
-			dn.subtree="ou=people,o=suffix" match 2, 3, 4, and 5; and 
-			dn.children="ou=people,o=suffix" match 3, 4, and 5.
+			dn.base="ou=people,o=suffix" match 2; 					#base 			只匹配DN自己					
+			dn.one="ou=people,o=suffix" match 3, and 5; 			#one  			匹配DN的第一代儿子
+			dn.subtree="ou=people,o=suffix" match 2, 3, 4, and 5;	#sub/subtree  	匹配DN及DN所有的后代
+			dn.children="ou=people,o=suffix" match 3, 4, and 5.		#children		匹配DN所有的后代
 
 	一个acl示例
 		-------------------------------------------
@@ -1731,20 +1743,17 @@
 		access to attrs=userpassword
 			by self       write
 			by anonymous  auth
-			by group.exact="cn=itpeople,ou=groups,dc=example,dc=com"
-							write
+			by group.exact="cn=itpeople,ou=groups,dc=example,dc=com" write
 			by *          none
 		# ACL2
 		access to attrs=carlicense,homepostaladdress,homephone
 			by self       write
-			by group.exact="cn=hrpeople,ou=groups,dc=example,dc=com"
-							write
+			by group.exact="cn=hrpeople,ou=groups,dc=example,dc=com" write
 			by *          none
 		# ACL3
 		access to *
 			by self       write
-			by group.exact="cn=hrpeople,ou=groups,dc=example,dc=com"
-							write
+			by group.exact="cn=hrpeople,ou=groups,dc=example,dc=com" write
 			by users      read
 			by *          none
 		-------------------------------------------
@@ -1777,7 +1786,8 @@
 
 
 ----------------------------------------------------------------------------------
-
+	
+	https://blog.csdn.net/NewTWG/article/details/86648515 (对openLDAP的整体概述 架构图 和 创建/修改时的注意事项)
 
 ----------------------------------------------------------------------------------
 	-------------------------------------------
