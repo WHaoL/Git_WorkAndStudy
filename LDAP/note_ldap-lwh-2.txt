@@ -3,17 +3,17 @@
 1.openLDAP同步原理
     openLDAP同步复制(简称syncrepl)机制是消费方的一个复制引擎。
         syncrepl引擎作为slapd的一个线程驻留在消费者那里；
-        它建立一个消费者复制，方法是连接复制提供者进行初始化DIT，并进行定期内容拉取 及时根据内容变更来更新目录树信息。
+        它建立一个消费者复制，方法是连接复制 provider进行初始化DIT，并进行定期内容拉取 及时根据内容变更来更新目录树信息。
     syncrepl 使用LDAP内容同步协议作为服务器之间同步数据所使用的协议
         有5种同步机制
         拉模式 pull-mode
             refreshOnly同步模式下
-                提供者处理定期的拉请求消息
-            消费者定期拉取提供者服务器的内容
+                 provider处理定期的拉请求消息
+            消费者定期拉取 provider服务器的内容
         推模式 push-mode
             refreshAndPersist同步模式下
-                提供者维护了 对 持久性消费者的跟踪，内容修改时发送更新
-            消费者监听提供者实时发送的更新信息
+                 provider维护了 对 持久性消费者的跟踪，内容修改时发送更新
+            消费者监听 provider实时发送的更新信息
     syncrepl是可扩展的
 
     slurpd同步机制已经废除，2.4版本后采用syncrepl机制
@@ -64,7 +64,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         DN由自身的RDN(cn或者uid)和祖先的DN共同组成
             The full DN format is described in RFC4514, "LDAP: String Representation of Distinguished Names."
     
-    slapd(8)是个独立的守护进程，可以看作是轻量级的X.500目录服务器。
+    slapd 是个独立的守护进程，可以看作是轻量级的X.500目录服务器。
 
     LDAPv3在1990年代后期开发，以取代LDAPv2。
 
@@ -95,7 +95,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     openLDAP 支持各种品种的线程
 
 4.2.6. TCP Wrappers
-    slapd(8)支持 TCP Wrappers(IP级别的访问控制过滤器)。
+    slapd 支持 TCP Wrappers(IP级别的访问控制过滤器)。
         对于包含非公共信息的服务器，建议使用 TCP Wrappers 或其他 IP级别的访问过滤器(例如 IP级别的防火墙提供的过滤器)。
             后面会讲到，对于IP级别的防控： 不推荐使用TCP Wrappers，建议使用防火墙
 
@@ -139,7 +139,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     #安装   通常，安装需要超级用户权限
     su root -c 'make install'
 
-    #你将在 /usr/local/etc/openldap 或者 /etc/openldap 找到slpad(8)的配置文件
+    #你将在 /usr/local/etc/openldap 或者 /etc/openldap 找到slpad 的配置文件
     
 
 
@@ -275,15 +275,15 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         默认值为 0，将禁用此功能。
 
     olcLogLevel: <level>
-        指定 调试语句 和 操作统计信息 应进行 syslog 的级别(当前记录到 syslogd(8)LOG_LOCAL4 设备)。
+        指定 调试语句 和 操作统计信息 应进行 syslog 的级别(当前记录到 syslogd LOG_LOCAL4 设备)。
         必须配置 OpenLDAP --enable-debug(默认设置)才能正常工作(两个统计级别除外，它们始终处于启用状态)。
             注意：必须已经使用--enable-debug 进行编译
-        
-        日志级别可以指定为整数或关键字。
-        可以使用多个日志级别，并且这些级别是可叠加的。
-        
+       
         要显示 哪种级别对应哪种调试，调用 slapd 的时候加上-d?
             slapd -d?
+
+        日志级别可以指定为整数或关键字。
+        可以使用多个日志级别，并且这些级别是可叠加的。
         
         <level>的可能值为：
                 Table 5.1: Debugging Levels
@@ -305,7 +305,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             16384	(0x4000 sync)	syncrepl consumer processing
             32768	(0x8000 none)	only messages that get logged whatever log level is set
         
-        所需的日志级别 可以以 十进制 十六进制输入，组合时使用或运算。例如 下面的这些都是等价的
+        所需的日志级别 可以以 单/多个整数(十进制/十六进制),单/多个显示的名称 输入，
+            组合时使用时，默认位进行了 或运算。
+            例如 下面的这些都是等价的
                 olcLogLevel 129
                 olcLogLevel 0x81
                 olcLogLevel 128 1
@@ -340,7 +342,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         指定要加载的 动态可加载模块的名称。
         文件名 可以是绝对路径名或者简单文件名
             写绝对路径名,就可以不写olcModulePath: <pathspec>
-            写文件名,就需要写olcModulePath: <pathspec>
+            写简单文件名,就需要写olcModulePath: <pathspec>
         将在 olcModulePath: <pathspec>指令 指定的目录中去 搜索 非绝对名称
     olcModulePath: <pathspec>
         指定目录列表,用以搜索可加载模块;
@@ -453,6 +455,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             olcDatabase: mdb    #这标志着一个新的 MDB 数据库实例的开始
     
     olcAccess: to <what> [ by <who> [<accesslevel>] [<control>] ]+
+    功能：<who>对<what>设置<accesslevel>
         该指令允许
             一个或多个请求者(由<who>指定)
             对一组条目和/或属性(由<what>指定)的
@@ -465,7 +468,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     
     olcReadonly { TRUE | FALSE }
         该指令将数据库置于“只读”模式。任何修改数据库的尝试都将返回“不愿执行”错误。
-        如果在consumer上设置，则仍然会发生由 syncrepl 发送的修改
+        如果在consumer上设置，则仍然会发生 由syncrepl发送的修改
         默认:olcReadonly: FALSE
     
     olcRootDN: <DN>
@@ -478,7 +481,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     olcRootPW: <password>
         为olcRootDN: <DN>的DN指定密码
             示例:  olcRootPW: 123456
-        可以使用slappasswd(8)生成密码的哈希  slappasswd -s 123456
+        可以使用slappasswd生成密码的哈希  slappasswd -s 123456
             示例:  olcRootPW: {SSHA}ePepK+E+QnYuDaUP1Fymdau9deDd0Hoe
 
     olcSizeLimit: <integer>
@@ -486,6 +489,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         默认:  olcSizeLimit: 500
 
     olcSuffix: <dn suffix>
+        即指定：从哪个子树开始查询
         该指令指定 传递到此后端数据库执行查询的 DN 后缀。
             可以指定多个后缀行，通常每个数据库定义至少需要一个后缀行。
             (某些后端类型，例如“frontend”和“monitor”使用硬编码后缀，该后缀可能不会在配置中被覆盖。)
@@ -494,7 +498,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         注意：
             当选择要传递查询的后端时，slapd会按照配置的顺序查看每个数据库定义中的后缀值。
                 如果一个数据库后缀是另一个数据库的前缀，则它必须出现在配置之后。
-    
+
+5.2.5.8. olcSyncrepl
+
     olcSyncrepl
             olcSyncrepl: rid=<replica ID>
                 provider=ldap[s]://<hostname>[:port]
@@ -529,10 +535,10 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 [logfilter=<filter str>]
                 [syncdata=default|accesslog|changelog]
         该指令
-            将当前slapd(8)建立为 复制consumer站点  通过运行syncrepl复制引擎，从而将当前数据库指定为 内容提供者 的consumer。
+            将当前slapd 建立为 复制consumer站点  通过运行syncrepl复制引擎，从而将当前数据库指定为 内容 provider 的consumer。
             consumer数据库 和 provider的最新内容保持同步
         rid 
-            用于标识复制使用者(cosumer)服务器中的当前 syncrepl 指令
+            用于标识复制consumer(cosumer)服务器中的当前 syncrepl 指令
             <replica ID>
                 唯一标识当前 syncrepl 指令所描述的 syncrepl 规范
                 为非负数且长度不超过三位十进制数
@@ -545,8 +551,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 例如 ldap://provider.example.com:389 或 ldaps://192.168.1.1:636      
             请注意，syncrepl 使用 consumer启动的协议，因此其规范位于consumer上。
         
-        使用 搜索规范 作为结果集 来定义 syncrepl使用者的内容
-            使用者slapd 将根据搜索规范 向 提供者slapd 发送搜索请求
+        使用 搜索规范 作为结果集 来定义 syncreplconsumer的内容
+            consumerslapd 将根据搜索规范 向  providerslapd 发送搜索请求
             搜索规范包含 searchbase, scope, filter, attrs, attrsonly, sizelimit, timelimit 
                 searchbase没有默认值，必须始终指定。
                 scope默认为 sub，
@@ -561,8 +567,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 在每个同步操作完成后的间隔时间内，周期性地重新调度下一个同步搜索操作。
                 间隔由间隔参数指定,默认是1天
             refreshAndPersist
-                同步搜索在提供者slapd实例中保持不变
-                对提供者的进一步更新将对消费者产生“searchResultEntry”作为对持久同步搜索的搜索响应。
+                同步搜索在 providerslapd实例中保持不变
+                对 provider的进一步更新将对消费者产生“searchResultEntry”作为对持久同步搜索的搜索响应。
         
         retry=[<retry interval> <# of retries>]
             如果复制发生错误,则consumer将根据retry参数尝试重新连接
@@ -572,16 +578,16 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             在<重试次数>中的+表示无限次重试直到成功。
 
         [schemachecking=on|off]
-            打开后,将在LDAP Sync使用者(consumer)站点上强制执行模式(schema)检查
+            打开后,将在LDAP Syncconsumer(consumer)站点上强制执行模式(schema)检查
             如果将其关闭，则将在不检查schema一致性的情况下存储条目。
             默认为关闭。
         
         [binddn=<DN>]
             给出了要绑定的 DN
-            该DN 对提供者数据库中的复制内容具有读权限
+            该DN 对 provider数据库中的复制内容具有读权限
 
         [bindmethod=simple|sasl]
-            是simple还是sasl,取决于连接到 提供者slapd实例 时 是基于密码的简单(simple)身份验证还是使用SASL身份验证
+            是simple还是sasl,取决于连接到  providerslapd实例 时 是基于密码的简单(simple)身份验证还是使用SASL身份验证
 
         simple身份验证
             除非有足够的数据完整性和机密性保护(例如 TLS 或 IPsec)，否则不应使用简单身份验证。
@@ -625,7 +631,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             olcTimeLimit: 3600
     
     olcUpdateref: <URL>
-        仅适用于副本(或 shadow) slapd(8)实例.
+        仅适用于副本(或 shadow) slapd 实例.
         用于指定 要返回给客户端的URL , 客户端将在副本上提交更新请求
         如果多次指定，则提供每个 URL
         Example:
@@ -1030,7 +1036,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     包含的文件应遵循正常的 slapd 配置文件格式。
                     注意：使用此指令时要小心-嵌套 include 指令的数量没有限制，并且不会执行循环检测。
             loglevel <level>
-                指定 调试语句 和 操作统计信息 应进行 syslog 的级别(当前记录到 syslogd(8)LOG_LOCAL4 设备)。
+                指定 调试语句 和 操作统计信息 应进行 syslog 的级别(当前记录到 syslogd LOG_LOCAL4 设备)。
                 和olcLogLevel: <level>功能相同，不再赘述
             objectclass <RFC4512 Object Class Description>
                 该指令定义了一个对象类
@@ -1076,11 +1082,11 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 和olcSuffix: <dn suffix>功能相同，不再赘述
             syncrepl
                 该指令
-                    将当前slapd(8)建立为 复制consumer站点  通过运行syncrepl复制引擎，从而将当前数据库指定为 内容提供者 的consumer。
+                    将当前slapd 建立为 复制consumer站点  通过运行syncrepl复制引擎，从而将当前数据库指定为 内容 provider 的consumer。
                     consumer数据库 和 provider的最新内容保持同步
                 和olcSyncrepl功能相同，不再赘述
             updateref <URL>
-                仅适用于副本(或 shadow) slapd(8)实例.
+                仅适用于副本(或 shadow) slapd 实例.
                 用于指定 要返回给客户端的URL , 客户端将在副本上提交更新请求
                 和olcUpdateref: <URL>功能相同，不再赘述
         BDB 和 HDB 数据库指令
@@ -1152,9 +1158,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
 
     --------------------chapter 7 运行 slapd配置文件(Running slapd)
-    slapd(8)作为一个独立服务运行。
+    slapd 作为一个独立服务运行。
         这使服务器可以利用缓存的优势，管理基础数据库的并发问题，并节省系统资源。
-    slapd(8)支持许多命令行选项，如手册页中所述。本节详细介绍了一些常用选项。
+    slapd 支持许多命令行选项，如手册页中所述。本节详细介绍了一些常用选项。
         -f <filename>
             为slapd 指定备用配置文件
             默认为/usr/local/etc/openldap/slapd.conf
@@ -1185,7 +1191,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             此选项指定用于日志记录和其他目的的服务名称。
                 默认服务名称为 slapd
         -l <syslog-local-user>
-            指定 syslog(8)工具的本地用户。
+            指定 syslog 工具的本地用户。
                 值可以是 LOCAL0，LOCAL1，LOCAL2，...和 LOCAL7。
                 默认值为 LOCAL4。
                 并非所有系统都支持此选项。
@@ -1213,7 +1219,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             其中/usr/local/libexec 由 configure 确定，而<option>是上述选项之一
             除非您指定了调试级别(包括级别 0)，否则 slapd 会自动从其控制终端ffork and detach，并在后台运行。
     停止 slapd 
-        为了安全地杀死 Slapd(8)，你应该
+        为了安全地杀死 Slapd ，你应该
             kill -INT `cat /usr/local/var/slapd.pid`  
                     我的目录是
                         [root@localhost openldap]# find / -name "slapd.pid"
@@ -1841,7 +1847,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         8.4.2. 匹配匿名和身份验证用户(Matching Anonymous and Authenticated users)
             
             匿名用户的 DN 为空。
-                虽然可以使用 dn.exact=""或 dn.regex="^$"，但 slapd(8)提供了一个匿名的简写形式，应改为使用:
+                虽然可以使用 dn.exact=""或 dn.regex="^$"，但 slapd 提供了一个匿名的简写形式，应改为使用:
             -----------------------------------  
             access to *
                 by anonymous none
@@ -2829,7 +2835,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     11.4. LMDB
         11.4.1. 概述(Overview)
             推荐使用slapd的mdb后端作为 普通slapd数据库的主后端。
-                mdb使用OpenLDAP自己的"Lightning Memory-Mapped Database（LMDB)"库来存储数据，
+                mdb使用OpenLDAP自己的"Lightning Memory-Mapped Database(LMDB)"库来存储数据，
                 并打算替换Berkeley DB后端。
             
             它像BDB后端一样支持索引，但它不使用缓存，也不需要进行调整/调优即可提供最大的搜索性能。
@@ -2996,7 +3002,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     11.8. Passwd
         11.8.1. 概览Overview
 
-            slapd的 PASSWD后端(PASSWD backend) 提供 系统passwd文件中 列出的用户帐户信息（默认为/etc/passwd）
+            slapd的 PASSWD后端(PASSWD backend) 提供 系统passwd文件中 列出的用户帐户信息(默认为/etc/passwd)
 
             提供此后端仅用于演示目的。每个条目的 DN 为“uid=<username>,<suffix>”。
         
@@ -3100,7 +3106,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             它也用于 delta-syncrepl 复制
 
             注意：
-                Accesslog 数据库对于给定的提供者是唯一的。
+                Accesslog 数据库对于给定的 provider是唯一的。
                 永远不要复制它。
         
         12.1.2. 配置访问日志(Access Logging Configuration)
@@ -3359,8 +3365,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             例如：
                 security ssf=1 update_ssf=112
             
-            要求对所有操作进行完整性保护，并对更新操作(例如添加，删除，修改等)要求加密保护（等效于 3DES）。
-            请参见 slapd.conf（5）
+            要求对所有操作进行完整性保护，并对更新操作(例如添加，删除，修改等)要求加密保护(等效于 3DES)。
+            请参见 slapd.conf(5)
 
             对于细粒度的控制，可以在访问控制中使用 SSF。
         
@@ -3389,7 +3395,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 未验证身份的绑定机制 默认情况下处于禁用状态，
                     但可以通过在 slapd.conf中指定“allow bind_anon_cred”来启用。
                 由于许多LDAP程序在进行 身份验证(user/password authenticated)访问时，错误地生成了未验证身份(unauthenticated)的绑定请求
-                （也就是说，它们不确保提供了密码），
+                (也就是说，它们不确保提供了密码)，
                     因此通常应保持禁用此机制。
 
             成功的 "用户/密码验证(user/password authenticated)"绑定 将导致用户授权身份(提供的名称)与会话关联。
@@ -3413,7 +3419,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     14.4. 密码存储(Password Storage)
         
         LDAP 密码通常存储在 userPassword 属性中。
-            RFC4519 指定密码 不以加密（或散列）形式存储（即 默认存储的是明文）。
+            RFC4519 指定密码 不以加密(或散列)形式存储(即 默认存储的是明文)。
             这允许使用多种基于密码的身份验证机制，例如 DIGEST-MD5。
             这也是最可互操作的存储方案。
         
@@ -3424,7 +3430,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         
         userPassword 属性允许有多个值，并且每个值都可以以不同的形式存储。
         在身份验证过程中，Slapd 将迭代这些值，直到找到与提供的密码匹配的值，或者直到用尽所有值进行检查为止。
-        存储方案作为值的前缀存储，因此使用 Salted SHA1（SSHA）方案的哈希密码如下所示:
+        存储方案作为值的前缀存储，因此使用 Salted SHA1(SSHA)方案的哈希密码如下所示:
             userPassword: {SSHA}DkMTwBl+a/3DQTxCYEApdUtNXGgdUac3
 
         哈希(哈希即散列)密码的优点是，哈希的攻击者不能直接访问实际的密码。
@@ -3436,7 +3442,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
 
         14.4.1. SSHA 密码存储方案(SSHA password storage scheme)
-            SSHA 是SHA方案的加盐版本。它被认为是slapd支持的最安全的（！！！！）密码存储方案。
+            SSHA 是SHA方案的加盐版本。它被认为是slapd支持的最安全的(！！！！)密码存储方案。
             这些值表示相同的密码：
                 userPassword: {SSHA}DkMTwBl+a/3DQTxCYEApdUtNXGgdUac3
                 userPassword: {SSHA}d0Q0626PSH9VUld7yWpR0k6BlpQmtczb
@@ -3457,7 +3463,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             此方案仅采用密码的 MD5哈希并将其以 base64编码形式存储：
                 userPassword: {MD5}Xr4ilOzQ4PCOq3aQ0qbuaQ==
             尽管比明文存储更安全，但这不是一个非常安全的方案。
-                MD5 算法速度很快，并且由于不添加 salt，因此该方案 容易受到字典攻击（！！！！）。
+                MD5 算法速度很快，并且由于不添加 salt，因此该方案 容易受到字典攻击(！！！！)。
 
         14.4.4. SMD5 密码存储方案(SMD5 password storage scheme)
             这通过添加salt(随机数据，这意味着给定明文密码有许多可能的表示)改进了基本的MD5方案。
@@ -3467,7 +3473,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         
         14.4.5. SHA 密码存储方案(SHA password storage scheme)
             像MD5方案一样，这只是通过 SHA哈希过程来提供密码。 
-            SHA 被认为比 MD5 更安全，但是缺少 salt 会使该方案 容易受到字典攻击（！！！！）。
+            SHA 被认为比 MD5 更安全，但是缺少 salt 会使该方案 容易受到字典攻击(！！！！)。
                 userPassword: {SHA}5en6G6MezRroT3XKqkdPOmY/BfQ=
         
         14.4.6. SASL 密码存储方案(SASL password storage scheme)
@@ -3481,7 +3487,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         slapd能够将密码验证委派给一个单独的进程。
             使用了 sasl_checkpass函数，因此它可以使用 Cyrus SASL 支持的任何后端服务来检查密码。
             选择范围非常广泛，
-                其中一种选择是使用saslauthd(8)，它可以使用本地文件、Kerberos、一个IMAP服务器、另一个LDAP服务器或PAM机制支持的任何东西。
+                其中一种选择是使用saslauthd ，它可以使用本地文件、Kerberos、一个IMAP服务器、另一个LDAP服务器或PAM机制支持的任何东西。
             必须使用 enable-spasswd配置选项 构建服务器，以启用直通身份验证。
         
         注意：这与使用 SASL 机制对 LDAP 会话进行身份验证不同。
@@ -3516,7 +3522,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         14.5.2. 配置 saslauthd(Configuring saslauthd)
             saslauthd 能够使用许多不同的 身份验证服务
                 通常的要求是将部分或全部身份验证委派给另一台 LDAP 服务器。
-                这是一个使用 MicrosoftActive Directory（AD）的示例 saslauthd.conf：
+                这是一个使用 MicrosoftActive Directory(AD)的示例 saslauthd.conf：
                 -----------------------------------
                 ldap_servers: ldap://dc1.example.com/ ldap://dc2.example.com/
 
@@ -3535,7 +3541,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         
         14.5.3. 测试直通身份认证(Testing pass-through authentication)
 
-            通常最好是 从后端身份验证提供者开始，并通过 saslauthd 和 slapd 连接到 LDAP 客户端。
+            通常最好是 从后端身份验证 provider开始，并通过 saslauthd 和 slapd 连接到 LDAP 客户端。
 
             在上面的 AD 示例中，首先检查 saslauthd 连接到 AD 时将使用的 DN 和密码是否有效：
             ----------------------------------- 
@@ -3576,7 +3582,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
 15. Using SASL
 
-    OpenLDAP 客户端和服务器能够通过简单身份验证和安全层（SASL）框架进行身份验证
+    OpenLDAP 客户端和服务器能够通过简单身份验证和安全层(SASL)框架进行身份验证
 
     SASL可以与几个行业标准的身份验证机制一起使用，
         包括用于Kerberos V的GSSAPI、DIGEST-MD5以及用于传输层安全(TLS)的PLAIN和EXTERNAL。
@@ -3592,7 +3598,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         然后将其身份切换为其他用户或服务的身份。
     
     请注意，
-        在下文中，术语“用户user”用于描述通过 LDAP 客户端（例如 ldapsearch（1））连接到 LDAP 服务器的个人或应用程序实体。
+        在下文中，术语“用户user”用于描述通过 LDAP 客户端(例如 ldapsearch(1))连接到 LDAP 服务器的个人或应用程序实体。
         也就是说，术语“用户”不仅适用于使用 LDAP客户端的个人，
         而且适用于在没有直接用户控制的情况下发出 LDAP 客户端操作的应用程序实体。
     
@@ -3600,10 +3606,10 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     15.1. SASL 安全注意事项(SASL Security Considerations)
         SASL 提供了许多不同的身份验证机制。本节简要概述了安全注意事项。
 
-        某些机制（例如 PLAIN 和 LOGIN）比 LDAP简单身份验证 更不安全性。
+        某些机制(例如 PLAIN 和 LOGIN)比 LDAP简单身份验证 更不安全性。
             和 简单身份验证 一样，除非您有足够的安全保护措施，否则不应该使用 简单身份验证/PLAIN/LOGIN 这些机制。
             建议
-                仅将这些机制与传输层安全性（TLS）结合使用。
+                仅将这些机制与传输层安全性(TLS)结合使用。
                 在本文档中不再讨论 PLAIN 和 LOGIN 的使用。
         
         DIGEST-MD5 机制是 LDAPv3 的强制实施身份验证机制。
@@ -3613,7 +3619,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             KERBEROS_V4 机制适用于使用 Kerberos IV 的用户。
             Kerberos 被视为适用于小型企业和大型企业的安全的分布式身份验证系统。
 
-        EXTERNAL 机制利用低层网络服务提供的身份验证服务，例如“传输层安全性”（TLS）。
+        EXTERNAL 机制利用低层网络服务提供的身份验证服务，例如“传输层安全性”(TLS)。
             与基于 TLS X.509 的公钥技术结合使用时，
             EXTERNAL 可提供强大的身份验证功能。    
         EXTERNAL 也可以与 ldapi:/// transport 一起使用，
@@ -3634,9 +3640,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 17. 构造分布式目录服务(Constructing a Distributed Directory Service)
     
     对于许多站点而言，运行一个或多个保存整个数据子树的 slapd就足够了。
-    但是通常希望对树的某个部分（可能正在运行或可能不在运行slapd）有一个 slapd 引用其他目录服务。
+    但是通常希望对树的某个部分(可能正在运行或可能不在运行slapd)有一个 slapd 引用其他目录服务。
 
-    17.1. 下级知识信息（Subordinate Knowledge Information）
+    17.1. 下级知识信息(Subordinate Knowledge Information)
         
         提供下级知识信息来委托子树。
             下级知识信息 作为 委托点的 特殊引用对象 在目录中维护。
@@ -3663,7 +3669,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         使用referral(引用/推荐)指令指定上级知识信息
             值是引用上级目录服务的 URI 列表
         
-        对于没有直接上级的服务器（例如上例中的 a.example.net），可以将服务器配置为 使用具有全局知识的目录服务，
+        对于没有直接上级的服务器(例如上例中的 a.example.net)，可以将服务器配置为 使用具有全局知识的目录服务，
             例如 OpenLDAP Root Service
                 referral        ldap://root.openldap.org/
         
@@ -3692,7 +3698,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             ref 属性是可操作的，如果需要显示在搜索结果中 必须在请求显示指定。
 
         注意：
-            使用 referral(引用/推荐) 来构建分布式目录服务非常笨拙（！！！！！），普通客户端也不太支持。
+            使用 referral(引用/推荐) 来构建分布式目录服务非常笨拙(！！！！！)，普通客户端也不太支持。
             如果已经使用引用构建了现有安装，则使用chain overlay来隐藏引用将大大提高 Directory 系统的可用性。
             更好的方法是在从属配置中使用显式定义的本地和代理数据库，以提供分布式目录的无缝视图。
         
@@ -3706,15 +3712,15 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
     复制目录是交付企业弹性部署的基本需求。
 
-    multimaster
+    OpenLDAP2.4 引入multimaster
 
     OpenLDAP复制 相关术语， 
         provider/multi-provider和consumer: 
-            provider可以接受外部写操作并将其提供给consumer以供检索;
+            provider可以接受外部(即客户端)写操作，并将其(更新)提供给consumer以供检索;
             consumer向provider请求复制更新。
         与严格定义的master/slave关系不同，provider/consumer角色非常灵活：
             consumer中接收的复制更新可以由该consumer进一步传播到其他服务器，因此consumer也可以同时充当provider。
-            而且，consumer不必是实际的 LDAP 服务器,它可能只是一个 LDAP 客户端。
+            而且，consumer不必是实际的 LDAP 服务器,它可能只是一个 LDAP client客户端。
     
     以下各节将介绍复制技术并讨论可用的各种复制选项。
 
@@ -3723,49 +3729,372 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
         18.1.1. 同步复制(LDAP Sync Replication)
             
-            LDAP同步复制引擎（简称 syncrepl）
-                是消费者方的复制引擎，
-                使消费者(consumer)LDAP服务器能够维护 DIT 片段的卷影副本。
-            syncrepl引擎驻留在consumer上，并作为 slapd线程之一执行。
-                它通过连接到 复制provider程序以执行 初始DIT内容加载，
-                然后进行 定期内容轮询或根据内容更改及时更新 来创建和维护副本。
+            LDAP同步复制(简称 syncrepl)
+                1.是消费者方的复制引擎，
+                使消费者(consumer)服务器能够维护 DIT片段 的影子副本。
             
-            Syncrepl 使用 LDAP内容同步协议（或简称 LDAP Sync）作为consumer同步协议。 
-                LDAP Sync提供有状态复制，该状态复制支持基于拉式和基于推式的同步，并且不要求使用历史记录存储。
-                    在基于 拉取 的复制中，consumer定期轮询provider以获取更新。
-                    在基于 推送 的复制中，consumer可以实时收听provider发送的更新。
-                由于该协议不需要历史记录存储，因此提供程序不需要维护已收到的任何更新日志
-                （请注意，syncrepl 引擎是可扩展的，将来可能会支持其他复制协议。）。
+            DIT：DIrectory Information Tree
             
-            Syncrepl通过维护和交换 同步cookie 来跟踪复制内容的状态。
-                因为 syncrepl consumer和provider保持其内容状态，
-                    consumer可以通过轮询 provider的内容 (拿到: 能使得consumer和provider保持最新同步 所需的条目) 以执行增量同步。
-            Syncrepl 还可以通过 维护复制状态 来方便地管理consumer。
-                consumer数据库 可以从 consumer端或provider端 的备份 以任何同步状态构建。
-                Syncrepl 可以自动将consumer数据库与最新的provider内容重新同步。
+            一个syncrepl引擎 作为slapd的一个线程 驻留在consumer上。
+                它建立和维护一个消费者副本，方法是：
+                    1.首先，连接到一个 provider 以执行 DIT内容的初始化加载，
+                    2.然后，进行 定期内容轮询/拉取 或 及时根据内容变更 来更新目录树信息。
+            
+            Syncrepl 使用 LDAP内容同步协议(或简称 LDAP Sync)作为consumer同步协议。 
+            LDAP Sync提供一个有状态的复制，
+                1.同时 支持基于拉式和基于推式的同步，并且不要求使用历史存储。
+                    1.1.在基于 拉 的复制中，consumer定期轮询/拉取provider以获取更新。
+                    1.2.在基于 推 的复制中，consumer实时收听provider发送的更新信息。
+                由于该协议不需要历史存储，因此 provider不需要维护已收到的任何更新日志
+                (请注意，syncrepl 引擎是可扩展的，支持未来新增的复制协议。)。
+            
+            Syncrepl通过维护和交换 同步cookie 来跟踪 复制内容的状态。
+                1.因为 syncrepl consumer和provider保持它们的内容状态，
+                   1.1.所以，consumer可以通过轮询 provider的内容 (拿到: 能使得consumer和provider保持最新同步 (所需)的条目) 以执行增量同步。
+                       所以消费者可以拉取 provider的内容来执行增量同步，只需要请求那些最新的 provider条目。
+                2.Syncrepl 还可以通过 维护复制状态 来方便地管理consumer的复制。
+                    2.1.consumer数据库/副本 可以在任何同步状态下 从一个consumer端或一个provider端的备份 构建。
+                    2.2.Syncrepl可以自动将consumer数据库与最新的provider内容同步到一致状态。
 
-            Syncrepl 支持基于拉和基于推的同步。
-                在基本的 refreshOnly 同步模式下，
+            Syncrepl 同时支持 基于拉和基于推的同步。
+                1.在基本的 refreshOnly 同步模式下，
                     provider使用基于"拉"的同步，
-                        在这种情况下，无需跟踪consumer服务器，并且不维护任何历史记录信息。
-                        provider 处理 定期轮询 请求所需的信息 包含在 请求本身的同步cookie中。
-                    为了优化基于拉取的同步，syncrepl 利用了 LDAP Sync协议的 当前阶段及其删除阶段，而不是依靠频繁的完全重载来进行回退。
-                    为了进一步优化基于拉的同步，provider可以将 每个作用域的会话日志 作为历史记录存储。
-                在其 refreshAndPersist 同步模式下，
+                        无需跟踪consumer服务器，并且不维护任何历史信息。
+                        provider 需要处理 来自consumer的周期性的拉取请求，
+                            请求信息 包含在 请求本身的同步cookie中。
+                    为了优化基于拉的同步，
+                        syncrepl 利用了 LDAP Sync协议的 “当前阶段”及其“删除阶段”，
+                        而不是依靠频繁的完全重载来进行回滚。
+                    为了进一步优化基于拉的同步，
+                        provider可以维护一个按范围划分的会话日志作为历史存储。
+                2.在 refreshAndPersist 同步模式下，
                     provider使用基于"推"的同步。
-                    provider跟踪 请求了持久搜索的consumer服务器，并在provider复制内容被修改时向它们发送必要的更新。
+                        provider跟踪 请求了一个持久搜索的consumer服务器，
+                        并在provider复制内容被修改时向它们发送必要的更新。
             
-            如果consumer服务器具有要复制的 DIT 片段的适当访问特权，则使用 syncrepl，
-                consumer可以创建一个复制协议而无需更改provider的配置，也无需重新启动provider服务器。
-                使用者服务器也可以停止复制，也是无需更改provider端和重新启动。
+            如果consumer服务器 对要被复制的DIT片段 有适当访问权限，
+                consumer服务器 可以创建一个复制而无需修改provider的配置，也无需重启provider服务器。
+                consumer服务器也可以停止复制，也是无需provider端任何变更和重启。
 
-            Syncrepl 支持部分，稀疏和部分复制。
-                影子 DIT 片段由常规搜索标准定义，该标准由 base，scope，filter 和 attribute list 组成。
-                consumer内容还受 syncrepl 复制连接的绑定标识的访问特权的约束。
+            Syncrepl支持 局部的，稀疏的 片段复制。
+                影子DIT片段 由一个标准通用搜索来定义，
+                    由 base，scope，filter 和 attribute list 组成。
+                    consumer复制内容还受 syncrepl复制连接 绑定的用户的操作权限的 限制。
+
+            总结：
+                Syncrepl是OpenLDAP服务器之间同步所使用的协议；
+                提供一个有状态的复制；
+                同时支持 基于拉 和 基于推 进行目录树信息同步；
+                拉模式下，consumer定期到provider 以拉取的方式进行同步数据更新； 
+                    refreshOnly
+                        当前阶段
+                        删除阶段
+                推模式下，consumer实时监听并接收provider发送的更新信息，并对本地目录树进行更新；
+                Syncrepl支持多服务器之间同步数据，且实现双向数据同步；
+                    2.4版本中使用Syncrepl方式进行同步，slurpd已废弃
+
+
+            18.1.1.1. The LDAP Content Synchronization Protocol
+            18.1.1.1. LDAP 内容同步协议
+
+                本节仅简要介绍 LDAP Content Sync协议
+                有关更多信息，请参阅 RFC4533
+
+                LDAP Sync协议通过定义两个单独的同步操作 来支持轮询和侦听：
+                    refreshOnly 和refreshAndPersist。
+                轮询通过 refreshOnly 实现。
+                    consumer使用附加了 LDAP Sync控件的 LDAP搜索请求 来轮询provider。
+                    在轮询时 使用查询中返回的信息，consumer副本将与provider副本同步。
+                    provider像处理常规搜索一样 在搜索操作结束时返回SearchResultDone 来完成搜索操作。
+                监听通过 refreshAndPersist 实现。
+                    顾名思义，像refreshOnly一样，它以搜索开始。
+                    在返回当前匹配搜索条件的所有条目之后，不完成搜索，而是将同步搜索在provider中保持不变。
+                    provider 对同步内容的 后续更新 会导致将(附加的)条目更新发送给consumer。
+
+                refreshOnly操作和refreshAndPersist操作的刷新阶段可以在当前阶段或删除阶段执行。
+
+                #当前阶段--当前消息
+                1.在当前阶段，provider向consumer发送 自上次同步以来在 搜索范围内 更新的条目。
+                    provider发送 更新后的条目的 所有请求的属性（无论是否更改）。
+                2.对于 在(搜索)范围内的每个未改变的条目，
+                    provider发送一条
+                    当前消息，
+                        该消息仅由 条目名称 和 代表当前状态的同步控件 组成。
+                        当前消息不包含条目的任何属性。
+                3.consumer收到所有更新和当前条目后，可以通过
+                    添加 添加到provider的条目，
+                    替换 在provider上修改的条目 以及
+                    删除 consumer副本中(既没有更新 也未指定存在于provider处)的条目 ？？？？？？？？？？？？？没看懂！！！
+                    来可靠地确定新的consumer副本。
+                总结：
+                    先发送范围内的更新
+                    范围内未改变的每个条目，发送一条“当前消息”
+                    删除/新增的呢 ？？？？？？？？？？？？？怎么同步？？
+                
+                #删除阶段--删除消息
+                删除阶段中 更新条目的传输与当前阶段中的相同。
+                    provider将 自上次同步以来 在搜索范围内更新的条目的所有请求属性 发送给consumer。
+                但是，在删除阶段，
+                    provider会为 从搜索范围中删除的每个条目发送一条删除消息，而不是发送当前消息。
+                    删除消息 
+                        仅由 条目名称 和 代表删除状态的同步控件 组成。
+                可以根据 SearchResultEntry消息附带的同步控件 通过添加，修改和删除条目 来确定新的consumer副本。
+                总结：
+                    先发送范围内的更新
+                    范围内被删除的每个条目，发送一条“删除消息”
+                    新增的呢 ？？？？？？？？？？？？？怎么同步？？
+
+                #当前阶段 和 删除阶段 怎么选择
+                如果LDAP Sync provider维护历史存储 并可以确定自上次同步以来哪些条目不在consumer副本范围内()，
+                    则provider可以使用“删除阶段“。
+                如果provider不维护任何历史存储，不能从历史存储中确定作用域外的条目，或者历史存储不涵盖consumer的过时同步状态，
+                    则provider应使用“当前阶段”。
+                就同步业务而言，当前阶段的使用比完整内容重新加载的效率要高得多。
+                为了进一步减少同步流量，LDAP Sync 协议还提供了一些优化措施，
+                    例如在单个syncIdSet消息中传输标准化的 entryUUID 和传输多个 entryUUID。
+                
+                在 refreshOnly 同步结束时，
+                    provider在同步完成后将同步cookie发送给consumer，
+                    作为consumer副本的状态指示符。
+                    consumer在向provider请求下一次增量同步时将携带此cookie。
+                
+                #refreshAndPersist
+                当使用 refreshAndPersist 同步时，
+                    provider会在刷新阶段结束时通过发送带有refreshDone=TRUE 的同步信息消息来发送同步 cookie。
+                    provider还通过将 同步cookie附加到 在同步搜索的"持久阶段"生成的SearchResultEntry消息 中 来发送同步cookie。
+                在持久阶段，
+                    provider还可以在 provider想要更新consumer一方状态指示符的任何时间 发送包含同步cookie的SyncInfo消息。
+
+                在 LDAP Sync 协议中，条目由 entryUUID 属性值唯一标识。
+                    它可以用作条目的可靠标识符。
+                    另一方面，条目的 DN 可以随时间更改，因此不能视为可靠的标识符。
+                    作为同步控件的一部分，entryUUID 附加到每个 SearchResultEntry 或 SearchResultReference。
+                
+            18.1.1.2. Syncrepl Details
+            18.1.1.2. Syncrepl 细节
+
+                syncrepl 引擎同时使用 LDAP Sync 协议的 refreshOnly 和 refreshAndPersist 操作。
+                如果数据库定义中包含 syncrepl 规范，
+                    则 slapd启动一个syncrepl引擎作为slapd的一个线程，并安排其执行。
+                如果指定了 refreshOnly 操作，
+                    则同步操作完成后的间隔时间将重新安排syncrepl引擎。
+                如果指定了 refreshAndPersist 操作，
+                    则引擎将保持活跃状态并处理来自provider的持久同步消息。
+
+                syncrepl引擎 同时使用 刷新同步的 当前阶段和删除阶段。
+                1.可以在provider中配置会话日志，该会话日志存储 从数据库中删除的有限数量条目的 entryUUID。
+                    多个consumer共享相同的会话日志。
+                2.如果会话日志是当前的(足够新)，并且consumer服务器的状态足够新，以至于在client的最后一次同步之后没有会话日志条目被截断时，
+                    那么syncreplpl引擎将使用删除阶段。
+                3.如果没有为复制内容配置任何会话日志，或者consumer方太过时而无法被会话日志覆盖，
+                    则syncrepl引擎将使用当前阶段。
+                会话日志存储的当前设计是基于内存的，
+                    因此会话日志中包含的信息不能在多个provider程序调用上保持不变。
+                    当前不支持使用 LDAP 操作访问会话日志存储。
+                    当前也不支持对会话日志施加访问控制。
+                
+                作为进一步的优化，
+                    即使在同步搜索未与任何会话日志关联的情况下，
+                    当复制上下文中没有更新时，也不会将任何条目传输到consumer服务器。
+                
+                1. consumer端的复制引擎：syncrepl引擎 可以与任何后端一起使用。
+                2. 可以将 LDAP Sync provider配置为任何后端上的overlay，
+                    但是最适合与 back-bdb，back-hdb 或 back-mdb 后端一起使用。
+                
+                LDAP Sync provider
+                    为每个数据库维护一个 contextCSN 
+                    作为provider内容的 当前同步状态指示符。
+                contextCSN是provider上下文中最大的 entryCSN，
+                    因此对于 entryCSN 值较小的条目，没有任何事务。
+                能将contextCSN 设置为最大的已发行entryCSN，
+                    因为 entryCSN 是在事务开始之前获得的，
+                    并且未按发行顺序提交。
+                
+                provider将上下文的 contextCSN 存储在上下文后缀条目(context suffix entry)的 contextCSN 属性中。
+                    但是，该属性不会在每次更新操作后写入数据库。相反，它主要在内存中维护。
+                    在数据库启动时，provider将最后保存的 contextCSN 读取到内存中，然后以独占方式使用内存中副本。
+                    默认情况下，由于数据库更新而导致对 contextCSN 的更改不会被完全写入数据库，直到服务器完全关闭为止。
+                如果需要的话，存在一个检查点工具可以使 contextCSN 被更频繁地写出。
+
+                请注意，在启动时，
+                    如果provider无法从后缀条目中读取 contextCSN，
+                    它将扫描整个数据库以确定该值，
+                    并且在大型数据库上进行此扫描可能需要很长时间。
+                读取 contextCSN 值后，
+                    仍将扫描数据库以查找大于该值的任何 entryCSN 值，
+                    以确保 contextCSN 值确实反映了数据库中最大的已提交 entryCSN。
+                在支持不等式索引的数据库上，
+                    在 entryCSN 属性上设置 eq索引
+                    并配置 contextCSN 检查点将大大加快此扫描步骤。
+                
+                如果无法通过读取和扫描数据库确定 contextCSN，则将生成一个新值。
+                另外，如果扫描数据库产生的 entryCSN 比后缀条目的 contextCSN 属性中先前记录的要大，则将立即用新值写入检查点。
+
+                consumer还将其复制状态存储在后缀条目的 contextCSN 属性中，
+                    这是作为同步cookie接收的provider的contextCSN。
+                当consumer服务器与provider服务器执行后续增量同步时，
+                    由consumer服务器维护的复制状态将用作同步状态指示符。
+                当它用作级联复制配置中的辅助provider服务器时，
+                    它还用作provider端同步状态指示符。
+                由于consumer和provider状态信息都保存在各自数据库中的同一位置，
+                    因此无需任何特殊操作即可将任何consumer提升为provider（反之亦然）。
+                
+                因为可以在syncrepl规范中使用 通用搜索过滤器，
+                    所以可以从同步内容中省略上下文中的某些条目。 ？？？？？？？？？？为什么？？？？？？？？？？？？？？？？？？？
+                如果consumer内容的任何部分是从属的，
+                    则 syncrepl引擎会创建一个粘合条目以填充consumer上下文。
+                    除非提供了 ManageDsaIT 控件，否则粘合条目不会在搜索结果中返回。
+                
+                同样，由于 syncrepl 规范中使用了搜索过滤器，
+                    即使未在provider上删除条目，
+                    也可能进行修改以将条目从复制范围中删除。
+                从逻辑上讲，必须在consumer上删除该条目，
+                    但是在provider不使用会话日志的情况下，
+                    provider在 refreshOnly 模式下无法检测和传播此更改。
+    
+    
+    18.2. Deployment Alternatives
+    18.2. 部署替代方案
+
+        18.2.1. Delta-syncrepl replication
+        18.2.1. Delta-syncrepl 复制
+
+        LDAP Sync 复制的缺点：
+            LDAP Sync 复制是基于对象的复制机制。
+                在 provider上更改复制对象中的任何属性值时，每个consumer都将获取并处理完整的更改对象，包括复制期间更改后的属性值和未更改的属性值。
+                这种方法的一个优点是，当单个对象发生多个更改时，无需保留这些更改的确切顺序；只有条目的最终状态很重要。(优点：单个对象发生多个更改时)
+                但是，当使用模式涉及对多个对象的单个更改时，此方法可能会有缺点。(缺点：多个对象的单个更改时)
+            例如，假设您有一个数据库，
+                其中包含102,400个对象，每个对象 1KB。
+                    此外，假设您例行运行批处理作业 
+                    对于在provider上的102,400个对象，
+                    更改每一个对象的一个属性的值，这个属性值占2个字节。
+                不计算 LDAP 和 TCP/IP 协议的开销，
+                    每次运行此作业时，每个consumer将传输并处理100MB的数据以处理 200KB 的更改！
+            在这种情况下传输和处理的数据的 99.98％将是多余的，因为它表示不变的值。
+                这浪费了宝贵的传输和处理带宽，并且可能导致无法接受的复制积压。
+                尽管这种情况很极端，但它展示了 LDAP实际部署中 可能会遇到的问题。
+        Delta-syncrepl 出现的位置：
+            Delta-syncrepl是syncrepl的 基于更改/变更日志(changelog-based) 的变体，旨在解决上述情况。
+            Delta-syncrepl
+                通过在provider上的单独数据库中 
+                维护可选深度的变更日志(changelog) 来工作。
+            复制consuner在changelog中检查其所需的变更，
+                并且只要changelog包含所需的变更，
+                consumer就可以从changelog中获取变更并将其应用于其数据库。
+            但是，如果consumer方太快超出同步速度（或完全耗尽），
+                则使用常规 syncrepl 使它保持最新状态，
+                然后进行复制，
+                然后切换回 delta-syncrepl 模式。
+        注意：
+            由于数据库状态既存储在provider上的 changelog数据库中，又存储在主数据库中，
+                因此在还原数据库或将其复制到另一台计算机上时，
+                使用 slapcat/slapadd 备份/还原 changelog数据库和主数据库非常重要。   
+
+
+        18.2.2. N-Way Multi-Provider Replication
+        18.2.2. N 路多provider复制 
+
+        多provider复制是一种使用 Syncrepl 将数据复制到多个provider（“Provider”）目录服务器的复制技术。
+            
+            18.2.2.1. Valid Arguments for Multi-Provider replication
+            18.2.2.1. Multi-Provider复制的有效参数
+                ● 如果任何provider失败，其他provider将继续接受更新
+                ● 避免单点故障
+                ● provider可以位于多个物理站点中，即分布在整个网络/地球上。
+                ● 适用于自动故障转移/高可用性
+
+            18.2.2.2. Invalid Arguments for Multi-Provider replication
+            18.2.2.2. Multi-Provider复制的无效参数
+                （这些通常被称为Multi-Provider复制的优点，但这些说法是错误的）：
+                ● 与负载均衡无关
+                ● Providers必须向所有其他服务器进行写操作，这意味着网络流量和写负载在所有服务器上的分布都与single-provider相同。
+                ● Multi-Provider和single-provider复制的服务器利用率和性能最多相同；
+                    在最坏的情况下，single-provider会更胜一筹，
+                    因为可以对索引进行不同的调整以优化provider和consumer之间的不同使用模式。
+            
+            18.2.2.3. Arguments against Multi-Provider replication
+            18.2.2.3. 反对Multi-Provider复制的争论
+                ● 打破 目录模型的数据一致性 保证
+                ● 如果由于网络分区而导致与provider的连接丢失，则“自动故障转移”可能会使问题更加复杂
+                ● 通常，一台特定的计算机 无法区分 由于对等方崩溃 或 与网络链接失败 而导致与对等方失去联系
+                ● 如果网络已分区并且多个clients开始向每个“providers”进行写入，
+                    那么对帐将很麻烦；
+                    最好是简单地拒绝：单个provider分区的client进行写操作
+
+        18.2.3. MirrorMode replication
+        18.2.3. MirrorMode 复制
+            
+            MirrorMode 是一种混合配置，
+                它提供了single-provider复制的所有一致性保证，
+                同时还提供了multi-provider的高可用性。
+            在 MirrorMode 中，将两个provider设置为可以相互复制（作为multi-provider配置），
+                但是使用外部前端将所有写入仅定向到两个服务器之一。 
+                仅当第一个provider崩溃时，第二个provider才用于写操作，
+                此时前端将切换为将所有写操作定向到第二个provider。
+                当崩溃的provider被修复并重新启动后，
+                它将自动赶上正在运行的provider上的所有更改并重新同步。
         
-        18.1.1.1. The LDAP Content Synchronization Protocol
-18.1.1.1. LDAP 内容同步协议
+            18.2.3.1. Arguments for MirrorMode
+            18.2.3.1. MirrorMode 的讨论
+                ● 为目录写入（副本句柄读取）提供高可用性（HA）解决方案
+                ● 只要一个provider可以操作，就可以安全地接受写操作
+                ● Provider nodes提供程序节点 相互复制，因此它们始终是最新的，可以随时接管（热备用）
+                ● Syncrepl 还允许provider节点在发生任何停机后重新同步
+            
+            18.2.3.2. Arguments against MirrorMode
+            18.2.3.2. 反对 MirrorMode 的讨论
+                ● MirrorMode 不是所谓的Multi-Provider解决方案。这是因为一次只能将写入操作 写到 镜像节点之一
+                ● MirrorMode 可以称为 Active-Active Hot-Standby，因此需要外部服务器（slapd以代理模式）
+                    或设备（硬件负载平衡器）来管理当前处于活动状态的provider
+                ● 备份管理略有不同
+                    ■ 如果备份 Berkeley数据库本身 并定期备份 事务日志文件，则需要使用镜像对的相
+                        同成员来收集日志文件，直到进行下一次数据库备份为止
+        
+        18.2.4. Syncrepl Proxy Mode
+        18.2.4. Syncrepl 代理模式
 
+            尽管 LDAP Sync 协议同时支持基于拉和推的复制，
+                但是在provider可以开始推更改之前，
+                仍必须从consumer启动推模式（refreshAndPersist）。
+            在某些网络配置中，尤其是在防火墙限制了建立连接的方向的情况下，
+                可能需要provider发起的推送模式。
+
+            可以借助LDAP后端（后端和slapd-ldap）配置此模式。
+                不是在实际consumer上运行syncrepl引擎，
+                而是在指向consumer的provider附近设置了slapd-ldap代理，
+                并且 syncrepl 引擎在代理上运行。
+            
+            18.2.4.1. Replacing Slurpd
+            18.2.4.1. 更换 Slurpd
+                旧的 Slurpd 机制仅在 提供商发起的(provider-initiated)推送模式下运行。
+                    不推荐使用 Slurpd 复制，而推荐使用Syncrepl 复制，并且已经从 OpenLDAP 2.4 中完全删除了它。
+                
+                简而言之，它被替换的原因有很多：
+                ● 不可靠
+                    ■ 它对 replog 中的记录顺序非常敏感
+                    ■ 它很容易不同步，这时需要手动干预才能将副本数据库与provider目录重新同步
+                    ■ 它对不能使用的服务器的容忍度不是很高。如果副本长时间宕机，则重复日志(replog)的大小可能太大而无法处理
+                ● 仅在推送模式下有效
+                ● 需要停止并重新启动provider以添加新副本
+                ● 仅支持single-provider复制
+                
+                Syncrepl 没有这些弱点：
+                ● Syncrepl 是自同步的；您可以从任何状态（从完全空到完全同步）的使用者数据库开
+                    始，它将自动执行正确的操作以实现并保持同步
+                    ■ 它对变化的发生顺序完全不敏感
+                    ■ 它确保了consumer和provider内容之间的融合，而无需人工干预
+                    ■ 它可以重新同步，无论consumer与provider无联系的时间有多长
+                ● Syncrepl 可以双向操作
+                ● 可以随时添加consumer，而不触及provider上的任何东西
+                ● 支持Multi-provider复制
+    
+
+    18.3. Configuring the different replication types
+    18.3. 配置不同的复制类型
+        18.3.1. Syncrepl
+            18.3.1.1. Syncrepl configuration
+            18.3.1.1. Syncrepl 配置
             -----------------------------------    
             -----------------------------------    
             -----------------------------------    
