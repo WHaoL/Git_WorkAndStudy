@@ -264,7 +264,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
 5.2.1. cn=config
     
-    cn=config
+--------------------------------------------------cn=config
         此条目中包含的指令通常适用于整个服务器。
         它们大多数是面向系统或面向连接的，与数据库无关。
         此条目必须具有 
@@ -334,7 +334,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         -------------
 
 
-    --------------------cn=module
+-------------------------cn=module
     cn=module
         如果在配置slapd的时候 启用了对 动态加载模块 的支持,则cn=module条目 可用于指定要加载的模块集
         必须包含  objectClass: olcModuleList
@@ -365,7 +365,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             /usr/lib64/openldap/smbk5pwd.la
             /usr/lib64/:/usr/lib64/openldap/
 
-    --------------------cn=schema
+------------------------cn=schema
     cn=schema
         条目cn=schema包含所有以 slapd 形式硬编码的模式定义
             此条目中的值由slapd生成，所以无需在配置文件中提供任何schema value
@@ -400,7 +400,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         -------------
 
 
-    --------------------olcBackend
+--------------------------olcBackend
     后端参数指令(Backend-specific Directives)
         适用于相同类型的所有数据库实例，并且取决于指令，数据库指令可能会覆盖后端指令。
         必须包含 objectClass: olcBackendConfig
@@ -437,7 +437,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         -------------
 
 
-    --------------------数据库参数指令(Database-specific Directives)
+--------------------------数据库参数指令(Database-specific Directives)
     数据库参数指令(Database-specific Directives)
         每种类型的数据库都支持本节中的指令。
         数据库条目必须包含 objectClass: olcDatabaseConfig 
@@ -499,8 +499,6 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             当选择要传递查询的后端时，slapd会按照配置的顺序查看每个数据库定义中的后缀值。
                 如果一个数据库后缀是另一个数据库的前缀，则它必须出现在配置之后。
 
-5.2.5.8. olcSyncrepl
-
     olcSyncrepl
             olcSyncrepl: rid=<replica ID>
                 provider=ldap[s]://<hostname>[:port]
@@ -531,7 +529,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 [tls_reqcert=never|allow|try|demand]
                 [tls_cipher_suite=<ciphers>]
                 [tls_crlcheck=none|peer|all]
-                [logbase=<base DN>]
+                [logbase=<base DN>]     
                 [logfilter=<filter str>]
                 [syncdata=default|accesslog|changelog]
         该指令
@@ -551,24 +549,37 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 例如 ldap://provider.example.com:389 或 ldaps://192.168.1.1:636      
             请注意，syncrepl 使用 consumer启动的协议，因此其规范位于consumer上。
         
-        使用 搜索规范 作为结果集 来定义 syncreplconsumer的内容
-            consumerslapd 将根据搜索规范 向  providerslapd 发送搜索请求
-            搜索规范包含 searchbase, scope, filter, attrs, attrsonly, sizelimit, timelimit 
+        使用 搜索规范 作为结果集 来定义 syncrepl consumer的内容 
+            consumer slapd 将根据搜索规范 向  provider slapd 发送搜索请求
+            搜索规范包含 searchbase , scope, filter, attrs, exattrs, attrsonly, sizelimit, timelimit 
                 searchbase没有默认值，必须始终指定。
+                    即：指定树根，去哪棵树下开始查找
                 scope默认为 sub，
+                    scope的可能值：
+                        base
+                        one
+                        sub
+                        children
                 filter默认为(objectclass=*)，
+                    过滤器
                 attrs 默认为“*，+”以复制所有用户和操作属性，
+                    指定：返回哪些属性
                 attrsonly 默认情况下未设置。
                 sizelimit 和 timelimit 都默认为“unlimited”，并且只能指定正整数或“unlimited”。
+                    指定 从搜索操作返回的最大条目数
+                    指定 slapd 响应搜索请求所花费的最大秒数(实时)
+                exattrs 选项还可以用于指定应从传入条目中省略的属性。
 
         type
             LDAP内容同步协议有两种类型：refreshOnly 和 refreshAndPersist
             refreshOnly 
-                在每个同步操作完成后的间隔时间内，周期性地重新调度下一个同步搜索操作。
-                间隔由间隔参数指定,默认是1天
+                在每个同步操作完成后的间隔时间内，周期性地重新调度下一个同步搜索操作。 （！！！！！！！！！！！！！！！！！）
+                间隔由间隔参数指定,默认是1天   
+                    [interval=dd:hh:mm:ss]
             refreshAndPersist
-                同步搜索在 providerslapd实例中保持不变
-                对 provider的进一步更新将对消费者产生“searchResultEntry”作为对持久同步搜索的搜索响应。
+                同步搜索在 provider slapd实例中保持不变
+                对 provider的进一步更新将对consumer产生“searchResultEntry”作为对持久同步搜索的搜索响应。
+                （！！！！！！！！！！！！！！！！！）
         
         retry=[<retry interval> <# of retries>]
             如果复制发生错误,则consumer将根据retry参数尝试重新连接
@@ -584,7 +595,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         
         [binddn=<DN>]
             给出了要绑定的 DN
-            该DN 对 provider数据库中的复制内容具有读权限
+            该DN 对 provider数据库中的复制内容具有读权限 （！！！！！！！！！！！！！！！！！）
 
         [bindmethod=simple|sasl]
             是simple还是sasl,取决于连接到  providerslapd实例 时 是基于密码的简单(simple)身份验证还是使用SASL身份验证
@@ -592,12 +603,12 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         simple身份验证
             除非有足够的数据完整性和机密性保护(例如 TLS 或 IPsec)，否则不应使用简单身份验证。
             简单身份验证 需要指定
-                binddn=<DN>
-                credentials=<passwd>
+                binddn=<DN>             #DN
+                credentials=<passwd>    #密码
         SASL身份验证
             通常建议使用 SASL 身份验证
             需要使用 saslmech=<mech> 来指定一种机制.
-                根据机制可以分别使用身份验证和/或凭据 指定身份验证身份和/或凭据
+                根据机制可以分别使用身份验证和/或凭据 指定 身份验证身份和/或凭据
                 authzid=<identity>用于指定授权身份
         
         [realm=<realm>]         指定一个特定的机制进行身份验证  ???!!!
@@ -609,21 +620,20 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             其他 TLS 设置默认与主要的 slapdTLS 设置相同。
 
         [logbase=<base DN>]
+            cn=accesslog
+            cn=changelog
         [logfilter=<filter str>]
         [syncdata=default|accesslog|changelog]
-            consumer可以查询数据修改日志，而不是复制整个条目
+            syncdata=accesslog
+            syncdata=changelog
+        consumer可以查询数据修改日志，而不是复制整个条目
             对于将要使用的日志,必须适当设置 [logbase=<base DN>]和[logfilter=<filter str>] 参数
-            如果日志符合slapo-accesslog,则必须将 [syncdata=default|accesslog|changelog] 设置为accesslog
-            如果日志符合 过时的changelog,则必须将 [syncdata=default|accesslog|changelog] 设置为changelog
-            如果忽略了 [syncdata=default|accesslog|changelog] 参数或将其设置为“默认”，则将忽略日志参数
+                如果日志符合slapo-accesslog,则必须将 [syncdata=default|accesslog|changelog] 设置为accesslog
+                如果日志符合 过时的changelog,则必须将 [syncdata=default|accesslog|changelog] 设置为changelog
+                如果忽略了 [syncdata=default|accesslog|changelog] 参数或将其设置为“默认”，则将忽略日志参数
 
 
         使用 bdb，hdb 和 mdb 后端支持 syncrepl 复制机制
-
-    
-
-
-
     
     [olcTimeLimit: <integer>]
         该指令指定了 slapd 响应搜索请求所花费的最大秒数(实时)。如果请求在此时间内未完成，则将返回: 指示超出时间限制的结果。
@@ -632,7 +642,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     
     olcUpdateref: <URL>
         仅适用于副本(或 shadow) slapd 实例.
-        用于指定 要返回给客户端的URL , 客户端将在副本上提交更新请求
+        用于指定 要返回给客户端的URL , 客户端将在副本上提交更新请求 
         如果多次指定，则提供每个 URL
         Example:
             olcUpdateref:   ldap://provider.example.net
@@ -650,14 +660,15 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         olcRootDN: cn=Manager,dc=example,dc=com
         -------------
 
+上面的数据库设置和下面的数据库设置 为什么不合并在一起   ？？？？？？？？？？？？？为什么！！！
+这两个配置是如何结合的 ？？？？？ 
 
 
-
-    --------------------BDB 和 HDB 数据库指令(BDB and HDB Database Directives)
+------------------------BDB 和 HDB 数据库指令(BDB and HDB Database Directives)
     BDB 和 HDB 数据库指令
         此类别中的指令适用于 BDB 和 HDB 数据库。
             除了上面定义的通用数据库指令外，它们还用于olcDatabase 条目中。
-            有关 BDB/HDB 配置指令的完整参考，请参见 slapd-bdb(5)。
+            有关 BDB/HDB 配置指令的完整参考，请参见 slapd-bdb。
         除了objectClass: olcDatabaseConfig之外，BDB 和 HDB 数据库条目还必须分别具有 
             objectClass: olcBdbConfig 和
             objectClass: olcHdbConfig 
@@ -700,6 +711,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 并且事务日志文件将存储在/var/tmp/bdb-log 目录中。
                 还设置了一个标志，告诉 BDB 一旦其内容已被(检查点)检查过并且不再需要它们，则删除事务日志文件
                     没有此设置，事务日志文件将继续累积，直到其他一些清除过程将其删除为止
+                    但是如果删除了事务日志文件，则无法对灾难性故障进行恢复（！！！！！！！！！！！！！！！）
         理想情况下，
             BDB缓存 必须至少与数据库的工作集一样大，
             日志缓冲区的大小 应足够大以容纳大多数事务而不会溢出，
@@ -723,12 +735,12 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         如果仅给出<attrlist>，则将保留默认索引。
         索引关键字对应于 可以在 LDAP搜索过滤器 中使用的常见匹配类型。
         Example:
-            olcDbIndex: default pres,eq
+            olcDbIndex: default pres,eq      ？？？？？？？？？？？？？pres索引是什么！！！
             olcDbIndex: uid
             olcDbIndex: cn,sn pres,eq,sub
             olcDbIndex: objectClass eq
                 在此示例中：
-                    第一行设置默认索引集， 以 保持/维护 pres(present 存在)和eq(equality 相等)
+                    第一行设置 默认索引集， 以 保持/维护 pres(present 存在)和eq(equality 相等)
                     第二行导致为 uid属性类型 保留/维护 默认的(pres，eq)索引集。
                     第三行导致为 cn和sn属性类型 维护pres，eq和sub(substring 子字符串) 索引
                     第四行导致为 objectClass属性类型 维护eq索引
@@ -872,6 +884,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     它适用于所有条目(在任何适用的 数据库特定的 访问控制之后)。
                 第 20 行是空白行。
     下一个条目定义配置后端。
+    config backend
         -------------
         21. # set a rootpw for the config database so we can bind.
         22. # deny access to everyone else.
@@ -892,6 +905,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     否则将无法访问config 数据库。)
                 第 28 行是空白行。
     下一个条目定义一个 BDB 后端，
+    BDB backend
         该后端将处理 对 树的“dc=example，dc=com”部分 中的内容的查询。
         将为几个属性维护索引，并保护 userPassword属性 免受未经授权的访问。
         -------------
@@ -933,6 +947,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                                 所有其他用户(已认证或未认证)都可以读取所有其他属性。
                 第 50 行是空白行，指示该条目的结尾。
     下一个条目定义另一个 BDB 数据库。
+    another BDB database
         该查询处理涉及dc=example，dc=net子树，
             但由 与第一个数据库相同的实体 管理。
         注意：如果没有第60行的话，由于第 19 行的全局访问规则，将允许所有读访问。
@@ -961,7 +976,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         database config
         rootpw VerySecret
 
-    注意：由于 config后端 可将任意代码加载到slapd进程中，
+    注意：由于 config backend 可将任意代码加载到slapd进程中，
             因此 警惕谁可以访问它 非常重要。
         由于简单密码容易受到密码猜测攻击的而变得脆弱，
             因此最好省略rootpw，
@@ -1290,6 +1305,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                             第一种形式用于   选择 所有 条目。
                             第二种形式用于   通过 正则表达式与条目的DN进行匹配 来选择 条目。
                             第三种形式用于   选择 DN请求范围内的 条目。
+                                <scope-style>
                                 范围可以是 base，one，subtree 或 children。
                                 base     仅匹配 具有DN的条目(仅仅DN一个)，
                                 one        匹配 其父代是 DN 的条目(这个DN的第一代儿子)，
@@ -1311,6 +1327,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                                     dn.subtree="ou=people,o=suffix" match 2, 3, 4, and 5; 
                                     dn.children="ou=people,o=suffix" match 3, 4, and 5.
                                     -----------------------------------
+                                <basic-style> ::= regex | exact
+                                    regex ？？？？？
+                                    exact ？？？？？
                 使用filter(过滤器)选择条目
                     to filter=<ldap filter>
                         <ldap filter>是字符串，例如： to filter=(objectClass=person)
@@ -1394,7 +1413,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             它停在 与请求者匹配的第一个<who> selector上。
                 这确定了请求访问的实体 对条目和/或属性的 访问权。
 
-            --------最后比较<who>
+            --------最后比较<access>
             最后，slapd 将所选<access>条款中授予的访问权限与客户端请求的访问权限进行比较。
                 如果允许更大或相等的访问权限，则授予访问权限。
                 否则，访问将被拒绝
@@ -1402,7 +1421,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             --------指令的顺序非常重要
             访问指令的评估顺序使其在配置文件中的位置很重要。
                 如果就其选择的条目而言，
-                    一个访问指令比另一个访问指令更具体，则它应该"首先"出现在配置文件中。
+                    一个访问指令比另一个访问指令更具体，则它应该"首先"出现在配置文件中。（！！！！！！！！！！！！！）
                 同样，
                     如果一个<who>选择器比另一个选择器更具体，则应在访问指令中排在第一位。
                 下面给出的访问控制示例应有助于使这一点变得清楚。
@@ -1417,7 +1436,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             -----------------------------------
             access to *
                 by self write
-                by anonymous auth
+                by anonymous auth  ？？？？？？？
                 by * read
             -----------------------------------
                     该指令 
@@ -1450,7 +1469,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     dc=example,dc=com子树下的条目 被赋予"搜索"权限
                     dc=com子树下的条目 被授予"读取"权限； 
                         但dc=example,dc=com子树下的条目没有读取权限
-                    dc=com，没有被赋予权限，因为这两个指令均与DN不匹配
+                    dc=com，没有被赋予权限，因为这两个指令均不匹配DN
+                        children：匹配DN的所有后代
                 注意：
                     如果这些访问控制指令的顺序颠倒了，
                     那么将永远不会执行位于后面的指令语句，因为dc=example,dc=com下的条目也都在dc=com下
@@ -1474,7 +1494,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 access to dn.subtree="dc=example,dc=com"
                     by self write
                     by dn.children="dc=example,dc=com" search
-                    by anonymous auth
+                    by anonymous auth    ？？？？？？？
             -----------------------------------
                     本示例适用于“dc=example,dc=com”子树中的所有条目的所有属性，除了homePhone属性。
 
@@ -1485,7 +1505,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                         homePhone属性可由该条目写入，
                         可由 example.com 下的条目搜索，
                         可由网络 10 连接的客户端可读，否则不可读(隐含 by * none)。
-                    
+
                     所有其他访问都被 access to * by * none 的隐式访问所拒绝。
 
 
@@ -1656,7 +1676,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             它停在 与请求者匹配的第一个<who> selector上。
                 这确定了请求访问的实体 对条目和/或属性的 访问权。
 
-            --------最后比较<who>
+            --------最后比较<access>
             最后，slapd 将所选<access>条款中授予的访问权限与客户端请求的访问权限进行比较。
                 如果允许更大或相等的访问权限，则授予访问权限。
                 否则，访问将被拒绝
@@ -1739,7 +1759,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             -----------------------------------
                     本示例适用于“dc=example,dc=com”子树中的所有条目的所有属性，除了homePhone属性。
 
-                        条目可以写入自身，
+                        一个条目可以写入自身，
                         example.com 条目下的条目可以进行搜索，
                         除了身份验证/授权(始终以匿名方式进行)之外，其他任何人都没有访问权限(暗含 by * none)。
 
@@ -1827,7 +1847,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         8.4.1. 基本 ACLs(Basic ACLs)
             -----------------------------------
             access to attrs=userPassword
-            by self =xw
+            by self =xw         ？？？？？？
             by anonymous auth
             by * none
             access to *
@@ -1886,7 +1906,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 例如：            
             -----------------------------------   
             access to dn.base="cn=Manager,o=MyOrganization"
-                by peername.regex=127\.0\.0\.1 auth
+                by peername.regex=127\.0\.0\.1 auth  ？？？？？auth
                 by peername.regex=192\.168\.0\..* auth
                 by users none
                 by * none            
@@ -1918,7 +1938,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             -----------------------------------   
             access to dn.children="dc=example,dc=com"
                 by self write
-                by group.exact="cn=Administrators,dc=example,dc=com" write
+                by group.exact="cn=Administrators,dc=example,dc=com" write  ？？？？？
                 by * auth            
             -----------------------------------        
 
@@ -1926,7 +1946,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 例如：
             -----------------------------------        
             access to dn.regex="(.+,)?ou=People,(dc=[^,]+,dc=[^,]+)$"
-                attrs=children,entry,uid
+                attrs=children,entry,uid     ？？？？？children？？？？？
             by group.expand="cn=Managers,$2" write
             by users read
             by * auth       
@@ -1949,7 +1969,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             dn: cn=Administrator,dc=example,dc=com
             cn: Administrator
             objectclass: organizationalRole
-            roleOccupant: cn=Jane Doe,dc=example,dc=com             
+            roleOccupant: cn=Jane Doe,dc=example,dc=com         ？？？？？    
             ----------------------------------- 
             注意：
                 指定的成员属性类型必须是 DN 或 NameAndOptionalUID 语法，
@@ -1980,7 +2000,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             by self write
 
             # entry itself: self may write, all may read
-            access to attrs=entry
+            access to attrs=entry ？？？？？
             by self write
             by * read
 
@@ -2043,7 +2063,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
 
             access to dn.regex="^ou=addressbook,associatedDomain=([^,]+),ou=domains,o=<basedn>$" attrs=children
-                    by dn.regex="^uid=([^,]+),ou=users,associatedDomain=$1,ou=domains,o=<basedn>$$" write
+                    by dn.regex="^uid=([^,]+),ou=users,associatedDomain=$1,ou=domains,o=<basedn>$$" write   ？？？？？
                     by * none
 
 
@@ -2107,7 +2127,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                             尽管正确，但可以安全有效地替换为
                             -----------------------------------    
                             access to dn.regex=".+,(dc=[^,]+,dc=[^,]+)$"
-                                by dn.onelevel,expand="ou=Admin,$1" write
+                                by dn.onelevel,expand="ou=Admin,$1" write ？？？？？？
                             -----------------------------------    
                                     其中<what>子句中的正则表达式更紧凑，
                                     而<by>子句中的正则表达式被 具有子字符串扩展功能的 onelevel 代替。
@@ -2688,7 +2708,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
 11. 后端(Backends)
     
-    后端执行实际的存储和检索，以相应LDAP的请求。
+    后端执行实际的存储和检索，以响应LDAP的请求。
         后端可以被静态编译进slapd，
         或者
         当启用模块支持后，可以动态加载后端
@@ -3066,7 +3086,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     
     Overlays 是软件组件，
         可提供 类似于后端提供的 功能钩子，
-        可以将其堆在后端调用的顶部，作为 后端响应顶部的回调 来更改其行为。
+        可以将其堆在后端调用的顶部，作为 后端响应顶部的回调 来更改其行为。  
     
     Overlays 
         可以静态编译到 slapd，
@@ -3119,11 +3139,11 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             ...
             overlay accesslog
             logdb cn=log
-            logops writes reads
+            logops writes reads    ？？？？？
             logold (objectclass=person)
 
             database mdb
-            suffix cn=log
+            suffix cn=log ？？？？？
             maxsize 85899345920
             ...
             index reqStart eq
@@ -3289,7 +3309,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 -----------------------------------    
                 将此添加到您的 syncrepl 语句下面：
                 -----------------------------------  
-                updateref "ldap://ldapprovider.example.com/"  
+                updateref "ldap://ldapprovider.example.com/"  ？？？？？？
                 -----------------------------------    
         12章 余下未看
 
@@ -3654,7 +3674,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             这允许条目包含适当的相对DN值。
 
         如果服务器a.example.net持有dc=example,dc=net，
-        并希望将子树ou=subtree,dc=example,dc=net委托给另一个服务器b.example.net，
+        并希望将子树ou=subtree,dc=example,dc=net委托给另一个服务器b.example.net，    ？？？？？ 何谓委托？？？？
             则会将以下命名的引用对象添加到a.example.net:
             -----------------------------------   
             dn: dc=subtree,dc=example,dc=net
@@ -3747,7 +3767,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             
             Syncrepl 使用 LDAP内容同步协议(或简称 LDAP Sync)作为consumer同步协议。 
             LDAP Sync提供一个有状态的复制，
-                1.同时 支持基于拉式和基于推式的同步，并且不要求使用历史存储。
+                1.同时 支持基于拉式和基于推式的同步，并且不要求使用历史存储。  
                     1.1.在基于 拉 的复制中，consumer定期轮询/拉取provider以获取更新。
                     1.2.在基于 推 的复制中，consumer实时收听provider发送的更新信息。
                 由于该协议不需要历史存储，因此 provider不需要维护已收到的任何更新日志
@@ -3922,7 +3942,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     但是最适合与 back-bdb，back-hdb 或 back-mdb 后端一起使用。
                 
                 LDAP Sync provider
-                    为每个数据库维护一个 contextCSN 
+                    为每个数据库维护一个 contextCSN   ？？？？？？是不是cookie
                     作为provider内容的 当前同步状态指示符。
                 contextCSN是provider上下文中最大的 entryCSN，
                     因此对于 entryCSN 值较小的条目，没有任何事务。
@@ -3950,7 +3970,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 如果无法通过读取和扫描数据库确定 contextCSN，则将生成一个新值。
                 另外，如果扫描数据库产生的 entryCSN 比后缀条目的 contextCSN 属性中先前记录的要大，则将立即用新值写入检查点。
 
-                consumer还将其复制状态存储在后缀条目的 contextCSN 属性中，
+                consumer还将其复制状态存储在后缀条目的 contextCSN 属性中，   ？？？？？？？
                     这是作为同步cookie接收的provider的contextCSN。
                 当consumer服务器与provider服务器执行后续增量同步时，
                     由consumer服务器维护的复制状态将用作同步状态指示符。
@@ -3967,7 +3987,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 
                 同样，由于 syncrepl 规范中使用了搜索过滤器，
                     即使未在provider上删除条目，
-                    也可能进行修改以将条目从复制范围中删除。
+                    也可能进行修改以将条目从复制范围中删除。  ？？？？？
                 从逻辑上讲，必须在consumer上删除该条目，
                     但是在provider不使用会话日志的情况下，
                     provider在 refreshOnly 模式下无法检测和传播此更改。
@@ -3983,7 +4003,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             LDAP Sync 复制是基于对象的复制机制。
                 在 provider上更改复制对象中的任何属性值时，每个consumer都将获取并处理完整的更改对象，包括复制期间更改后的属性值和未更改的属性值。
                 这种方法的一个优点是，当单个对象发生多个更改时，无需保留这些更改的确切顺序；只有条目的最终状态很重要。(优点：单个对象发生多个更改时)
-                但是，当使用模式涉及对多个对象的单个更改时，此方法可能会有缺点。(缺点：多个对象的单个更改时)
+                但是，当使用模式涉及对多个对象的单个更改时，此方法可能会有缺点。(缺点：多个对象的单个更改时)（！！！！！！！！！！！！）
             例如，假设您有一个数据库，
                 其中包含102,400个对象，每个对象 1KB。
                     此外，假设您例行运行批处理作业 
@@ -4068,8 +4088,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 ● MirrorMode 可以称为 Active-Active Hot-Standby，因此需要外部服务器（slapd以代理模式）
                     或设备（硬件负载平衡器）来管理当前处于活动状态的provider
                 ● 备份管理略有不同
-                    ■ 如果备份 Berkeley数据库本身 并定期备份 事务日志文件，则需要使用镜像对的相
-                        同成员来收集日志文件，直到进行下一次数据库备份为止
+                    ■ 如果备份 Berkeley数据库本身 并定期备份 事务日志文件，则需要使用镜像对的相   ？？？？？？
+                        同成员来收集日志文件，直到进行下一次数据库备份为止      
         
         18.2.4. Syncrepl Proxy Mode
         18.2.4. Syncrepl 代理模式
@@ -4210,9 +4230,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                         type=refreshOnly
                         interval=01:00:00:00
                         searchbase="dc=example,dc=com"
-                        filter="(objectClass=organizationalPerson)"
+                        filter="(objectClass=organizationalPerson)"  
                         scope=sub
-                        attrs="cn,sn,ou,telephoneNumber,title,l"
+                        attrs="cn,sn,ou,telephoneNumber,title,l"   ？？？？
                         schemachecking=off
                         bindmethod=simple
                         binddn="cn=syncuser,dc=example,dc=com"
@@ -4249,7 +4269,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 启动consumer的slapd时，
                     可以加上 -c cookie 命令行选项 以提供同步cookie，以便从特定状态开始同步。
                     cookie 是用逗号分隔的 “name=value”对 的列表。
-                    当前支持的 syncrepl cookie字段为 csn=<csn>和 rid=<rid>。
+                    当前支持的 syncrepl cookie字段为 csn=<csn>和 rid=<rid>。 （！！！！！！！！！！！！）
                         <csn>代表consumer的当前同步状态。
                         <rid>在consunmer服务器内本地标识一个consumer。
                             它用于将 cookie 与 slapd.conf中具有<rid>的syncrepl定义相关联。
@@ -4356,12 +4376,12 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                         binddn="cn=replicator,dc=example,dc=com"
                         credentials=secret
                         searchbase="dc=example,dc=com"
-                        logbase="cn=accesslog"
+                        logbase="cn=accesslog"          ？？？？？
                         logfilter="(&(objectClass=auditWriteObject)(reqResult=0))"
                         schemachecking=on
                         type=refreshAndPersist
                         retry="60 +"
-                        syncdata=accesslog
+                        syncdata=accesslog              ？？？？？
 
                 # Refer updates to the provider
                 updateref               ldap://ldapprovider.example.com    
@@ -4511,7 +4531,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             18.3.4.1. Mirror Node Configuration
             18.3.4.1. 镜像节点配置
 
-                第一步是与设置provider slapd 部分中相同的方式配置 syncrepl provider。
+                第一步是与设置provider slapd 部分中相同的方式配置 syncrepl provider。 ？？？？
 
                 这是在 refreshAndPersist 模式下使用 LDAP 同步复制的特定缩减示例：
                     ----------------------------------- 
@@ -4822,15 +4842,522 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             -----------------------------------    
 
                     
-12. Overlays
-13. Schema Specification 模式规范
-14. Security Considerations 安全注意事项
-17. 构造分布式目录服务(Constructing a Distributed Directory Service
-18. 复制Replication
-19. 维护Maintenance
+
+19. （数据库备份）维护Maintenance
+
+    19.1. Directory Backups
+    19.1. 目录备份
+
+        备份策略在很大程度上取决于
+            数据库中的更改量，
+            以及管理员在灾难性故障中可能愿意损失的更改量。
+        可以使用两种基本方法：
+
+        1. 备份 Berkeley数据库本身，并定期备份事务日志文件：
+        (Berkeley database itself)(transaction log files)
+
+            Berkeley DB 生成事务日志(transaction log)，可用于重建给定时间点的更改。
+                例如，如果管理员只愿意丢失一小时的更改价值，
+                则他们可以在半夜关闭服务器，将 Berkeley 数据库文件复制到异地，然后使服务器重新上线。
+                然后，他们每小时可以强制执行一个数据库检查点，捕获过去一个小时内生成的日志文件，然后将其复制到异地。
+                累积的日志文件与先前的数据库备份进行结合 然后与 db_recover 一起使用，以重建数据库(恢复到 ：最后一次将日志文件集合复制到异地为止)。
+                此方法提供了良好的保护，同时具有最小的空间开销。
+        
+        2. 定期运行 slapcat 并备份 LDIF 文件：
+
+            可以在 slapd 处于活动状态时运行 slapcat。
+                2.1.但是，这会带来数据库不一致的风险
+                    不仅是从 slapd 的角度来看，
+                    而且从使用 LDAP 的应用程序的角度来看。
+                例如，如果预配应用程序执行的任务由多个 LDAP 操作组成，并且 slapcat 与这些操作同时发生，
+                则从该预配应用程序和依赖于该自定义应用程序的应用程序的角度来看，LDAP 数据库中可能存在不一致之处。
+                因此，必须确信不会发生类似的事情。
+                    一种方法是在执行 slapcat 时将数据库置于只读模式。
+                2.2.这种方法的另一个缺点是生成的 LDIF 文件可能很大，并且一天备份的累积可能会占用大量空间。
+
+        您可以使用 slapcat为您的每个 slapd back-bdb 或 back-hdb 数据库生成 LDIF 文件。
+            slapcat -f slapd.conf -b "dc=example,dc=com"
+                对于 back-bdb 和 back-hdb，此命令可能在 slapd运行时运行。
+        
+        有关实际的 Berkeley DB 备份的更多信息，稍后将介绍 db_recover 等。
+
+    19.2. Berkeley DB Logs
+    19.2. Berkeley DB 日志
+
+        Berkeley DB 日志文件会增长，管理员必须对其进行处理。该过程称为日志文件归档或日志文件轮换。
+        注意：实际的日志文件轮换由 Berkeley DB 引擎处理。
+
+        当前事务的日志需要存储到文件中，以便在应用程序崩溃时可以恢复数据库。
+            管理员可以通过设置数据库环境来
+                更改单个日志文件的大小限制（默认为 10MB），
+                并自动删除旧的日志文件（请参阅下文）。
+            Berkeley DB 默认情况下从不删除任何日志文件的原因是，
+                管理员可能希望在删除日志文件之前对其进行备份，
+                以便在灾难性的故障（例如文件系统损坏）之后也可以进行数据库恢复。
+
+        日志文件名为 log.XXXXXXXXXX（X 是一个数字）。
+            默认情况下，日志文件位于 BDB 后端目录中。
+        db_archive工具 知道当前事务中使用哪些日志文件，哪些不使用。
+            管理员可以将未使用的日志文件移至备份介质，然后将其删除。
+            要自动删除它们，请将 set_flags DB_LOG_AUTOREMOVE 指令放置在 DB_CONFIG 中。
+        
+        注意：如果自动删除日志文件，则灾难性故障后可能无法恢复。
+
+        名称为__db.001，__db.002 等的文件只是共享内存区域（或其他）。
+        这些不是“日志”，必须将它们单独放置。
+        不要害怕它们，它们不会像原木一样生长。
+
+        要了解 db_archive 接口，读者应参考 Berkeley DB 指南的第 9 章。特别是，建议以下章节：
+            ● 数据库和日志文件归档
+                - http://www.oracle.com/technology/documentation/berkeley-db/db/ref/transapp/archival.html 
+            ● 日志文件删除
+                - http://www.oracle.com/technology/documentation/berkeley-db/db/ref/transapp/logfile.html 
+            ● 恢复程序
+                - http://www.oracle.com/technology/documentation/berkeley-db/db/ref/transapp/recovery.html 
+            ● 热故障转移
+                - http://www.oracle.com/technology/documentation/berkeley-db/db/ref/transapp/hotfail.html 
+            ● 完整的 Berkeley DB 标志列表
+                - http://www.oracle.com/technology/documentation/berkeley-db/db/api_c/env_set_flags.html 
+        
+        高级安装可以使用特殊的环境设置来微调一些 Berkeley DB 选项（更改日志文件限制等）。
+            这可以通过使用 DB_CONFIG 文件来完成。
+        可以在由 slapd.conf（5）设置的 BDB 后端目录中创建此魔术文件。
+        有关此文件的更多信息，请参见“文件命名”一章。
+        可以在 C 接口中找到特定的指令，查找 DB_ENV->set_XXXX 调用。
+
+        注意：
+            DB_CONFIG 文件中设置的选项会覆盖 OpenLDAP 设置的选项。
+            使用它们时要格外小心。除非您知道自己在做什么，否则不要使用它们。
+
+        使用 DB_CONFIG 的优点如下：
+            ● 将数据文件和日志文件保存在不同的介质（例如磁盘）上，以提高性能和/或可靠性；
+            ● 微调一些特定的选项（例如共享内存区域的大小）；
+            ● 设置日志文件限制（在执行此操作之前，请先阅读日志文件限制）。
+        
+        为了找出最佳实践的 BDB 备份方案，
+            强烈建议读者阅读整个第 9 章：Berkeley DB 事务性数据存储应用程序。
+            本章是一组小页面，其中包含 C 语言示例。非编程人员可以跳过这些示例。
+
+    19.3. Checkpointing
+    19.3. 检查点
+
+        如果在 slapd.conf 中放入“checkpoint 1024 5”（checkpoint在1024kb或5分钟 后），
+        则不会像您想的那样每 5 分钟检查一次。霍华德的解释是：
+
+        “在 OpenLDAP 2.1 和 2.2 中，检查点指令的行为如下-
+            *当有写操作时*，并且自上一个检查点以来已超过<check>分钟，请执行检查点。
+            如果在写操作后经过<check>分钟以上而未发生任何其他写操作，则不会执行任何检查点，因此有可能会丢失上一次发生的写操作。”
+                换句话说，在最后一个检查点之后少于“check”分钟发生的写操作将不会被检查，
+                直到从检查点经过“check”分钟之后才进行下一次写操作。
+        
+        在 2.3 中已对其进行了修改，
+            实际上确实经常进行检查点检查。
+            同时，一种解决方法是每隔5 分钟（例如 5 分钟）从 cron 脚本中调用“db_checkpoint”。
+    
+
+    19.4. Migration
+    19.4. 迁移
+
+        根据您的部署类型，在版本之间或升级之间迁移的最简单步骤是：
+            ● 方便时停止当前服务器
+            ● slapcat 导出当前数据
+            ● 清除当前数据目录（/usr/local/var/openldap-data/），将 DB_CONFIG 保留在原位
+            ● 进行软件升级
+            ● 将导出的数据重新添加到目录中
+            ● 启动服务器
+        显然，这不能满足诸如 MirrorMode 或 N-Way Multi-Provider 之类的任何复杂部署的要求，
+        但是遵循上述内容并使用商业支持或社区支持应该会有所帮助。还要检查“疑难解答”部分。
+
+
+
 20. 监视器(Monitoring)
 
+    slapd支持可选的LDAP监视接口，您可以使用该接口来获取有关slapd实例当前状态的信息。
+        例如，该界面允许您确定当前有多少客户端连接到服务器。
+        监视信息由专门的后端（监视后端）提供。
+        手册页 slapd-monitor（5）可用。
+    
+    启用监视界面后，可以使用 LDAP 客户端访问由监视后端提供的信息，但要受访问和其他控制的约束。
+
+    启用后，监控器后端会动态生成并返回对象，以响应 cn=Monitor 子树中的搜索请求。
+        每个对象都包含有关服务器特定方面的信息。
+        该信息保存在用户应用程序和操作属性的组合中。
+    可以使用 ldapsearch，任何通用 LDAP 浏览器或专用监视工具来访问此信息。
+        访问监视信息部分(Accessing Monitoring Information) : 提供了有关如何使用 ldapsearch访问监视信息的简短教程，
+        监视信息部分(Monitor information)                 : 详细介绍了监视信息库及其组织。
  
+    虽然对监视器后端的支持已包含在 slapd的默认内部版本中，但此支持需要一些配置才能生效。
+    这可以使用 cn=config 或 slapd.conf（5）完成。
+        前者将在本章的  通过cn=config配置监视     中进行讨论。
+        后者在本章的    通过slapd.conf配置监视器  配置中讨论。
+    这些部分假定监视器后端内置在 slapd 中（例如--enable-monitor=yes，是默认值）。
+        如果监视器后端是作为模块构建的（例如--enable-monitor=mod，则必须加载此模块。
+        配置slapd 和  slapd配置文件  章节中讨论了模块的加载。
+    
+
+    20.1. Monitor configuration via cn=config(5)
+    20.1. 通过cn=config配置监视
+
+        这部分还没有写(手册里没写)。
+
+    20.2. Monitor configuration via slapd.conf(5)
+    20.2.通过slapd.conf配置监视器
+
+        首先，请确保您的 slapd.conf文件中包含 core.schema 模式配置文件。监控后端需要它。
+
+        其次，通过在现有数据库部分下方添加数据库监视器指令来实例化监视器后端。例
+            database monitor
+        
+        最后，根据需要添加其他全局或数据库指令。
+
+        像大多数其他数据库后端一样，监视器后端也确实支持 slapd访问其他管理控件。
+            由于某些监视器信息可能很敏感，
+                因此通常建议将 cn=monitor 的访问权限限制为目录管理员及其监视代理。
+            在数据库监控器指令的正下方添加访问指令是一种控制访问的清晰有效的方法。
+                例如，在数据库监视器指令的正下方添加以下访问指令将访问特定目录管理器的监视信息的访问限制为。
+                    access to *
+                    by dn.exact="cn=Manager,dc=example,dc=com"
+                    by * none
+        
+        slapd的访问控制的更多信息，请参阅所述的接入控制指令部的 slapd配置文件章节和slapd.access。
+
+        重新启动的 slapd之后，你就可以开始探索在本章的访问监控信息一节讨论了 cn=config提供的监控信息。
+
+        一个可以验证的 slapd可以被适当地配置成提供读取的 cn=Minitor 对象监视信息。
+        例如，如果满足下列的 ldapsearch命令返回 cn=config 对象（按要求请求，没有属性）。
+            ldapsearch -x -D 'cn=Manager,dc=example,dc=com' -W -b 'cn=Monitor' -s base 1.1
+        
+        请注意，与通用的后端数据库不同，该数据库后缀是固定的。
+            它总是为 cn=Minitor。
+            因此，应提供无后缀的指令。
+        还要注意的是通用的后端数据库，监控后端不能被实例化多次。
+            也就是说，只能有数据库监控的一个（或零）出现在服务器的配置。
+        
+    20.3. 获取监控信息(Accessing Monitoring Information)
+
+        如前所述，当启用时，监视器后端会动态生成并返回对象，以响应cn=Monitor子树中的搜索请求。
+            每个对象都包含关于服务器特定方面的信息。
+            信息保存在用户应用程序和操作属性的组合中。
+        可以使用ldapsearch、任何通用LDAP浏览器或专门的监控工具访问这些信息。
+
+        要检查任何特定的监视对象，请使用 一个baseObject范围 和 一个（objectClass=*）过滤器 对该对象执行搜索操作。
+            由于监视信息包含在用户应用程序和操作属性的组合中，
+            因此应请求返回所有 用户应用程序属性（例如“*”）和所有 操作属性（例如“+”）。
+            例如，要读取 cn=Monitor对象本身，可以使用 ldapsearch命令（修改以适合您的配置）：
+                ldapsearch -x -D 'cn=Manager,dc=example,dc=com' -W \
+                    -b 'cn=Monitor' -s base '(objectClass=*)' '*' '+'
+            在服务器上运行时，这将产生类似于以下内容的输出：
+                dn: cn=Monitor
+                objectClass: monitorServer
+                structuralObjectClass: monitorServer
+                cn: Monitor
+                creatorsName:
+                modifiersName:
+                createTimestamp: 20061208223558Z
+                modifyTimestamp: 20061208223558Z
+                description: This subtree contains monitoring/managing objects.
+                description: This object contains information about this server.
+                description: Most of the information is held in operational attributes, which
+                must be explicitly requested.
+                monitoredInfo: OpenLDAP: slapd 2.4 (Dec  7 2006 17:30:29)
+                entryDN: cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: TRUE
+        
+        为了减少返回的无用属性的数量，在请求返回哪些属性时可以有更多选择。
+            例如，可以请求返回 monitorServer对象类 所允许的所有属性（例如@objectClass），而不是所有用户和所有操作属性：
+                ldapsearch -x -D 'cn=Manager,dc=example,dc=com' -W \ 
+                    -b 'cn=Monitor' -s base '(objectClass=*)' '@monitorServer'
+            这里限制了输出，如下所示：
+                dn: cn=Monitor
+                objectClass: monitorServer
+                cn: Monitor
+                description: This subtree contains monitoring/managing objects.
+                description: This object contains information about this server.
+                description: Most of the information is held in operational attributes, which
+                must be explicitly requested.
+                monitoredInfo: OpenLDAP: slapd 2.X (Dec  7 2006 17:30:29)
+            这是必须明确要求的。
+                monitoredInfo: OpenLDAP: slapd 2.X (Dec 7 2006 17:30:29)
+        
+        要返回所有监视对象的名称，
+            请执行带有子树范围和（objectClass=*）过滤器的 cn=Monitor的搜索，
+            并且不请求返回任何属性（例如 1.1）。
+        
+        ldapsearch -x -D 'cn=Manager,dc=example,dc=com' -W -b 'cn=Monitor' -s sub 1.1
+        
+        如果运行此命令，将会发现 cn=Monitor 子树中有许多对象。
+        
+        以下部分描述了一些常用的监视对象。
+
+    20.4. Monitor Information
+    20.4. 监控信息
+
+        监视后端提供了大量信息，可用于监视一组监视对象中包含的 slapd。 
+            每个对象都包含有关服务器特定方面的信息，
+            例如后端，连接或线程。
+        一些对象充当其他对象的容器，并用于构造对象的层次结构。
+
+        在此层次结构中，最高级的对象是{cn=Monitor}。
+        尽管此对象主要充当其他对象的容器，其中大多数是容器，但该对象提供有关此服务器的信息。
+        特别是，它提供了 slapd版本字符串。例子：
+            dn: cn=Monitor
+            monitoredInfo: OpenLDAP: slapd 2.X (Dec 7 2006 17:30:29)
+        
+        注意：本节（及其子节）中的示例已被剪裁为仅显示关键信息。
+    
+
+        20.4.1. Backends
+
+            cn=Backends,cn=Monitor 对象本身提供了可用后端的列表。
+            可用后端的列表包括所有内置后端以及模块加载的后端。例如：
+                dn: cn=Backends,cn=Monitor
+                monitoredInfo: config
+                monitoredInfo: ldif
+                monitoredInfo: monitor
+                monitoredInfo: bdb
+                monitoredInfo: hdb
+            这表示 config，ldif，monitor，bdb 和 hdb 后端可用。
+
+
+            cn=Backends,cn=Monitor 对象也是可用后端对象的容器。
+            每个可用的后端对象都包含有关特定后端的信息。
+            例如：
+                dn: cn=Backend 0,cn=Backends,cn=Monitor
+                monitoredInfo: config
+                monitorRuntimeConfig: TRUE
+                supportedControl: 2.16.840.1.113730.3.4.2
+                seeAlso: cn=Database 0,cn=Databases,cn=Monitor
+                dn: cn=Backend 1,cn=Backends,cn=Monitor
+                monitoredInfo: ldif
+                monitorRuntimeConfig: TRUE
+                supportedControl: 2.16.840.1.113730.3.4.2
+                dn: cn=Backend 2,cn=Backends,cn=Monitor
+                monitoredInfo: monitor
+                monitorRuntimeConfig: TRUE
+                supportedControl: 2.16.840.1.113730.3.4.2
+                seeAlso: cn=Database 2,cn=Databases,cn=Monitor
+                dn: cn=Backend 3,cn=Backends,cn=Monitor
+                monitoredInfo: bdb
+                monitorRuntimeConfig: TRUE
+                supportedControl: 1.3.6.1.1.12
+                supportedControl: 2.16.840.1.113730.3.4.2
+                supportedControl: 1.3.6.1.4.1.4203.666.5.2
+                supportedControl: 1.2.840.113556.1.4.319
+                supportedControl: 1.3.6.1.1.13.1
+                supportedControl: 1.3.6.1.1.13.2
+                supportedControl: 1.3.6.1.4.1.4203.1.10.1
+                supportedControl: 1.2.840.113556.1.4.1413
+                supportedControl: 1.3.6.1.4.1.4203.666.11.7.2
+                seeAlso: cn=Database 1,cn=Databases,cn=Monitor
+                dn: cn=Backend 4,cn=Backends,cn=Monitor
+                monitoredInfo: hdb
+                monitorRuntimeConfig: TRUE
+                supportedControl: 1.3.6.1.1.12
+                supportedControl: 2.16.840.1.113730.3.4.2
+                supportedControl: 1.3.6.1.4.1.4203.666.5.2
+                supportedControl: 1.2.840.113556.1.4.319
+                supportedControl: 1.3.6.1.1.13.1
+                supportedControl: 1.3.6.1.1.13.2
+                supportedControl: 1.3.6.1.4.1.4203.1.10.1
+                supportedControl: 1.2.840.113556.1.4.1413
+                supportedControl: 1.3.6.1.4.1.4203.666.11.7.2
+            对于这些对象中的每一个，
+                monitorInfo 指示该对象中的信息是关于哪个后端的。
+                例如，cn=Backend 3,cn=Backends,cn=Monitor 对象包含（在示例中）有关 bdb 后端的信息。
+
+              Attribute           Description
+            monitoredInfo       Name of backend
+            supportedControl    supported LDAP control extensions
+            seeAlso             Database objects of instances of this backend
+
+
+        20.4.2. Connections
+
+            主条目为空；它应该包含一些有关连接数量的统计信息。
+
+            将为每个打开的连接创建动态子条目，并提供该连接上活动的统计信息（该格式将在后面详细介绍）。
+            有两个特殊的子项，分别显示了总连接数和当前连接数。
+            例如：
+            总连接数：
+                dn: cn=Total,cn=Connections,cn=Monitor
+                structuralObjectClass: monitorCounterObject
+                monitorCounter: 4
+                entryDN: cn=Total,cn=Connections,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+                Current Connections:
+            当前连接：
+                dn: cn=Current,cn=Connections,cn=Monitor
+                structuralObjectClass: monitorCounterObject
+                monitorCounter: 2
+                entryDN: cn=Current,cn=Connections,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+        
+        20.4.3. Databases
+
+            主条目包含每个已配置数据库的命名上下文；
+            对于每个数据库，子条目都包含类型和命名上下文。
+            例如：
+                dn: cn=Database 2,cn=Databases,cn=Monitor
+                structuralObjectClass: monitoredObject
+                monitoredInfo: monitor
+                monitorIsShadow: FALSE
+                monitorContext: cn=Monitor
+                readOnly: FALSE
+                entryDN: cn=Database 2,cn=Databases,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+        
+        20.4.4. Listener
+
+            它包含服务器当前正在侦听的设备的描述：
+                dn: cn=Listener 0,cn=Listeners,cn=Monitor
+                structuralObjectClass: monitoredObject
+                monitorConnectionLocalAddress: IP=0.0.0.0:389
+                entryDN: cn=Listener 0,cn=Listeners,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+        
+        20.4.5. Log
+
+            它包含当前活动的日志项。
+            日志子系统允许用户修改描述属性上的操作，该属性的值必须在可允许的日志开关列表中：
+                Trace
+                Packets
+                Args
+                Conns
+                BER
+                Filter
+                Config
+                ACL
+                Stats
+                Stats2
+                Shell
+                Parse
+                Sync
+            这些值可以添加，替换或删除。
+            它们会影响将哪些消息发送到 syslog 设备。
+            可以通过自定义模块添加自定义值。
+
+        20.4.6. Operations
+
+            它显示了有关服务器执行的操作的一些统计信息：
+                Initiated
+                Completed
+            并针对每种操作类型，即：
+                Bind
+                Unbind
+                Add
+                Delete
+                Modrdn
+                Modify
+                Compare
+                Search
+                Abandon
+                Extended
+            类型太多，无法在此处列出示例，因此请使用 Monitor search example 自行尝试
+        
+        20.4.7. Overlays
+
+            主条目包含运行时可用的叠加层(overlays)类型。
+            对于每个覆盖，子条目均包含覆盖(overlay)的类型。
+            
+            如果启用了动态叠加(overlays)，它还应该包含已加载的模块：
+                # Overlays, Monitor
+                dn: cn=Overlays,cn=Monitor
+                structuralObjectClass: monitorContainer
+                monitoredInfo: syncprov
+                monitoredInfo: accesslog
+                monitoredInfo: glue
+                entryDN: cn=Overlays,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: TRUE
+        
+
+        20.4.8. SASL
+            目前是空的。
+
+        20.4.9. Statistics
+
+            它显示了有关服务器发送的数据的一些统计信息：
+                Bytes
+                PDU
+                Entries
+                Referrals
+            例如
+                # Entries, Statistics, Monitor
+                dn: cn=Entries,cn=Statistics,cn=Monitor
+                structuralObjectClass: monitorCounterObject
+                monitorCounter: 612248
+                entryDN: cn=Entries,cn=Statistics,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+        
+        20.4.10. Threads
+
+            它包含启动时启用的最大线程数和当前的反向负载。
+            e.g.
+                # Max, Threads, Monitor
+                dn: cn=Max,cn=Threads,cn=Monitor
+                structuralObjectClass: monitoredObject
+                monitoredInfo: 16
+                entryDN: cn=Max,cn=Threads,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+
+        20.4.11. Time
+
+            它包含两个子条目，分别包含服务器的开始时间和当前时间。
+
+            e.g.
+            Start time:
+                dn: cn=Start,cn=Time,cn=Monitor
+                structuralObjectClass: monitoredObject
+                monitorTimestamp: 20061205124040Z
+                entryDN: cn=Start,cn=Time,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+            Current time:
+                dn: cn=Current,cn=Time,cn=Monitor
+                structuralObjectClass: monitoredObject
+                monitorTimestamp: 20061207120624Z
+                entryDN: cn=Current,cn=Time,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+        
+        20.4.12. TLS
+            
+            目前是空的。
+        
+        20.4.13. Waiters
+
+            它包含当前 读等待者 的数量。
+            
+            e.g.
+            Read waiters:
+            读等待：
+                dn: cn=Read,cn=Waiters,cn=Monitor
+                structuralObjectClass: monitorCounterObject
+                monitorCounter: 7
+                entryDN: cn=Read,cn=Waiters,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+            Write waiters:
+            写等待：
+                dn: cn=Write,cn=Waiters,cn=Monitor
+                structuralObjectClass: monitorCounterObject
+                monitorCounter: 0
+                entryDN: cn=Write,cn=Waiters,cn=Monitor
+                subschemaSubentry: cn=Subschema
+                hasSubordinates: FALSE
+
+            在此处添加新的监视对象并进行讨论，参考手册页和当前示例
+
+
+
+
             -----------------------------------    
             -----------------------------------    
             

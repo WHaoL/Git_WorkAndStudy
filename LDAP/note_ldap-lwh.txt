@@ -118,6 +118,9 @@
 		===== Snapshot1 =====
 
 		export PS1='[\u@\h \w]\$ '
+			这句话的作用是改变你的提示符显示格式，分别显示用户名，目录，时间
+			PS1：命令行提示符环境变量
+			https://zhidao.baidu.com/question/277442099.html 
 
 		#要么直接关闭防火墙，要么按照第3步 添加防火墙允许
 		systemctl stop firewalld
@@ -304,7 +307,7 @@
 		echo "将要修改的内容："
 		cat 01_tmp.ldif
 		
-		ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f tmp.ldif
+		ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 01_tmp.ldif
 
 		echo "修改后的变化"
 		diff -Nur \
@@ -325,8 +328,8 @@
 				-Y 指定验证机制(client和server之间的应答过程以及传输内容的编码方式)
 				-Q 安静的执行
 		
-		ldapmodify -Y EXTERNAL -H ldapi:/// -f tmp.ldif
-				利用 tmp.ldif 中的内容修改管理员密码
+		ldapmodify -Y EXTERNAL -H ldapi:/// -f 01_tmp.ldif
+				利用 01_tmp.ldif 中的内容修改管理员密码
 
 		4.diff -Nur 查看更改了哪些内容
 			diff可以参考博客：
@@ -771,6 +774,7 @@
 			
 			因为没有加类似-b dc=demo,dc=com "cn=hr-*"这样的过滤条件，
 			结果中会输出“result: 32 No such object”，这是正常的
+
 			如果密码错误会输出“ldap_bind: Invalid credentials (49)”
 
 			[root@bogon ldap]# ldapsearch -x -D cn=hr-ryan,ou=HR,ou=People,dc=demo,dc=com -w 123456 -b dc=demo,dc=com "cn=hr-*"
@@ -965,7 +969,7 @@
 				SASL username: gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth
 				SASL SSF: 0
 				modifying entry "olcDatabase={2}hdb,cn=config"
-			查看变更后的设置，放到olcDatabase={2}hdb.new文件中去
+			查看变更后的设置，放到olcDatabase={2}hdb.new文件中去了
 				[root@localhost ldap]# ldapsearch  -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={2}hdb' > olcDatabase={2}hdb.new
 
 			比较 老 新 设置的区别
@@ -981,7 +985,8 @@
 			//----------------------------------------------------------------------------------//
 
 			我们先不关注这种行为吧，默认所有第三方系统只有登录权限。
-			关于组织架构的维护，即ldap组织的更新，我们采用其他的方案去管理，ldap只是用来辅助第三方登录的。
+			关于组织架构的维护，即ldap组织的更新，我们采用其他的方案去管理，
+				ldap只是用来辅助第三方登录的（！！！！！！！！！！！！！！！！！）。
 			即，其他系统想要修改密码之类的，统一到我们的用户中心服务去修改变更，用户中心负责把信息同步给ldap
 
 	----------------------------------------------------------------------------------
@@ -1003,8 +1008,8 @@
 
 	大家可能会觉得dn已经很明显的分组了好吧，为啥还要这么复杂。
 	事实上，ldap也提供了Reverse Group Membership Maintenance.由系统来维护二者的映射关系。即：
-		group添加member的时候会自动给对应的entry添加memberof字段；
-    	当删除entry的时候，也会从group里删除member字段。
+		group添加member的时候会自动给对应的entry添加memberof字段（！！！！！！！！！！！！！！！！！）；
+    	当删除entry的时候，也会从group里删除member字段（！！！！！！！！！！！！！！！！！）。
 	这个需要单独配置，默认是不支持的。
 
 	9.1添加memberof模块	
@@ -1585,7 +1590,7 @@
 	-f              指定要修改的文件
 	-a              使用ldapmodify增加一个entry的时候等同于ldapadd
 	-b              basedn 根目录， 将在此目录下查询
-	-Y EXTERNAL     本地执行，修改配置文件，比如basedn, rootdn,rootpw,acl, module等信息
+	-Y EXTERNAL     本地执行，修改/查看配置文件，比如basedn, rootdn,rootpw,acl, module等信息
 	
 	-------------------------------------------
 
