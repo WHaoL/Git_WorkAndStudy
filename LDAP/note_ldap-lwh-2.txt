@@ -2716,19 +2716,26 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     如果你的安装使用动态模块
         需要添加相关的moduleload指令
         后端模块的通用名称是：
-            back_<backend name>.la
+            back_<backend name>.la    (  ls /usr/lib64/openldap/  )
         例如，你需要加载hdb后端：
             moduleload back_hdb.la 
 
     11.1. Berkeley DB Backends
         11.1.1. Overview
-            slapd的hdb后端，是一个正常/普通的的slapd数据库后端。
+            BDB Backends
+                slapd的"hdb后端"，是一个普通的的slapd数据库后端。
                 它使用Oracle Berkeley DB (BDB)包来存储数据，
                 它广泛的使用索引和缓存来加速数据访问
+            总结：
+                "hdb后端" 使用 "BDB后端"，
+                "hdb后端" 使用 "BDB后端" 来执行实际的 存储和检索
             
             hdb是原始bdb后端的变体，最初是为与 BDB 一起使用而编写的；
-            hdb使用支持子树重命名的分层数据库布局；
+            hdb使用 支持重命名子树的 分层数据库布局；                   (hierarchical database layout)
             它在其他方面和bdb的行为完全相同，并且所有相同的配置选项都适用。
+            总结：
+                hdb是bdb的变体 但是比bdb更好 
+                hdb和BDB一起配套使用
 
             注意：
                 hdb数据库需要一个更大的idlcachesize(idl缓存)，才能获得更好的搜索性能，
@@ -2737,6 +2744,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             注意：
                 hdb后端已经取代了bdb后端，并且很快将不推荐使用两者，
                 而推荐使用新的mdb后端。
+            总结：
+                推荐使用mdb 而不是hdb 也不算bdb
+
         11.1.2. back-bdb/back-hdb Configuration
             略
         11.1.3. Further Information
@@ -2744,14 +2754,18 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     
     11.2. LDAP
         11.2.1. 概览(Overview)
-            slapd的LDAP后端不是一个实际的数据库，
-                相反 它作为一个proxy 将传入请求转发给另一个LDAP服务器。
-                在处理请求时，它会追踪referrals，使得/以便 referrals进行完全处理，而不是将其返回给slapd客户端
+            LDAP backend
+            slapd的"LDAP后端"不是一个实际的数据库，
+                相反 它作为一个proxy/代理  将传入请求转发给另一个LDAP服务器。
+                在处理请求时，它会追踪referrals，
+                    使得/以便 referrals进行完全处理，
+                    而不是将referrals返回给slapd客户端
             
-            明确绑定到back-ldap数据库的会话会创建它们自己与远端LDAP服务器的专用连接。
+            连接池
+            明确绑定到"back-ldap数据库"的会话 会创建它们自己与远端LDAP服务器的专用连接。
             匿名会话会和远端服务器共享一个匿名连接。
-            对于通过其他机制绑定的会话，相同的DN的所有会话会，将共享相同的连接。
-            此连接池策略，可以通过 减少重复建立/断开多个连接的开销，来提高代理的效率。
+            对于通过其他机制绑定的会话，具有相同DN的所有会话，将共享相同的连接。
+            此连接池策略，可以通过 减少 重复建立/断开多个连接的开销，来提高代理的效率。
 
             ldap数据库可以作为一个信息服务，即本地通过了身份验证的客户端 可能以某种修改的形式 声明(asserted)给远端服务器。
             出于此目的，proxy(代理)使用管理员身份绑定到远端的服务器，并且，如果需要，授权声明的(asserted)身份
@@ -3753,15 +3767,16 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     18.1. 复制技术(Replication Technology) 
 
         18.1.1. 同步复制(LDAP Sync Replication)
+        Syncrepl （！！！！！！！！！！！！！！！！！）
             
             LDAP同步复制(简称 syncrepl)
                 1.是消费者方的复制引擎，
                 使消费者(consumer)服务器能够维护 DIT片段 的影子副本。
             
-            DIT：DIrectory Information Tree
+            DIT：DIrectory Information Tree 目录树
             
             一个syncrepl引擎 作为slapd的一个线程 驻留在consumer上。
-                它建立和维护一个消费者副本，方法是：
+                它建立和维护一个consumer副本，方法是：
                     1.首先，连接到一个 provider 以执行 DIT内容的初始化加载，
                     2.然后，进行 定期内容轮询/拉取 或 及时根据内容变更 来更新目录树信息。
             
@@ -3784,8 +3799,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             Syncrepl 同时支持 基于拉和基于推的同步。
                 1.在基本的 refreshOnly 同步模式下，
                     provider使用基于"拉"的同步，
-                        无需跟踪consumer服务器，并且不维护任何历史信息。
-                        provider 需要处理 来自consumer的周期性的拉取请求，
+                        provider无需跟踪consumer服务器，并且不维护任何历史信息。
+                        provider 需要处理 来自consumer的周期性的拉请求信息，
                             请求信息 包含在 请求本身的同步cookie中。
                     为了优化基于拉的同步，
                         syncrepl 利用了 LDAP Sync协议的 “当前阶段”及其“删除阶段”，
@@ -3811,11 +3826,15 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 Syncrepl使用 LDAP Sync作为consumer同步协议；
                 Syncrepl通过 同步cookie 来跟踪 复制内容的状态，以提供一个有状态的复制；
                 Syncrepl同时支持 基于拉 和 基于推 进行目录树信息同步；
-                (refreshOnly)拉模式下，consumer定期到provider 以拉取的方式进行同步数据更新； 
-                    refreshOnly
+                (refreshOnly)拉模式下，
+                    consumer定期到provider 以拉取的方式进行同步数据更新； 
+                    优化：
                         当前阶段
                         删除阶段
-                (refreshAndPersist)推模式下，consumer实时监听并接收provider发送的更新信息，并对本地目录树进行更新；
+                (refreshAndPersist)推模式下，
+                    1.consumer请求了持久搜索， 那么provider会跟踪consumer
+                    2.一旦provider检测到 持久搜索范围内 有内容被更新了，就会向consumer发送更新
+                    3.consumer实时监听并接收provider发送的更新信息，并对本地目录树进行更新；
                 Syncrepl支持多服务器之间同步数据，且实现双向数据同步；
                     2.4版本中使用Syncrepl方式进行同步，slurpd已废弃
 
@@ -3942,7 +3961,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     但是最适合与 back-bdb，back-hdb 或 back-mdb 后端一起使用。
                 
                 LDAP Sync provider
-                    为每个数据库维护一个 contextCSN   ？？？？？？是不是cookie
+                    为每个数据库维护一个 contextCSN   ？？？？？？是不是cookie？ 答：不是，cookie 是<csn><rid> <csn>是contextCSN用于标识复制状态, <rid>是consumer的id+
                     作为provider内容的 当前同步状态指示符。
                 contextCSN是provider上下文中最大的 entryCSN，
                     因此对于 entryCSN 值较小的条目，没有任何事务。
@@ -3998,6 +4017,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
         18.2.1. Delta-syncrepl replication
         18.2.1. Delta-syncrepl 复制
+        Delta-syncrep （！！！！！！！！！！！！！！！！！）
 
         LDAP Sync 复制的缺点：
             LDAP Sync 复制是基于对象的复制机制。
@@ -4030,6 +4050,14 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             由于数据库状态既存储在provider上的 changelog数据库中，又存储在主数据库中，
                 因此在还原数据库或将其复制到另一台计算机上时，
                 使用 slapcat/slapadd 备份/还原 changelog数据库和主数据库非常重要。   
+        
+        总结： （！！！！！！！！！！！！！！！！！）
+            Delta-syncrepl是对syncrepl的改进，使得可以增量同步
+            provider把更改/更新 维护在changelog中 
+            consumer可以从changelog中获取自己所需的变更
+        总结：
+            实际配置Delta-syncrepl provider时 是配置的accesslog 
+            accesslog 是 changelog的变体
 
 
         18.2.2. N-Way Multi-Provider Replication
@@ -4043,6 +4071,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 ● 避免单点故障
                 ● provider可以位于多个物理站点中，即分布在整个网络/地球上。
                 ● 适用于自动故障转移/高可用性
+                总结：
+                    Multi-Provider的优点是 避免单点故障/冗余备份
 
             18.2.2.2. Invalid Arguments for Multi-Provider replication
             18.2.2.2. Multi-Provider复制的无效参数
@@ -4060,7 +4090,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 ● 通常，一台特定的计算机 无法区分 由于对等方崩溃 或 与网络链接失败 而导致与对等方失去联系
                 ● 如果网络已分区并且多个clients开始向每个“providers”进行写入，
                     那么对帐将很麻烦；
-                    最好是简单地拒绝：单个provider分区的client进行写操作
+                    最好是简单地拒绝：从单个provider分区的client进行写操作
 
         18.2.3. MirrorMode replication
         18.2.3. MirrorMode 复制
@@ -4104,6 +4134,12 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 不是在实际consumer上运行syncrepl引擎，
                 而是在指向consumer的provider附近设置了slapd-ldap代理，
                 并且 syncrepl 引擎在代理上运行。
+            
+            总结：
+                Syncrepl Proxy同步模式 属于代理同步，它将主服务器隐藏起来，
+                proxy/代理服务器 通过syncrepl从主服务器上 以拉的方式 同步目录信息树，
+                当 proxy/代理服务器 数据发生改变时，proxy/代理服务器 又以推的方式将数据更新到 下属的从LDAP服务器上，
+                且 从LDAP服务器只有对 proxy/代理服务器 有读权限。
             
             18.2.4.1. Replacing Slurpd
             18.2.4.1. 更换 Slurpd
@@ -4153,10 +4189,12 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     建议从备份加载consumer，
                     而不是使用syncrepl执行完整的初始加载。
                 
-                总结：
-                    建议 加载 provider备份转储的LDIF文件 来初始化consumer的内容
+                总结：    （！！！！！！！！！！！！！！！！！）
+                    1. syncrepl 存在于consumer的slapd.conf文件中；
+                    2. 建议 加载 provider备份转储的LDIF文件 来初始化consumer的内容
                         然后 syncrepl引擎，自动将consumer内容和provider内容同步
             
+
             18.3.1.2. Set up the provider slapd
             18.3.1.2. 设置provider的slapd
 
@@ -4202,12 +4240,38 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 suffix dc=example,dc=com
                 rootdn dc=example,dc=com
                 directory /var/ldap/db
-                index objectclass,entryCSN,entryUUID eq
+                index objectclass,entryCSN,entryUUID eq    
 
                 overlay syncprov
                 syncprov-checkpoint 100 10
                 syncprov-sessionlog 100
                 -----------------------------------    
+
+            总结：    （！！！！！！！！！！！！！！！！！）
+                设置provider slapd
+                    overlay syncprov                    ！必须把provider实现为一个overlay
+                    syncprov-checkpoint <ops> <minutes> ！必须设置检查点
+                        检查点负责把缓存中的数据刷到磁盘中，这样provider数据库就会被更新了
+                    syncprov-sessionlog <ops>           ！必须设置会话允许的最大条目数
+                        设置entryCSN entryUUID的索引位eq将会 极大地改善provider上的session log的性能
+                            如： 
+                                index objectclass,entryCSN,entryUUID eq 
+                    syncprov-reloadhint <TRUE|FALSE>    使用增量同步复制Delta-syncrepl时必须设置为TRUE
+                        用于支持accesslog overlay
+                    syncprov-nopresent <TRUE|FALSE>     使用增量同步复制Delta-syncrepl时必须设置为TRUE 
+                        仅：当将overlay置于log database顶端时 才设置为TRUE，比如 增量同步复制Delta-syncrepl
+            总结： 概述
+                必须设置
+                    index 
+                    overlay
+                    syncprov-checkpoint
+                    syncprov-sessionlog
+                增量复制时还要设置
+                    syncprov-reloadhint TRUE
+                    syncprov-nopresent TRUE
+                还必须在provider里 设置 consumer的binddn的访问权限
+                    否则consumer没有权限，拿不到provider更新的内容
+
             
 
             18.3.1.3. Set up the consumer slapd
@@ -4232,7 +4296,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                         searchbase="dc=example,dc=com"
                         filter="(objectClass=organizationalPerson)"  
                         scope=sub
-                        attrs="cn,sn,ou,telephoneNumber,title,l"   ？？？？
+                        attrs="cn,sn,ou,telephoneNumber,title,l"  
                         schemachecking=off
                         bindmethod=simple
                         binddn="cn=syncuser,dc=example,dc=com"
@@ -4252,6 +4316,27 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                         搜索 objectClass=organizationalPerson 的条目。 
                         请求的属性是 cn,sn,ou,telephoneNumber,title,l 。
                     关闭schema检查，所以consumer在处理来自provider slapd的更新时 将不会执行体条目的schema检查。
+                
+            总结：  （！！！！！！！！！！！！！！！！！）
+                设置consumer slapd
+                必须设置
+                    index           设置索引
+                    rid             consumer的唯一标识id
+                    provider        provider ldap-server
+                    searchbase      从provider的哪棵树下 获取更新
+                    filter          过滤出 哪些条目
+                    scope           更新的范围  一般设置为 sub
+                    attrs           拿到条目中的哪些属性值
+                    schemachecking  写入前是否开启schema检查
+                    bindmethod      simple是明文；sasl
+                        binddn          consumer以什么身份/DN 去provider上获取更新
+                        credentials     此DN的密码
+                    type=refreshOnly模式下
+                        interval        以此为周期去provider上拉取更新
+                    type=refreshAndPersist模式下    
+
+
+
 
 
             18.3.1.4. Start the provider and the consumer slapd
@@ -4275,6 +4360,16 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                             它用于将 cookie 与 slapd.conf中具有<rid>的syncrepl定义相关联。
                             <rid>不能超过 3 个十进制数字。
                         命令行 cookie 会覆盖存储在consumer数据库中的同步cookie。
+           
+           
+           
+            总结：    （！！！！！！！！！！！！！！！！！）
+                provider 
+                consumer 启动时 附上参数 -c cookie，会导致从特定的 复制状态 开始同步
+                    其中cookie是 csn=<csn> rid=<rid>
+                    其中 entryCSN是provider为每一个consumer维护的复制同步状态
+
+
 
 
         18.3.2. Delta-syncrepl
@@ -4293,6 +4388,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 #即：给予 cn=replicator,dc=example,dc=com 无限制的读权限
                 #此ACL需要与其他ACL语句合并，并在数据库范围内移动
                 # by * break 导致对后续规则求值
+                # 即： 设置了谁能来拿我(provider)更新的内容
 
                 # Set the module path location  #设置module路径位置
                 modulepath /usr/lib/openldap
@@ -4302,9 +4398,14 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 
                 # Load the accesslog overlay    # 加载accesslog overlay
                 moduleload accesslog.la
+                # 必须要加载这个module
+                # 因为增量同步Delta-syncrepl 时 provider需要支持accesslog overlay
+                # 即：要支持 accesslog database  
+                #    同时还要把accesslog设置为overlay
                 
                 #Load the syncprov overlay      #加载syncprov overlay
                 moduleload syncprov.la
+                # 加载这个module 时为了 把provider设置为overlay
                 
                 # Accesslog database definitions  #Accesslog数据库定义
                 database mdb
@@ -4314,10 +4415,14 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 maxsize 85899345920
                 index default eq
                 index entryCSN,objectClass,reqEnd,reqResult,reqStart,reqDN
+                # 定义了accesslog database 
+                # 并设置了ccesslog database的索引
 
                 overlay syncprov
                 syncprov-nopresent TRUE
                 syncprov-reloadhint TRUE
+                # 把provider设置为overlay
+                # 同时增量同步Delta-syncrepl 时 这两个参数必须设置为true 详见 18.3.1.2. 的总结：
 
                 # 让这个 cn=replicator,dc=example,dc=com 的搜索不受任何限制
                 limits dn.exact="cn=replicator,dc=example,dc=com" time.soft=unlimited time.hard=unlimited size.soft=unlimited size.hard=unlimited
@@ -4327,16 +4432,19 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 suffix "dc=example,dc=com"
                 rootdn "cn=manager,dc=example,dc=com"
                 maxsize 85899345920
+                # 设置主数据库 mdb
 
                 ## Whatever other configuration options are desired     #其他配置选项
 
                 # syncprov specific indexing                    #指定索引
                 index entryCSN eq
                 index entryUUID eq
+                # 主数据库的索引 是为了加速 session log
 
                 # syncrepl Provider for primary db              #syncrepl Provider的主数据库
                 overlay syncprov
                 syncprov-checkpoint 1000 60
+                # 设置检查点 
 
                 # accesslog overlay definitions for primary db  #
                 overlay accesslog
@@ -4345,11 +4453,20 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 logsuccess TRUE
                 # scan the accesslog DB every day, and purge entries older than 7 days  #每天扫描accesslog DB，清除超过7天的条目
                 logpurge 07+00:00 01+00:00
+                # 把accesslog设置为overlay
+                # 设置了 每天扫描accesslog DB，清除超过7天的条目
 
                 # Let the replicator DN have limitless searches     # 让这个 cn=replicator,dc=example,dc=com 的搜索不受任何限制
                 limits dn.exact="cn=replicator,dc=example,dc=com" time.soft=unlimited time.hard=unlimited size.soft=unlimited size.hard=unlimited  
                 -----------------------------------    
                 有关更多信息，请查阅相关的手册页（slapo-accesslog和 slapd.conf）
+            
+            问题：
+                前面描述Delta-syncrepl的时候说的是changelog为什么此处配置的是acesslog？
+            总结：
+                实际配置Delta-syncrepl provider时 是配置的accesslog 
+                accesslog 是 changelog的变体
+
 
 
 
@@ -4376,15 +4493,15 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                         binddn="cn=replicator,dc=example,dc=com"
                         credentials=secret
                         searchbase="dc=example,dc=com"
-                        logbase="cn=accesslog"          ？？？？？
+                        logbase="cn=accesslog"          #去provider的 accesslog database 上查找是否有更新
                         logfilter="(&(objectClass=auditWriteObject)(reqResult=0))"
                         schemachecking=on
-                        type=refreshAndPersist
+                        type=refreshAndPersist          #推模式 
                         retry="60 +"
-                        syncdata=accesslog              ？？？？？
+                        syncdata=accesslog             #syncdata和logbase保持一致
 
                 # Refer updates to the provider
-                updateref               ldap://ldapprovider.example.com    
+                updateref               ldap://ldapprovider.example.com    #？？？？？？
                 -----------------------------------   
                 上面的配置假定您在数据库中定义了一个复制者身份，可用于绑定到provider。
                     此外，如果使用 bdb 或 hdb 后端，
@@ -4463,15 +4580,33 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 dn: olcDatabase={0}config,cn=config
                 changetype: modify
                 add: olcSyncRepl
-                olcSyncRepl: rid=001 provider=$URI1 binddn="cn=config" bindmethod=simple
-                credentials=secret searchbase="cn=config" type=refreshAndPersist
-                retry="5 5 300 5" timeout=1
-                olcSyncRepl: rid=002 provider=$URI2 binddn="cn=config" bindmethod=simple
-                credentials=secret searchbase="cn=config" type=refreshAndPersist
-                retry="5 5 300 5" timeout=1
-                olcSyncRepl: rid=003 provider=$URI3 binddn="cn=config" bindmethod=simple
-                credentials=secret searchbase="cn=config" type=refreshAndPersist
-                retry="5 5 300 5" timeout=1
+                olcSyncRepl: rid=001 
+                            provider=$URI1 
+                            binddn="cn=config" 
+                            bindmethod=simple
+                            credentials=secret 
+                            searchbase="cn=config" 
+                            type=refreshAndPersist
+                            retry="5 5 300 5" 
+                            timeout=1
+                olcSyncRepl: rid=002 
+                            provider=$URI2 
+                            binddn="cn=config" 
+                            bindmethod=simple
+                            credentials=secret 
+                            searchbase="cn=config" 
+                            type=refreshAndPersist
+                            retry="5 5 300 5" 
+                            timeout=1
+                olcSyncRepl: rid=003 
+                            provider=$URI3 
+                            binddn="cn=config" 
+                            bindmethod=simple
+                            credentials=secret 
+                            searchbase="cn=config" 
+                            type=refreshAndPersist
+                            retry="5 5 300 5" 
+                            timeout=1
                 -
                 add: olcMirrorMode
                 olcMirrorMode: TRUE
@@ -4493,15 +4628,36 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             olcRootDN: $MANAGERDN
             olcRootPW: $PASSWD
             olcLimits: dn.exact="$MANAGERDN" time.soft=unlimited time.hard=unlimited size.soft=unlimited size.hard=unlimited
-            olcSyncRepl: rid=004 provider=$URI1 binddn="$MANAGERDN" bindmethod=simple
-            credentials=$PASSWD searchbase="$BASEDN" type=refreshOnly
-            interval=00:00:00:10 retry="5 5 300 5" timeout=1
-            olcSyncRepl: rid=005 provider=$URI2 binddn="$MANAGERDN" bindmethod=simple
-            credentials=$PASSWD searchbase="$BASEDN" type=refreshOnly
-            interval=00:00:00:10 retry="5 5 300 5" timeout=1
-            olcSyncRepl: rid=006 provider=$URI3 binddn="$MANAGERDN" bindmethod=simple
-            credentials=$PASSWD searchbase="$BASEDN" type=refreshOnly
-            interval=00:00:00:10 retry="5 5 300 5" timeout=1
+            olcSyncRepl: rid=004 
+                        provider=$URI1 
+                        binddn="$MANAGERDN" 
+                        bindmethod=simple
+                        credentials=$PASSWD 
+                        searchbase="$BASEDN" 
+                        type=refreshOnly
+                        interval=00:00:00:10 
+                        retry="5 5 300 5" 
+                        timeout=1
+            olcSyncRepl: rid=005 
+                        provider=$URI2 
+                        binddn="$MANAGERDN" 
+                        bindmethod=simple
+                        credentials=$PASSWD 
+                        searchbase="$BASEDN" 
+                        type=refreshOnly
+                        interval=00:00:00:10 
+                        retry="5 5 300 5" 
+                        timeout=1
+            olcSyncRepl: rid=006 
+                        provider=$URI3 
+                        binddn="$MANAGERDN" 
+                        bindmethod=simple
+                        credentials=$PASSWD 
+                        searchbase="$BASEDN" 
+                        type=refreshOnly
+                        interval=00:00:00:10 
+                        retry="5 5 300 5" 
+                        timeout=1
             olcMirrorMode: TRUE
 
             dn: olcOverlay=syncprov,olcDatabase={1}${BACKEND},cn=config
@@ -4517,6 +4673,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 如 slapd-config中所述，olcSyncRepl 指令中指定的 URL 是要复制的服务器的 URL。
                 这些必须与在（命令行选项中的-h）上监听的 URL 完全匹配。否则，slapd 可能会尝试从自身复制，从而导致循环。
         
+
+        问题： ？？？？？？？？？？？？？没看懂！！！
+            上下两个配置文件。到底哪个放在provider中，哪个放在comsumer中？？？？？？
 
         18.3.4. MirrorMode
         

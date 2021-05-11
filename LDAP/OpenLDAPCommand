@@ -875,6 +875,19 @@ LDIF 配置的总体布局如下：
 	<type>是后端数据库类型/前端数据库类型
 
 
+
+#查看条目总数
+ldapsearch -x -LLL | wc -l 
+
+#把自己的公钥发给对方
+ssh-keygen -t rsa 
+ssh-copy-id -i ～/.ssh/id_rsa.pub    /..../
+scp ori.xx copy.xx
+bash -x 
+tail -f /.../../xx.log
+
+
+
 P502
 5.2.5.8. olcSyncrepl
 
