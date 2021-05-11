@@ -1,0 +1,141 @@
+---------------------------------------------------------------------------------------------------------    
+OpenLDAP各个版本的发展路线图/发展历史：https://www.openldap.org/software/roadmap.html
+
+Past Releases
+过去的版本
+    OpenLDAP 1.0(1998年8月发布)
+        这个版本没有被积极维护。
+    OpenLDAP 1.1(1998年12月发布)
+        这个版本没有被积极维护。
+            附加功能
+                外部可配置的客户端库支持:ldap.conf(5)
+                GTK接口
+                PHP3接口
+            增强安全特性
+                支持按组ACL。
+                改进的密码安全特性，包括SHA1, MD5和crypt(3)支持，而不是明文密码。
+                增强的TCP wrapper支持
+            改进了构建环境
+                自动配置
+                共享库的支持
+            升级平台支持
+    OpenLDAP 1.2(1999年2月发布)
+        这个版本没有被积极维护。
+            ldapTCL -一个来自NeoSoft的TCL SDK
+            DAP密码的工具
+            支持Salted passwd
+            大量的错误修复和平台更新
+    OpenLDAP 2.0(2000年8月发布)
+        这个版本没有被积极维护。
+        LDAPv3 support and much, much more!
+            LDAPv3 (RFC3377, 2251-2256, 2829-2830)
+                强身份认证(SASL) (RFC2829)
+                开始(支持)TLS (RFC2830)
+                Language Tags(RFC2596)
+                DNS-based服务位置(RFC2247+RFC3088)
+                密码修改(RFC3062)
+            增强独立服务器
+                命名的 References/ManageDsaIT (RFC3296)
+                增强了 访问控制子系统
+                线程池
+                支持 基于优先级的线程
+                支持 多个listener
+            LDIFv1 (RFC2849)
+            改进的 platform/subsystem 检测
+    OpenLDAP 2.1(2002年6月发布)
+        这个版本没有被积极维护。
+        增强了功能和提高了稳定性:
+            面向事务的数据库后端
+            改进了 Unicode/DN处理
+            SASL验证/授权映射
+            SASL在目录中存储 身份验证秘密
+            增强了 管理的 limits/access控制
+            增强了 系统system schema检查
+            LDAPv3扩展:
+                增强了 Language Tag/Range 选项支持
+                objectClass-based属性列表
+                LDAP Who ami I? 扩展操作
+                LDAP no-op 控制
+                控制 Matched Values(值匹配)(RFC3876)
+                Misc LDAP特性扩展
+            LDAP c++ API
+            更新了LDAP C和TCL APIs
+            Meta/元 后端
+            Monitor/监控器 后端
+            虚拟上下文“粘合”后端 Virtual Context "glue" Backend
+    OpenLDAP 2.2(2003年12月发布)
+        这个版本没有被积极维护。
+        增强了功能和改进了可伸缩性:
+            基于"LDAP Sync"的轻量级复制
+            支持 代理缓存
+            分层次的后端                    (Hierarchical Backend)
+            支持NS-SLAPI
+            后端分层                        (Backend Layering)
+            扩展了 访问控制(access control)，包括支持动态组(dynamic group)
+            LDAPv3扩展:
+                扩展了 ACID
+                取消操作(RFC3909)           (Cancel Operation)
+                内容同步操作                (Content Synchronization Operation)
+                DIT内容规则(X.501)          (DIT Content Rules)
+                扩展了 重复条目
+                扩展了 简单分页结果(RFC2696)
+                扩展了 代理授权             (Proxied Authorization)
+    OpenLDAP 2.3(2005年6月发布)
+        这个版本没有被积极维护。
+        增强了功能和改进了可伸缩性:
+            扩展了 访问控制，包括"don't disclose on error"条款
+            配置后端(cn=config)
+            密码策略叠加(Password Policy Overlay)(正在进行中)
+            Sync Provider Overlay
+            支持了Delta-syncrepl
+            LDAPv3扩展:
+                扩展了ManageDIT(work in progress在制作中)
+                组件匹配(experimental试验阶段)
+
+Current Release(s)
+当前版本(s)
+    OpenLDAP 2.4(2007年10月发布)
+        增强了功能和改进了可伸缩性:
+            修正了slapd调度员
+            MirrorMode和MultiMaster复制
+            Proxy Sync replication
+            扩大了 监控 monitor
+            多个new Overlays
+            扩展了文档
+            新的套接字后端(试验)            (New socket backend)
+            LDAPv3扩展:
+                支持了 LDAP链接操作         (LDAP Chaining Operation)
+                LDAP不使用复制控制支持       (LDAP Don't Use Copy Control support)
+                LDAP动态目录服务(RFC2589)   (LDAP Dynamic Directory Services)
+未来的小版本
+    OpenLDAP 2.5 (TBD)
+        功能改进:
+            动态语法引擎(基于第四)
+            更广泛的动态配置
+            LDAPv3扩展:
+                LDAP事务支持
+
+
+---------------------------------------------------------------------------------------------------------    
+OpenLDAP Developers' Day - San Diego - 2004    OpenLDAP2004年开发者大会
+
+03__《CN=config and Overlays》https://www.openldap.org/conf/odd-sandiego-2004/Howard.pdf
+主要讨论了CN=config和Overlays
+
+Overlays
+
+    增强回调机制
+        introduced in OpenLDAP 2.1
+
+    原始目标
+
+
+---------------------------------------------------------------------------------------------------------    
+---------------------------------------------------------------------------------------------------------    
+---------------------------------------------------------------------------------------------------------    
+---------------------------------------------------------------------------------------------------------    
+---------------------------------------------------------------------------------------------------------    
+---------------------------------------------------------------------------------------------------------    
+---------------------------------------------------------------------------------------------------------    
+---------------------------------------------------------------------------------------------------------    
+---------------------------------------------------------------------------------------------------------    
