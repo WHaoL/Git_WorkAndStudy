@@ -117,18 +117,60 @@ Current Release(s)
 
 
 ---------------------------------------------------------------------------------------------------------    
-OpenLDAP Developers' Day - San Diego - 2004    OpenLDAP2004年开发者大会
+OpenLDAP Developers' Day - San Diego - 2004    OpenLDAP第三次开发者大会-2004年
+
+发表这些演讲时 是2004年8月，当时处于OpenLDAP 2.2(2003年12月发布)
+但是依然能学到很多概念的设计初衷（！！！！！！！！）
+
 
 03__《CN=config and Overlays》https://www.openldap.org/conf/odd-sandiego-2004/Howard.pdf
 主要讨论了CN=config和Overlays
 
+
+
 Overlays
+    Status Summary
+        增强回调机制
+            OpenLDAP 2.1中引入的
+            OpenLDAP 2.2中部署成功
+    Overlay Status
+        最初的目标
+            减少冗余
+            简化调用顺序
+            加强回调
+            开启 后端的 堆叠/分层 功能
+        大获成功
+            整合了backend_group/backend_attribute，backend API继续增长
+            Operation和SlapReply块产生了可观的性能提升（〜10％）
+            ProxyCache，Chain，Rewrite和其他各种overlays已证明Oerlay concept的可行性
+        Overlay机制还有一段路要走
+            并非所有后端入口点都得到处理
+            没有一个工具入口点得到处理
+            我们希望分层是完全透明的，但是后端设计中存在一些必须解决的明显问题（例如back-ldbm死锁）
+            我们想在overlays方面重新实现SLAPI – 既然我们有了一个全局前端，那么这更可行
+CN=config 
+    CN=config Status        
+        最初目标
+            将config.c转换为表驱动机制（table-driven mechanism）
+                •保持与现有slapd.conf语法的向后兼容性
+                •允许创建只读的CN=config树以查看当前配置
+                •复制来自CN=monitor的某些信息
+            实现简单的LDIF backend  （back-ldif）(cn=config使用back-ldif来存储条目)
+            使用overlay机制（惊奇！）来实现修改语义
+            支持有限的初始修改
+                •编辑ACL           （即在cn=config中配置access）
+                •添加schema        （允许自定义schema 只有加载了schema才能在cn=config上配置某些objectclass）
+            修改将是原子性的，并立即生效(所谓原子操作是指不会被线程调度机制打断的操作；这种操作一旦开始，就一直运行到结束，中间不会有任何 context switch)
+        慢慢进行中
+            back-ldif完成
+                •使用文件系统维护树形结构，每个文件存储一个条目
+                •不支持索引
+            liblunicode合并
+                •ucdata进行了硬编码，因此我们可以使用LDIF进行引导
+            全局变量合并
+                •新的“前端”机制
+                •将其余的全局配置项存储在frontend-> be_private中
 
-    增强回调机制
-        introduced in OpenLDAP 2.1
-
-    原始目标
-
 
 ---------------------------------------------------------------------------------------------------------    
 ---------------------------------------------------------------------------------------------------------    
@@ -139,3 +181,4 @@ Overlays
 ---------------------------------------------------------------------------------------------------------    
 ---------------------------------------------------------------------------------------------------------    
 ---------------------------------------------------------------------------------------------------------    
+

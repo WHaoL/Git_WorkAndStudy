@@ -2755,7 +2755,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     11.2. LDAP
         11.2.1. 概览(Overview)
             LDAP backend
-            slapd的"LDAP后端"不是一个实际的数据库，
+            slapd的"LDAP backend"不是一个实际的数据库，
                 相反 它作为一个proxy/代理  将传入请求转发给另一个LDAP服务器。
                 在处理请求时，它会追踪referrals，
                     使得/以便 referrals进行完全处理，
@@ -2791,7 +2791,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
             很明显，slapd-ldap后端非常灵活 并且在OpenLDAP套间中大量使用。
 
-            以下是一个非常简单的例子，但是slapd-ldap后端的强大功能已经可以通过使用uri列表看到了:
+            以下是一个非常简单的例子，但是slapd-ldap backend的强大功能已经可以通过使用uri列表看到了:
             -----------------------------------    
             database ldap
             suffix "dc=suretecsystems,dc=com"
@@ -2804,16 +2804,25 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
             使用"MirrorMode复制(MirrorMode replication)"时，此功能可用于提供一种负载均衡。
         
+        总结：
+            slapd-ldap 被很多Backends和Overlays用在幕后。
+            slapd-ldap backend 还是很重要的
+        
         11.2.3. Further Information
             略
 
     11.3. LDIF     
         11.3.1. 概览Overview
-            slapd的 LDIF后端 是一个基本的存储后端，它以 LDIF格式 在文本文件中存储条目，并利用文件系统创建数据库的树形结构。
+            slapd的 LDIF backend 是一个基本的存储后端，它以 LDIF格式 在文本文件中存储条目，并利用文件系统创建数据库的树形结构。
             它旨在作为便宜，低性能的易于使用的后端。
 
             当使用具有持久性存储的 cn=config动态配置数据库 时，配置数据将使用此后端存储。
                 更多信息请参见slapd-config
+        
+        总结：
+            当时用 cn=config 动态配置数据库时，会调用 LDIF backend 
+                来 在文本文件中存储条目，
+                并利用文件系统创建数据库的树形结构。
 
         11.3.2. back-ldif配置(back-ldif Configuration)
             像许多其他后端一样，可以使用很少的配置行来实例化 LDIF后端：
@@ -2889,6 +2898,11 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             -----------------------------------  
                     除了最小配置所需的常规参数外，mdb后端还需要设置最大值。
                     这是数据库有望达到的最大记录(以字节为单位)。文件系统必须提供足够的可用空间以容纳此大小。  
+    总结：
+        LMDB backend 正在替换掉 BDB backend
+            LMDB backend 是mdb数据库的后端
+            BDB backend  是bdb/hdb数据库的后端
+
         
         11.4.3. Further Information
             略 
@@ -2921,11 +2935,14 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             slapd的 监视器后端(monitor backend) 不是实际的数据库；
                 如果启用，它将由 slapd 自动生成并动态维护，其中包含有关守护程序的运行状态的信息。
 
-            要检查所有监视器信息，发出一个以cn= monitor为基础的子树搜索，请求返回属性“+”和“*”。
+            要检查所有监视器信息，发出一个以cn=monitor为基础的子树搜索，请求返回属性“+”和“*”。
                 监视器后端主要生成操作属性，LDAP仅返回显式请求的操作属性。
                 请求属性“+”是一个请求所有操作属性的扩展。
 
             请参阅“监控(Monitoring)”部分。
+        
+        总结：
+            monitor backend 响应 cn=monitor的搜索
 
 
         11.6.2. back-monitor Configuration
@@ -3147,28 +3164,28 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             
             一个实现访问日志(Access Logging)的例子：
             -----------------------------------  
-            database mdb
+            database mdb         #主数据库
             suffix dc=example,dc=com
             maxsize 85899345920
             ...
-            overlay accesslog
-            logdb cn=log
-            logops writes reads    ？？？？？
+            overlay accesslog    #设置主数据库上的 overlay为accesslog，来对接 accesslog的database
+            logdb cn=log         # 对accesslog的database进行读写
+            logops writes reads    
             logold (objectclass=person)
 
-            database mdb
-            suffix cn=log ？？？？？
+            database mdb        #这个mdb是 accesslog的database
+            suffix cn=log       #这个database 的根
             maxsize 85899345920
             ...
             index reqStart eq
-            access to *
+            access to *         #这个database 允许谁来获取信息
              by dn.base="cn=admin,dc=example,dc=com" read  
             -----------------------------------  
 
             以下是用于 delta-syncrepl复制  的示例：  
             -----------------------------------
             database mdb
-            suffix cn=accesslog
+            suffix cn=accesslog                     # provider的 accesslog数据库
             rootdn cn=accesslog
             maxsize 85899345920
             directory /usr/local/var/openldap-accesslog
@@ -3178,16 +3195,16 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
             主数据库的 Accesslog overlay定义
             ----------------------------------- 
-            database mdb
-            suffix dc=example,dc=com
+            database mdb        
+            suffix dc=example,dc=com                # provider的 主数据库
             maxsize 85899345920
             ...
-            overlay accesslog
+            overlay accesslog                       # provider的 overlay(钩子) 钩到了 accesslog数据库
             logdb cn=accesslog
-            logops writes
+            logops writes                           #可以对accesslog database 写操作
             logsuccess TRUE
             # scan the accesslog DB every day, and purge entries older than 7 days
-            logpurge 07+00:00 01+00:00 
+            logpurge 07+00:00 01+00:00              #accesslog数据库 每天扫描一次 ，并清理7天前的条目
             ----------------------------------- 
 
             针对 cn=accesslog 的搜索结果可能如下所示：
@@ -3308,16 +3325,16 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             默认情况下--enable-ldap 进行编译。
         
         12.3.2. Chaining Configuration
-            为了演示此覆盖层(overlay)如何工作，
-                我们将讨论一个典型的场景，该场景可能是一个 提供服务器 和三个 Syncrepl(复制)副本。
+            为了演示此overlay如何工作，
+                我们将讨论一个典型的场景，该场景可能是一个 provider服务器 和三个 Syncrepl(复制)副本。
                     在每个副本上，在任何数据库定义之前 将其添加到 slapd.conf文件 全局的顶部附近：
                 -----------------------------------    
                 overlay                    chain
                 chain-uri                  "ldap://ldapprovider.example.com"
                 chain-idassert-bind        bindmethod="simple"
-                                        binddn="cn=Manager,dc=example,dc=com"
-                                        credentials="<secret>"
-                                        mode="self"
+                                           binddn="cn=Manager,dc=example,dc=com"
+                                           credentials="<secret>"
+                                           mode="self"
                 chain-tls                  start
                 chain-return-error         TRUE
                 -----------------------------------    
@@ -4670,7 +4687,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 您所有服务器的时钟必须紧密同步，
                 比如 NTPhttp://www.ntp.org/，原子钟或其他一些可靠的时间参考。
             注意：
-                如 slapd-config中所述，olcSyncRepl 指令中指定的 URL 是要复制的服务器的 URL。
+                如 slapd-config中所述，olcSyncRepl 指令中指定的 URL 是要从其复制的服务器的 URL。
                 这些必须与在（命令行选项中的-h）上监听的 URL 完全匹配。否则，slapd 可能会尝试从自身复制，从而导致循环。
         
 
@@ -4680,7 +4697,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         18.3.4. MirrorMode
         
             MirrorMode 配置实际上非常简单。
-                如果您曾经设置过普通的 slapd syncrepl 提供程序，
+                如果您曾经设置过普通的 slapd syncrepl provider，
                 则唯一的更改是以下两个指令：
                     mirrormode on
                     serverID 1
@@ -4713,6 +4730,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
                     mirrormode on
                     ----------------------------------- 
+                        注意： 60 和 + 之间有空格间隔
                     ----------------------------------- 
                     #MirrorMode node 2:
 
@@ -4790,16 +4808,16 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             moduleload  back_monitor.la
             moduleload  back_ldap.la
 
-            pidfile     /usr/local/var/slapd.pid
-            argsfile    /usr/local/var/slapd.args
+            pidfile     /usr/local/var/slapd.pid  #我的是/run/openldap/slapd.pid
+            argsfile    /usr/local/var/slapd.args #我的是/run/openldap/slapd.args
 
             loglevel    sync stats
 
             database    mdb
             suffix      "dc=suretecsystems,dc=com"
             directory   /usr/local/var/openldap-data
-            maxsize     85899345920
 
+            maxsize     85899345920
             checkpoint      1024 5
 
             index       objectClass eq
@@ -4884,21 +4902,18 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             database    mdb
             suffix      "dc=suretecsystems,dc=com"
             directory   /usr/local/var/openldap-consumer/data
-
             maxsize         85899345920
             checkpoint      1024 5
-
             index       objectClass eq
             # rest of indexes
             index       default     sub
-
             rootdn          "cn=admin,dc=suretecsystems,dc=com"
             rootpw          testing
 
             # Let the replicator DN have limitless searches
             limits dn.exact="cn=replicator,dc=suretecsystems,dc=com" time.soft=unlimited time.hard=unlimited size.soft=unlimited size.hard=unlimited
 
-            updatedn "cn=replicator,dc=suretecsystems,dc=com"
+            updatedn "cn=replicator,dc=suretecsystems,dc=com"  ？？？？？？
 
             # Refer updates to the provider
             updateref   ldap://localhost:9011
@@ -4908,8 +4923,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             database    config
             rootpw          testing
             -----------------------------------    
-
         您可以看到我们在这里使用了 updatedn 指令，
+
         示例 ACL（usr/local/etc/openldap/slapd.acl）是：
             -----------------------------------    
             # Give the replicator DN unlimited read access.  This ACL may need to be
@@ -4919,7 +4934,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 by dn.base="cn=replicator,dc=suretecsystems,dc=com" write
                 by * break
 
-            access to dn.base=""
+            access to dn.base=""  ？？？？？
                     by * read
 
             access to dn.base="cn=Subschema"
@@ -5021,6 +5036,13 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 然后，他们每小时可以强制执行一个数据库检查点，捕获过去一个小时内生成的日志文件，然后将其复制到异地。
                 累积的日志文件与先前的数据库备份进行结合 然后与 db_recover 一起使用，以重建数据库(恢复到 ：最后一次将日志文件集合复制到异地为止)。
                 此方法提供了良好的保护，同时具有最小的空间开销。
+            
+            总结：
+                备份BDB和transaction log
+                    BDB生成transaction log
+                    先复制数据库文件到异地
+                    每个一段时间执行一次检查点并收集日志文件
+                    使用日志文件 对 异地数据库进行同步
         
         2. 定期运行 slapcat 并备份 LDIF 文件：
 
@@ -5053,6 +5075,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             Berkeley DB 默认情况下从不删除任何日志文件的原因是，
                 管理员可能希望在删除日志文件之前对其进行备份，
                 以便在灾难性的故障（例如文件系统损坏）之后也可以进行数据库恢复。
+        
+        总结：
+            transaction log用于灾难性事故发生时 恢复数据库
 
         日志文件名为 log.XXXXXXXXXX（X 是一个数字）。
             默认情况下，日志文件位于 BDB 后端目录中。
@@ -5097,6 +5122,10 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             强烈建议读者阅读整个第 9 章：Berkeley DB 事务性数据存储应用程序。
             本章是一组小页面，其中包含 C 语言示例。非编程人员可以跳过这些示例。
 
+        总结：
+            在DB_CONFIG文件中 设置了对 BDB的限制 
+                如 设置BDB的transaction log的一些限制
+
     19.3. Checkpointing
     19.3. 检查点
 
@@ -5136,6 +5165,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         监视信息由专门的后端（监视后端）提供。
         手册页 slapd-monitor（5）可用。
     
+    总结：
+        有专门的 monitor backends 用来支持 monitor
+    
     启用监视界面后，可以使用 LDAP 客户端访问由监视后端提供的信息，但要受访问和其他控制的约束。
 
     启用后，监控器后端会动态生成并返回对象，以响应 cn=Monitor 子树中的搜索请求。
@@ -5144,6 +5176,10 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
     可以使用 ldapsearch，任何通用 LDAP 浏览器或专用监视工具来访问此信息。
         访问监视信息部分(Accessing Monitoring Information) : 提供了有关如何使用 ldapsearch访问监视信息的简短教程，
         监视信息部分(Monitor information)                 : 详细介绍了监视信息库及其组织。
+    
+    总结：
+        cn=Monitor 子树 负责发出 搜索请求
+        monitor backends负责收集信息，并将信息返回给 cn=Monitor 子树 
  
     虽然对监视器后端的支持已包含在 slapd的默认内部版本中，但此支持需要一些配置才能生效。
     这可以使用 cn=config 或 slapd.conf（5）完成。
@@ -5153,6 +5189,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         如果监视器后端是作为模块构建的（例如--enable-monitor=mod，则必须加载此模块。
         配置slapd 和  slapd配置文件  章节中讨论了模块的加载。
     
+    总结：
+        使用cn=config 或 slapd.conf 来配置 monitor backends
 
     20.1. Monitor configuration via cn=config(5)
     20.1. 通过cn=config配置监视
@@ -5178,12 +5216,14 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     by dn.exact="cn=Manager,dc=example,dc=com"
                     by * none
         
-        slapd的访问控制的更多信息，请参阅所述的接入控制指令部的 slapd配置文件章节和slapd.access。
+        slapd的访问控制的更多信息，请参阅 控制指令部分的 slapd配置文件章节和slapd.access。
 
-        重新启动的 slapd之后，你就可以开始探索在本章的访问监控信息一节讨论了 cn=config提供的监控信息。
-
-        一个可以验证的 slapd可以被适当地配置成提供读取的 cn=Minitor 对象监视信息。
-        例如，如果满足下列的 ldapsearch命令返回 cn=config 对象（按要求请求，没有属性）。
+        在重新启动slapd之后，
+            您就可以开始研究cn=config中提供的监视信息了，
+            正如本章中访问监视信息一节所讨论的那样。
+        
+        通过尝试读取cn=monitor对象，可以验证slapd是否被正确配置为提供监控信息。
+        例如，如果下面的ldapsearch命令返回cn=monitor对象(按照请求，没有属性)，那么它就工作了。
             ldapsearch -x -D 'cn=Manager,dc=example,dc=com' -W -b 'cn=Monitor' -s base 1.1
         
         请注意，与通用的后端数据库不同，该数据库后缀是固定的。
@@ -5191,6 +5231,23 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             因此，应提供无后缀的指令。
         还要注意的是通用的后端数据库，监控后端不能被实例化多次。
             也就是说，只能有数据库监控的一个（或零）出现在服务器的配置。
+        
+    总结：
+        在slapd.conf中配置monitor backends
+            必须包含core.schema
+            必须要在 需要监视的数据库下 添加 database monitor，来实例化一个monitor backends
+            必须要设置访问控制
+            cn=config提供监控信息 
+            监控数据库的后缀 一定是 cn=Monitor 
+    
+    总结：
+        实例化monitor后
+        monitor backends把监控信息 提供给 cn=Monitor数据库
+        我们通过ldapsearch去 cn=Monitor 上读取 监控信息即可
+
+
+
+
         
     20.3. 获取监控信息(Accessing Monitoring Information)
 
@@ -5201,7 +5258,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
 
         要检查任何特定的监视对象，请使用 一个baseObject范围 和 一个（objectClass=*）过滤器 对该对象执行搜索操作。
             由于监视信息包含在用户应用程序和操作属性的组合中，
-            因此应请求返回所有 用户应用程序属性（例如“*”）和所有 操作属性（例如“+”）。
+            因此应请求返回 所有用户应用程序属性（例如“*”）和 所有操作属性（例如“+”）。
             例如，要读取 cn=Monitor对象本身，可以使用 ldapsearch命令（修改以适合您的配置）：
                 ldapsearch -x -D 'cn=Manager,dc=example,dc=com' -W \
                     -b 'cn=Monitor' -s base '(objectClass=*)' '*' '+'
@@ -5330,6 +5387,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
             supportedControl    supported LDAP control extensions
             seeAlso             Database objects of instances of this backend
 
+        总结：
+            cn=Backends,cn=Monitor用于指定 特定的监控器后端
 
         20.4.2. Connections
 
@@ -5353,6 +5412,9 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 entryDN: cn=Current,cn=Connections,cn=Monitor
                 subschemaSubentry: cn=Subschema
                 hasSubordinates: FALSE
+            
+            总结：
+                cn=Connections,cn=Monitor 负责统计 连接相关的信息
         
         20.4.3. Databases
 

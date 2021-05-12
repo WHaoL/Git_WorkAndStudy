@@ -544,6 +544,69 @@ gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$
 
 
 
+
+
+
+
+(gdb) i r
+rax            0x1                 1
+rbx            0x0                 0        #此时 rbx寄存器值为0
+rcx            0x0                 0
+rdx            0x0                 0
+rsi            0x0                 0
+rdi            0x0                 0
+rbp            0x0                 0x0
+rsp            0x7fffffffdd60      0x7fffffffdd60
+r8             0x0                 0
+r9             0x0                 0
+r10            0x0                 0
+r11            0x0                 0
+r12            0x0                 0
+r13            0x0                 0
+r14            0x0                 0
+r15            0x0                 0
+rip            0x401005            0x401005 <_start+5>
+eflags         0x202               [ IF ]
+cs             0x33                51
+ss             0x2b                43
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+(gdb) set $rbx=1                #修改某个寄存器的值
+(gdb) i r
+rax            0x1                 1
+rbx            0x1                 1        #此时 rbx寄存器值 改为1
+rcx            0x0                 0
+rdx            0x0                 0
+rsi            0x0                 0
+rdi            0x0                 0
+rbp            0x0                 0x0
+rsp            0x7fffffffdd60      0x7fffffffdd60
+r8             0x0                 0
+r9             0x0                 0
+r10            0x0                 0
+r11            0x0                 0
+r12            0x0                 0
+r13            0x0                 0
+r14            0x0                 0
+r15            0x0                 0
+rip            0x401005            0x401005 <_start+5>
+eflags         0x202               [ IF ]
+cs             0x33                51
+ss             0x2b                43
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+(gdb) 
+
+
+
+
+
+
+
 ##################################################### 使用ddd对汇编生成的可执行程序(含有调试信息) 进行调试
 rm -rf /home/gos/.ddd
 gos@gos-Latitude-5591:~/Projs/ASM/assembly_language-master/00_helloworld$ ddd hello_intel  #ddd算是gdb的GUI界面，gdb大部分指令都可以用
