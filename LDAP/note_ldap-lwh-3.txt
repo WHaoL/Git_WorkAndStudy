@@ -1,4 +1,5 @@
 ---------------------------------------------------------------------------------------------------------    
+
 OpenLDAP各个版本的发展路线图/发展历史：https://www.openldap.org/software/roadmap.html
 
 Past Releases
@@ -115,6 +116,57 @@ Current Release(s)
             LDAPv3扩展:
                 LDAP事务支持
 
+---------------------------------------------------------------------------------------------------------    
+1st OpenLDAP Developers' Day, San Francisco, March 2003
+OpenLDAP第1次开发者大会-2003年3月21日
+
+
+
+https://www.openldap.org/conf/odd-sfo-2003/choi.html
+《Lightweight Replication in OpenLDAP》
+    OpenLDAP Replication
+        slurpd
+            生产者发起的，基于日志的复制
+            带外复制管理
+        A New Lightweight Replication
+            消费者发起的，基于状态的，拉式复制  ！！！ 
+            最终一致性
+            通过搜索操作进行复制-无需事先达成协议  ！！！
+            最小历史记录信息  ！！！
+            生产者方面的消费者信息最少 ！！！ 
+            主从  ！！！ 
+            支持部分复制（部分复制和稀疏复制）
+            主复制和辅助复制
+            基于客户端同步协议
+                draft-zeilenga-ldup-sync-01
+                draft-ietf-ldup-lcup-04
+    Sync Protocol - LCUP
+        LDAP Sync
+            维护轻量级历史信息
+            适用于有限数量的refreshOnly consumer
+            复制时必须包含
+                syncSearchSpec : {base, scope, filter, attrs, binddn}
+                presentRange : {startCSN,endCSN}
+
+
+https://kb.symas.com/how-to-guides/ 
+  《Configure Delta-Syncrepl》 
+   https://3bmahv3xwn6030jbn72hlx3j-wpengine.netdna-ssl.com/wp-content/uploads/2019/10/Configure-Delta-Syncrepl.pdf 
+
+
+
+
+15:00-17:00
+《LDAP Standardization Report》- Kurt D. Zeilenga  -  
+    LCUP (content sync) work:两个提案
+        •“LCUP” 
+            需要历史记录，
+            需要有限的“system schema”知识
+        •“LDAP Sync” 
+            不需要历史记录，
+            需要“system schema”知识
+   LDUP(multi-master replication)工作停顿了，
+    工作组/WG 正在考虑如何进行。
 
 ---------------------------------------------------------------------------------------------------------    
 OpenLDAP Developers' Day - San Diego - 2004    OpenLDAP第三次开发者大会-2004年
@@ -168,9 +220,34 @@ CN=config
             liblunicode合并
                 •ucdata进行了硬编码，因此我们可以使用LDIF进行引导
             全局变量合并
-                •新的“前端”机制
+                •新的“前端(frontend)”机制
                 •将其余的全局配置项存储在frontend-> be_private中
-
+    CN=config Bootstrapping
+        CN=config overlay stack 将被硬编码
+        从slapd.conf迁移：
+            如果存在back-ldif目录，则将忽略slapd.conf
+            否则，请读取slapd.conf并写入到back-ldif
+            或者，只需写入到一个平面LDIF文件
+        加载平面LDIF配置文件
+            只需将slapadd与后端一起使用  ＃0
+            将使用新的命令行选项（例如–F）指定back-ldif数据目录的位置
+    CN=config Wishes
+        包含什么？
+            考虑到back-ldif实现，可能没有必要
+        moduleload？
+            由于存在明确定义的shutdown API，因此可以在运行时动态地加载和卸载backends和overlays。
+            其他modules – syntax语法，password密码等 将需要重新制作
+        重新配置Attribute的index ？
+            可以通过将属性视为未索引的属性，直到完成索引传递为止
+        交换Backend database？
+            即时将backend指向其他文件系统位置，以允许更换磁盘等。
+            可能需要多个LDAPModify请求； 可能是LDAP事务的候选人
+        还有更多我们尚未想到的
+Conclusions
+    • slapd Overlays are really cool  #slapd Overlays真的很酷
+    • back-config will be an Overlay  #back-config将会是一个Oerlay
+    • We expected back-config to be a big effort #我们希望back-config是一项很大的进步
+    • We’re making progress…          #我们正在进步……
 
 ---------------------------------------------------------------------------------------------------------    
 ---------------------------------------------------------------------------------------------------------    

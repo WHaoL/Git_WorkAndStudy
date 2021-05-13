@@ -3878,7 +3878,8 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 #当前阶段--当前消息
                 1.在当前阶段，provider向consumer发送 自上次同步以来在 搜索范围内 更新的条目。
                     provider发送 更新后的条目的 所有请求的属性（无论是否更改）(即：只要条目中有一个属性值被更改 整个条目都会被发送)。
-                2.对于 在(搜索)范围内的每个未改变的条目，
+                2.对于 
+                    在(搜索)范围内的每个未改变的条目，
                     provider发送一条
                     当前消息，
                         该消息仅由 条目名称 和 代表当前状态的同步控件 组成。
@@ -3925,7 +3926,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 就同步业务而言，当前阶段的使用比完整内容重新加载的效率要高得多。
                 为了进一步减少同步流量，LDAP Sync 协议还提供了一些优化措施，
                     例如在单个syncIdSet消息中传输标准化的 entryUUID 和传输多个 entryUUID。
-                    (粗略理解：应该是在 “当前消息”中一次发送多个 未更改体条目的ID)
+                    (粗略理解：应该是在 “当前消息”中一次发送多个 未更改的/或者是被删除的 条目的ID)
                 
                 在 refreshOnly 同步结束时，
                     provider在同步完成后将同步cookie发送给consumer，
@@ -3976,15 +3977,26 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 1. consumer端的复制引擎：syncrepl引擎 可以与任何后端一起使用。
                 2. 可以将 LDAP Sync provider配置为任何后端上的overlay，
                     但是最适合与 back-bdb，back-hdb 或 back-mdb 后端一起使用。
+                    如下：
+                        overlay syncprov
                 
                 LDAP Sync provider
-                    为每个数据库维护一个 contextCSN   ？？？？？？是不是cookie？ 答：不是，cookie 是<csn><rid> <csn>是contextCSN用于标识复制状态, <rid>是consumer的id+
+                    为每个数据库维护一个 contextCSN    
                     作为provider内容的 当前同步状态指示符。
                 contextCSN是provider上下文中最大的 entryCSN，
                     因此对于 entryCSN 值较小的条目，没有任何事务。
                 能将contextCSN 设置为最大的已发行entryCSN，
                     因为 entryCSN 是在事务开始之前获得的，
                     并且未按发行顺序提交。
+            总结：
+                contextCSN是不是cookie ？？？
+                答：不是，cookie 是<csn><rid> 
+                    <csn>是contextCSN用于标识复制状态, 
+                    <rid>是consumer的id+
+            总结：
+                根据consumer发来的cookie中的contextCSN 
+                来确定 复制的起始位置 和 结束位置
+                （startCSN < e.CSN < endCSN时发送更新条目）
                 
                 provider将上下文的 contextCSN 存储在上下文后缀条目(context suffix entry)的 contextCSN 属性中。
                     但是，该属性不会在每次更新操作后写入数据库。相反，它主要在内存中维护。
@@ -4006,7 +4018,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                 如果无法通过读取和扫描数据库确定 contextCSN，则将生成一个新值。
                 另外，如果扫描数据库产生的 entryCSN 比后缀条目的 contextCSN 属性中先前记录的要大，则将立即用新值写入检查点。
 
-                consumer还将其复制状态存储在后缀条目的 contextCSN 属性中，   ？？？？？？？
+                consumer还将其复制状态存储在后缀条目的 contextCSN 属性中，   
                     这是作为同步cookie接收的provider的contextCSN。
                 当consumer服务器与provider服务器执行后续增量同步时，
                     由consumer服务器维护的复制状态将用作同步状态指示符。
@@ -4014,6 +4026,12 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
                     它还用作provider端同步状态指示符。
                 由于consumer和provider状态信息都保存在各自数据库中的同一位置，
                     因此无需任何特殊操作即可将任何consumer提升为provider（反之亦然）。
+                
+            总结：
+                每次更新完成后，provider都会给consumer发送一个cookie
+                (cookie中封装了一个contxtCSN，告诉consumer 你小子下次再来找我要数据时 记得带上cookie)
+                这样每次请求消息时，provider就知道每个具体的consumer都复制到那里了，
+                这样就知道了复制的 起始位置和结束位置
                 
                 因为可以在syncrepl规范中使用 通用搜索过滤器，
                     所以可以从同步内容中省略上下文中的某些条目。 ？？？？？？？？？？为什么？？？？？？？？？？？？？？？？？？？
@@ -4075,6 +4093,7 @@ https://www.openldap.org/doc/ 《OpenLDAP 2.4 Administrator's Guide》  OpenLDAP
         总结：
             实际配置Delta-syncrepl provider时 是配置的accesslog 
             accesslog 是 changelog的变体
+            所以实际的配置文件中见到的是accesslog 而不是changelog
 
 
         18.2.2. N-Way Multi-Provider Replication
