@@ -1,0 +1,37 @@
+---------------------------------------------------------------------------------------------------------    
+本文档说明：
+    主要记录了OpenLDAP协议的阅读
+    及 
+    OpenLDAP代码的基本改写
+
+
+LDAP-RFC 
+    http://www.faqs.org/rfcs/rfc4510.html
+      LDAP: The Protocol [RFC4511]
+      LDAP: Directory Information Models [RFC4512]
+      LDAP: Authentication Methods and Security Mechanisms [RFC4513]
+      LDAP: String Representation of Distinguished Names [RFC4514]
+      LDAP: String Representation of Search Filters [RFC4515]
+      LDAP: Uniform Resource Locator [RFC4516]
+      LDAP: Syntaxes and Matching Rules [RFC4517]
+      LDAP: Internationalized String Preparation [RFC4518]
+      LDAP: Schema for User Applications [RFC4519]
+
+
+---------------------------------------------------------------------------------------------------------    
+
+
+
+---------------------------------------------------------------------------------------------------------    
+
+
+
+
+---------------------------------------------------------------------------------------------------------    
+
+
+
+
+---------------------------------------------------------------------------------------------------------    
+
+

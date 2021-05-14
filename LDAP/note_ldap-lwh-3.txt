@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------------    
+本文档说明：
+    主要记录了OpenLDAP的发展历程
+    以及 
+    OpenLDAP开发者大会上的 几篇比较好的 演讲稿
+
+
+---------------------------------------------------------------------------------------------------------    
 
 OpenLDAP各个版本的发展路线图/发展历史：https://www.openldap.org/software/roadmap.html
 
@@ -117,12 +124,10 @@ Current Release(s)
                 LDAP事务支持
 
 ---------------------------------------------------------------------------------------------------------    
-1st OpenLDAP Developers' Day, San Francisco, March 2003
-OpenLDAP第1次开发者大会-2003年3月21日
+1st OpenLDAP Developers' Day, San Francisco, 2003-03-21 OpenLDAP第1次开发者大会-2003年3月21日
 
 
-
-https://www.openldap.org/conf/odd-sfo-2003/choi.html
+https://www.openldap.org/conf/odd-sfo-2003/choi.html (推荐！！！)
 《Lightweight Replication in OpenLDAP》
     OpenLDAP Replication
         slurpd
@@ -169,6 +174,16 @@ https://kb.symas.com/how-to-guides/
     工作组/WG 正在考虑如何进行。
 
 ---------------------------------------------------------------------------------------------------------    
+OpenLDAP Developers' Day - Vienna - 2003-07-18    OpenLDAP第二次开发者大会-2003年
+
+https://www.openldap.org/conf/odd-wien-2003/jong.pdf 
+《SyncRepl Engine》by jong - (推荐!!!!!!!!!)
+
+https://www.openldap.org/conf/odd-wien-2003/ando.pdf
+《Meta Directory》by ando - (推荐!!!)
+
+
+---------------------------------------------------------------------------------------------------------    
 OpenLDAP Developers' Day - San Diego - 2004    OpenLDAP第三次开发者大会-2004年
 
 发表这些演讲时 是2004年8月，当时处于OpenLDAP 2.2(2003年12月发布)
@@ -177,9 +192,6 @@ OpenLDAP Developers' Day - San Diego - 2004    OpenLDAP第三次开发者大会-
 
 03__《CN=config and Overlays》https://www.openldap.org/conf/odd-sandiego-2004/Howard.pdf
 主要讨论了CN=config和Overlays
-
-
-
 Overlays
     Status Summary
         增强回调机制
