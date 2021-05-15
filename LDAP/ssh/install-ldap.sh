@@ -31,6 +31,8 @@ sed 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 
 echo "8 - 安装openssl"
 sudo yum install -y openssl openssl-devel
+#确认当前系统是否安装OpenSSL
+#rpm -qa | grep openssl
 
 echo "重启centos7"
 sudo reboot
