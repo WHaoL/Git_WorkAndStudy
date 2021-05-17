@@ -1,0 +1,19 @@
+dn: cn=config
+changetype: modify
+add: olcDisallows
+olcDisallows: bind_anon
+
+dn: cn=config
+changetype: modify
+add: olcRequires
+olcRequires: authc
+
+dn: olcDatabase={-1}frontend,cn=config
+changetype: modify
+add: olcRequires
+olcRequires: authc
+
+#设置权限
+#   ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 05-disAllow_AnonymousBind.ldif
+#此时在web页面上，勾选匿名 然后使用管理员账户密码登陆，发现登陆失败，说明修改成功
+#确认没有问题后创建 Snapshot-5 ？？？

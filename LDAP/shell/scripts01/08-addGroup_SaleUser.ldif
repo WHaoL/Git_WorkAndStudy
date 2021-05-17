@@ -1,0 +1,62 @@
+#----------------------------------------------------------
+
+dn: ou=sale,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: organizationalUnit
+ou: sale
+
+#----------------------------------------------------------
+
+dn: ou=team1,ou=sale,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: organizationalUnit
+ou: team1.sale
+
+dn: cn=sale1-1,ou=team1,ou=sale,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: inetOrgPerson
+cn: sale1-1
+departmentNumber: 91
+sn: sale1-1.team1
+title: sale1-1.title
+mail: sale1-1@mail1.com
+uid: 90000
+displayName: sale1-1.displayName
+
+#----------------------------------------------------------
+
+dn: ou=team2,ou=sale,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: organizationalUnit
+ou: team2.sale
+
+dn: cn=sale2-1,ou=team2,ou=sale,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: inetOrgPerson
+cn: sale2-1
+departmentNumber: 92
+sn: sale2-1.team2
+title: sale2-1.title
+mail: sale2-1@mail1.com
+uid: 90001
+displayName: sale2-1.displayName
+
+dn: cn=sale2-2,ou=team2,ou=sale,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: inetOrgPerson
+cn: sale2-2
+departmentNumber: 93
+sn: sale2-2.team2
+title: sale2-2.title
+mail: sale2-2@mail1.com
+uid: 90002
+displayName: sale2-2.displayName
+#----------------------------------------------------------
+
+#现在执行添加
+#   ldapadd -x -D cn=admin,dc=testldap,dc=com -w admin -f 08-addGroup_SaleUser.ldif
+# 或者是 
+#   ldapmodify -a -x -D cn=admin,dc=testldap,dc=com -w admin -f 08-addGroup_SaleUser.ldif
+
+#查看当前所有的部门 和 组员
+#   ldapsearch -x -D cn=admin,dc=testldap,dc=com -w admin -b dc=testldap,dc=com

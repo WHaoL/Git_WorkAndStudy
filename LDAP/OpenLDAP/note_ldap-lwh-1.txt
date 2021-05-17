@@ -1654,8 +1654,8 @@
 			yum clean all && yum makecache
 	
 	备份配置文件
-		cp /etc/httpd/conf.d/phpldapadmin.conf /etc/httpd/conf.d/phpldapadmin.conf.bak
-		cp /etc/phpldapadmin/config.php /etc/phpldapadmin/config.php.bak
+		cp /etc/httpd/conf.d/phpldapadmin.conf /etc/httpd/conf.d/phpldapadmin.conf.bak01
+		cp /etc/phpldapadmin/config.php /etc/phpldapadmin/config.php.bak01
 	
 	修改配置文件/etc/httpd/conf.d/phpldapadmin.conf，允许其他人访问
 			Alias /phpldapadmin /usr/share/phpldapadmin/htdocs

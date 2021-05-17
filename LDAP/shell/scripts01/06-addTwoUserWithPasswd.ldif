@@ -1,0 +1,26 @@
+dn: cn=people1,ou=People,dc=testldap,dc=com
+objectClass: inetOrgPerson
+cn: people1
+userPassword: 123456
+sn: people1.sn
+title: people1.title
+mail: people1@people.testldap.com
+displayName: people1.displayName
+
+dn: cn=hr-miao,ou=HR,ou=People,dc=testldap,dc=com
+objectClass: inetOrgPerson
+cn: hr-miao
+userPassword: 123456
+departmentNumber: 3
+sn: hr-miao
+title: HRBP
+mail: hr-miao@mail3.com
+uid: 10006
+displayName: hr-miao.displayName
+
+#添加一个带有密码的用户
+#   ldapadd -x -D cn=admin,dc=testldap,dc=com -w admin -f 06-addOneUserWithPasswd.ldif
+#   ldapmodify -a -x -D cn=admin,dc=testldap,dc=com -w admin -f 06-addOneUserWithPasswd.ldif
+#验证添加是否成功 , 各自使用自己的DN和passwd登陆， 会返回各自的信息
+#   ldapsearch -x -D cn=people1,ou=People,dc=testldap,dc=com -w 123456 -b cn=people1,ou=People,dc=testldap,dc=com -LLL
+#   ldapsearch -x -D cn=hr-miao,ou=HR,ou=People,dc=testldap,dc=com -w 123456 -b cn=hr-miao,ou=HR,ou=People,dc=testldap,dc=com -LLL

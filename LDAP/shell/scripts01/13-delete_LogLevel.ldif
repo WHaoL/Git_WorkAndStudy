@@ -1,0 +1,11 @@
+dn: cn=config
+changetype: modify
+delete: olcLogLevel
+olcLogLevel: 256
+
+
+#删除256
+#   ldapmodify -Y EXTERNAL -H ldapi:/// -f 13-delete_LogLevel.ldif 2>/dev/null
+#检查
+#   cat /etc/openldap/slapd.d/cn\=config.ldif  | grep olcLogLevel
+#可以看到olcLogLevel 已经没有了

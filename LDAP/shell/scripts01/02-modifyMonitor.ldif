@@ -1,0 +1,19 @@
+dn: olcDatabase={1}monitor,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to *
+    by dn.base="gidNumber=0+uidNumber=0,cn=peercred,cn=external,cn=auth" read
+    by dn.base="cn=admin,dc=testldap,dc=com" read
+    by * none
+
+#执行修改
+#   ldapmodify -Y EXTERNAL -H ldapi:/// -f 02-modifyMonitor.ldif 2>/dev/null
+#查询: 验证 02-modifyMonitor.ldif 是否被添加到ldap中
+#   ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={1}monitor' -LLL 2>/dev/null
+#   ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config "olcDatabase={1}monitor" -LLL 2>/dev/null
+#验证 admin是否能正常登陆
+#   ldapsearch -H ldapi:/// -D "cn=admin,dc=testldap,dc=com" -w admin -LL
+
+#下面是配置phpldapadmin
+# 然后在浏览器上访问 http://192.168.122.9/phpldapadmin/ （记得关闭VPN）
+#       将显示 ： This base cannot be created with PLA.

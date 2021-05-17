@@ -1,0 +1,94 @@
+#----------------------------------------------------------
+
+dn: ou=People,dc=testldap,dc=com
+objectClass: organizationalUnit
+ou: People
+description: People-ou
+
+dn: ou=Group,dc=testldap,dc=com
+objectClass: organizationalUnit
+ou: Group
+description: Group-ou
+
+#----------------------------------------------------------
+
+dn: ou=研发部门,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: organizationalUnit
+ou: 研发部门
+
+#-------------------------
+
+dn: ou=后台组,ou=研发部门,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: organizationalUnit
+ou: 后台组
+
+dn: cn=ryan.miao,ou=后台组,ou=研发部门,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: inetOrgPerson
+cn: ryan.miao
+departmentNumber: 1
+sn: Miao
+title: 大牛
+mail: ryan.miao@mail1.com
+uid: 10000
+displayName: 中文名
+
+dn: cn=someone,ou=后台组,ou=研发部门,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: inetOrgPerson
+cn: someone
+departmentNumber: 1
+sn: someone
+title: Java工程师
+mail: someone@mail1.com
+uid: 10001
+displayName: 某人
+
+#-------------------------
+
+dn: ou=测试组,ou=研发部门,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: organizationalUnit
+ou: 测试组
+
+dn: cn=tester.miao,ou=测试组,ou=研发部门,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: inetOrgPerson
+cn: tester.miao
+departmentNumber: 2
+sn: Miao
+title: 测试工程师
+mail: tester@mail2.com
+uid: 10002
+displayName: 测试某人
+
+#----------------------------------------------------------
+
+dn: ou=HR,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: organizationalUnit
+ou: HR
+
+dn: cn=fang.huang,ou=HR,ou=People,dc=testldap,dc=com
+changetype: add
+objectClass: inetOrgPerson
+cn: fang.huang
+departmentNumber: 3
+sn: Huang
+title: HRBP
+mail: fang.huang@mail3.com
+uid: 10003
+displayName: 黄芳
+
+#----------------------------------------------------------
+#注意：！！！！必须要加载schema，否则 objectClass: inetOrgPerson 会被认为是无效的参数
+#默认安装加载了core.ldif, 我们现在加载几个想要的schema:
+#    ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
+#    ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
+#    ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 
+#现在执行添加
+#   ldapadd -x -D cn=admin,dc=testldap,dc=com -w admin -f 04-add_group_users.ldif
+# 或者是 
+#   ldapmodify -a -x -D cn=admin,dc=testldap,dc=com -w admin -f 04-add_group_users.ldif

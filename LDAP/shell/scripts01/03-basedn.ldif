@@ -1,0 +1,13 @@
+#设置basedn，和sudffix保持一致
+dn: dc=testldap,dc=com
+objectClass: top
+objectClass: dcObject
+objectClass: organization
+dc: testldap
+o: ldap
+
+#执行添加
+#   ldapadd -x -D cn=admin,dc=testldap,dc=com -w admin -f  03-basedn.ldif 
+
+# 然后在浏览器上访问 http://192.168.122.9/phpldapadmin/ 
+#   将显示： dc=testldap,dc=com (刚刚添加的条目)

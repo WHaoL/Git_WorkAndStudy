@@ -1,0 +1,22 @@
+dn: cn=config
+changetype: modify
+add: olcLogLevel
+olcLogLevel: -1
+
+#dn: cn=config
+#changetype: modify
+#delete: olcLogLevel
+#olcLogLevel: -1
+
+#dn: cn=config
+#changetype: modify
+#replace: olcLogLevel
+#olcLogLevel: 256
+
+
+#默认使用的日志级别是-1，记录的内容比较多，可以改为256
+
+#   ldapmodify -Y EXTERNAL -H ldapi:/// -f 11-add_LogLevel.ldif 2>/dev/null
+#检查
+#   cat /etc/openldap/slapd.d/cn\=config.ldif  | grep olcLogLevel
+

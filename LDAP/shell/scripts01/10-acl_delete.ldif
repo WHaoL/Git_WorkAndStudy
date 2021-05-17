@@ -1,0 +1,11 @@
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+delete: olcAccess
+
+#   ldapmodify -Y EXTERNAL -H ldapi:/// -f 10-acl_delete.ldif 2>/dev/null
+#检查
+#   ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={2}hdb,cn=config "olcAccess" -LLL 2>/dev/null
+#   ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={2}hdb,cn=config -s sub "olcAccess" -LLL 2>/dev/null
+
+#   ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={2}hdb,cn=config -LLL 2>/dev/null
+

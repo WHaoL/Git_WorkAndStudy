@@ -1,0 +1,18 @@
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcAccess
+olcAccess: {0} to dn.subtree="ou=HR,ou=People,dc=testldap,dc=com"
+    by dn="cn=admin,dc=testldap,dc=com" write
+    by self write
+    by dn="cn=people1,ou=People,dc=testldap,dc=com" none
+olcAccess: {1} to *
+    by dn="cn=admin,dc=testldap,dc=com" write
+    by self write
+    by * read
+
+#设置peopel1用户的权限，禁止该用户访问ou=HR,ou=People,dc=testldap,dc=com
+#   ldapmodify -Y EXTERNAL -H ldapi:/// -f 09-acl_people1.ldif 2>/dev/null
+
+#检查
+#   ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={2}hdb,cn=config "olcAccess" -LLL 2>/dev/null
+#   ldapsearch -Y EXTERNAL -H ldapi:/// -b olcDatabase={2}hdb,cn=config -s sub "olcAccess" -LLL 2>/dev/null

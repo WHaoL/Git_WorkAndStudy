@@ -1,0 +1,13 @@
+dn: cn=people1,ou=People,dc=testldap,dc=com
+objectClass: inetOrgPerson
+cn: people1
+userPassword: 123456
+sn: people1.sn
+title: people1.title
+mail: people1@people.testldap.com
+displayName: people1.displayName
+
+#添加一个带有密码的用户
+#   ldapadd -x -D cn=admin,dc=testldap,dc=com -w admin -f 07-addOneExistingUser.ldif
+#   ldapmodify -a -x -D cn=admin,dc=testldap,dc=com -w admin -f 07-addOneExistingUser.ldif
+#会显示：ldap_add: Already exists (68)

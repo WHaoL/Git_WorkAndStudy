@@ -1,0 +1,14 @@
+dn: cn=user1,ou=People,dc=myldap,dc=com
+objectClass: inetOrgPerson
+cn: user1
+userPassword: 123456
+sn: user1.sn
+title: user1.title
+mail: user1@people.myldap.com
+displayName: user1.displayName
+
+
+dn: cn=user1,ou=People,dc=myldap,dc=com
+changetype: modify
+delete:
+

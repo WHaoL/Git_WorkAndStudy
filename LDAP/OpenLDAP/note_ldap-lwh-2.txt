@@ -3797,7 +3797,31 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
         -out        证书的存放位置
         -days       证书的有效期限
         -enc        获取加密类型 
-     
+            一个使用openssl对文件内容进行加密 的例子：
+                # hello.txt 文件中 只有一行内容： this filename is hello.txt
+                使用des3对hello.txt中的内容进行加密，并把内容输出到hello.txt.des3
+                [lwh@bogon ~]$openssl enc -des3 -in hello.txt -out hello.txt.des3
+                enter des-ede3-cbc encryption password:             #提示输入加密秘密
+                Verifying - enter des-ede3-cbc encryption password: #提示再次输入加密秘密
+                [lwh@bogon ~]$ ls
+                hello.txt  hello.txt.des3  install-ldap.sh
+                #对 加密后的文件 进行 解密
+                [lwh@bogon ~]$ openssl enc -des3 -d -in hello.txt.des3 -out hello.txt.out
+                enter des-ede3-cbc decryption password: #输入秘密
+                [lwh@bogon ~]$ cat hello.txt.out        #输出解密后的文件内容
+                this filename is hello.txt
+    8.5 
+    常见的两种CA证书获取方式：
+        通过OpenSSL自建CA，响应用户的证书请求 并实现证书的颁发,管理 等操作。
+        第三方证书颁发机构
+    自建CA 
+        需要OpenSSL软件的支持
+        具体步骤在如下文件中
+            /home/gos/workspace/Git_WorkAndStudy/LDAP/openssl/openssl_01.sh
+
+
+
+ 
     
         
         
@@ -3812,7 +3836,66 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
 
 16. Using TLS
 16. 使用 TLS
+
+
+
+    16.1. TLS Certificates
+    16.1. TLS 认证
+
+        TLS 使用X.509证书 来携带客户端和服务器身份。
+            所有服务器都必须具有有效的证书，
+            客户端必须具有有效的证书才能通过 SASL EXTERNAL 进行身份验证。
+        有关创建和管理证书的更多信息，
+            请参见 OpenSSL，GnuTLS 或 MozNSS 文档，
+            具体取决于您使用的 TLS 实施库。
     
+
+
+        16.1.1. Server Certificates
+        16.1.1. 服务端认证
+
+            服务器证书的DN 必须使用 CN属性 来命名服务器，并且 CN必须带有服务器的完全限定域名。
+            额外的别名和通配符可能会出现在 subjectAltName证书扩展中。
+            关于服务器证书名称的更多详细信息在 RFC4513 中。
+
+
+
+        16.1.2. Client Certificates
+        16.1.2. 客户端认证
+
+            客户端证书的DN 可以直接用作身份验 DN。
+            由于 X.509 是 X.500 标准的一部分，并且 LDAP也基于 X.500，
+            因此两者都使用相同的 DN 格式，
+                并且 用户X.509证书中的DN 通常应与他们的 LDAP条目的DN 相同。
+                但是，有时 DN 可能不完全相同，因此映射身份验证中描述的映射工具也可以应用于这些 DN
+
+
+
+    16.2. TLS Configuration
+    16.2. TLS 配置
+
+        获得所需的证书后，
+            必须在客户端和服务器上都配置许多选项以启用 TLS 并使用证书。
+            至少必须为客户端配置文件名称，该文件包含它将信任的所有证书颁发机构（CA）证书。
+            服务器必须配置有 CA 证书以及它自己的服务器证书和私钥。
+
+        通常，单个 CA 将发布服务器证书和所有受信任的客户端证书，
+            因此服务器只需要信任一个签名 CA。
+            但是，客户端可能希望通过许多不同的 CA 生成的服务器证书连接到由不同组织管理的各种安全服务器。
+            这样，客户端可能需要在其配置中包含许多不同的受信任 CA 的列表。
+
+
+
+        16.2.1. Server Configuration
+        16.2.1. 服务端配置
+            服务端 slapd 的配置指令属于 slapd.conf的全局指令部分。
+
+            16.2.1.1. TLSCACertificateFile <filename>
+
+
+
+
+
 
 
 ---------------------------------------------------------------------------------------------------------    

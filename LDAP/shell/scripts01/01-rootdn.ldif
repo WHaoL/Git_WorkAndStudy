@@ -1,0 +1,14 @@
+# 配置数据库的 管理员账号 秘密 及域名
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcRootDN
+olcRootDN: cn=admin,dc=testldap,dc=com
+-
+replace: olcSuffix
+olcSuffix: dc=testldap,dc=com
+-
+replace: olcRootPW
+olcRootPW: <pass>
+#运行01-changeroot.sh 更改密码，
+#   ./01-changeroot.sh
+#   #ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 01-tmp.ldif
