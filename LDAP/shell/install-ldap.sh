@@ -69,6 +69,6 @@ sudo systemctl restart httpd
 
 
 
-echo "重启centos7"
-sudo reboot
+# echo "重启centos7"
+# sudo reboot
 

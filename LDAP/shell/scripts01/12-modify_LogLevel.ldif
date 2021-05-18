@@ -9,3 +9,4 @@ olcLogLevel: 256
 #检查
 #   cat /etc/openldap/slapd.d/cn\=config.ldif  | grep olcLogLevel
 #可以看到olcLogLevel已经改为了256
+#   256	    (0x100 stats)	stats log connections/operations/results

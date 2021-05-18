@@ -1,0 +1,43 @@
+
+dn: cn=user01TestSlapdlog,ou=People,dc=testldap,dc=com
+objectClass: inetOrgPerson
+cn: uuser01TestSlapdlog
+userPassword: 123456
+sn: user01TestSlapdlog.sn
+title: user01TestSlapdlog.title
+mail: user01TestSlapdlog@people.testldap.com
+displayName: user01TestSlapdlog.displayName
+#   ldapadd -x -H ldap://192.168.122.9 -D cn=admin,dc=testldap,dc=com -w admin -f 16-test_rsyslog.ldif
+
+
+
+#首先连接centos7(ldap)
+#0 追踪日志
+#   sudo tail -f /var/log/slapd.log
+#1 添加记录(添加一个user)
+#   ldapadd -x -H ldap://192.168.122.9 -D cn=admin,dc=testldap,dc=com -w admin -f 16-test_rsyslog.ldif
+#2 查询记录，查询user是否添加成功
+#   ldapsearch -x -H ldap://192.168.122.9 -D cn=admin,dc=testldap,dc=com -w admin -b cn=user01TestSlapdlog,ou=People,dc=testldap,dc=com -LLL
+#3 修改user的秘密
+# user修改自己的秘密
+#   ldappasswd -x -H ldap://192.168.122.9 -D cn=user01TestSlapdlog,ou=People,dc=testldap,dc=com -w 123456  -s 123
+#   ldappasswd -x -H ldap://192.168.122.9 -D cn=user01TestSlapdlog,ou=People,dc=testldap,dc=com -w 123456  -S
+#管理员修改user的密码
+#   ldappasswd -x -H ldap://192.168.122.9 -D cn=admin,dc=testldap,dc=com -w admin -S cn=user01TestSlapdlog,ou=People,dc=testldap,dc=com
+#4 分别尝试 正确的密码登陆和错误的密码登陆
+#   ldapsearch -x -H ldap://192.168.122.9 -D cn=user01TestSlapdlog,ou=People,dc=testldap,dc=com -w 123456
+#   ldapsearch -x -H ldap://192.168.122.9 -D cn=user01TestSlapdlog,ou=People,dc=testldap,dc=com -w 123
+#5 删除记录(删除一个user)
+#   ldapdelete -x -H ldap://192.168.122.9 -D cn=admin,dc=testldap,dc=com -w admin "cn=user01TestSlapdlog,ou=People,dc=testldap,dc=com"
+
+
+
+#dn: ou=People,dc=testldap,dc=com
+#changetype: modify
+#delete: rdn
+#rdn: cn=user01TestSlapdlog
+# 疑问？？？ 怎么通过ldapmodify删除user
+
+
+
+#sudo tail -f /var/log/slapd.log 

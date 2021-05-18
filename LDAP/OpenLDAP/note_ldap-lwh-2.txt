@@ -312,13 +312,32 @@ LDAP-RFC
             32	    (0x20 filter)	search filter processing                    #filter
             64	    (0x40 config)	configuration processing
             128	    (0x80 ACL)	    access control list processing
-            256	    (0x100 stats)	stats log connections/operations/results
+            256	    (0x100 stats)	stats log connections/operations/results    #最常用
             512	    (0x200 stats2)	stats log entries sent
             1024	(0x400 shell)	print communication with shell backends
             2048	(0x800 parse)	print entry parsing debugging
             16384	(0x4000 sync)	syncrepl consumer processing
             32768	(0x8000 none)	only messages that get logged whatever log level is set
         
+        总结：syslog
+        /home/gos/workspace/openldap-2_4/openldap-OPENLDAP_REL_ENG_2_4/doc/guide/admin/tuning.sdf
+        以及，官方文档2.4的chapter24 ，均包含了 关于 loglevel如何选择！！！！
+                默认的loglevel stats(256) 是最好的选择
+                当出现问题时，不要使用syslog跟踪，因为对于跟踪调试来说很慢，并且信息可能不完整-当无法跟上时 会丢弃消息
+                    应该用 debug选项
+                    并捕获slapd的stderr输出
+                并不推荐 level 0 ，它并不理想
+                推荐在linux的/etc/rsyslog.conf 中配置 slapd的syslog
+                    配置为异步运行，会降低syslog对性能的影响
+                    默认使用的是 LOCAL4 日志记录
+                    如  
+                        local4.*    /var/log/slapd.log
+                    当在日志文件名前 添加 "-" 来提高日志记录的性能，因为这代表了异步写入
+                        local4.*    -/var/log/slapd.log
+
+
+
+
         所需的日志级别 可以以 单/多个整数(十进制/十六进制),单/多个显示的名称 输入，
             组合时使用时，默认位进行了 或运算。
             例如 下面的这些都是等价的
@@ -1239,6 +1258,14 @@ LDAP-RFC
                     调试级别可叠加
                 注意：
                     slapd 必须已经使用--enable-debug 进行编译
+        
+        注意，当出现问题时，
+            使用 -d level来指定debug日志级别
+            并捕获slapd的stderr 
+            
+
+
+
     启动 slapd
         slapd 的运行方式如下：/usr/local/libexec/slapd [<option>]*
                 我的slapd目录
