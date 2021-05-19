@@ -12,13 +12,11 @@
 #2 - ./conn-ldap.sh            #连接到每个虚拟机
 #3 - ./XXX.sh          #然后在虚拟机里运行 slapdmodify 添加配置
 #------------------------------
-# sudo scp -r  /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/* root@192.168.122.9:/home/lwh
-# sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.9:/home/lwh
-# sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.31:/home/lwh
-sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.190:/home/lwh
 
-# sudo scp -r  /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/* root@192.168.122.56:/home/lwh
-# sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.56:/home/lwh
+
+sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.133:/home/lwh
+# sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.251:/home/lwh
+
 #--------------------------------------------------------------
 
 
