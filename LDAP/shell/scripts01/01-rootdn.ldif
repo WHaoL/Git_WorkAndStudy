@@ -1,4 +1,10 @@
-# 配置数据库的 管理员账号 秘密 及域名
+# 1- 配置数据库的 管理员账号 秘密 及域名
+#   可以把   olcSuffix  olcRootDN olcRootPW  
+#           olcTLSCertificateFile  olcTLSCertificateKeyFile 
+#   配置到
+#   dn: olcDatabase={2}hdb,cn=config
+# 参考；https://www.learnitguide.net/2016/01/configure-openldap-server-on-rhel7.html
+
 dn: olcDatabase={2}hdb,cn=config
 changetype: modify
 replace: olcRootDN

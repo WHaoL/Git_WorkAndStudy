@@ -1,0 +1,10 @@
+dn: cn=replicator,dc=testldap,dc=com
+objectClass: top
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: replicator
+description: "Replication  User"
+userPassword: abc123
+# LDAP主从同步需要在master服务上面配置同步用户。管理员用户也可以，但不推荐
+# 配置主从用户
+# ldapadd -x -D "cn=admin,dc=testldap,dc=com" -w admin -f 1-replicator.ldif

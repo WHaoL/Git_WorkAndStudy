@@ -83,12 +83,18 @@ uid: 10003
 displayName: 黄芳
 
 #----------------------------------------------------------
-#注意：！！！！必须要加载schema，否则 objectClass: inetOrgPerson 会被认为是无效的参数
-#默认安装加载了core.ldif, 我们现在加载几个想要的schema:
-#    ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
-#    ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
-#    ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 
+
 #现在执行添加
 #   ldapadd -x -D cn=admin,dc=testldap,dc=com -w admin -f 04-add_group_users.ldif
 # 或者是 
 #   ldapmodify -a -x -D cn=admin,dc=testldap,dc=com -w admin -f 04-add_group_users.ldif
+
+# 注意： 必须先删除从属节点，然后才可以删除父节点
+# ldapdelete -x -D cn=admin,dc=testldap,dc=com -w admin "ou=后台组,ou=研发部门,ou=People,dc=testldap,dc=com"
+# ldapdelete -x -D cn=admin,dc=testldap,dc=com -w admin "ou=研发部门,ou=People,dc=testldap,dc=com"
+# ldapdelete -x -D cn=admin,dc=testldap,dc=com -w admin "ou=People,dc=testldap,dc=com"
+# ldapdelete -x -D cn=admin,dc=testldap,dc=com -w admin "ou=Group,dc=testldap,dc=com"
+
+# ldapsearch -H ldapi:/// -D cn=admin,dc=testldap,dc=com -w admin -b ou=People,dc=testldap,dc=com
+
+# ldapsearch -H ldapi:/// -D cn=admin,dc=testldap,dc=com -w admin -b cn=fang.huang,ou=HR,ou=People,dc=testldap,dc=com

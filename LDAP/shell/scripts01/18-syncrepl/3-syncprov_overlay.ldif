@@ -1,0 +1,13 @@
+dn: olcOverlay=syncprov,olcDatabase={2}hdb,cn=config
+objectClass: olcOverlayConfig
+objectClass: olcConfig
+objectClass: top
+objectClass: olcSyncProvConfig
+olcOverlay: syncprov
+olcSpCheckpoint: 20 10
+olcSpSessionlog: 50
+# olcSpSessionLog: 10000
+# olcSpCheckpoint: 100 10
+
+# 配置主从同步信息
+# ldapadd -Y EXTERNAL -H ldapi:/// -f 3-syncprov_overlay.ldif

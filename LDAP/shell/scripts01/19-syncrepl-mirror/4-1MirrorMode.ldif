@@ -1,0 +1,23 @@
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcSyncRepl
+olcSyncRepl: rid=001
+  provider=ldap://192.168.122.151:389/
+  bindmethod=simple
+  binddn="cn=admin,dc=testldap,dc=com"
+  credentials=admin
+  type=refreshAndPersist
+  searchbase="dc=testldap,dc=com"
+  filter="(objectclass=*)"
+  scope=sub
+  schemachecking=on
+  interval=00:00:00:5
+  retry="5 +"
+  sizeLimit=unlimited
+  timelimit=unlimited
+-
+add: olcMirrorMode
+olcMirrorMode: TRUE
+
+#生产环境中， 在 /etc/hosts/中配置 URL/域名和IP 的映射， 在 此文件中 写 URL
+# ldapmodify -Y EXTERNAL -H ldapi:/// -f 4-MirrorMode.ldif

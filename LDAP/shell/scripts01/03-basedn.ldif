@@ -11,3 +11,5 @@ o: ldap
 
 # 然后在浏览器上访问 http://192.168.122.9/phpldapadmin/ 
 #   将显示： dc=testldap,dc=com (刚刚添加的条目)
+
+#   ldapsearch -H ldapi:/// -D cn=admin,dc=testldap,dc=com -w admin -b dc=testldap,dc=com

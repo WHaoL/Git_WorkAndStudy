@@ -181,7 +181,7 @@ LDAP-RFC
 5.1. Configuration Layout
 5.1. 配置布局
 
-    slapd配置存储为 具有预定义schema(模式)和DIT的 特殊LDAP目录。
+    slapd配置存储为 预定义的 schema和DIT
         有一些特定的objectClasses用于承载全局配置选项，模式定义，后端和数据库定义以及各种其他项目。
         
     slapd-config 配置树具有非常具体的结构。
@@ -189,8 +189,58 @@ LDAP-RFC
         其他设置包含在单独的子条目中
             Dynamically loaded modules      #module     # --enable-modules配置后才能使用该功能
             Schema definitions              #schema     # 包含了：从配置文件加载或者运行时添加的 user schema
-            Backend-specific configuration              # 定义在数据库条目的子级(下一级)中
+            Backend-specific configuration              # overlay定义在数据库条目的子级(下一级)中 (!!!)
             Database-specific configuration #olcDatabase
+
+    2.4x 版本及之后的版本：slapd的配置，都存储在slapd-config configuration tree上
+        即存储在 /etc/openldap/slapd.d/cn\=config/ 目录下 
+        包含四部分，(注意overlay挂在Database下面)
+        如下：
+            1.cn=module
+            2.cn=schema
+            3.olcDatabase={x}config/frontend/bdb/hdb/mdb     
+                4.olcOverlay={0}syncprov
+            
+            总结： (!!!)
+                overlay负责把 各种module，拉来 为 Database 工作 (!!!)
+                    即，把module挂在Database身上，像注册了一个回调
+                把各种backend 实例化为 Database
+
+
+
+        那么如何更改slapd的配置，把slapd配置出我们希望的功能
+        注意：
+            我们要编写xx.ldif文件，并使用ldapserach/ldapmodify/.. 加载它们，来更改slapd的配置文件，除此之外都是禁止的(官方不推荐)
+        [root@localhost scripts01]# tree /etc/openldap/slapd.d/
+        /etc/openldap/slapd.d/
+        ├── cn=config
+        │   ├── cn=module{0}.ldif
+        │   ├── cn=schema
+        │   │   ├── cn={0}core.ldif
+        │   │   ├── cn={10}misc.ldif
+        │   │   ├── cn={11}pmi.ldif
+        │   │   ├── cn={12}ppolicy.ldif
+        │   │   ├── cn={1}cosine.ldif
+        │   │   ├── cn={2}inetorgperson.ldif
+        │   │   ├── cn={2}nis.ldif
+        │   │   ├── cn={3}inetorgperson.ldif
+        │   │   ├── cn={3}openldap.ldif
+        │   │   ├── cn={4}nis.ldif
+        │   │   ├── cn={5}collective.ldif
+        │   │   ├── cn={6}corba.ldif
+        │   │   ├── cn={7}duaconf.ldif
+        │   │   ├── cn={8}dyngroup.ldif
+        │   │   └── cn={9}java.ldif
+        │   ├── cn=schema.ldif
+        │   ├── olcDatabase={0}config.ldif
+        │   ├── olcDatabase={-1}frontend.ldif
+        │   ├── olcDatabase={1}hdb
+        │   │   └── olcOverlay={0}syncprov.ldif
+        │   ├── olcDatabase={1}hdb.ldif
+        │   ├── olcDatabase={1}monitor.ldif
+        │   ├── olcDatabase={2}hdb.ldif
+        │   └── olcDatabase={2}monitor.ldif
+        └── cn=config.ldif        
     
     图 5.1 中显示了一个示例 配置树(configuration tree.)
                         -----------------------
@@ -335,9 +385,6 @@ LDAP-RFC
                     当在日志文件名前 添加 "-" 来提高日志记录的性能，因为这代表了异步写入
                         local4.*    -/var/log/slapd.log
 
-
-
-
         所需的日志级别 可以以 单/多个整数(十进制/十六进制),单/多个显示的名称 输入，
             组合时使用时，默认位进行了 或运算。
             例如 下面的这些都是等价的
@@ -471,13 +518,18 @@ LDAP-RFC
 
 
 --------------------------数据库参数指令(Database-specific Directives)
+通用数据库指令
+
+把 各种backend 或 frontend 实例化为 Database (!!!)
+    不同的Database负责不同的工作 
+
     数据库参数指令(Database-specific Directives)
         每种类型的数据库都支持本节中的指令。
         数据库条目必须包含 objectClass: olcDatabaseConfig 
     
     olcDatabase: [{<index>}]<type>
         该指令命名一个特定的数据库实例。
-        数字{<index>}用来区分相同类型的多个数据库。通常可以省略索引，而 slapd 会自动生成它。
+        数字{<index>}用来区分相同类型的多个数据库。通常可以省略{<index>}，而 slapd 会自动生成它。
         <type>是表5.2中列出的受支持的数据库后端类型之一或前端类型。
             (The frontend)前端是一个特殊的数据库，用于保存 应该被应用于所有其他数据库的数据库级选项。
                 后续的数据库定义也可能会覆盖某些前端设置。
@@ -521,13 +573,13 @@ LDAP-RFC
         该指令指定 从搜索操作返回的最大条目数
         默认:  olcSizeLimit: 500
 
-    olcSuffix: <dn suffix>
-        即指定：从哪个子树开始查询
-        该指令指定 传递到此后端数据库执行查询的 DN 后缀。
-            可以指定多个后缀行，通常每个数据库定义至少需要一个后缀行。
+    olcSuffix: <dn suffix> 
+        即指定：从哪个子树开始查询   (!!!)
+        该指令指定 传递到 此后端数据库 查询的 DN后缀。   (!!!)
+            可以指定多个后缀行，通常每个数据库定义至少需要一个后缀行/suffix 。
             (某些后端类型，例如“frontend”和“monitor”使用硬编码后缀，该后缀可能不会在配置中被覆盖。)
         示例：olcSuffix: dc=example,dc=com
-            DN 以“dc=example，dc=com”结尾的查询将传递到此后端。
+            将 以“dc=example，dc=com”结尾的DN查询 将传递到此后端。
         注意：
             当选择要传递查询的后端时，slapd会按照配置的顺序查看每个数据库定义中的后缀值。
                 如果一个数据库后缀是另一个数据库的前缀，则它必须出现在配置之后。
@@ -566,17 +618,17 @@ LDAP-RFC
                 [logfilter=<filter str>]
                 [syncdata=default|accesslog|changelog]
         该指令
-            将当前slapd 建立为 复制consumer站点  通过运行syncrepl复制引擎，从而将当前数据库指定为 内容 provider 的consumer。
+            将当前slapd 建立为 复制consumer站点  通过运行syncrepl复制引擎，从而将当前数据库指定为 provider内容  的consumer。
             consumer数据库 和 provider的最新内容保持同步
         rid 
-            用于标识复制consumer(cosumer)服务器中的当前 syncrepl 指令
+            用于标识consumer服务器中的当前 syncrepl 指令
             <replica ID>
                 唯一标识当前 syncrepl 指令所描述的 syncrepl 规范
                 为非负数且长度不超过三位十进制数
         provider
             provider的 LDAP URI
                 指定 包含provider content的 provider站点作为LDAP URI
-                这个参数指定了  可以找到provider slap instance 的 scheme host以及可选的port
+                这个参数指定了  可以找到provider slap instance 的 (scheme)host以及可选的port
                 <hostname> 可以是域名或者IP 
                 [:port]    端口是可选的,如果未提供<port>，则使用标准LDAP端口号(389 或 636)
                 例如 ldap://provider.example.com:389 或 ldaps://192.168.1.1:636      
@@ -622,16 +674,16 @@ LDAP-RFC
             在<重试次数>中的+表示无限次重试直到成功。
 
         [schemachecking=on|off]
-            打开后,将在LDAP Syncconsumer(consumer)站点上强制执行模式(schema)检查
+            打开后,将在LDAP Sync consumer(consumer)站点上强制执行模式(schema)检查
             如果将其关闭，则将在不检查schema一致性的情况下存储条目。
             默认为关闭。
         
         [binddn=<DN>]
             给出了要绑定的 DN
-            该DN 对 provider数据库中的复制内容具有读权限 （！！！！！！！！！！！！！！！！！）
+            该DN 对 provider database中的复制内容具有读权限 （！！！！！！！！！！！！！！！！！）
 
         [bindmethod=simple|sasl]
-            是simple还是sasl,取决于连接到  providerslapd实例 时 是基于密码的简单(simple)身份验证还是使用SASL身份验证
+            是simple还是sasl,取决于连接到 provider slapd实例 时 是基于密码的简单(simple)身份验证还是使用SASL身份验证
 
         simple身份验证
             除非有足够的数据完整性和机密性保护(例如 TLS 或 IPsec)，否则不应使用简单身份验证。
@@ -666,7 +718,7 @@ LDAP-RFC
                 如果忽略了 [syncdata=default|accesslog|changelog] 参数或将其设置为“默认”，则将忽略日志参数
 
 
-        使用 bdb，hdb 和 mdb 后端支持 syncrepl 复制机制
+        使用 bdb/hdb/mdb backend 支持 syncrepl 复制机制
     
     [olcTimeLimit: <integer>]
         该指令指定了 slapd 响应搜索请求所花费的最大秒数(实时)。如果请求在此时间内未完成，则将返回: 指示超出时间限制的结果。
@@ -698,6 +750,8 @@ LDAP-RFC
 
 
 ------------------------BDB 和 HDB 数据库指令(BDB and HDB Database Directives)
+适用于BDB和HDB数据库 的指令
+
     BDB 和 HDB 数据库指令
         此类别中的指令适用于 BDB 和 HDB 数据库。
             除了上面定义的通用数据库指令外，它们还用于olcDatabase 条目中。
@@ -710,15 +764,15 @@ LDAP-RFC
         Default:
             olcDbDirectory: /usr/local/var/openldap-data
     olcDbCachesize: <integer>
-        指定由 BDB后端数据库实例 维护的内存中缓存条目 的大小。
+        指定由 BDB后端数据库实例 维护的 内存中缓存条目 的大小。
         Default:
             olcDbCachesize: 1000
     olcDbCheckpoint: <kbyte> <min>
         指定 对BDB事务日志  进行检查点的频率
             检查点操作 会将数据库缓冲刷到磁盘，并在日志中写入检查点记录。
         检查点将会被触发 的情况：
-            1.上一个检查点已经写入   <kbyte>数据   或者
-            2.上一个检查点已经过去过 <min>分钟
+            1.自上一个检查点已经写入   <kbyte>数据   或者
+            2.自上一个检查点已经过去过 <min>分钟
         这两个参数默认都为零，在这种情况下，它们将被忽略。
         当<min>为非零值时，内部任务将每隔<min>分钟运行一次 以执行检查点。
         Example:
@@ -732,15 +786,15 @@ LDAP-RFC
         没有提供默认值，但是必须！在此处使用适当的设置以获得最佳的服务器性能。
             对此属性所做的任何更改都将写入 DB_CONFIG 文件中，并将导致数据库环境被重置，因此更改可以立即生效。
             如果数据库环境缓存很大，并且最近未进行检查点检查，则此重置操作可能会花费很长时间。
-                建议：：在使用 LDAP Modify 更改此属性之前，建议使用 Berkeley DBdb_checkpoint 实用工具手动执行单个检查点。
+                建议：：在使用 LDAP Modify 更改此属性之前，建议使用 Berkeley DB 的 db_checkpoint 实用工具手动执行单个检查点。
         Example:
             olcDbConfig: set_cachesize 0 10485760 0
             olcDbConfig: set_lg_bsize 2097512
             olcDbConfig: set_lg_dir /var/tmp/bdb-log
             olcDbConfig: set_flags DB_LOG_AUTOREMOVE
             在此示例中：
-                BDB缓存 设置为 10MB，
-                BDB事务日志缓冲区的大小 设置为 2MB，
+                BDB 缓存 设置为 10MB，
+                BDB 事务日志缓冲区(transaction log buffer) 的大小 设置为 2MB，
                 并且事务日志文件将存储在/var/tmp/bdb-log 目录中。
                 还设置了一个标志，告诉 BDB 一旦其内容已被(检查点)检查过并且不再需要它们，则删除事务日志文件
                     没有此设置，事务日志文件将继续累积，直到其他一些清除过程将其删除为止
@@ -4025,7 +4079,7 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
     18.1. 复制技术(Replication Technology) 
 
         18.1.1. 同步复制(LDAP Sync Replication)
-        Syncrepl （！！！！！！！！！！！！！！！！！）
+        Syncrepl (!!!)
             
             LDAP同步复制(简称 syncrepl)
                 1.是消费者方的复制引擎，
@@ -4067,17 +4121,18 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                         provider可以维护一个按范围划分的会话日志作为历史存储。
                 2.在 refreshAndPersist 同步模式下，
                     provider使用基于"推"的同步。
-                        provider跟踪 请求了一个持久搜索的consumer服务器，
+                        provider跟踪 请求了持久搜索的consumer服务器，
                         并在provider复制内容被修改时向它们发送必要的更新。
             
             如果consumer服务器 对要被复制的DIT片段 有适当访问权限，
-                consumer服务器 可以创建一个复制而无需修改provider的配置，也无需重启provider服务器。
-                consumer服务器也可以停止复制，也是无需provider端任何变更和重启。
+                则通过syncrepl , 
+                    consumer服务器,可以创建一个复制而无需修改provider的配置，也无需重启provider服务器。
+                    consumer服务器,也可以停止复制，也是无需provider端任何变更和重启。
 
             Syncrepl支持 局部的，稀疏的 片段复制。
                 影子DIT片段 由一个标准通用搜索来定义，
-                    由 base，scope，filter 和 attribute list 组成。
-                    consumer复制内容还受 syncrepl复制连接 绑定的用户的操作权限的 限制。
+                    由 base，scope，filter 和 attribute list 组成。 (!!!)
+                    consumer复制内容还受 syncrepl复制 连接绑定的用户的访问权限限制。
 
             总结：
                 Syncrepl驻留 在consumer上；
@@ -4085,10 +4140,12 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                 Syncrepl通过 同步cookie 来跟踪 复制内容的状态，以提供一个有状态的复制；
                 Syncrepl同时支持 基于拉 和 基于推 进行目录树信息同步；
                 (refreshOnly)拉模式下，
-                    consumer定期到provider 以拉取的方式进行同步数据更新； 
+                    consumer定期到provider 以拉取的方式进行数据同步； 
                     优化：
                         当前阶段
                         删除阶段
+                    进一步优化:
+                        provider可以维护一个按范围划分的会话日志作为历史存储。
                 (refreshAndPersist)推模式下，
                     1.consumer请求了持久搜索， 那么provider会跟踪consumer
                     2.一旦provider检测到 持久搜索范围内 有内容被更新了，就会向consumer发送更新
@@ -4112,12 +4169,12 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                 监听通过 refreshAndPersist 实现。
                     顾名思义，像refreshOnly一样，它以搜索开始。
                     在返回当前匹配搜索条件的所有条目之后，不完成搜索，而是将同步搜索在provider中保持不变。
-                    provider 对同步内容的 后续更新 会导致将(附加的)条目更新发送给consumer。
+                    provider 对同步内容的 后续更新 会导致将(条目)更新发送给consumer。
 
-                refreshOnly操作和refreshAndPersist操作的刷新阶段可以在当前阶段或删除阶段执行。
+                "refreshOnly操作" 和 "refreshAndPersist操作的刷新阶段" 可以在当前阶段或删除阶段执行。
 
                 #当前阶段--当前消息
-                1.在当前阶段，provider向consumer发送 自上次同步以来在 搜索范围内 更新的条目。
+                1.在"当前阶段"，provider向consumer发送 自上次同步以来在 搜索范围内 更新的条目。
                     provider发送 更新后的条目的 所有请求的属性（无论是否更改）(即：只要条目中有一个属性值被更改 整个条目都会被发送)。
                 2.对于 
                     在(搜索)范围内的每个未改变的条目，
@@ -4125,20 +4182,20 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                     当前消息，
                         该消息仅由 条目名称 和 代表当前状态的同步控件 组成。
                         当前消息不包含条目的任何属性。(即：对于未更改的条目 发送条目名称和状态 但不包含任何属性)
-                3.consumer收到所有更新和当前条目后，可以通过
+                3.consumer收到所有更新和当前条目(当前消息)后，可以通过
                     添加 添加到provider的条目，
                     替换 在provider上修改的条目 以及
-                    删除 consumer副本中(既没有更新 也未指定存在于provider处)的条目 (意思是: 更新的条目中不包含这个条目，同时当前消息中也不包含这个条目 肯定是被provider删除了)
+                    删除 provider中 既没有更新 也未指定存在于provider处 的条目 (意思是: 更新的条目中不包含这个条目，同时当前消息中也不包含这个条目 肯定是被provider删除了)
                     来可靠地确定新的consumer副本。
                 总结：
                     先发送范围内的更新
-                    范围内未改变的每个(!!!)条目，发送一条“当前消息”
+                    范围内未改变的每个(!!!)条目，发送一条(!!!)“当前消息” (后文: 使用syncIdset进行优化,一次可以发送多个entryUUID)(!!!)
                         即：
                             根据更新 新增条目和修改条目
                             根据更新 和 当前消息(即：指出哪些条目仍然原封不动的存在) ，来确定删除哪些条目
                 
                 #删除阶段--删除消息
-                删除阶段中 更新条目的传输与当前阶段中的相同。
+                "删除阶段"中 更新条目的传输与"当前阶段"中的相同。
                     provider将 自上次同步以来 在搜索范围内更新的条目的所有请求属性 发送给consumer。
                 但是，在删除阶段，
                     provider会为 从搜索范围中删除的每个条目发送一条删除消息，而不是发送当前消息。
@@ -4147,7 +4204,7 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                 可以根据 SearchResultEntry消息附带的同步控件 通过添加，修改和删除条目 来确定新的consumer副本。
                 总结：
                     先发送范围内的更新
-                    范围内被删除的每个条目，发送一条“删除消息”
+                    范围内被删除的每个条目，发送一条“删除消息” (后文: 使用syncIdset进行优化,一次可以发送多个entryUUID)(!!!)
                         即： 
                             新增的 和 修改的 包含在更新中       ，据此进行新增条目和修改条目
                             然后每删除一个条目 发送一个删除消息  ，据此进行删除条目
@@ -4164,22 +4221,39 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                     那么把 目前还存活的条目名称 发给consumer ，
                     让consumer自己判断 删除哪些条目，
                     也就是使用“当前阶段”)
-                就同步业务而言，当前阶段的使用比完整内容重新加载的效率要高得多。
+                就同步业务而言，"当前阶段"的使用比完整内容重新加载的效率要高得多。(!!!)
                 为了进一步减少同步流量，LDAP Sync 协议还提供了一些优化措施，
                     例如在单个syncIdSet消息中传输标准化的 entryUUID 和传输多个 entryUUID。
                     (粗略理解：应该是在 “当前消息”中一次发送多个 未更改的/或者是被删除的 条目的ID)
                 
+                # refreshOnly怎么发送cookie
                 在 refreshOnly 同步结束时，
                     provider在同步完成后将同步cookie发送给consumer，
                     作为consumer副本的(同步)状态指示符。(即：这个cookie唯一标识了这个consumer同步到了哪儿)
                     consumer在向provider请求下一次增量同步时将携带此cookie。
+                    (!!!)
                 
-                #refreshAndPersist
+                # refreshAndPersist 怎么发送cookie
                 当使用 refreshAndPersist 同步时，
-                    provider会在刷新阶段结束时通过发送带有refreshDone=TRUE 的同步信息消息来发送同步 cookie。
-                    provider还通过将 同步cookie附加到 在同步搜索的"持久阶段"生成的“SearchResultEntry消息” 中 来发送同步cookie。
+                    provider会在刷新阶段结束时通过发送带有refreshDone=TRUE 的同步信息消息来发送同步 cookie。(!!!)
+                    provider还通过将 同步cookie附加到 在同步搜索的"持久阶段"生成的“SearchResultEntry消息” 中 来发送同步cookie。(!!!)
                 在持久阶段，
-                    provider还可以在 provider想要更新consumer一方状态指示符的任何时间 发送包含同步cookie的SyncInfo消息。
+                    provider还可以在 provider想要更新consumer一方状态指示符的任何时间 发送包含同步cookie的SyncInfo消息。(!!!)
+            
+            cookie用于 唯一标识某一consumer的同步状态(同步到了哪个位置)
+            总结:关于syncrepl中的cookie (!!!)
+                refreshOnly
+                    每次同步完成后 将cookie发送给consumer 
+                    (consumer在向provider请求下一次增量同步时将携带此cookie。)
+                refreshAndPersist   
+                    刷新阶段结束时, 
+                        cookie和 最终携带了refreshDone=TRUE的同步消息 一起发送
+                    持久阶段,
+                        cookie和 持久阶段每次生成的SearchResultEntry消息 一起发送
+                    在持久阶段,还可以: 
+                        任何时间,只要provider想更新consumer的同步状态指示符的,
+                        provider都可以发送携带了cookie的Sync Info message
+
 
                 在 LDAP Sync 协议中，条目由 entryUUID 属性值唯一标识。
                     它可以用作条目的可靠标识符。
@@ -4191,28 +4265,28 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
 
                 syncrepl 引擎同时使用 LDAP Sync 协议的 refreshOnly 和 refreshAndPersist 操作。
                 如果数据库定义中包含 syncrepl 规范，
-                    则 slapd启动一个syncrepl引擎作为slapd的一个线程，并安排其执行。
+                    则 slapd启动一个syncrepl引擎作为slapd的一个线程，并安排其执行时间。
                 如果指定了 refreshOnly 操作，
                     则同步操作完成后的间隔时间将重新安排syncrepl引擎。
-                    （因为周期性的去拉取，所以要设置其周期）
+                    （因为周期性的去拉取,所以要根据周期长度,重新设置下一次的时间）
                 如果指定了 refreshAndPersist 操作，
-                    则引擎将保持活跃状态并处理来自provider的持久同步消息。
-                    （因为是 接收provider推过来的消息，所以保持监听）
+                    则syncrepl引擎将保持活跃状态并处理来自provider的持久同步消息。
+                    （因为是 接收provider持久阶段推过来的消息，所以保持监听）
 
                 syncrepl引擎 同时使用 刷新同步的 当前阶段和删除阶段。
-                1.可以在provider中配置会话日志，该会话日志存储 从数据库中删除的有限数量条目的 entryUUID。
-                    多个consumer共享相同的会话日志。
+                1.可以在provider中配置(session log/会话日志)，该会话日志/sessionlog存储 从(provider)数据库中删除的有限数量条目的 entryUUID。
+                    多个consumer共享相同的会话日志/sessionlog。
                 2.如果会话日志是当前的(足够新)，并且consumer服务器的状态足够新，以至于在client的最后一次同步之后没有会话日志条目被截断时，
                     那么syncreplpl引擎将使用删除阶段。
                 3.如果没有为复制内容配置任何会话日志，或者consumer方太过时而无法被会话日志覆盖，
                     则syncrepl引擎将使用当前阶段。
-                会话日志存储的当前设计是基于内存的，
+                会话日志/sessionlog的存储是基于内存的，
                     因此会话日志中包含的信息不能在多个provider程序调用上保持不变。
-                    当前不支持使用 LDAP 操作访问会话日志存储。
-                    当前也不支持对会话日志施加访问控制。
+                    当前不支持使用LDAP操作访问会话日志/sessionlog存储。
+                    当前也不支持对会话日志/sessionlog施加访问控制。
                 
                 作为进一步的优化，
-                    即使在同步搜索未与任何会话日志关联的情况下，
+                    即使在同步搜索未与任何会话日志/sessionlog关联的情况下，
                     当复制上下文中没有更新时，也不会将任何条目传输到consumer服务器。
                 
                 1. consumer端的复制引擎：syncrepl引擎 可以与任何后端一起使用。
@@ -4226,14 +4300,15 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                     作为provider内容的 当前同步状态指示符。
                 contextCSN是provider上下文中最大的 entryCSN，
                     因此对于 entryCSN 值较小的条目，没有任何事务。
-                能将contextCSN 设置为最大的已发行entryCSN，
+                不能仅将contextCSN 设置为最大的已发行entryCSN，
                     因为 entryCSN 是在事务开始之前获得的，
                     并且未按发行顺序提交。
             总结：
-                contextCSN是不是cookie ？？？
+                contextCSN是不是cookie (!!!)
                 答：不是，cookie 是<csn><rid> 
-                    <csn>是contextCSN用于标识复制状态, 
-                    <rid>是consumer的id+
+                    <csn>是contextCSN,用于标识slave/consumer的同步/复制状态, 
+                    <rid>是slave/consumer的id+
+                    csn=<csn> rid=<rid>
             总结：
                 根据consumer发来的cookie中的contextCSN 
                 来确定 复制的起始位置 和 结束位置
@@ -4270,7 +4345,8 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                 
             总结：
                 每次更新完成后，provider都会给consumer发送一个cookie
-                (cookie中封装了一个contxtCSN，告诉consumer 你小子下次再来找我要数据时 记得带上cookie)
+                (告诉consumer 你下次再来找我要数据时 记得带上cookie)
+                (并且cookie中封装了一个contxtCSN)
                 这样每次请求消息时，provider就知道每个具体的consumer都复制到那里了，
                 这样就知道了复制的 起始位置和结束位置
                 
@@ -4327,7 +4403,7 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                 因此在还原数据库或将其复制到另一台计算机上时，
                 使用 slapcat/slapadd 备份/还原 changelog数据库和主数据库非常重要。   
         
-        总结： （！！！！！！！！！！！！！！！！！）
+        总结： (!!!)
             Delta-syncrepl是对syncrepl的改进，使得可以增量同步
             provider把更改/更新 维护在changelog中 
             consumer可以从changelog中获取自己所需的变更
@@ -4376,9 +4452,9 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
                 它提供了single-provider复制的所有一致性保证，
                 同时还提供了multi-provider的高可用性。
             在 MirrorMode 中，将两个provider设置为可以相互复制（作为multi-provider配置），
-                但是使用外部前端将所有写入仅定向到两个服务器之一。 
+                但是使用 外部前端(external frontend) 将所有写入仅定向到两个服务器之一。
                 仅当第一个provider崩溃时，第二个provider才用于写操作，
-                此时前端将切换为将所有写操作定向到第二个provider。
+                此时 前端/frontend 将切换为将所有写操作定向到第二个provider。
                 当崩溃的provider被修复并重新启动后，
                 它将自动赶上正在运行的provider上的所有更改并重新同步。
         
@@ -4386,8 +4462,8 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
             18.2.3.1. MirrorMode 的讨论
                 ● 为目录写入（副本句柄读取）提供高可用性（HA）解决方案
                 ● 只要一个provider可以操作，就可以安全地接受写操作
-                ● Provider nodes提供程序节点 相互复制，因此它们始终是最新的，可以随时接管（热备用）
-                ● Syncrepl 还允许provider节点在发生任何停机后重新同步
+                ● Provider nodes相互复制，因此它们始终是最新的，可以随时接管（热备用）
+                ● Syncrepl 还允许provider nodes在发生任何停机后重新同步
             
             18.2.3.2. Arguments against MirrorMode
             18.2.3.2. 反对 MirrorMode 的讨论
@@ -4407,7 +4483,7 @@ https://program-think.blogspot.com/2010/02/introduce-digital-certificate-and-ca.
             在某些网络配置中，尤其是在防火墙限制了建立连接的方向的情况下，
                 可能需要provider发起的推送模式。
 
-            可以借助LDAP后端（后端和slapd-ldap）配置此模式。
+            可以借助LDAP后端（backends和slapd-ldap）配置此模式。
                 不是在实际consumer上运行syncrepl引擎，
                 而是在指向consumer的provider附近设置了slapd-ldap代理，
                 并且 syncrepl 引擎在代理上运行。

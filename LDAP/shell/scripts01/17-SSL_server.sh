@@ -17,9 +17,9 @@ set -x
 # 修改slapd server和client的 /etc/hosts，将slapd server的ip地址和主机名添加到该文件
 #     127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
 #     ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
-#     192.168.122.133 slapd #新增的
+#     192.168.122.234 slapd #新增的
 HOSTS=/etc/hosts
-sudo grep slapd $HOSTS > /dev/null   ||   sudo echo "192.168.122.133 slapd" >> $HOSTS  # 插入
+sudo grep slapd $HOSTS > /dev/null   ||   sudo echo "192.168.122.234 slapd" >> $HOSTS  # 插入
 # grep slapd $HOSTS >/dev/null    &&   sed -i '/slapd/d' $HOSTS               # 删除
 #   
 # 2 - 

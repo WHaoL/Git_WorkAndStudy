@@ -1,0 +1,9 @@
+dn: cn=module,cn=config
+objectClass: olcModuleList
+cn: module
+olcModulepath: /usr/lib64/openldap
+olcModuleload: syncprov.la
+
+
+# 导入同步模块
+# ldapadd -Y EXTERNAL -H ldapi:/// -f 2-syncprov_module.ldif

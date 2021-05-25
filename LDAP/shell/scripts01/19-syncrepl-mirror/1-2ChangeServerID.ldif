@@ -1,0 +1,6 @@
+dn: cn=config
+changetype: modify
+replace: olcServerID
+olcServerID: 2
+
+# ldapmodify -Y EXTERNAL -H ldapi:/// -f 1-2ChangeServerID.ldif

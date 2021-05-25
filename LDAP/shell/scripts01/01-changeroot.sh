@@ -9,16 +9,34 @@ admin_pass=`/usr/sbin/slappasswd -s admin`
 echo "admin pass is:  ${admin_pass}"
 sed "s!<pass>!${admin_pass}!g"   01-rootdn.ldif > 01-tmp.ldif
 
-echo "备份默认配置"
-cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif \
-   /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.bak01
+# echo "备份默认配置"
+# # cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif \
+# #    /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.bak01
+
+# cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{1\}mdb.ldif \
+#    /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{1\}mdb.ldif.bak01
 
 echo "将要修改的内容："
 cat 01-tmp.ldif
 
 ldapmodify -Q -Y EXTERNAL -H ldapi:/// -f 01-tmp.ldif
 
-echo "修改后的变化"
-diff -Nur \
-        /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif \
-        /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.back01
+# echo "修改后的变化"
+# diff -Nur \
+#         /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif \
+#         /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.back01
+
+# diff -Nur \
+#         /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{1\}mdb.ldif \
+#         /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{1\}mdb.ldif.back01
+
+#  ldapsearch -H ldapi:/// -D cn=admin,dc=testldap,dc=com -w admin
+#  ldapsearch -H ldapi:/// -D cn=admin,dc=testldap,dc=com -w admin -b dc=testldap,dc=com
+
+
+
+#注意：！！！！必须要加载schema，否则 objectClass: inetOrgPerson 会被认为是无效的参数
+#默认安装加载了core.ldif, 我们现在加载几个想要的schema:
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/cosine.ldif 
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/nis.ldif 
+ldapadd -Y EXTERNAL -H ldapi:/// -f /etc/openldap/schema/inetorgperson.ldif 

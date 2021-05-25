@@ -1,0 +1,17 @@
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+add: olcLimits
+olcLimits: dn.exact="cn=replicator,dc=testldap,dc=com"
+  time.soft=unlimited time.hard=unlimited
+  size.soft=unlimited size.hard=unlimited
+
+dn: olcDatabase={2}hdb,cn=config
+changetype: modify
+replace: olcAccess
+olcAccess: {0}to dn.subtree="dc=testldap,dc=com"
+  by self write
+  by dn.exact="cn=replicator,dc=testldap,dc=com" read
+  by anonymous auth
+  by * read
+
+# ldapmodify -Y EXTERNAL -H ldapi:/// -f 4-olchdb.ldif

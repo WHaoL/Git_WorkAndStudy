@@ -1,3 +1,8 @@
+# 2- 配置Monotor的权限 到 dn: olcDatabase={1}monitor,cn=config
+# 参考；https://www.learnitguide.net/2016/01/configure-openldap-server-on-rhel7.html
+
+
+# dn: olcDatabase={1}monitor,cn=config
 dn: olcDatabase={1}monitor,cn=config
 changetype: modify
 replace: olcAccess
@@ -8,6 +13,10 @@ olcAccess: {0}to *
 
 #执行修改
 #   ldapmodify -Y EXTERNAL -H ldapi:/// -f 02-modifyMonitor.ldif 2>/dev/null
+#检查配置
+#   slaptest -u
+
+
 #查询: 验证 02-modifyMonitor.ldif 是否被添加到ldap中
 #   ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config 'olcDatabase={1}monitor' -LLL 2>/dev/null
 #   ldapsearch -Y EXTERNAL -H ldapi:/// -b cn=config "olcDatabase={1}monitor" -LLL 2>/dev/null
@@ -17,3 +26,15 @@ olcAccess: {0}to *
 #下面是配置phpldapadmin
 # 然后在浏览器上访问 http://192.168.122.9/phpldapadmin/ （记得关闭VPN）
 #       将显示 ： This base cannot be created with PLA.
+
+
+
+# systemctl start slapd
+# systemctl enable slapd
+# netstat -ntlp | grep ldap
+# 可以看到 slapd的 389 端口
+
+
+
+#配置 LDAP database 
+# cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/DB_CONFIG

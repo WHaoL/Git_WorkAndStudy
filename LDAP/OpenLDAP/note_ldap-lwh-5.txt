@@ -1,16 +1,12 @@
 ---------------------------------------------------------------------------------------------------------    
 本文档说明：
-    主要记录了在两台centos7-Mini虚拟机上 
-    配置基本的
-        DIT 目录信息树   -- 基本的组织架构
-            管理员
-            部门
-            人员
-            分组
-            基本的权限限制
-        syncRepl 
+    centos7-Mini虚拟机上 
+
+        TLS         配置文件及配置步骤：    /Git_WorkAndStudy/LDAP/shell/scripts01/17-SSL*
+
+        syncRepl    配置文件及配置步骤：    /Git_WorkAndStudy/LDAP/shell/scripts01/18-syncrepl  
+        
         Mirror-syncRepl
-        TLS
 
         detal-syncRepl 
         Multi-syncRepl 
