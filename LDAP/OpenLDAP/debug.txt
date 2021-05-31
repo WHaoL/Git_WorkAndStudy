@@ -1,3 +1,4 @@
+//-------------------------------------------------------------------------------------------
 slaptest 
     出现错误：
         bdb_db_open: warning – no DB_CONFIG file found in directory /var/lib/ldap: 
@@ -7,3 +8,35 @@ slaptest
         [root@localhost ldap]# mkdir -p /var/lib/ldap
         [root@localhost ldap]# cp  /usr/share/openldap-servers/DB_CONFIG.example   /var/lib/ldapDB_CONFIG
         [root@localhost ldap]# slaptest 
+//-------------------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------------------
+注意：这种身份验证机制 已经不兼容了！！！
+
+ldapsearch时出现：  ldap_sasl_interactive_bind_s: Invalid credentials (49)
+
+    https://blog.51cto.com/zhangxiaohua/1585308 
+
+1。默认的openLDAP是基于 sasl 的绑定,需要先创建sasl用户及其密码
+[root@mail html]# saslpasswd2 -c UserName
+输入两次密码，密码保存在/etc/sasldb2，可以用 sasldblistusers2 命令查看用户名称
+在ldapsearch等命令中使用 -U UserName -W参数，然后输入上面的密码就行
+
+
+2。查看修改/etc/openldap/slapd.conf
+rootpw     123456  注:行首不能有空格,属性于值间隔用tab键隔开
+
+
+3。mv /etc/openldap/slapd.d /etc/openldap/slapd.bak 
+
+//将这个文件夹改为其它名字，在redhat enterprise linux 6.4中需要这么做，其他版本未知
+
+
+4。chmod 644 /etc/openldap/dlapd.conf ,如果不行设为777再试下
+//-------------------------------------------------------------------------------------------
+
+
+
+
+

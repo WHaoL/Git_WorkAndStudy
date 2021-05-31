@@ -19,17 +19,44 @@ LDAP-RFC
 
 
 ---------------------------------------------------------------------------------------------------------    
+#统计总共的代码量 ， 在源代码根目录下 运行
+find . "(" -name "*.c" -or -name "*.h" ")" -print | xargs grep -v "^$" | grep -v "^\/\/" | wc -l
+
+
 
 
 
 ---------------------------------------------------------------------------------------------------------    
 
+Softerra LDAP Administrator/Browser -- 收费
+
+LDAPsoft   -- 收费
+    http://www.ldapclient.com/
+
+Apache Directory Studio  -- 开源
+官网
+    http://directory.apache.org/studio/
+    http://directory.apache.org/studio/downloads.html
+Gitub
+    https://github.com/apache/directory-studio 
 
 
+LDAP Account Manager -- 开源 web端的   -- 支持中文
+    专业版是：LAM Pro -- 收费
+官网
+    https://www.ldap-account-manager.org/lamcms/ 
+    https://www.ldap-account-manager.org/lamcms/releases  -- 下载
+sourceforge
+    https://sourceforge.net/projects/lam/ 
+GitHub
+    https://github.com/LDAPAccountManager/lam 
 
----------------------------------------------------------------------------------------------------------    
 
+LDAP Admin 
+    官网         http://ivb.sweb.cz/en/ldap.html
+    Gitub       https://github.com/ibv/LDAP-Admin
 
+https://www.web2ldap.de/
 
 
 ---------------------------------------------------------------------------------------------------------    

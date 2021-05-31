@@ -2840,7 +2840,7 @@ LDAP-RFC
                 hdb后端已经取代了bdb后端，并且很快将不推荐使用两者，
                 而推荐使用新的mdb后端。
             总结：
-                推荐使用mdb 而不是hdb 也不算bdb
+                推荐使用mdb 而不是hdb 也不推荐bdb
 
         11.1.2. back-bdb/back-hdb Configuration
             略
@@ -3013,7 +3013,7 @@ LDAP-RFC
                 slapd-ldap后端被设计为ldap后端的增强(版),
                 这两个后端共享很多功能(实际上，它们也共享部分代码)，
             
-            ldap后端：用于代理指向但个服务器的操作
+            ldap后端：用于代理指向单个服务器的操作
             元后端(meta backend)：主要用于代理多个服务器，并可能命名上下文。
 
             这些特性虽然在许多场景中都很有用，但可能会给某些应用程序带来过多的开销，因此应该仔细考虑其使用。
@@ -3037,7 +3037,10 @@ LDAP-RFC
             请参阅“监控(Monitoring)”部分。
         
         总结：
-            monitor backend 响应 cn=monitor的搜索
+            monitor backend 
+                响应 cn=monitor的搜索
+                但要记得设置访问权限
+            
 
 
         11.6.2. back-monitor Configuration
@@ -3198,7 +3201,7 @@ LDAP-RFC
             这个slapd后端的主要目的是
                 将在同一个slapd实例中运行的 数据库中定义的命名上下文 映射到 虚拟命名上下文，
                 如果需要，可以使用attributeType和objectClass。
-                它需要rwm覆盖(rwmo verlay)。
+                它需要rwm覆盖(rwm overlay)。
             此后端和上面提到的覆盖层是实验性的。
         11.10.2. back-relay配置(back-relay Configuration)
             稍后
@@ -3206,12 +3209,17 @@ LDAP-RFC
             略
 
     11.11. SQL
-        未看！！！
+        LDAP搭配RDBMS(关系型数据库),
+            这个slapd后端的主要目的是无需编程即可将某些 RDBMS 中的 PRESENT信息作为 LDAP子树存储在 LDAP中
+        
+        参考 ：
+            官方手册 2.4 的     11.11. SQL
+            官方源码包2.4的     /openldap-2_4/openldap-OPENLDAP_REL_ENG_2_4/servers/slapd/back-sql/rdbms_depend/README
 
 12. Overlays
     
     Overlays 是软件组件，
-        可提供 类似于后端提供的 功能钩子，
+        可提供 类似于后端提供的 功能的钩子，
         可以将其堆在后端调用的顶部，作为 后端响应顶部的回调 来更改其行为。  
     
     Overlays 
@@ -3220,15 +3228,16 @@ LDAP-RFC
     大多数 overlays仅允许在单个数据库上进行配置。
 
     有些也可以堆叠在前端上，以供全局使用。
-        这意味着它们可以在 请求被解析和验证之后，但恰好在选择适当的数据库之前执行。
+        这意味着它们可以在 请求被解析和验证 之后，但恰好在选择适当的数据库 之前 执行。
             主要目的是影响与数据库无关的操作，
-            并且在某些情况下，通过 消息请求的DN 来影响数据库的选择。
+            并且在某些情况下，通过 消息请求DN 来影响数据库的选择。
     
     从本质上讲，overlays 代表了一种实现以下目的的手段：
         1.在不更改后端代码的情况下 定制现有后端行为，也不需要编写具有完整功能的新的自定义后端
         2.编写 可应用于不同后端类型的 通用功能
 
-    如上所述，使用slapd.conf时，在任何其他数据库之前配置的 overlays 将被视为全局的。
+    如上所述，使用slapd.conf时，
+        在任何其他数据库之前配置的 overlays 将被视为全局的。 (!!!)
         实际上，它们隐式堆叠在前端数据库(frontend database)的顶部。
         也可以将它们显式配置为：
         -----------------------------------    
@@ -3254,6 +3263,13 @@ LDAP-RFC
             注意：
                 Accesslog 数据库对于给定的 provider是唯一的。
                 永远不要复制它。
+            
+            总结:
+                accesslog记录了 client对一个数据库的 增/删/改/(查)
+                    基于此实现了增量复制 delta-syncrepl
+
+
+
         
         12.1.2. 配置访问日志(Access Logging Configuration)
             
@@ -3352,8 +3368,9 @@ LDAP-RFC
     12.2. 审计日志(Audit Logging)
         审核日志层(The Audit Logging overlay) 可用于将 给定后端数据库上的所有更改 记录到 指定的日志文件 中。
 
-        12.2.1. 概览(Overview)
-            略 
+        12.2.1. 概览(Overviewn 
+            如果要将更改记录为标准LDIF，则可以使用 olcOverlay=auditlog
+            
         12.2.2. 配置审计日志(Audit Logging Configuration)
 
             如果目录正在通过slapd.d运行，
@@ -3435,12 +3452,340 @@ LDAP-RFC
                 -----------------------------------    
                 将此添加到您的 syncrepl 语句下面：
                 -----------------------------------  
-                updateref "ldap://ldapprovider.example.com/"  ？？？？？？
+                updateref "ldap://ldapprovider.example.com/"
                 -----------------------------------    
         12章 余下未看
 
 13. 模式规范(Schema Specification)
-    待看
+    
+    扩展 system schema需要修改源代码
+    system schema 包含了
+        所有的可操作 attribute types  或 
+        任何允许/要求(直接或间接) 可操作attribute的object class
+    
+    13.1. Distributed Schema Files
+
+            Table 8.1: Provided Schema Specifications
+                    表 8.1：提供的 Schema 规范
+        File                                            Description
+        core.schema                         OpenLDAP core (required)
+        cosine.schema             Cosine and Internet X.500 (useful)
+        inetorgperson.schema                  InetOrgPerson (useful)
+        misc.schema                          Assorted (experimental)
+        nis.schema                Network Information Services (FYI)
+        openldap.schema              OpenLDAP Project (experimental)
+
+        /etc/openldap/schema 目录中
+            slapd.conf中 include /xx/xxx.schema
+            slapd.d中    通过ldapmodify/ldapadd加载xxx.schema
+    
+    13.2. Extending Schema
+
+        slapd使用的schema可以扩展为支持其他
+            语法/syntax，匹配规则/machRule，属性类型/AttributeType和对象类/objectClass。
+        本章详细介绍
+            如何使用 slapd 已支持的语法/syntax和匹配规则/machRule
+            来添加用户应用程序属性类型和对象类。
+        
+        slapd也可以扩展为支持其他语法，匹配规则和systemSchema，但这需要进行一些编程，因此这里不再讨论。
+            定义新schema有五个步骤：
+                ● obtain Object Identifier   --获取对象标识                 -->> OID 
+                ● choose a name prefix       --选择名字前缀                 -->> NAME 
+                ● create local schema file   --创建本地模式文件              -->> xx.schema
+                ● define custom attribute types(if necessary)--定义自定义attribute type(如有必要) -->> attribute type
+                ● define custom object class --定义自定义object class -->> object class
+        
+
+        13.2.1. Object Identifiers
+                
+            每个schema elements均由全局唯一的对象标识符（OID）标识。
+            OID 也用于标识其他对象。
+            它们通常在 ASN.1 描述的协议中找到。
+            特别是，它们被简单网络管理协议（SNMP）大量使用。
+            由于OID是分层的，因此您的组织/organization可以获取一个OID并根据需要对其进行分支。
+                
+            例如，如果为您的组织分配了 OID 1.1，则可以按如下所示对树进行分支：
+                Table 8.2: Example OID hierarchy
+                表 8.2：示例 OID 层次结构
+                OID                 Assignment
+                1.1         Organization's OID
+                1.1.1            SNMP Elements
+                1.1.2            LDAP Elements
+                1.1.2.1         AttributeTypes
+                1.1.2.1.1       x-my-Attribute
+                1.1.2.2          ObjectClasses
+                1.1.2.2.1     x-my-ObjectClass
+
+            您可以根据organization的 OID 自由设计适合您organization需求的层次结构。
+            无论选择哪种层次结构，都应维护所做分配的注册表。
+            这可以是一个简单的平面文件，也可以是更复杂的文件,例如OpenLDAP OID
+
+            在任何情况下都不应劫持 OID 名称空间！ 
+        
+            要免费获得注册的 OID，请在 ORG：IANA 维护的私有企业下申请OID
+
+        13.2.2. Naming Elements
+
+            除了为每个 schema element分配唯一的OID之外，
+                您还应该为每个element至少提供一个 文本名称。
+                名称应在 IANA 中注册，或以“x-”开头，以放置在“专用”名称空间中。
+
+            该名称应既具有描述性，又不应与其他 schema element的名称冲突
+
+            示例中，我们使用了短前缀“x-my-”。这样的短前缀仅适用于非常大型的全球性组织。
+                一般而言，我们建议使用类似
+                'x-de-Firm-'（德国公司）或
+                'x-com-Example'（与example.com 相关的组织相关的元素）之类的东西。
+        
+        13.2.3. Local schema file
+
+            使用objectclass 和 attributeTypes指令在目录中的条目上定义 schema 规则。
+            通常创建一个文件来包含您的自定义 schema 项目的定义
+            建议在/etc/openldap/schema/local.schema 中创建一个文件 local.schema,
+                在ldap.conf中包含此schema
+                在include其他schema之后,立即include local.schema
+        
+        13.2.4. Attribute Type Specification
+
+            attributetype指令,用于定义新的attribute type,
+                该指令使用与 subschema子条目中的attributeTypes属性
+                相同的属性类型描述（如 RFC4512 中所定义），例如：
+            
+            其中 attribute Type描述由以下ABNF定义:
+                AttributeTypeDescription = "(" whsp
+                      numericoid whsp              ; AttributeType identifier
+                    [ "NAME" qdescrs ]             ; name used in AttributeType
+                    [ "DESC" qdstring ]            ; description
+                    [ "OBSOLETE" whsp ]
+                    [ "SUP" woid ]                 ; derived from this other
+                                                    ; AttributeType
+                    [ "EQUALITY" woid              ; Matching Rule name
+                    [ "ORDERING" woid              ; Matching Rule name
+                    [ "SUBSTR" woid ]              ; Matching Rule name
+                    [ "SYNTAX" whsp noidlen whsp ] ; Syntax OID
+                    [ "SINGLE-VALUE" whsp ]        ; default multi-valued
+                    [ "COLLECTIVE" whsp ]          ; default not collective
+                    [ "NO-USER-MODIFICATION" whsp ]; default user modifiable
+                    [ "USAGE" whsp AttributeUsage ]; default userApplications
+                    whsp ")"
+
+                AttributeUsage =
+                    "userApplications"     /
+                    "directoryOperation"   /
+                    "distributedOperation" / ; DSA-shared
+                    "dSAOperation"          ; DSA-specific, value depends on server
+
+                其中 
+                    whsp 是一个空格（' '），
+                    numericoid 是点分十进制形式的全局唯一OID（例如 1.1.0），
+                    qdescrs 是一个或多个名称，
+                    woid 是名称或 OID（可选），其后是长度说明符（例如{10}）。
+
+                    numericoid (必须)点分十进制OID
+                    "NAME" 后跟 一个或多个名称
+                    "DESC" 后跟 描述信息/description
+                    "SUP"  后跟 派生/继承自 哪个AttributeType
+                    "EQUALITY" 后跟 进行相等匹配时 使用什么rule
+                    "SUBSTR"   后跟 进行子串匹配时 使用什么rule
+                    "SYNTAX"      后跟 syntax/语法的 OID
+                    SINGLE-VALUE  单值(不写它的话 默认是多值的)
+
+                示例：attribute types name and cn 在core.schema中的定义如下:
+                        attributeType ( 2.5.4.41 NAME 'name'
+                                DESC 'name(s) associated with the object'
+                                EQUALITY caseIgnoreMatch
+                                SUBSTR caseIgnoreSubstringsMatch
+                                SYNTAX 1.3.6.1.4.1.1466.115.121.1.15{32768} )
+                        attributeType ( 2.5.4.3 NAME ( 'cn' 'commonName' )
+                                DESC 'common name(s) associated with the object'
+                                SUP name )
+                    注意，
+                        每个定义了IOD的attribute，
+                            提供了 简短的名称/NAME 和 简短的描述/DESC。
+                            每个名称都是 OID 的别名。
+                            slapd在返回结果时返回第一个列出的名称
+                    第一个'attribute type: name'包含directoryString（UTF-8编码的Unicode）语法的值。
+                    语法由 语法的OID（1.3.6.1.4.1.1466.115.121.1.15标识directoryString 语法）指定。
+                    指定的长度建议为 32768。
+                    服务器应支持此长度的值，但可以支持更长的值。
+                    该字段未指定大小限制，因此在不施加此类大小限制的服务器（例如 slapd）上会被忽略。 
+                    此外，相等和子串匹配使用大小写忽略规则。 
+                    下表列出了常用的语法和匹配规则（slapd（8）支持这些以及更多）。
+
+                                    Table 8.3: Commonly Used Syntaxes
+                                    表 8.3：常用语法
+                    Name	            OID	                            Description
+                    boolean	            1.3.6.1.4.1.1466.115.121.1.7	boolean value
+                    directoryString	    1.3.6.1.4.1.1466.115.121.1.15	Unicode (UTF-8) string
+                    distinguishedName	1.3.6.1.4.1.1466.115.121.1.12	LDAP DN
+                    integer	            1.3.6.1.4.1.1466.115.121.1.27	integer
+                    numericString	    1.3.6.1.4.1.1466.115.121.1.36	numeric string
+                    OID	                1.3.6.1.4.1.1466.115.121.1.38	object identifier
+                    octetString	        1.3.6.1.4.1.1466.115.121.1.40	arbitrary octets
+
+                                        Table 8.4: Commonly Used Matching Rules
+                                        表 8.4：常用匹配规则
+                    Name	                            Type	    Description
+                    booleanMatch	                    equality	boolean
+                    caseIgnoreMatch	                    equality	case insensitive, space insensitive
+                    caseIgnoreOrderingMatch	            ordering	case insensitive, space insensitive
+                    caseIgnoreSubstringsMatch	        substrings	case insensitive, space insensitive
+                    caseExactMatch	                    equality	case sensitive, space insensitive
+                    caseExactOrderingMatch	            ordering	case sensitive, space insensitive
+                    caseExactSubstringsMatch	        substrings	case sensitive, space insensitive
+                    distinguishedNameMatch	            equality	distinguished name
+                    integerMatch	                    equality	integer
+                    integerOrderingMatch	            ordering	integer
+                    numericStringMatch	                equality	numerical/数字
+                    numericStringOrderingMatch	        ordering	numerical
+                    numericStringSubstringsMatch	    substrings	numerical
+                    octetStringMatch	                equality	octet string
+                    octetStringOrderingMatch	        ordering	octet string
+                    octetStringSubstringsMatch          ordering	octet string
+                    objectIdentiferMatch	            equality	object identifier
+
+                    case sensitive      区分大小写
+                    case insensitive    不区分大小写
+                    space sensitive     对空格敏感
+                    space insensitive   对空格不敏感
+
+                第二个'attribute type: cn' 是 name 的子类型，
+                因此它继承了 name 的语法、匹配规则和用法。 
+                commonName是备用名称。
+
+                两种属性均不限于单个值。 
+                两者均供用户应用程序使用。 
+                既不是废弃的/过时的 也不是集体的。
+
+                以下小节提供了几个示例。
+
+
+            13.2.4.1. x-my-UniqueName
+
+                许多组织为每个用户维护一个唯一/unique的名称。
+                    尽管可以使用 displayName（RFC2798），但此属性实际上是由用户/user 而不是组织/organization控制的。
+                    我们可以 从 inetorgperson.schema 复制displayName 的定义，然后替换 OID，name和description，
+                例如：
+                    attributetype ( 1.1.2.1.1 NAME 'x-my-UniqueName'
+                        DESC 'unique name with my organization'
+                        EQUALITY caseIgnoreMatch
+                        SUBSTR caseIgnoreSubstringsMatch
+                        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+                        SINGLE-VALUE )
+                但是，如果我们希望在 名称断言(name assertions) 中使用此 名称/name，
+                    例如 （name = *Jane*），该属性也可以定义为name的子类型，
+                例如：
+                    attributetype ( 1.1.2.1.1 NAME 'x-my-UniqueName'
+                        DESC 'unique name with my organization'
+                        SUP name )
+
+            13.2.4.2. x-my-Photo
+
+                许多组织维护着每个用户的照片。可以定义一个 x-my-Photo 属性类型/attribute type来保存照片。
+                    当然，可以只使用 jpegPhoto（RFC2798）（或子类型）来保存照片。
+                    但是，仅当照片为 JPEG 文件交换格式时才能执行此操作。
+                或者，可以定义使用八进制字符串语法(Octet String syntax)的属性类型，
+                例如：
+                    attributetype ( 1.1.2.1.2 NAME 'x-my-Photo'
+                        DESC 'a photo (application defined format)'
+                        SYNTAX 1.3.6.1.4.1.1466.115.121.1.40          
+                        SINGLE-VALUE )
+                
+                在这种情况下，语法不指定照片的格式。
+                假定（可能不正确）所有访问此属性的应用程序都同意对该值的处理。
+
+                如果你想支持多种照片格式，
+                    则可以为每种格式定义一个单独的属性类型，
+                    在照片前添加一些类型信息，
+                    或者使用ASN.1描述值 并使用binary transfer 选项。
+
+                该属性的另一种选择是保留指向照片的URI。 
+                    您可以在labeledURI（RFC2079）之后对此类属性进行建模，
+                    也可以简单地创建一个子类型，
+                例如：
+                    attributetype ( 1.1.2.1.3 NAME 'x-my-PhotoURI'
+                        DESC 'URI and optional label referring to a photo'
+                        SUP labeledURI )
+
+        13.2.5. Object Class Specification        
+
+            objectclasses 指令用于定义新的object class。 
+            该指令使用
+                与 subschema 子条目中的 objectClasses attribute
+                相同的Object Class Description(如RFC4512中所定义)，例如：
+
+            objectclass <RFC4512 Object Class Description>
+            where Object Class Description is defined by the following ABNF:
+                ObjectClassDescription = "(" whsp
+                    numericoid whsp      ; ObjectClass identifier
+                    [ "NAME" qdescrs ]
+                    [ "DESC" qdstring ]
+                    [ "OBSOLETE" whsp ]
+                    [ "SUP" oids ]       ; Superior ObjectClasses
+                    [ ( "ABSTRACT" / "STRUCTURAL" / "AUXILIARY" ) whsp ]
+                            ; default structural
+                    [ "MUST" oids ]      ; AttributeTypes
+                    [ "MAY" oids ]       ; AttributeTypes
+                    whsp ")"
+            其中whsp是空格（''），
+            numericaloid是点分十进制形式的全局唯一OID（例如1.1.0），
+            qdescrs是一个或多个名称，
+            oid是一个或多个名称和/或OID。
+
+
+
+            13.2.5.1. x-my-PhotoObject
+                
+                定义一个辅助对象类，
+                    以允许将x-my-Photo添加到任何现有的条目
+                objectclass ( 1.1.2.2.1 NAME 'x-my-PhotoObject'
+                    DESC 'mixin x-my-Photo'
+                    AUXILIARY
+                    MAY x-my-Photo )
+            
+            13.2.5.2. x-my-Person
+
+                如果您的organization希望
+                    有一个私有的 结构对象类(structural object class) 来实例化用户，
+                    则可以 子类化/subclass 现有的person classes之一，
+                    例如inetOrgPerson（RFC2798），并添加所需的任何其他属性。
+                objectclass ( 1.1.2.2.2 NAME 'x-my-Person'
+                    DESC 'my person'
+                    SUP inetOrgPerson
+                    MUST ( x-my-UniqueName $ givenName )
+                    MAY x-my-Photo )
+
+                对象类继承了inetOrgPerson的 必需/允许 的属性类型，
+                    但必须要x-my-UniqueName和namedName
+                    并 允许/可选 使用x-my-Photo。
+
+            13.2.6. OID Macros
+            OID宏
+
+                为了简化OIDs的管理和使用，slapd（8）支持对象标识符宏(Object Identifier macros)。 
+                    objectIdentifier指令用于将宏（名称）与OID等同。 
+                OID 可能源自先前定义的 OID宏。 
+                slapd.conf（5）语法为：
+
+
+                objectIdentifier <name> { <oid> | <name>[:<suffix>] }
+                
+                以下内容演示了 一组OID宏 的定义 及其在定义schema elements中的 用法：
+                
+                    objectIdentifier myOID  1.1
+                    objectIdentifier mySNMP myOID:1
+                    objectIdentifier myLDAP myOID:2
+                    objectIdentifier myAttributeType        myLDAP:1
+                    objectIdentifier myObjectClass  myLDAP:2
+                    attributetype ( myAttributeType:3 NAME 'x-my-PhotoURI'
+                        DESC 'URI and optional label referring to a photo'
+                        SUP labeledURI )
+                    objectclass ( myObjectClass:1 NAME 'x-my-PhotoObject'
+                        DESC 'mixin x-my-Photo'
+                        AUXILIARY
+                        MAY x-my-Photo )                
+
+
 
 14. 安全注意事项(Security Considerations) 
     OpenLDAP 软件旨在 在从严格控制的封闭网络 到 全球Internet的 各种计算环境中运行。
