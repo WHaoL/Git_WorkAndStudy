@@ -1,0 +1,350 @@
+
+
+#---------------------------------------------------------------------------------------
+attribute type       属性类型
+object class         对象类
+#---------------------------------------------------------------------------------------
+
+
+Network Working Group                                          M. Smith
+Request for Comments: 2079                      Netscape Communications
+Category: Standards Track                                  January 1997
+
+
+   Definition of an X.500 Attribute Type and an Object Class to Hold
+                  Uniform Resource Identifiers (URIs)
+   X.500 Attribute Type 和 要用于保存URLs的Object Class 的定义
+
+Status of this Memo 
+该备忘录的状态
+
+   This document specifies an Internet standards track protocol for the
+   Internet community, and requests discussion and suggestions for
+   improvements.  Please refer to the current edition of the "Internet
+   Official Protocol Standards" (STD 1) for the standardization state
+   and status of this protocol.  Distribution of this memo is unlimited.
+
+Abstract
+摘要
+
+   Uniform Resource Locators (URLs) are being widely used to specify the
+   location of Internet resources.  There is an urgent need to be able
+   to include URLs in directories that conform to the LDAP and X.500
+   information models, and a desire to include other types of Uniform
+   Resource Identifiers (URIs) as they are defined.  A number of
+   independent groups are already experimenting with the inclusion of
+   URLs in LDAP and X.500 directories.  This document builds on the
+   experimentation to date and defines a new attribute type and an
+   auxiliary object class to allow URIs, including URLs, to be stored in
+   directory entries in a standard way.
+      统一资源定位符（URLs）被广泛用于指定Internet资源的位置。
+      迫切需要在符合LDAP和X.500的目录中包含URL信息模型，并希望包含其他类型的统一定义的资源标识符（URI）。
+      本文档建立在迄今为止的实验，并定义了新的属性类型(attribute type)和辅助对象类(object class)，
+         以允许将包括URL在内的URI存储在目录条目以一种标准方式。
+
+Background and Intended Usage
+背景和可能的应用
+
+   Uniform Resource Locators (URLs) as defined by [1] are the first of
+   several types of Uniform Resource Identifiers (URIs) being defined by
+   the IETF.  URIs are widely used on the Internet, most notably within
+   Hypertext Markup Language [2] documents. This document defines an
+   X.500 [3,4] attribute type called labeledURI and an auxiliary object
+   class called labeledURIObject to hold all types of URIs, including
+   URLs.  These definitions are designed for use in LDAP and X.500
+   directories, and may be used in other contexts as well.
+      URIs在Internet上被广泛使用，尤其是在超文本标记语言文档。
+      本文档定义了X.500 [3,4]
+         属性类型(attribute type)，称为labeledURI
+         和一个辅助对象称为labeledURIObject的类，
+         用于保存所有类型的URIs，包括URLs。
+      这些定义是为在LDAP和X.500中使用而设计的目录，也可以在其他上下文中使用。
+
+总结：
+   本 [rfc2079.txt] 为LDAP/X.500定义了 新的 
+    attribute type 和 object class
+   使得可以在条目中存储URI
+#---------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+Smith                       Standards Track                     [Page 1]
+
+RFC 2079          URI Attribute Type and Object Class       January 1997
+
+
+Schema Definition of the labeledURI Attribute Type
+labeledURI Attribute Type的schema定义
+
+   Name:             labeledURI
+   ShortName:        None
+   Description:      Uniform Resource Identifier with optional label
+   OID:              umichAttributeType.57 (1.3.6.1.4.1.250.1.57)
+   Syntax:           caseExactString
+   SizeRestriction:  None
+   SingleValued:     False
+
+Discussion of the labeledURI Attribute Type
+关于 labeledURI Attribute Type 的讨论
+
+   The labeledURI attribute type has the caseExactString syntax (since
+   URIs are case-sensitive) and it is multivalued.  Values placed in the
+   attribute should consist of a URI (at the present time, a URL)
+   optionally followed by one or more space characters and a label.
+   Since space characters are not allowed to appear un-encoded in URIs,
+   there is no ambiguity about where the label begins.  At the present
+   time, the URI portion must comply with the URL specification [1].
+   Multiple labeledURI values will generally indicate different
+   resources that are all related to the X.500 object, but may indicate
+   different locations for the same resource.
+      labeledURI Attribute Type具有caseExactString语法（自从URIs区分大小写），并且它是多值的。
+      值应包含URI（目前为URL）（可选）后跟一个或多个空格字符和标签。
+      空格字符不允许出现在未编码的URIs中，
+      URI部分必须符合URL规范。
+      多个labeledURI values通常表示与X.500对象有关的不同资源，但也可能是指示同一资源的不同位置。
+
+   The label is used to describe the resource to which the URI points,
+   and is intended as a friendly name fit for human consumption.  This
+   document does not propose any specific syntax for the label part.  In
+   some cases it may be helpful to include in the label some indication
+   of the kind and/or size of the resource referenced by the URI.
+      标签用于描述URI指向的资源，旨在作为适合人类辨识的友好名称。
+      该文档没有为标签部分提出任何特定的语法。
+      在在某些情况下，在标签中包含一些 URI引用资源的类型和/或大小的指示 可能会有所帮助。
+
+   Note that the label may include any characters allowed by the
+   caseExactString syntax, but that the use of non-IA5 (non-ASCII)
+   characters is discouraged as not all directory clients may handle
+   them in the same manner.  If non-IA5 characters are included, they
+   should be represented using the X.500 conventions, not the HTML
+   conventions (e.g., the character that is an "a" with a ring above it
+   should be encoded using the T.61 sequence 0xCA followed by an "a"
+   character; do not use the HTML escape sequence "&aring").
+      请注意，标签中可以包含任何符合caseExactString语法的字符，
+      但non-IA5 (non-ASCII)字符 不鼓励使用，因为并非所有目录客户端都可以以相同的方式处理它们。
+      如果包含non-IA5字符，则它们应该使用X.500约定，而不是使用HTML约定
+      (例如，
+         如果"a"字符 上面带有一个ring，应该使用T.61 secquence 0xCA后跟一个"a"字符进行编码
+         不要使用HTML转义序列 "&aring"
+      )
+
+Examples of labeledURI Attribute Values
+labeledURI Attribute Values的示例
+
+   An example of a labeledURI attribute value that does not include a label:
+   不包含标签的 labeledURI attribute value 的示例：
+
+                   ftp://ds.internic.net/rfc/rfc822.txt
+#---------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+Smith                       Standards Track                     [Page 2]
+
+RFC 2079          URI Attribute Type and Object Class       January 1997
+
+
+   An example of a labeledURI attribute value that contains a tilde
+   character in the URL (special characters in a URL must be encoded as
+   specified by the URL document [1]).  The label is "LDAP Home Page":
+               http://www.umich.edu/%7Ersug/ldap/ LDAP Home Page
+   Another example.  This one includes a hint in the label to help the
+   user realize that the URL points to a photo image.
+               http://champagne.inria.fr/Unites/rennes.gif Rennes [photo]
+      
+      labeledURI attribute value/属性值 的一个示例
+         在URL中包含tilde/波浪号字符(URL中的特殊字符必须按照URL文档中指定的方式编码)
+      示例，标签为"LDAP Home Page":
+                  http://www.umich.edu/%7Ersug/ldap/ LDAP Home Page
+      另一个例子，在标签中包含一个提示，以帮助用户认识/得到 指向照片 的URL。
+         http://champagne.inria.fr/Unites/rennes.gif Rennes [photo]
+
+Schema Definition of the labeledURIObject Object Class
+labeledURIObject Object Class的schema定义
+
+   Name:              labeledURIObject
+   Description:       object that contains the URI attribute type
+   OID:               umichObjectClass.15 (1.3.6.1.4.1.250.3.15)
+   SubclassOf:        top
+   MustContain:
+   MayContain:        labeledURI
+
+Discussion of the labeledURIObject Object Class
+关于labeledURIObject Object Class的讨论
+
+   The labeledURIObject class is a subclass of top and may contain the
+   labeledURI attribute.  The intent is that this object class can be
+   added to existing directory objects to allow for inclusion of URI
+   values.  This approach does not preclude including the labeledURI
+   attribute type directly in other object classes as appropriate.
+      labeledURIObject class是top的subcalss/子类，并且可能包含labeledURI attribue。
+            目的是可以将labeledURIObject object class添加到现有目录对象中，以允许包含URI值。
+            但是，同样允许在适当的情况下直接在其他object class中包含labeledURI attribute type 。
+
+Security Considerations
+安全注意事项
+
+   Security considerations are not discussed in this memo, except to
+   note that blindly inserting the label portion of a labeledURI
+   attribute value into an HTML document is not recommended, as this may
+   allow a malicious individual to include HTML tags in the label that
+   mislead viewers of the entire document in which the labeledURI value
+   was inserted.
+      注意：
+         不要盲目地将labeledURI attribute value的label部分盲目的插入HTML中，
+         因为者可能使得 恶意人员 在label中包含HTML tags，从而误导浏览者
+
+Acknowledgments
+致谢
+
+   Paul-Andre Pays, Martijn Koster, Tim Howes, Rakesh Patel, Russ
+   Wright, and Hallvard Furuseth provided invaluable assistance in the
+   creation of this document.
+
+   This material is based in part upon work supported by the National
+   Science Foundation under Grant No. NCR-9416667.
+#---------------------------------------------------------------------------------------
+
+
+
+
+
+Smith                       Standards Track                     [Page 3]
+
+RFC 2079          URI Attribute Type and Object Class       January 1997
+
+
+Appendix:  The labeledURL Attribute Type (Deprecated)
+附录：labeledURL Attribute Type（不建议使用） 
+
+   An earlier draft of this document defined an additional attribute
+   type called labeledURL.  This attribute type is deprecated, and
+   should not be used when adding new values to directory entries.  The
+   original motivation for including a separate attribute type to hold
+   URLs was that this would better enable efficient progammatic access
+   to specific types of URIs.  After some deliberation, the IETF-ASID
+   working group concluded that it was better to simply have one
+   attribute than two.
+      本文档的早期草案定义了附加attribute type称为labelledURL。
+         不推荐使用此属性类型，
+         并且向目录条目添加新值时不应使用。
+      设计此URL的原始动机：
+         更好的实现对特定类型URI的有效访问
+      经过深思熟虑后，IETF-ASID工作组得出的结论是，
+         废弃labelledURL。
+
+
+   The schema definition for labeledURL is included here for historical
+   reference only.  Directory client software may want to support this
+   schema definition (in addition to labeledURI) to ease the transition
+   away from labeledURL for those sites that are using it.
+      这里提供了labelledURL的schema定义，仅供历史参考。
+      目录客户端软件可能希望支持此schema定义（除了labeledURI之外），以简化使用它的那些站点从labelledURL的过渡。
+
+   Name:             labeledURL
+   ShortName:        None
+   Description:      Uniform Resource Locator with optional label
+   OID:              umichAttributeType.41 (1.3.6.1.4.1.250.1.41)
+   Syntax:           caseExactString
+   SizeRestriction:  None
+   SingleValued:     False
+   OID:              umichAttributeType.41 (1.3.6.1.4.1.250.1.41)
+
+References
+参考
+
+   [1] Berners-Lee, T., Masinter, L., and M. McCahill, "Uniform
+   Resource Locators (URL)", RFC 1738, CERN, Xerox Corporation,
+   University of Minnesota, December 1994.
+   <URL:ftp://ds.internic.net/rfc/rfc1738.txt>
+
+   [2] Berners-Lee, T., and D. Connolly, "Hypertext Markup Language -
+   2.0", RFC 1866, <URL:ftp://ds.internic.net/rfc/rfc1866.txt>
+
+   [3] The Directory: Overview of Concepts, Models and Service.  CCITT
+   Recommendation X.500, 1988.
+
+   [4] Information Processing Systems -- Open Systems Interconnection --
+   The Directory: Overview of Concepts, Models and Service.  ISO/IEC JTC
+   1/SC21; International Standard 9594-1, 1988.
+#---------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+Smith                       Standards Track                     [Page 4]
+
+RFC 2079          URI Attribute Type and Object Class       January 1997
+
+
+Author's Address
+
+   Mark Smith
+   Netscape Communications Corp.
+   501 E. Middlefield Rd.
+   Mountain View, CA 94043, USA
+
+   Phone:  +1 415 937-3477
+   EMail:  mcs@netscape.com
+#---------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Smith                       Standards Track                     [Page 5]
+
