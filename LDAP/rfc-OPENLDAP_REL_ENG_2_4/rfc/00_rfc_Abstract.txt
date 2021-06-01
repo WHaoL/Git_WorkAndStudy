@@ -119,6 +119,15 @@ RFC 2247              Using Domains in LDAP/X.500           January 1998
 rfc2293.txt Tables and Subtrees in the X.500 Directory (PS)
 RFC 2293            Table and Subtrees in the X.500           March 1998
 
+tableEntry 如何定义 树根和树上的信息
+subtree    如何定义 树根和树上的信息
+
+
+#---------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------
+      Lightweight Directory Access Protocol (LDAP): The Protocol
+RFC 4511                         LDAPv3                        June 2006
+
 
 
 

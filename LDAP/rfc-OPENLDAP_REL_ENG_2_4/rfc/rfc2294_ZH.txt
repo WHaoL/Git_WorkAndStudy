@@ -12,6 +12,7 @@ Category: Standards Track
 
              Representing the O/R Address hierarchy in the
                     X.500 Directory Information Tree
+            在 X.500目录信息树/DIT 中表示 O/R地址层次结构
 
 Status of this Memo
 
@@ -30,14 +31,18 @@ Abstract
    This document defines a representation of the O/R Address hierarchy
    in the Directory Information Tree [6, 1].  This is useful for a range
    of purposes, including:
+        本文档定义了目录信息树/DIT中 O/R地址层次结构 的表示。 
+        这可用于多种用途，包括：
 
     o  Support for MHS Routing [4].
+            支持 MHS路由。
 
     o  Support for X.400/RFC 822 address mappings [2, 5].
+            支持 X.400/RFC 822地址映射[2，5]。
 
    Please send comments to the author or to the discussion group <mhs-
    ds@mercury.udev.cdc.com>.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -75,6 +80,7 @@ RFC 2294               Directory Information Tree             March 1998
                  mHSDomainDefinedAttribute  O
 
          Table 1:  Order of O/R Address Directory Components
+            表 1：O/R地址目录组件的顺序
 
 1  The O/R Address Hierarchy
 
@@ -88,7 +94,14 @@ RFC 2294               Directory Information Tree             March 1998
    always be higher in the DIT than an object class defined lower down
    the table.  Valid combinations of O/R Address components are defined
    in X.400.
-
+        通过将 目录名称组件 与 O/R地址组件 相关联，
+            将 O/R地址层次结构在X.500目录中表示。 
+        图 1 中给出了一个示例。
+        图 2 中定义了支持这种表示所需的对象类(object classes)和属性(attributes)。
+        表 1 中指定了schema，它定义了在目录信息树中表示这些对象的层次结构。 
+            表中定义的给定对象类在DIT中始终高于表中定义的较低对象类。 
+        X.400中定义了O/R地址组件的有效组合。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -158,7 +171,8 @@ RFC 2294               Directory Information Tree             March 1998
 
 
                     Figure 1:  Example O/R Address Tree
-
+                    图 1：O/R 地址树示例
+#---------------------------------------------------------------------------------------
 
 
 
@@ -218,7 +232,7 @@ mHSOrganization OBJECT-CLASS ::= {
     SUBCLASS OF {top}
     MUST CONTAIN {mHSOrganizationName }
     ID oc-mhs-organization}
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -275,7 +289,7 @@ mHSNamedObject OBJECT-CLASS ::= {
     SUBCLASS OF {top}
     MUST CONTAIN {mHSCommonName}
     ID oc-mhs-named-object}
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -328,7 +342,7 @@ mHSTerminalIDName ATTRIBUTE ::= {
     SUBTYPE OF name
     WITH SYNTAX DirectoryString {ub-terminal-id-length}
     ID at-mhs-terminal-id-name}                                    140
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -351,43 +365,61 @@ mHSNumericeUserIdentifierName ATTRIBUTE ::= {
     ID at-mhs-numeric-user-id-name}
 
                     Figure 2:  O/R Address Hierarchy
+                    图 2：O/R 地址层次结构（各个组件(objectClass/attributes)的定义）
 
    The hierarchy is defined so that:
+        层次结构被定义为：
 
    1.  The representation is defined so that it is straightforward to
        make a mechanical transformation in either direction.  This
        requires that each node is named by an attribute whose type can
        determine the mapping.
+            该(层次结构的表示)表示被定义为可以直接在任一方向上进行机械变换。 
+                这要求每个节点都由一个属性命名(named by an attribute)，
+                该属性的类型可以确定映射。
 
    2.  Where there are multiple domain defined attributes, the first
        in the sequence is the most significant.
+            在有多个域定义属性的情况下，序列中的第一个属性最重要。
 
    3.  Physical Delivery (postal) addresses are not represented in
        this hierarchy.  This is primarily because physical delivery can
        be handled by the Access Unit routing mechanisms defined in [4],
        and there is no need for this representation.
+            物理交付（邮政）地址未在此层次结构中表示。 
+            这主要是因为物理交付可以由[4]中定义的 访问单元路由机制 处理，并且不需要这种表示。
 
    4.  Terminal and network forms of address are not handled, except
        for X.121 form, which is useful for addressing faxes.
+            不处理终端和网络形式的地址，但 X.121 形式除外，这对于寻址传真很有用。
 
    5.  MHSCountry is defined as a subclass of Country, and so the
        same entry will be used for MHS Routing as for the rest of the
        DIT.
+            MHSCountry被定义为Country的子类，因此与DIT的其余部分一样，该条目将用于MHS路由。
 
    6.  The numeric country code will be an alias.
+            国家数字编码(The numeric country code) 将会是一个别名
 
    7.  ADMD will always be present in the hierarchy.  This is true
        in the case of " " and of "0".  This facilitates an easy
        mechanical transformation between the two forms of address.
+            ADMD 将始终存在于层次结构中。 
+            在" "和"0"的情况下也是如此。 
+            这促进了两种地址形式之间的简单机械转换。
 
    8.  Each node is named by the relevant part of the O/R Address.
+            每个节点都由 O/R 地址的相关部分命名。
 
    9.  Aliases may be used in other parts of the tree, in order to
        normalize alternate values.  Where an alias is used, the value of
        the alias should be present as an alternate value in the node
        aliased to.  Aliases may not be used for domain defined
        attributes.
-
+            可以在树的其他部分使用别名，以便规范化替代值。 
+            在使用别名的情况下，别名的值应作为别名的节点中的替代值出现。 
+            别名不能用于域定义属性。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -399,6 +431,8 @@ RFC 2294               Directory Information Tree             March 1998
    10. Domain Defined Attributes are named by a multi-valued RDN
        (Relative Distinguished Name), consisting of the type and value.
        This is done so that standard attribute syntaxes can be used.
+            域定义属性 由多个RDN（Relative Distinguished Name）命名，由类型和值组成。 
+            这样做是为了可以使用标准的属性语法。
 
    11. Where an O/R Address has a valid Printable String and T.61 form,
        both must be present, with one as an alias for the other.  This
@@ -406,22 +440,33 @@ RFC 2294               Directory Information Tree             March 1998
        the variant used.  When both are present in an O/R Address being
        looked up, either may be used to construct the distinguished
        name.
+            如果O/R地址具有有效的可打印字符串和T.61格式，则两者都必须存在，其中一个作为另一个的别名。 
+            这样可以直接查找名称，而与使用的变体无关。 
+            当两者都出现在正在查找的O/R地址中时，可以使用其中一个来构造DN。
 
    12. Personal name is handled by use of the mHSPerson object class.
        Each of the components of the personal name will be present in
        the relative distinguished name, which will usually be multi-
        valued.
+            个人名称是通过使用 mHSPerson 对象类来处理的。 
+            个人名称的每个组成部分都将出现在RDN中，该名称通常是多值的。
 
    The relationship between X.400 O/R Addresses and the X.400 Entries
    (Attribute Type and Object Class) are given in Table 2.  Where there
    are multiple Organizational Units or Domain Defined Attributes, each
    component is mapped onto a single X.500 entry.
+        X.400 O/R地址 和 X.400条目（属性类型和对象类）之间的关系在表 2 中给出。
+        如果有多个组织单元或域定义属性，每个组件都映射到单个X.500条目。
 
    Note: When an X.121 address is used for addressing fax transmission,
        this may only be done relative to the PRMD or ADMD. This is in
        line with the current X.400 standards position.  This means that
        it is not possible to use this form of addressing for an
        organizational or departmental fax gateway service.
+            注意：
+                当 X.121地址 用于 寻址传真传输 时，这只能相对于 PRMD 或 ADMD 进行。 
+                这符合当前 X.400 标准的立场。 
+                这意味着不能将这种寻址形式用于组织或部门传真网关服务。
 
 O/R Address  Object Class               Naming Attribute
 -----------  ------------               ----------------
@@ -444,7 +489,8 @@ DDA          mHSDomainDefinedAttribute  mHSDomainDefinedAttributeType
 
 
           Table 2:  O/R Address relationship to Directory Name
-
+          表 2：O/R 地址与目录名称的关系
+#---------------------------------------------------------------------------------------
 
 
 Kille                       Standards Track                     [Page 8]
@@ -458,8 +504,12 @@ RFC 2294               Directory Information Tree             March 1998
    Distinguished Names use the string representation of distinguished
    names defined in [3].  The keywords used for the attributes defined
    in this specification are given in Table 3.
+        O/R地址 以标准X.400表示法编写。 
+        DN使用 [3] 中定义的专有名称的字符串表示。 
+        用于本规范中定义的属性的关键字在表 3 中给出。
 
 3  Example Representation
+    示例表示
 
    The O/R Address:
 
@@ -468,6 +518,7 @@ RFC 2294               Directory Information Tree             March 1998
 
 
    would be represented in the directory as:
+    将在目录中表示为：
 
    MHS-I=S + MHS-S=Kille, MHS-OU=CS, MHS-O=UCL,
 
@@ -491,16 +542,20 @@ RFC 2294               Directory Information Tree             March 1998
             mHSNumericeUserIdentifierName   MHS-UA-ID
 
               Table 3:  Keywords for String DN Representation
+              表 3：字符串 DN 表示的关键字
 
 
    PRMD=UK.AC, ADMD=Gold 400, C=GB
 
 4  Mapping from O/R Address to Directory Name
+    从 O/R 地址到目录名称的映射
 
    The primary application of this mapping is to take an X.400 encoded
    O/R Address and to generate an equivalent directory name.  This
    mapping is only used for selected types of O/R Address:
-
+        此映射的主要应用是采用 X.400编码的O/R地址 并生成等效的目录名称。 
+        此映射仅用于选定类型的 O/R地址：
+#---------------------------------------------------------------------------------------
 
 
 Kille                       Standards Track                     [Page 9]
@@ -509,11 +564,14 @@ RFC 2294               Directory Information Tree             March 1998
 
 
     o  Mnemonic form
+        助记符形式
 
     o  Numeric form
+        数字形式
 
     o  Terminal form, where country is present and X121 addressing
        is used
+        终端形式，其中存在国家/地区并使用 X121寻址
 
    Other forms of O/R address are handled by Access Unit mechanisms.
    The O/R Address is treated as an ordered list, with the order as
@@ -523,19 +581,34 @@ RFC 2294               Directory Information Tree             March 1998
    appropriate.  Where both forms are present in the O/R Address, either
    form may be used to generate the distinguished name.  Both will be
    represented in the DIT. There are two special cases:
+        其他形式的 O/R地址 由 访问单元机制 处理。 
+        O/R地址 被视为一个有序列表，其顺序如表 1 中所定义。
+        对于每个 O/R地址属性，生成等效的 目录命名属性。 
+        在大多数情况下，映射是机械的。 
+        根据需要选择可打印字符串或 Teletex 编码。 
+        如果 O/R地址中存在两种形式，则可以使用任一形式来生成DN。 
+        两者都将在 DIT 中表示。 
+        有两种特殊情况：
 
    1.  A DDA generates a multi-valued RDN
+        一个 DDA 生成多个RDN
 
    2.  The Personal Name is mapped to a multi-valued RDN
+        个人名称映射到多个RDN
 
    In many cases, an O/R Address will be provided, and only the higher
    components of the address will be represented in the DIT. In this
    case, the "longest possible match" should be returned.
+        在许多情况下，将提供 O/R地址，并且只有地址的较高部分才会在 DIT 中表示。 
+        在这种情况下，应返回“最长可能匹配”。
 
 5  Mapping from Directory Name to O/R Address
+        从目录名称到 O/R 地址的映射
 
    The reverse mapping is also needed in some cases.  All of the naming
    attributes are unique, so the mapping is mechanically reversible.
+        在某些情况下，还需要反向映射。 
+        所有命名属性都是唯一的，因此映射在机械上是可逆的。
 
 6  Acknowledgments
 
@@ -554,7 +627,7 @@ References
 
    [4] Kille, S., "Use of an X.500/LDAP directory to support MIXER address
        mapping", RFC 2164, January 1998.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -589,7 +662,7 @@ RFC 2294               Directory Information Tree             March 1998
    EMail:  S.Kille@ISODE.COM
 
    X.400:  I=S; S=Kille; P=ISODE; A=Mailnet; C=FI;
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -621,6 +694,7 @@ RFC 2294               Directory Information Tree             March 1998
 
 
 A  Object Identifier Assignment
+    对象标识符分配
 
 mhs-ds OBJECT IDENTIFIER ::= {iso(1) org(3) dod(6) internet(1) private(4)
           enterprises(1) isode-consortium (453) mhs-ds (7)}
@@ -660,7 +734,7 @@ at-mhs-initials OBJECT IDENTIFIER ::= {at 17}
 at-mhs-generation-qualifier OBJECT IDENTIFIER ::= {at 18}
 
                 Figure 3:  Object Identifier Assignment
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -703,7 +777,7 @@ Full Copyright Statement
    BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
    HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
    MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -729,3 +803,4 @@ Full Copyright Statement
 
 Kille                       Standards Track                    [Page 13]
 
+#---------------------------------------------------------------------------------------

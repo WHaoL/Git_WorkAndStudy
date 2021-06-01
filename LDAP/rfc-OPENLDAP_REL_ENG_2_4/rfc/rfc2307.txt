@@ -10,6 +10,7 @@ Category: Experimental                                        March 1998
 
 
       An Approach for Using LDAP as a Network Information Service
+        使用LDAP作为网络信息服务的方法 
 
 Status of this Memo
 
@@ -30,6 +31,9 @@ Abstract
    Access Protocol [RFC2251]. A set of attribute types and object
    classes are proposed, along with specific guidelines for interpreting
    them.
+        本文档描述了一种将 与 TCP/IP 和 UNIX系统相关的实体 映射到 X.500[X500]条目 的实验机制，
+            以便它们可以通过轻量级目录访问协议 [RFC2251] 进行解析。 
+        提出了一组属性类型和对象类，以及解释它们的具体指南。
 
    The intention is to assist the deployment of LDAP as an
    organizational nameservice. No proposed solutions are intended as
@@ -37,6 +41,10 @@ Abstract
    consensus will emerge as to the appropriate solution to such
    problems, leading eventually to the adoption of standards. The
    proposed mechanism has already been implemented with some success.
+        目的是帮助将 LDAP 部署为 一个组织名称服务(an organizational nameservice)。 
+        没有提议的解决方案旨在作为Internet的标准。 
+        相反，希望就此类问题的适当解决方案达成普遍共识，最终通过标准。 
+        提议的机制已经实施并取得了一些成功。
 
 1. Background and Motivation
 
@@ -47,12 +55,15 @@ Abstract
    operating systems that support TCP/IP may provide some means of
    resolving some of these entities. This schema is applicable to those
    environments also.)
+        UNIX (R) 操作系统及其派生系统（特别是那些支持 TCP/IP 并符合 X/Open Single UNIX 规范 [XOPEN] 的操作系统）
+            需要一种查找 实体(entities) 的方法，通过将实体与搜索条件进行匹配或通过枚举。 
+        （支持 TCP/IP 的其他操作系统可能会提供一些方法来解析其中一些实体。此模式也适用于这些环境。）
 
    These entities include users, groups, IP services (which map names to
    IP ports and protocols, and vice versa), IP protocols (which map
    names to IP protocol numbers and vice versa), RPCs (which map names
    to ONC Remote Procedure Call [RFC1057] numbers and vice versa), NIS
-
+#---------------------------------------------------------------------------------------
 
 
 Howard                        Experimental                      [Page 1]
@@ -63,6 +74,11 @@ RFC 2307      Using LDAP as a Network Information Service     March 1998
    netgroups, booting information (boot parameters and MAC address
    mappings), filesystem mounts, IP hosts and networks, and RFC822 mail
    aliases.
+        这些实体包括用户、组、IP服务（将名称映射到 IP 端口和协议，反之亦然）、
+        IP 协议（将名称映射到 IP协议编号，反之亦然）、
+        RPC（将名称映射到 ONC远程过程调用 [ RFC1057] 编号，反之亦然）、
+        NIS 网络组、引导信息（引导参数和 MAC 地址映射）、
+        文件系统挂载、IP 主机和网络以及 RFC822 邮件别名。
 
    Resolution requests are made through a set of C functions, provided
    in the UNIX system's C library. For example, the UNIX system utility
@@ -77,6 +93,14 @@ RFC 2307      Using LDAP as a Network Information Service     March 1998
    services and networks.) Both these nameservices have the advantage of
    being distributed and thus permitting a common set of entities to be
    shared amongst many clients.
+        解析请求 是通过 UNIX系统C库提供的一组C函数发出的。 
+            例如，枚举文件系统目录内容的UNIX系统实用程序“ ls”
+                使用C库函数getpwuid()以将用户ID映射到登录名。 
+            发出请求后，将使用客户端库支持的“名称服务”来解决该请求。 
+        最简单的名称服务,可能是本地文件系统中 由C库打开和搜索的文件的集合。 
+        其他常见的名称服务包括 网络信息服务 (NIS) 和 域名系统 (DNS)。 
+        （后者通常用于解析主机、服务和网络。）
+        这两种名称服务都具有分布式优势，因此允许在许多客户端之间共享一组公共实体。
 
    LDAP is a distributed, hierarchical directory service access protocol
    which is used to access repositories of users and other network-
@@ -88,10 +112,17 @@ RFC 2307      Using LDAP as a Network Information Service     March 1998
    scalability of LDAP can be exploited. (By comparison, NIS services
    based on flat files do not have the scalability or extensibility of
    LDAP or X.500.)
+        LDAP是一种分布式分层目录服务访问协议，
+            用于访问用户和其他网络相关实体的存储库。 
+        由于 LDAP 通常没有与主机操作系统紧密集成，
+            因此用户等信息可能需要同时保存在 LDAP 和操作系统支持的名称服务（如 NIS）中。 
+        通过使用 LDAP 作为解决这些实体的主要方法，这些冗余问题被最小化，并且可以利用 LDAP 的可伸缩性。 
+        （相比之下，基于平面文件的 NIS 服务没有 LDAP 或 X.500 的可伸缩性或可扩展性。）
 
    The object classes and attributes defined below are suitable for
    representing the aforementioned entities in a form compatible with
    LDAP and X.500 directory services.
+        下面定义的对象类和属性 适用于 以与LDAP和X.500目录服务兼容的形式 表示上述实体。
 
 2. General Issues
 
@@ -99,13 +130,19 @@ RFC 2307      Using LDAP as a Network Information Service     March 1998
 
    The key words "MUST", "SHOULD", and "MAY" used in this document are
    to be interpreted as described in [RFC2119].
+        本文档中使用的关键字"MUST"，"SHOULD",和 "MAY"，将按照[RFC2119]中的说明进行解释。
 
    For the purposes of this document, the term "nameservice" refers to a
    service, such as NIS or flat files, that is used by the operating
    system to resolve entities within a single, local naming context.
    Contrast this with a "directory service" such as LDAP, which supports
    extensible schema and multiple naming contexts.
-
+        就本文档而言，术语"nameservice"是指一种服务，
+            例如 NIS 或平面文件，
+            操作系统使用它来解析单个本地命名上下文中的实体。 
+        将此与"directory service"（例如 LDAP）形成对比，
+            后者支持可扩展模式/schema和多个命名上下文。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -123,6 +160,11 @@ RFC 2307      Using LDAP as a Network Information Service     March 1998
    particular, the host and network classes are generically applicable,
    and may be implemented on any system that wishes to use LDAP or X.500
    for host and network resolution.
+        术语 "NIS-related entities"(NIS相关实体) 泛指 
+            通常使用 网络信息服务(Information Service) 解析的实体。(NIS 以前称为 YP)
+        部署 LDAP 来解析这些实体 并不意味着NIS可以用作网关或其他方式。 
+            特别是，主机和网络类是普遍适用的，
+            并且可以在 希望使用LDAP或X.500进行主机和网络解析的任何系统上实现。
 
    The "DUA" (directory user agent) refers to the LDAP client querying
    these entities, such as an LDAP to NIS gateway or the C library.  The
@@ -131,17 +173,28 @@ RFC 2307      Using LDAP as a Network Information Service     March 1998
    DUA and the client reside within the same address space. The act of
    the DUA making this information to the client is termed
    "republishing".
+        "DUA"（目录用户代理）是指查询这些实体的 LDAP客户端/client，
+            例如 LDAP 到 NIS网关或C库。 
+        "client"是指最终使用解析返回的信息的应用程序。 
+        DUA和client 是否位于同一地址空间中无关紧要。 
+        DUA将此信息提供给client的行为称为"republishing"(重新发布)。
 
    To avoid confusion, the term "login name" refers to the user's login
    name (being the value of the uid attribute) and the term "user ID"
    refers to he user's integer identification number (being the value of
    the uidNumber attribute).
+        为避免混淆，
+            术语"login name"指的是用户的登录名（即 uid/CN 属性的值），
+            而术语"user ID"指的是用户的整数标识号（即 uidNumber 属性的值）。
 
    The phrases "resolving an entity" and "resolution of entities" refer
    respectively to enumerating NIS-related entities of a given type, and
    matching them against a given search criterion. One or more entities
    are returned as a result of successful "resolutions" (a "match"
    operation will only return one entity).
+        短语“解析实体”和“实体解析”分别是指 枚举给定类型的 NIS相关实体，
+            并将它们与给定的搜索标准进行匹配。 
+        “解析”成功后会返回一个或多个实体（“匹配”操作将只返回一个实体）。
 
    The use of the term UNIX does not confer upon this schema the
    endorsement of owners of the UNIX trademark. Where necessary, the
@@ -164,7 +217,7 @@ RFC 2307      Using LDAP as a Network Information Service     March 1998
            gidNumber
            gecos
            homeDirectory
-
+#---------------------------------------------------------------------------------------
 
 
 Howard                        Experimental                      [Page 3]
@@ -1098,7 +1151,7 @@ RFC 2307      Using LDAP as a Network Information Service     March 1998
            nisMapEntry: Nightfly$4
 
    This entry represents the NIS map tracks, and a single map entry.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -1151,7 +1204,7 @@ Full Copyright Statement
    BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
    HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
    MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -1177,3 +1230,4 @@ Full Copyright Statement
 
 Howard                        Experimental                     [Page 21]
 
+#---------------------------------------------------------------------------------------

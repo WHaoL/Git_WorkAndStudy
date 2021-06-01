@@ -1,0 +1,15 @@
+
+
+RFC2229[被RFC8174更新]
+https://www.rfc-editor.org/rfc/rfc2119.txt
+Key words for use in RFCs to Indicate Requirement Levels, MARCH 1997
+    定义了
+        MUST/REQUIRED/SHALL 必须包含
+        MUST NOT/SHALL NOT  绝对禁止
+        SHOULD/RECOMMENDED
+        SHOULD NOT/NOT RECOMMENDED
+        MAY/OPTIONAL
+ 
+
+RFC8174
+https://www.rfc-editor.org/rfc/rfc8174.txt 

@@ -11,6 +11,7 @@ Category: Standards Track
 
 
       Lightweight Directory Access Protocol (LDAP): The Protocol
+      轻量级目录访问协议(LDAP): 协议
 
 Status of This Memo
 
@@ -32,6 +33,9 @@ Abstract
    act in accordance with X.500 data and service models.  These protocol
    elements are based on those described in the X.500 Directory Access
    Protocol (DAP).
+      本文档描述了轻量级目录访问协议(LDAP)的 协议元素及其语义和编码。 
+      LDAP 提供对 按照X.500数据和服务模型 运行的分布式目录服务 的访问。 
+      这些协议元素 基于X.500目录访问协议 (DAP) 中描述的那些元素。
 
 Table of Contents
 
@@ -39,20 +43,20 @@ Table of Contents
       1.1. Relationship to Other LDAP Specifications ..................3
    2. Conventions .....................................................3
    3. Protocol Model ..................................................4
-      3.1. Operation and LDAP Message Layer Relationship ..............5
+      3.1. Operation and LDAP Message Layer Relationship ..............5 操作和LDAP消息层 的关系
    4. Elements of Protocol ............................................5
       4.1. Common Elements ............................................5
-           4.1.1. Message Envelope ....................................6
-           4.1.2. String Types ........................................7
-           4.1.3. Distinguished Name and Relative Distinguished Name ..8
-           4.1.4. Attribute Descriptions ..............................8
-           4.1.5. Attribute Value .....................................8
-           4.1.6. Attribute Value Assertion ...........................9
-           4.1.7. Attribute and PartialAttribute ......................9
-           4.1.8. Matching Rule Identifier ...........................10
-           4.1.9. Result Message .....................................10
-           4.1.10. Referral ..........................................12
-
+           4.1.1. Message Envelope ....................................6 消息/信息封装
+           4.1.2. String Types ........................................7 字符串类型
+           4.1.3. Distinguished Name and Relative Distinguished Name ..8 DN和RDN
+           4.1.4. Attribute Descriptions ..............................8 属性描述
+           4.1.5. Attribute Value .....................................8 属性值
+           4.1.6. Attribute Value Assertion ...........................9 属性值断言
+           4.1.7. Attribute and PartialAttribute ......................9 属性和部分属性
+           4.1.8. Matching Rule Identifier ...........................10 匹配规则标识符
+           4.1.9. Result Message .....................................10 结果信息
+           4.1.10. Referral ..........................................12 引用/转介
+#---------------------------------------------------------------------------------------
 
 
 Sermersheim                 Standards Track                     [Page 1]
@@ -60,50 +64,50 @@ Sermersheim                 Standards Track                     [Page 1]
 RFC 4511                         LDAPv3                        June 2006
 
 
-           4.1.11. Controls ..........................................14
-      4.2. Bind Operation ............................................16
-           4.2.1. Processing of the Bind Request .....................17
-           4.2.2. Bind Response ......................................18
-      4.3. Unbind Operation ..........................................18
-      4.4. Unsolicited Notification ..................................19
-           4.4.1. Notice of Disconnection ............................19
-      4.5. Search Operation ..........................................20
-           4.5.1. Search Request .....................................20
-           4.5.2. Search Result ......................................27
-           4.5.3. Continuation References in the Search Result .......28
-      4.6. Modify Operation ..........................................31
-      4.7. Add Operation .............................................33
-      4.8. Delete Operation ..........................................34
-      4.9. Modify DN Operation .......................................34
-      4.10. Compare Operation ........................................36
-      4.11. Abandon Operation ........................................36
-      4.12. Extended Operation .......................................37
-      4.13. IntermediateResponse Message .............................39
-           4.13.1. Usage with LDAP ExtendedRequest and
-                   ExtendedResponse ..................................40
-           4.13.2. Usage with LDAP Request Controls ..................40
-      4.14. StartTLS Operation .......................................40
-           4.14.1. StartTLS Request ..................................40
-           4.14.2. StartTLS Response .................................41
-           4.14.3. Removal of the TLS Layer ..........................41
-   5. Protocol Encoding, Connection, and Transfer ....................42
-      5.1. Protocol Encoding .........................................42
-      5.2. Transmission Control Protocol (TCP) .......................43
-      5.3. Termination of the LDAP session ...........................43
-   6. Security Considerations ........................................43
-   7. Acknowledgements ...............................................45
-   8. Normative References ...........................................46
-   9. Informative References .........................................48
-   10. IANA Considerations ...........................................48
-   Appendix A. LDAP Result Codes .....................................49
-      A.1. Non-Error Result Codes ....................................49
-      A.2. Result Codes ..............................................49
-   Appendix B. Complete ASN.1 Definition .............................54
-   Appendix C. Changes ...............................................60
-      C.1. Changes Made to RFC 2251 ..................................60
+           4.1.11. Controls ..........................................14 控件
+      4.2. Bind Operation ............................................16 绑定操作
+           4.2.1. Processing of the Bind Request .....................17 对绑定请求的处理
+           4.2.2. Bind Response ......................................18 绑定响应
+      4.3. Unbind Operation ..........................................18 解绑操作
+      4.4. Unsolicited Notification ..................................19 主动通知
+           4.4.1. Notice of Disconnection ............................19 断开通知
+      4.5. Search Operation ..........................................20 搜索操作
+           4.5.1. Search Request .....................................20 搜索请求
+           4.5.2. Search Result ......................................27 搜索结果
+           4.5.3. Continuation References in the Search Result .......28 搜索结果中的继续引用
+      4.6. Modify Operation ..........................................31 修改操作
+      4.7. Add Operation .............................................33 添加操作
+      4.8. Delete Operation ..........................................34 删除操作
+      4.9. Modify DN Operation .......................................34 修改DN的操作
+      4.10. Compare Operation ........................................36 比较操作
+      4.11. Abandon Operation ........................................36 放弃/丢弃操作
+      4.12. Extended Operation .......................................37 扩展操作
+      4.13. IntermediateResponse Message .............................39 中间响应消息
+           4.13.1. Usage with LDAP ExtendedRequest and                   与LDAP的  
+                   ExtendedResponse ..................................40     扩展请求/ExtendedRequest 和 扩展响应/ExtendedResponse 一起使用
+           4.13.2. Usage with LDAP Request Controls ..................40 与LDAP的 控制请求/Request Controls 一起使用
+      4.14. StartTLS Operation .......................................40 StartTLS操作
+           4.14.1. StartTLS Request ..................................40 StartTLS请求
+           4.14.2. StartTLS Response .................................41 StartTLS响应
+           4.14.3. Removal of the TLS Layer ..........................41 删除TLS层
+   5. Protocol Encoding, Connection, and Transfer ....................42 协议的编码，连接和传输
+      5.1. Protocol Encoding .........................................42 协议的编码
+      5.2. Transmission Control Protocol (TCP) .......................43 传输控制协议/TCP 
+      5.3. Termination of the LDAP session ...........................43 LDAP会话的终止
+   6. Security Considerations ........................................43 安全注意事项
+   7. Acknowledgements ...............................................45 致谢
+   8. Normative References ...........................................46 规范性引用
+   9. Informative References .........................................48 参考文献
+   10. IANA Considerations ...........................................48 
+   Appendix A. LDAP Result Codes .....................................49 LDAP返回码
+      A.1. Non-Error Result Codes ....................................49 非错误的 返回码
+      A.2. Result Codes ..............................................49 返回码
+   Appendix B. Complete ASN.1 Definition .............................54 完整的ASN.1定义
+   Appendix C. Changes ...............................................60 变化
+      C.1. Changes Made to RFC 2251 ..................................60 对RFC2251所做的更改
       C.2. Changes Made to RFC 2830 ..................................66
       C.3. Changes Made to RFC 3771 ..................................66
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -125,17 +129,35 @@ RFC 4511                         LDAPv3                        June 2006
    user, interacts with one or more servers (or Directory System Agents
    (DSA)).  Clients interact with servers using a directory access
    protocol.
+      目录是“合作 提供目录服务的 开放系统的 集合”[X.500]。 
+      目录用户（可以是人或其他实体）,
+         通过
+            客户端/client
+            (或目录用户代理(DUA))
+         访问目录。 
+      客户端/client 
+         代表 目录用户 
+         与一台或多台服务器（或目录系统代理（DSA））
+         进行交互。 
+      客户端/client
+         使用目录访问协议
+         与服务器交互。
 
    This document details the protocol elements of the Lightweight
    Directory Access Protocol (LDAP), along with their semantics.
    Following the description of protocol elements, it describes the way
    in which the protocol elements are encoded and transferred.
+      本文档详细介绍了 轻量级目录访问协议(LDAP)的 协议元素及其语义。 
+      在 协议元素的描述之后，它描述了协议元素的编码和传输方式。
 
 1.1.  Relationship to Other LDAP Specifications
+      与其他LDAP规范的关系
 
    This document is an integral part of the LDAP Technical Specification
    [RFC4510], which obsoletes the previously defined LDAP technical
    specification, RFC 3377, in its entirety.
+      本文档是 LDAP 技术规范 [RFC4510] 的组成部分，
+      它 完全废弃了 先前定义的LDAP技术规范RFC 3377。
 
    This document, together with [RFC4510], [RFC4513], and [RFC4512],
    obsoletes RFC 2251 in its entirety.  Section 3.3 is obsoleted by
@@ -145,10 +167,21 @@ RFC 4511                         LDAPv3                        June 2006
    are obsoleted by [RFC4512].  The remainder of RFC 2251 is obsoleted
    by this document.  Appendix C.1 summarizes substantive changes in the
    remainder.
+      本文档与 [RFC4510]、[RFC4513] 和 [RFC4512] 一起完全废弃了 RFC 2251。 
+      3.3 节已被 [RFC4510] 废弃。 
+      第 4.2.1 节（部分）和 4.2.2 节已被 [RFC4513] 废弃。 
+      3.2、3.4、4.1.3（最后一段）、
+         4.1.4、4.1.5、4.1.5.1、4.1.9（最后一段）、
+         5.1、6.1和6.2（最后一段）
+         已被[RFC4512]废弃。 
+      RFC 2251 的其余部分已被本文档废弃。 附录C.1总结了其余部分的实质性更改。
 
    This document obsoletes RFC 2830, Sections 2 and 4.  The remainder of
    RFC 2830 is obsoleted by [RFC4513].  Appendix C.2 summarizes
    substantive changes to the remaining sections.
+      本文档废弃了 RFC 2830 第 2 节和第 4 节。
+      RFC 2830 的其余部分已被 [RFC4513] 废弃。 
+      附录 C.2 总结了对其余部分的实质性更改。
 
    This document also obsoletes RFC 3771 in entirety.
 
@@ -157,11 +190,17 @@ RFC 4511                         LDAPv3                        June 2006
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", and "MAY" in this document are
    to be interpreted as described in [RFC2119].
+      本文档中的关键词 "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+      "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"是按照
+      [RFC2119]中的描述进行解释
 
    Character names in this document use the notation for code points and
    names from the Unicode Standard [Unicode].  For example, the letter
    "a" may be represented as either <U+0061> or <LATIN SMALL LETTER A>.
-
+      本文档中的字符名称 
+         使用来自 Unicode标准[Unicode]的 代码点和名称 符号。 
+      例如，字母“a”可以表示为 <U+0061> 或 <LATIN SMALL LETTER A>。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -175,28 +214,44 @@ RFC 4511                         LDAPv3                        June 2006
    Note: a glossary of terms used in Unicode can be found in [Glossary].
    Information on the Unicode character encoding model can be found in
    [CharModel].
+      注意：Unicode中使用的术语词汇表可以在[词汇表]中找到。 
+      有关 Unicode 字符编码模型的信息可以在 [CharModel] 中找到。
 
    The term "transport connection" refers to the underlying transport
    services used to carry the protocol exchange, as well as associations
-   established by these services.
+   established by these services.    
+      术语"transport connection"是指 用于进行协议交换的 基本传输服务，
+      以及由这些服务建立的关联。
 
    The term "TLS layer" refers to Transport Layer Security (TLS)
    services used in providing security services, as well as associations
    established by these services.
+      术语"TLS layer"是指用于 
+         提供安全服务的 传输层安全(TLS)服务，
+         以及由这些服务建立的关联。
 
    The term "SASL layer" refers to Simply Authentication and Security
    Layer (SASL) services used in providing security services, as well as
    associations established by these services.
+      术语"SASL layer" 是指 
+         用于提供安全服务
+         以及由这些服务建立的关联的 
+         简单身份验证和安全层（SASL）服务。
 
    The term "LDAP message layer" refers to the LDAP Message Protocol
    Data Unit (PDU) services used in providing directory services, as
    well as associations established by these services.
+      术语"LDAP message layer"是指 
+         在 提供目录服务 以及 由这些服务建立的关联 中 使用的 
+         LDAP消息协议数据单元(PDU)服务。
 
    The term "LDAP session" refers to combined services (transport
    connection, TLS layer, SASL layer, LDAP message layer) and their
    associations.
+      术语"LDAP session"是指组合的服务（传输连接，TLS层，SASL层，LDAP消息层）及其关联。 
 
    See the table in Section 5 for an illustration of these four terms.
+      有关这四个术语的说明，请参见第5节中的表。
 
 3.  Protocol Model
 
@@ -207,10 +262,21 @@ RFC 4511                         LDAPv3                        June 2006
    the necessary operation(s) in the Directory.  Upon completion of an
    operation, the server typically returns a response containing
    appropriate data to the requesting client.
+      该协议采用的通用模型是 
+         对服务器执行协议操作的 客户端之一。 
+      在该模型中，
+         客户端向服务器发送 
+            描述要执行的操作的协议请求。 
+         然后服务器负责在号码簿中执行必要的操作。 
+      操作完成后，
+         服务器通常会向 发出请求的客户端
+         返回包含适当数据的响应。
 
    Protocol operations are generally independent of one another.  Each
    operation is processed as an atomic action, leaving the directory in
    a consistent state.
+      协议操作通常彼此独立。 
+      每个操作都作为一个原子操作进行处理，使目录保持一致状态。
 
    Although servers are required to return responses whenever such
    responses are defined in the protocol, there is no requirement for
@@ -218,7 +284,11 @@ RFC 4511                         LDAPv3                        June 2006
    Requests and responses for multiple operations generally may be
    exchanged between a client and server in any order.  If required,
    synchronous behavior may be controlled by client applications.
-
+      尽管 无论何时 在协议中定义了此类响应，都要求服务器返回响应，
+         但是客户端或服务器端都不需要同步行为。 
+      通常，可以在客户端和服务器之间 以任何顺序 交换对多个操作的请求和响应。 
+      如果需要，同步行为可由客户端应用程序控制。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -234,8 +304,15 @@ RFC 4511                         LDAPv3                        June 2006
    and X.500 Directory Access Protocol (DAP) operations.  Server
    implementations acting as a gateway to X.500 directories may need to
    make multiple DAP requests to service a single LDAP request.
+      本文档中定义的 核心协议操作 
+        可以映射到 X.500(1993)目录摘要服务[X.511]的子集。 
+      但是，LDAP操作和X.500目录访问协议(DAP)操作之间没有一对一的映射。 
+      充当 X.500目录网关的服务器实现 
+        可能需要发出多个DAP请求 
+        来为单个LDAP请求提供服务。
 
 3.1.  Operation and LDAP Message Layer Relationship
+        操作 与 LDAP消息层 关系
 
    Protocol operations are exchanged at the LDAP message layer.  When
    the transport connection is closed, any uncompleted operations at the
@@ -244,13 +321,24 @@ RFC 4511                         LDAPv3                        June 2006
    possible).  Also, when the transport connection is closed, the client
    MUST NOT assume that any uncompleted update operations have succeeded
    or failed.
+        协议操作 在LDAP消息层 交换。 
+        当传输连接关闭时，
+            LDAP消息层上 任何未完成的操作都将被放弃（如果可能），
+            或者 在不传输响应的情况下完成（当无法放弃时）。 
+        另外，当传输连接关闭时，
+            客户端/client 不得假定 任何未完成的更新操作 已成功或失败。
 
 4.  Elements of Protocol
+        协议元素
 
    The protocol is described using Abstract Syntax Notation One
    ([ASN.1]) and is transferred using a subset of ASN.1 Basic Encoding
    Rules ([BER]).  Section 5 specifies how the protocol elements are
    encoded and transferred.
+        该协议 
+            使用 抽象语法符号一([ASN.1])进行描述，
+            并使用 ASN.1基本编码规则([BER])的子集 进行传输。 
+        第5节指定了协议元素的编码和传输方式。
 
    In order to support future extensions to this protocol, extensibility
    is implied where it is allowed per ASN.1 (i.e., sequence, set,
@@ -259,23 +347,41 @@ RFC 4511                         LDAPv3                        June 2006
    extensible as discussed in [RFC4520].  Because of the implied
    extensibility, clients and servers MUST (unless otherwise specified)
    ignore trailing SEQUENCE components whose tags they do not recognize.
+        为了支持此协议的未来扩展，
+            ASN.1在每个允许(扩展)的地方暗示了可扩展性
+            （即序列/sequence、集合/set、选择/choice 和 枚举/enumerated 类型是可扩展的）。 (!!!)
+        此外，
+            椭圆形（...）已以ASN.1类型提供，可明确扩展，如[RFC4520]中所述。 
+        由于隐含的可扩展性，
+            客户端和服务器必须（除非另有说明）
+            忽略其标签无法识别的尾随SEQUENCE组件。
 
    Changes to the protocol other than through the extension mechanisms
    described here require a different version number.  A client
    indicates the version it is using as part of the BindRequest,
    described in Section 4.2.  If a client has not sent a Bind, the
    server MUST assume the client is using version 3 or later.
+        除了通过此处描述的扩展机制进行的协议更改以外，还需要其他版本号。 
+        客户端指示其正在使用的版本作为BindRequest的一部分，如第4.2节所述。 
+        如果客户端没有发送绑定，服务器必须假设客户端使用的是版本 3 或更高版本。
 
    Clients may attempt to determine the protocol versions a server
    supports by reading the 'supportedLDAPVersion' attribute from the
    root DSE (DSA-Specific Entry) [RFC4512].
+        客户端可以通过
+            从根DSE（特定于DSA的条目）[RFC 4512]中
+            读取“supportedLDAPVersion/支持的LDAP版本”属性
+            来尝试确定服务器支持的协议版本。
 
 4.1.  Common Elements
 
    This section describes the LDAPMessage envelope Protocol Data Unit
    (PDU) format, as well as data type definitions, which are used in the
    protocol operations.
-
+        本节介绍 
+            LDAPMessage 封装 协议数据单元(PDU/Protocol Data Unit) 格式，
+            以及协议操作中使用的数据类型定义。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -285,14 +391,18 @@ RFC 4511                         LDAPv3                        June 2006
 
 
 4.1.1.  Message Envelope
+        消息封装
 
    For the purposes of protocol exchanges, all protocol operations are
    encapsulated in a common envelope, the LDAPMessage, which is defined
    as follows:
+        为了协议交换的目的，所有协议操作都封装在 
+            一个公共信封LDAPMessage中，
+        该信封定义如下：
 
-        LDAPMessage ::= SEQUENCE {
-             messageID       MessageID,
-             protocolOp      CHOICE {
+        LDAPMessage ::= SEQUENCE {                          #序列
+             messageID       MessageID,                     #消息ID -- messageID
+             protocolOp      CHOICE {                       #执行什么操作
                   bindRequest           BindRequest,
                   bindResponse          BindResponse,
                   unbindRequest         UnbindRequest,
@@ -315,24 +425,28 @@ RFC 4511                         LDAPv3                        June 2006
                   extendedResp          ExtendedResponse,
                   ...,
                   intermediateResponse  IntermediateResponse },
-             controls       [0] Controls OPTIONAL }
+             controls       [0] Controls OPTIONAL }             #控件 -- controls
 
-        MessageID ::= INTEGER (0 ..  maxInt)
+        MessageID ::= INTEGER (0 ..  maxInt)                    #消息ID是个整数，介于0和maxint之间
 
         maxInt INTEGER ::= 2147483647 -- (2^^31 - 1) --
 
    The ASN.1 type Controls is defined in Section 4.1.11.
+        ASN.1的控件类型，在4.1.11节中定义
 
    The function of the LDAPMessage is to provide an envelope containing
    common fields required in all protocol exchanges.  At this time, the
    only common fields are the messageID and the controls.
+        LDAPMessage的功能是 
+            提供一个 包含所有协议交换 所需的公共字段的 信封。 
+        此时，唯一的公共字段是 messageID 和 controls。
 
    If the server receives an LDAPMessage from the client in which the
    LDAPMessage SEQUENCE tag cannot be recognized, the messageID cannot
    be parsed, the tag of the protocolOp is not recognized as a request,
    or the encoding structures or lengths of data fields are found to be
    incorrect, then the server SHOULD return the Notice of Disconnection
-
+#---------------------------------------------------------------------------------------
 
 
 Sermersheim                 Standards Track                     [Page 6]
@@ -343,6 +457,13 @@ RFC 4511                         LDAPv3                        June 2006
    described in Section 4.4.1, with the resultCode set to protocolError,
    and MUST immediately terminate the LDAP session as described in
    Section 5.3.
+        如果服务器从客户端接收到一个 
+            无法识别 SEQUENCE-tag 的 LDAPMessage，
+            则无法解析messageID，不会将protocolOp的tag 识别为请求，
+        或者发现 编码结构或数据字段的长度 如果不正确，
+            则服务器应返回第4.4.1节中所述的 断开连接通知，
+            并将resultCode设置为protocolError，
+            并且必须立即按第5.3节中所述终止LDAP会话。
 
    In other cases where the client or server cannot parse an LDAP PDU,
    it SHOULD abruptly terminate the LDAP session (Section 5.3) where
@@ -350,18 +471,29 @@ RFC 4511                         LDAPv3                        June 2006
    pernicious.  Otherwise, server implementations MUST return an
    appropriate response to the request, with the resultCode set to
    protocolError.
+        在客户端或服务器无法解析 LDAP PDU/(Protocol Data Unit) 的其他情况下，
+            它应该突然终止 LDAP 会话（第 5.3 节），
+            因为进一步的通信（包括提供通知）将是有害的。 
+        然后，服务器实现必须返回对请求的适当响应，
+            并将resultCode设置为protocolError。
 
 4.1.1.1.  MessageID
 
    All LDAPMessage envelopes encapsulating responses contain the
    messageID value of the corresponding request LDAPMessage.
+        所有响应 封装的LDAPMessage信封 都包含 
+            相应的 LDAPMessage请求的messageID 值。
 
    The messageID of a request MUST have a non-zero value different from
    the messageID of any other request in progress in the same LDAP
    session.  The zero value is reserved for the unsolicited notification
    message.
+        请求的messageID必须是非零值，
+            该值必须和 同一LDAP会话中正在进行的 任何其他请求的messageID 不同。 
+        零值是为未经请求的通知消息保留的。
 
    Typical clients increment a counter for each request.
+    典型的客户端为每个请求增加一个计数器。
 
    A client MUST NOT send a request with the same messageID as an
    earlier request in the same LDAP session unless it can be determined
@@ -370,6 +502,10 @@ RFC 4511                         LDAPv3                        June 2006
    completes).  Otherwise, the behavior is undefined.  For this purpose,
    note that Abandon and successfully abandoned operations do not send
    responses.
+        客户端不得在同一 LDAP 会话中发送具有 与先前请求相同messageID的请求，
+        除非可以确定服务器不再为先前的请求 提供服务（例如，在收到最终响应之后，或后续绑定完成后） ）。 
+        否则，行为是不确定的。 
+        为此，请注意放弃和成功放弃的操作不会发送响应。
 
 4.1.2.  String Types
 
@@ -380,6 +516,10 @@ RFC 4511                         LDAPv3                        June 2006
    characters U+0000 through U+007F are the same as ASCII 0 through 127,
    respectively, and have the same single octet UTF-8 encoding.  Other
    Unicode characters have a multiple octet UTF-8 encoding.
+        LDAPString 是一种符号方便，表明尽管 LDAPString 类型的字符串编码为ASN.1 OCTET STRING类型，
+            但使用了 [ISO10646] 字符集（[Unicode] 的超集），按照 UTF-8 [RFC3629] 进行编码 算法。 
+        请注意，Unicode字符U + 0000至U + 007F分别与ASCII 0至127相同，并且具有相同的单八位字节UTF-8编码。 
+        其他Unicode字符具有多个八位字节的UTF-8编码。
 
         LDAPString ::= OCTET STRING -- UTF-8 encoded,
                                     -- [ISO10646] characters

@@ -131,8 +131,8 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
    The generic table entry contains only a description.  All instances
    will be subclassed, and the subclass will define the naming
    attribute.  Two subclasses are defined:
-        通用表条目仅包含描述。 
-        所有实例都将被子类化，
+        通用 表条目(table entry) 仅包含描述。  (!!!)
+        所有实例都将被子类化，   (!!!)
             并且子类将定义命名属性。 
         定义了两个子类：
 #---------------------------------------------------------------------------------------
@@ -194,6 +194,10 @@ distinguishedNameTableKey ATTRIBUTE ::= {
        attribute is defined to allow a text value, to support the
        frequent text key to text value mapping.  Additional values may
        be defined.
+            TextEntry，它定义带有 文本键(text key) 的表条目，可以具有任何类型的单个或多个值。 
+            一个属性被定义为允许一个文本值(text value)，
+            以支持频繁的文本键(text key)到文本值(text value)的映射。 
+            可以定义其他值。
 #---------------------------------------------------------------------------------------
 
 
@@ -214,8 +218,16 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
        value attributes are defined for this type of entry.  An
        application of this will make appropriate subtyping to define the
        needed values.
+            DistinguishedNameEntry, 这用于将信息与全局定义的对象相关联。 
+                当表中的对象数量很少或在 DIT 上分布非常稀疏时，应使用此方法。 
+            在 DIT 中存在许多对象或对象紧密聚集的其他情况下，
+                第 2 节中定义的子树方法将更可取。 
+            没有为这种类型的条目定义值属性。 
+            对此的应用程序将进行适当的子类型化以定义所需的值。
+
 
    This is best illustrated by example.  Consider the MTA:
+        这最好通过例子来说明。 考虑 MTA：
 
    CN=Bells, OU=Computer Science,
    O=University College London, C=GB
@@ -223,6 +235,8 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
    Suppose that the MTA needs a table mapping from private keys to fully
    qualified domain names (this example is fictitious).  The table might
    be named as:
+        假设 MTA 需要一个从 private keys/专用键 到完全限定域名的表映射（此示例是虚构的）。 
+        该表可能命名为：
 
    CN=domain-nicknames,
    CN=Bells, OU=Computer Science,
@@ -230,6 +244,7 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
 
    To represent a mapping in this table from "euclid" to
    "bloomsbury.ac.uk", the entry:
+        要表示此表中从“euclid”到“bloomsbury.ac.uk”的映射，条目：
 
    TextTableKey=euclid, CN=domain-nicknames,
    CN=Bells, OU=Computer Science,
@@ -241,12 +256,14 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
 
    A second example, showing the use of DistinguishedNameEntry is now
    given.  Consider again the MTA:
+        现在给出第二个示例，显示了 DistinguishedNameEntry 的使用。 再次考虑 MTA：
 
    CN=Bells, OU=Computer Science,
    O=University College London, C=GB
 
    Suppose that the MTA needs a table mapping from MTA Name to bilateral
    agreement information of that MTA. The table might be named as:
+        假设 MTA 需要一个从MTA名称到该MTA的双边协议信息的表映射。 该表可能被命名为：
 
    CN=MTA Bilateral Agreements,
    CN=Bells, OU=Computer Science,
@@ -262,6 +279,7 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
 
 
    To represent information on the MTA which has the Distinguished Name:
+        表示具有专有名称/DN的 MTA 上的信息：
 
    CN=Q3T21, ADMD=Gold 400, C=GB
 
@@ -270,6 +288,8 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
    referred to.  The MTA Bilateral information would be an attribute in
    this entry.  Using a non-standard notation, the Distinguished Name of
    the table entry is:
+        该表中将有一个条目，表条目的RDN是所引用的 MTA 的DN。 
+        MTA 双边信息将是此条目中的一个属性。 使用非标准表示法，表条目的专有名称为：
 
    DistinguishedNameTableKey=<CN=Q3T21, ADMD=Gold 400, C=GB>,
    CN=MTA Bilateral Agreements,
@@ -277,6 +297,7 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
    O=University College London, C=GB
 
 2  Representing Subtrees
+        表示子树
 
    A subtree is similar to a table, except that the keys are constructed
    as a distinguished name hierarchy relative to the location of the
@@ -287,10 +308,19 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
    equivalent to a table with distinguished name keys.  The table
    approach is best when the tree is very sparse.  This approach is
    better for subtrees which are more populated.
+        子树与表类似，不同之处在于，将 键/key 构造为 相对于DIT中 子树位置的 DN层次结构。 
+        子树有效地启动了一个 私有“根”/private"root"，并具有相对于该根/root的DN。 
+            通常，这种方法用于将本地信息与全局对象相关联。 
+            所使用的schema在图 2 中定义。
+        从功能上讲，这相当于具有 DN-key 的表。 
+            当树非常稀疏时，表方法是最好的。
+            对于繁茂的子树，此方法更好。
 
    The subtree object class defines the root for a subtree in an
    analogous means to the table.  Information within the subtree will
    generally be defined in the same way as for the global object, and so
+        子树对象类(subtree object class) 以类似于表的方式定义了子树的根。 
+        子树中的信息 通常以 与全局对象相同的方式 定义，因此
 
    subtree OBJECT-CLASS ::= {
        SUBCLASS OF {top}
@@ -302,6 +332,7 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
 
 
    no specific object classes for subtree entries are needed.
+        不需要子树条目的特定对象类。
 
    For example consider University College London.
 
@@ -330,6 +361,7 @@ RFC 2293            Table and Subtrees in the X.500           March 1998
    O=University College London, C=GB
 
    Practical examples of this mapping are given in [2].
+        [2] 中给出了这种映射的实际示例。
 
 3  Acknowledgments
 

@@ -6,11 +6,11 @@
 
 This is an index of RFC contained in this directory:
 
-rfc2079.txt X.500 Attribute Type and an Object Class to Hold URIs (PS)
-rfc2247.txt Using Domains in LDAP DNs (PS)
-rfc2293.txt Tables and Subtrees in the X.500 Directory (PS)
-rfc2294.txt O/R Address hierarchy in the X.500 DIT (PS)
-rfc2307.txt LDAP Network Information Services Schema (E)
+rfc2079.txt X.500 Attribute Type and an Object Class to Hold URIs (PS)  能保存URI的objectClass/attributeType 
+rfc2247.txt Using Domains in LDAP DNs (PS)                              attributeType: DC  以及objectClass: dcobject/domain的选择
+rfc2293.txt Tables and Subtrees in the X.500 Directory (PS)             tableEntry/subtree 如何定义 树根和树上的信息
+rfc2294.txt O/R Address hierarchy in the X.500 DIT (PS)                 在 X.500目录信息树/DIT 中表示 X.400编码的O/R地址层次结构
+rfc2307.txt LDAP Network Information Services Schema (E)                TCP/IP以及unix系统 映射到X.500条目
 rfc2377.txt LDAP Naming Plan (I)
 rfc2589.txt LDAPv3: Dynamic Directory Services Extensions (PS)
 rfc2649.txt LDAPv3 Operational Signatures (E)
