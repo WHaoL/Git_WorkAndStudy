@@ -355,6 +355,9 @@ RFC 4511                         LDAPv3                        June 2006
         由于隐含的可扩展性，
             客户端和服务器必须（除非另有说明）
             忽略其标签无法识别的尾随SEQUENCE组件。
+    
+    总结：
+        sequence/set/choice/enumerated 都是本协议规定的 可扩展的 类型
 
    Changes to the protocol other than through the extension mechanisms
    described here require a different version number.  A client
@@ -362,8 +365,12 @@ RFC 4511                         LDAPv3                        June 2006
    described in Section 4.2.  If a client has not sent a Bind, the
    server MUST assume the client is using version 3 or later.
         除了通过此处描述的扩展机制进行的协议更改以外，还需要其他版本号。 
-        客户端指示其正在使用的版本作为BindRequest的一部分，如第4.2节所述。 
-        如果客户端没有发送绑定，服务器必须假设客户端使用的是版本 3 或更高版本。
+        客户端
+            指示其正在使用的版本
+            作为BindRequest的一部分，如第4.2节所述。 
+        如果客户端没有发送绑定，服务器必须假设客户端使用的是版本3或更高版本。
+    
+    总结：client必须告诉server 自己的版本号 (!!!)
 
    Clients may attempt to determine the protocol versions a server
    supports by reading the 'supportedLDAPVersion' attribute from the
@@ -440,6 +447,11 @@ RFC 4511                         LDAPv3                        June 2006
         LDAPMessage的功能是 
             提供一个 包含所有协议交换 所需的公共字段的 信封。 
         此时，唯一的公共字段是 messageID 和 controls。
+    
+    总结：
+        LDAPMessage是一个SEQUENCE(序列)
+        LDAPMessage中封装了公共字段 messageID 和 controls
+
 
    If the server receives an LDAPMessage from the client in which the
    LDAPMessage SEQUENCE tag cannot be recognized, the messageID cannot
@@ -457,13 +469,22 @@ RFC 4511                         LDAPv3                        June 2006
    described in Section 4.4.1, with the resultCode set to protocolError,
    and MUST immediately terminate the LDAP session as described in
    Section 5.3.
-        如果服务器从客户端接收到一个 
-            无法识别 SEQUENCE-tag 的 LDAPMessage，
-            则无法解析messageID，不会将protocolOp的tag 识别为请求，
-        或者发现 编码结构或数据字段的长度 如果不正确，
+        如果服务器从客户端接收到一个 LDAPMessage，
+            并且这个LDAPMessage的 SEQUENCE-tag 无法识别，
+            那么，将无法解析messageID，也就不会将protocolOp的tag 识别为请求，
+        或者发现 编码结构或数据字段的长度 不正确，
             则服务器应返回第4.4.1节中所述的 断开连接通知，
             并将resultCode设置为protocolError，
             并且必须立即按第5.3节中所述终止LDAP会话。
+    
+    总结： 
+        如果server无法识别client发送来的LDAPMessage(由于 它的SEQUENCE-tag无法识别)
+            那么将无法解析messageID，
+            也就不会将protocolOp的tag 识别为请求
+        如果 编码结构或数据字段的长度 不正确
+            那么发送 断开连接通知，
+            并将resultCode设置为protocolError
+            并立即终止LDAP会话
 
    In other cases where the client or server cannot parse an LDAP PDU,
    it SHOULD abruptly terminate the LDAP session (Section 5.3) where
@@ -472,10 +493,15 @@ RFC 4511                         LDAPv3                        June 2006
    appropriate response to the request, with the resultCode set to
    protocolError.
         在客户端或服务器无法解析 LDAP PDU/(Protocol Data Unit) 的其他情况下，
-            它应该突然终止 LDAP 会话（第 5.3 节），
+            它应该突然/立即终止 LDAP 会话（第 5.3 节），
             因为进一步的通信（包括提供通知）将是有害的。 
         然后，服务器实现必须返回对请求的适当响应，
             并将resultCode设置为protocolError。
+    
+    总结：
+        如果server/client 无法解析某个 PDU，
+            那么立即终止通信
+            并将 响应中的 resultCode设置为protocolError
 
 4.1.1.1.  MessageID
 
@@ -491,9 +517,17 @@ RFC 4511                         LDAPv3                        June 2006
         请求的messageID必须是非零值，
             该值必须和 同一LDAP会话中正在进行的 任何其他请求的messageID 不同。 
         零值是为未经请求的通知消息保留的。
+    
+    总结： 
+        messageID
+            是非0值
+            不能与同一会话中的其他messageID相同
+            0值是为 通知消息保留的
 
    Typical clients increment a counter for each request.
     典型的客户端为每个请求增加一个计数器。
+
+    总结：client为每个 request/请求 维护一个计数器
 
    A client MUST NOT send a request with the same messageID as an
    earlier request in the same LDAP session unless it can be determined
@@ -505,7 +539,12 @@ RFC 4511                         LDAPv3                        June 2006
         客户端不得在同一 LDAP 会话中发送具有 与先前请求相同messageID的请求，
         除非可以确定服务器不再为先前的请求 提供服务（例如，在收到最终响应之后，或后续绑定完成后） ）。 
         否则，行为是不确定的。 
-        为此，请注意放弃和成功放弃的操作不会发送响应。
+        为此，请注意放弃和成功放弃的操作不会发送响应。 
+    
+    总结： 
+        在同一会话中，client发送的messageID不能重复
+            (除非server已经不为某一个messageID提供服务)
+        放弃/成功放弃 操作不会发送响应
 
 4.1.2.  String Types
 
@@ -516,18 +555,32 @@ RFC 4511                         LDAPv3                        June 2006
    characters U+0000 through U+007F are the same as ASCII 0 through 127,
    respectively, and have the same single octet UTF-8 encoding.  Other
    Unicode characters have a multiple octet UTF-8 encoding.
-        LDAPString 是一种符号方便，表明尽管 LDAPString 类型的字符串编码为ASN.1 OCTET STRING类型，
-            但使用了 [ISO10646] 字符集（[Unicode] 的超集），按照 UTF-8 [RFC3629] 进行编码 算法。 
-        请注意，Unicode字符U + 0000至U + 007F分别与ASCII 0至127相同，并且具有相同的单八位字节UTF-8编码。 
-        其他Unicode字符具有多个八位字节的UTF-8编码。
+        LDAPString代表了一种符号方便， 
+            尽管 LDAPString类型的字符串 编码为ASN.1 OCTET STRING类型，
+            但使用了[ISO10646]字符集（[Unicode]的超集），按照UTF-8[RFC3629] 进行编码 算法。 
+        请注意，
+            Unicode字符U+0000至U+007F分别与ASCII 0至127相同，
+            并且具有相同的单八位字节UTF-8编码(octet UTF-8 encoding)。 
+        其他Unicode字符具有 多个八位字节UTF-8编码(multiple octet UTF-8 encoding)。
+    
+    总结： 
+        LDAPString是一种字符串
+            编码为 ASN.1 OCTET STRING类型
+            并且编码为 Unicode的UTF-8
+            因为 Unicode的U+0000到U+007F 与 ASCII的0到127相同
+        即 单字节-8位的UTF-8编码 的字符串 (!!!)
 
         LDAPString ::= OCTET STRING -- UTF-8 encoded,
                                     -- [ISO10646] characters
+    总结：
+        可以看到 LDAPString 同时被编码为
+            "OCTET STRING"(ASCII) 和 
+            "UTF-8"(Unicode)
 
    The LDAPOID is a notational convenience to indicate that the
    permitted value of this string is a (UTF-8 encoded) dotted-decimal
    representation of an OBJECT IDENTIFIER.  Although an LDAPOID is
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -538,40 +591,78 @@ RFC 4511                         LDAPv3                        June 2006
 
    encoded as an OCTET STRING, values are limited to the definition of
    <numericoid> given in Section 1.4 of [RFC4512].
+        LDAPOID 代表了一种符号方便，
+            用于指示此字符串的允许值是对象标识符的（UTF-8 编码）点分十进制表示。 
+        尽管 LDAPOID 被编码为 OCTET STRING，但值仅限于 [RFC4512] 的第 1.4 节中给出的 <numericoid> 定义。
+
+    总结： 
+        LDAPOID是一种 点分十进制 表示的字符串
+            (UTF-8编码)
+        尽管LDAPOID被编码为 OCTET STRING
+            但 值 仅限于 [RFC4512]的1.4节定义的 <numericoid>
 
         LDAPOID ::= OCTET STRING -- Constrained to <numericoid>
                                  -- [RFC4512]
+    
+    总结： 
+        可以看到LDAPOID
+            被编码为OCTET STRING，的 点分十进制字符串
+            并且被限制 值只能是 [RFC4512]中的<numericoid>
 
    For example,
+    例如：
 
         1.3.6.1.4.1.1466.1.2.3
 
 4.1.3.  Distinguished Name and Relative Distinguished Name
+        DN和RDN
 
    An LDAPDN is defined to be the representation of a Distinguished Name
    (DN) after encoding according to the specification in [RFC4514].
+        根据 [RFC4514] 中的规范进行编码后，
+        LDAPDN 被定义为可分辨名称 (DN) 的表示。
+    
+    总结： 
+        LDAPDN 代表/表示 DN
 
         LDAPDN ::= LDAPString
                    -- Constrained to <distinguishedName> [RFC4514]
 
+    总结： LDAPDN的类型是：LDAPString字符串
+
    A RelativeLDAPDN is defined to be the representation of a Relative
    Distinguished Name (RDN) after encoding according to the
    specification in [RFC4514].
+        根据 [RFC4514] 中的规范进行编码后，
+        RelativeLDAPDN 被定义为相对可分辨名称 (RDN) 的表示。
+    
+    总结： 
+        RelativeLDAPDN 代表/表示 RDN
 
         RelativeLDAPDN ::= LDAPString
                            -- Constrained to <name-component> [RFC4514]
 
+    总结： RelativeLDAPDN的类型是：LDAPString字符串
+
 4.1.4.  Attribute Descriptions
+        属性描述
 
    The definition and encoding rules for attribute descriptions are
    defined in Section 2.5 of [RFC4512].  Briefly, an attribute
    description is an attribute type and zero or more options.
+        属性描述的 定义和编码规则在 [RFC4512]的第2.5节中定义。 
+        简而言之，属性描述是一种属性类型和零个或多个选项。
 
         AttributeDescription ::= LDAPString
                                 -- Constrained to <attributedescription>
                                 -- [RFC4512]
 
+    总结： 
+        AttributeDescription的类型是：LDAPString字符串
+        AttributeDescription包含一个attribute type和多个options
+
 4.1.5.  Attribute Value
+        属性值
 
    A field of type AttributeValue is an OCTET STRING containing an
    encoded attribute value.  The attribute value is encoded according to
@@ -579,9 +670,17 @@ RFC 4511                         LDAPv3                        June 2006
    The LDAP-specific encoding definitions for different syntaxes and
    attribute types may be found in other documents and in particular
    [RFC4517].
+        AttributeValue 类型的字段是包含编码属性值的 OCTET STRING。 
+        属性值根据其相应语法的 LDAP 特定编码定义进行编码。 
+        不同语法和属性类型的 LDAP 特定编码定义可以在其他文档中找到，特别是 [RFC4517]。
+    
+    总结： 
+        AttributeValue的 值的类型是 OCTET STRING
 
         AttributeValue ::= OCTET STRING
-
+    总结： 
+        AttributeValue编码为OCTET STRING
+#---------------------------------------------------------------------------------------
 
 
 
@@ -595,17 +694,29 @@ RFC 4511                         LDAPv3                        June 2006
    Note that there is no defined limit on the size of this encoding;
    thus, protocol values may include multi-megabyte attribute values
    (e.g., photographs).
+        请注意，此编码的大小没有定义限制； 因此，协议值可以包括多兆字节的属性值（例如，照片）。
+    
+    总结： 
+        AttributeValue的 值的大小没有限制
 
    Attribute values may be defined that have arbitrary and non-printable
    syntax.  Implementations MUST NOT display or attempt to decode an
    attribute value if its syntax is not known.  The implementation may
    attempt to discover the subschema of the source entry and to retrieve
    the descriptions of 'attributeTypes' from it [RFC4512].
+        可以定义具有任意和不可打印语法的属性值。 
+        如果语法未知，则实现不得显示或尝试解码属性值。 
+        实现 可能会尝试发现 源条目的子模式 并从中检索“attributeTypes”的描述 [RFC4512]。
 
    Clients MUST only send attribute values in a request that are valid
    according to the syntax defined for the attributes.
+        客户端/clients 必须 根据语法中定义的有效属性值 只在请求中发送这些有效属性值。
+    
+    总结： 
+        client只能在请求中发送 语法中定义的(AttributeValue的)有效属性值
 
 4.1.6.  Attribute Value Assertion
+        属性值断言
 
    The AttributeValueAssertion (AVA) type definition is similar to the
    one in the X.500 Directory standards.  It contains an attribute
@@ -613,12 +724,22 @@ RFC 4511                         LDAPv3                        June 2006
    value suitable for that type.  Elements of this type are typically
    used to assert that the value in assertionValue matches a value of an
    attribute.
+        AttributeValueAssertion(AVA)类型 定义类似于 X.500目录 标准中的类型定义。 
+        它包含适合该类型的属性描述和匹配规则（[RFC4512]，第 4.1.3 节）断言值。 
+        此类型的元素通常用于断言 assertionValue 中的值与属性值匹配。
 
         AttributeValueAssertion ::= SEQUENCE {
              attributeDesc   AttributeDescription,
              assertionValue  AssertionValue }
 
         AssertionValue ::= OCTET STRING
+    
+    总结： 
+        AttributeValueAssertion编码为OCTET STRING(值为OCTET STRING类型)
+        AttributeValueAssertion包含 
+            attributeDesc -- 属性描述 
+            assertionValue - 断言值
+        
 
    The syntax of the AssertionValue depends on the context of the LDAP
    operation being performed.  For example, the syntax of the EQUALITY
@@ -627,17 +748,37 @@ RFC 4511                         LDAPv3                        June 2006
    attribute type, but in some cases the assertion syntax differs from
    the value syntax.  See objectIdentiferFirstComponentMatch in
    [RFC4517] for an example.
+        AssertionValue 的语法取决于正在执行的 LDAP 操作的上下文。 
+        例如，在执行比较操作时使用属性的 EQUALITY 匹配规则的语法。 
+        通常，这与用于属性类型值的语法相同，但在某些情况下，断言语法与值语法不同。 
+        有关示例，请参阅 [RFC4517] 中的 objectIdentiferFirstComponentMatch。
+    总结： 
+        AssertionValue的 syntax/语法 取决于正在执行的 LDAP操作的 context/上下文
+        例如：
+            在对一个属性/attribute 执行比较操作时 将会使用 EQUALITY匹配规则 语法
+            通常，对于 属性类型的值 应用同样的语法
+            但是，某些情况下 断言 语法与 值语法不同
 
 4.1.7.  Attribute and PartialAttribute
+        属性和部分属性
 
    Attributes and partial attributes consist of an attribute description
    and attribute values.  A PartialAttribute allows zero values, while
    Attribute requires at least one value.
+        Attributes/属性 和 PartialAttribute/部分属性 由属性描述和属性值组成。 
+        PartialAttribute 允许零值，而 Attribute 至少需要一个值。
+    
+    总结： 
+        Attributes PartialAttribute都是由
+            一个attribute description
+            和attribute values，组成
+        PartialAttribute 允许0个值
+        Attributes 至少需要一个值
 
         PartialAttribute ::= SEQUENCE {
              type       AttributeDescription,
              vals       SET OF value AttributeValue }
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -655,23 +796,46 @@ RFC 4511                         LDAPv3                        June 2006
    No two of the attribute values may be equivalent as described by
    Section 2.2 of [RFC4512].  The set of attribute values is unordered.
    Implementations MUST NOT rely upon the ordering being repeatable.
+        如[RFC4512] 的第2.2节所述，没有两个属性值可能是等效的。 
+        属性值的集合是无序的。 
+        实现，并不依赖于可重复的排序。
+    总结： 
+        attribute values/属性值集合 
+            是无序的
 
 4.1.8.  Matching Rule Identifier
+        匹配规则标识符 
 
    Matching rules are defined in Section 4.1.3 of [RFC4512].  A matching
    rule is identified in the protocol by the printable representation of
    either its <numericoid> or one of its short name descriptors
    [RFC4512], e.g., 'caseIgnoreMatch' or '2.5.13.2'.
+        匹配规则在 [RFC4512]的第4.1.3节中定义。 
+            匹配规则在协议中
+            通过其 <numericoid> 或其 短名称描述符 [RFC4512] 之一的可打印表示
+            来标识，
+        例如，“caseIgnoreMatch”或“2.5.13.2”。
 
         MatchingRuleId ::= LDAPString
 
 4.1.9.  Result Message
+        返回结果消息
 
    The LDAPResult is the construct used in this protocol to return
    success or failure indications from servers to clients.  To various
    requests, servers will return responses containing the elements found
    in LDAPResult to indicate the final status of the protocol operation
    request.
+        LDAPResult
+            是此协议中用于 
+            从服务器/servers 向客户端/clients 
+            返回成功或失败指示的构造。 
+        对于各种请求，
+            服务器/servers 将返回 LDAPResult响应，
+            在LDAPResult中的 elements/元素 表示 协议请求 操作的 最终状态。
+    总结： 
+        servers 向 clients 返回 LDAPResult
+        LDAPResult中包含的 elements/元素 表明了 请求操作的 最终处理状态
 
         LDAPResult ::= SEQUENCE {
              resultCode         ENUMERATED {
@@ -687,16 +851,16 @@ RFC 4511                         LDAPv3                        June 2006
                        -- 9 reserved --
                   referral                     (10),
                   adminLimitExceeded           (11),
-                  unavailableCriticalExtension (12),
-                  confidentialityRequired      (13),
+                  unavailableCriticalExtension (12), #不可用的关键扩展
+                  confidentialityRequired      (13), #需要保密
                   saslBindInProgress           (14),
                   noSuchAttribute              (16),
                   undefinedAttributeType       (17),
                   inappropriateMatching        (18),
-                  constraintViolation          (19),
+                  constraintViolation          (19), #违反约束
                   attributeOrValueExists       (20),
                   invalidAttributeSyntax       (21),
-
+#---------------------------------------------------------------------------------------
 
 
 Sermersheim                 Standards Track                    [Page 10]
@@ -706,33 +870,37 @@ RFC 4511                         LDAPv3                        June 2006
 
                        -- 22-31 unused --
                   noSuchObject                 (32),
-                  aliasProblem                 (33),
+                  aliasProblem                 (33), #别名问题
                   invalidDNSyntax              (34),
                        -- 35 reserved for undefined isLeaf --
-                  aliasDereferencingProblem    (36),
+                  aliasDereferencingProblem    (36), #别名解除引用问题
                        -- 37-47 unused --
-                  inappropriateAuthentication  (48),
-                  invalidCredentials           (49),
-                  insufficientAccessRights     (50),
+                  inappropriateAuthentication  (48), #不适当的认证
+                  invalidCredentials           (49), #无效证书
+                  insufficientAccessRights     (50), #访问权限不足
                   busy                         (51),
                   unavailable                  (52),
                   unwillingToPerform           (53),
-                  loopDetect                   (54),
+                  loopDetect                   (54), #循环检测
                        -- 55-63 unused --
-                  namingViolation              (64),
+                  namingViolation              (64), #命名违规
                   objectClassViolation         (65),
-                  notAllowedOnNonLeaf          (66),
+                  notAllowedOnNonLeaf          (66), #不允许在非叶子上
                   notAllowedOnRDN              (67),
                   entryAlreadyExists           (68),
-                  objectClassModsProhibited    (69),
+                  objectClassModsProhibited    (69), #禁止...
                        -- 70 reserved for CLDAP --
-                  affectsMultipleDSAs          (71),
+                  affectsMultipleDSAs          (71), #影响多个DSA
                        -- 72-79 unused --
                   other                        (80),
                   ...  },
-             matchedDN          LDAPDN,
-             diagnosticMessage  LDAPString,
-             referral           [3] Referral OPTIONAL }
+             matchedDN          LDAPDN,                 #
+             diagnosticMessage  LDAPString,             #诊断消息
+             referral           [3] Referral OPTIONAL } #
+        
+        参看： 
+            /OPENLDAP_REL_ENG_2_4/libraries/libldap/error.c
+            中的  * Parse LDAPResult Messages:
 
    The resultCode enumeration is extensible as defined in Section 3.8 of
    [RFC4520].  The meanings of the listed result codes are given in
@@ -741,6 +909,21 @@ RFC 4511                         LDAPv3                        June 2006
    result code that best indicates the nature of the error encountered.
    Servers may return substituted result codes to prevent unauthorized
    disclosures.
+        resultCode枚举(resultCode enumeration) 是可扩展的，
+            如 [RFC4520] 的第 3.8 节中所定义。 
+        列出的结果码(result codes)的含义在附录A中给出。
+            ([Page 48])
+        如果服务器/server检测到一个操作的多个错误，
+            则只返回一个结果码。 
+        服务器/server 应返回
+            最能表明 所遇错误的性质 的结果代码(result code)。 
+        服务器/server可能会返回 替换的结果代码 以防止未经授权的披露。
+    
+    总结： 
+        LDAPResult中的 resultCode/结果码 字段
+            是个枚举值
+            对于一个操作的多个错误，只返回一个resultCode
+            server只返回 最能代表错误性质的 resultCode
 
    The diagnosticMessage field of this construct may, at the server's
    option, be used to return a string containing a textual, human-
@@ -750,7 +933,20 @@ RFC 4511                         LDAPv3                        June 2006
    Diagnostic messages typically supplement the resultCode with
    additional information.  If the server chooses not to return a
    textual diagnostic, the diagnosticMessage field MUST be empty.
-
+        根据服务器的选择，
+            该构造的diagnosticMessage(诊断消息)字段 
+            可用于返回包含文本的、人类可读的诊断消息的字符串
+            （应避免终端控制和页面格式化字符）。
+        由于此诊断消息未标准化，因此实现不得依赖于返回的值。
+        诊断消息通常用附加信息补充 resultCode。
+        如果服务器选择不返回文本诊断，则diagnosticMessage字段必须为空。
+        
+    总结： 
+        LDAPResult中的 diagnosticMessage(诊断消息)字段
+            用于返回包含文本的、人类可读的诊断消息的字符串
+            用于补充resultCode
+            当服务器选择不返回文本诊断时，这个字段必须为空
+ #---------------------------------------------------------------------------------------
 
 
 
@@ -768,18 +964,51 @@ RFC 4511                         LDAPv3                        June 2006
    form of the provided name or, if an alias was dereferenced while
    attempting to locate the entry, of the resulting name.  Otherwise,
    the matchedDN field is empty.
+        对于某些结果代码
+            （通常 但不限于 noSuchObject、aliasProblem、invalidDNSyntax 和 aliasDereferencingProblem），
+            matchedDN 字段被设置（受访问控制）为用于 
+                查找目标（或基本）对象的 
+                最后一个条目（对象或别名）的名称。
+        这将是所提供名称的截断形式，
+            或者，如果在尝试定位条目时取消引用别名，则是结果名称的截断形式。
+            否则，匹配的DN 字段为空。
+    
+    总结： 
+        LDAPResult中的 matchedDN 字段
+            matchedDN的值 由服务器/server返回 
+            对于结果代码/resultCode 为 noSuchObject、aliasProblem、invalidDNSyntax、aliasDereferencingProblem
+                的消息/message，
+                服务器返回DIT中，可以为此操作找到的 最深的条目的DN
+                (即：所查找对象的 最后一个条目的名称)
+            参看：
+                /OPENLDAP_REL_ENG_2_4/contrib/ldapc++/src/LDAPResult.h 
+                的const std::string& getMatchedDN() const;
+
 
 4.1.10.  Referral
 
    The referral result code indicates that the contacted server cannot
    or will not perform the operation and that one or more other servers
    may be able to.  Reasons for this include:
+        推荐结果代码(referral result code) 
+            表示被连接的服务器 不能或不会执行操作，
+            而一个或多个其他服务器可能能够执行。 
+        原因包括：
 
    - The target entry of the request is not held locally, but the server
      has knowledge of its possible existence elsewhere.
+        请求的目标条目不在本地(本服务器)保存，但服务器知道它可能存在于其他地方。
 
    - The operation is restricted on this server -- perhaps due to a
      read-only copy of an entry to be modified.
+        该操作在此服务器上受到限制——可能是由于要修改的 是此条目的只读副本。
+    
+    总结： 
+        LDAPResult的resultCode 字段的值 如果是 referral
+            表明 此服务器无法执行 所请求的操作，但其他服务器可以执行 所请求的操作
+            原因包括: 
+                所请求的条目不在这个服务器上
+                请求修改某条目，但此条目在此服务器上 只是个可读的副本
 
    The referral field is present in an LDAPResult if the resultCode is
    set to referral, and it is absent with all other result codes.  It
@@ -788,27 +1017,55 @@ RFC 4511                         LDAPv3                        June 2006
    returned in response to any operation request (except Unbind and
    Abandon, which do not have responses).  At least one URI MUST be
    present in the Referral.
+        如果 LDAPResult的 resultCode字段 设置为referral，
+            则referral字段存在于 LDAPResult 中，
+            而所有其他结果代码都不存在referral字段。 
+        它包含对可通过 LDAP 或其他协议访问的一个或多个服务器或服务的一个或多个引用。 
+        任何操作请求都可以返回referral（Unbind 和 Abandon 除外，它们没有响应）。 
+        referral中必须至少存在一个 URI。
+    
+    总结： 
+        当LDAPResult的resultCode 字段的值 被设置为referral时
+            referral字段出现在LDAPResult中，
+        对 任何操作请求的响应 都可以返回 referral
+        referral中字段 中 至少存在一个URI
+    即： 
+        LDAPResult的resultCode字段 被设置为referral时，
+            LDAPResult的referral字段 至少包含一个URI 
+
 
    During a Search operation, after the baseObject is located, and
    entries are being evaluated, the referral is not returned.  Instead,
    continuation references, described in Section 4.5.3, are returned
    when other servers would need to be contacted to complete the
    operation.
+        在搜索操作期间，在定位baseObject 并评估条目后，不会返回引用。 
+        相反，当需要联系其他服务器以完成操作时，将返回第 4.5.3 节中描述的延续引用。
+    总结： 
+        当需要联系其他服务器以完成操作时，将返回reference(引用)
+
 
         Referral ::= SEQUENCE SIZE (1..MAX) OF uri URI
 
         URI ::= LDAPString     -- limited to characters permitted in
                                -- URIs
+    总结： 
+        可以看到： referral中至少包含一个 URI，URI是一个LDAPString字符串
+
 
    If the client wishes to progress the operation, it contacts one of
    the supported services found in the referral.  If multiple URIs are
    present, the client assumes that any supported URI may be used to
    progress the operation.
+        如果客户端希望推进操作，它会连接referral中找到的支持服务之一。 
+        如果存在多个 URI，则客户端假定任何受支持的 URI 均可用于推进操作。
+    总结： 
+        client会连接referral中的URI，以继续执行操作
 
    Clients that follow referrals MUST ensure that they do not loop
    between servers.  They MUST NOT repeatedly contact the same server
    for the same request with the same parameters.  Some clients use a
-
+#---------------------------------------------------------------------------------------
 
 
 Sermersheim                 Standards Track                    [Page 12]
@@ -819,49 +1076,78 @@ RFC 4511                         LDAPv3                        June 2006
    counter that is incremented each time referral handling occurs for an
    operation, and these kinds of clients MUST be able to handle at least
    ten nested referrals while progressing the operation.
+        追踪referral的客户端/client必须确保它们不会在服务器/server之间循环。 
+            对于具有相同参数的相同请求，他们不得重复联系同一服务器/server。 
+        一些客户端/client使用一个计数器，
+            每当发生操作的引用处理时 都会增加该计数器，
+        并且这些类型的客户端/client 必须能够在进行操作时 处理至少十个嵌套引用/referral。
+    
+    总结： 
+        client会连接referral中的URI 
+            但是，具有相同参数的相同请求 不能重复连接同一服务器/server 
 
    A URI for a server implementing LDAP and accessible via TCP/IP (v4 or
    v6) [RFC793][RFC791] is written as an LDAP URL according to
    [RFC4516].
+        实现LDAP 并可通过TCP/IP(v4或v6)[RFC793][RFC791]访问的 服务器
+            的URI 
+            根据[RFC4516] 被写为 LDAP URL。
 
    Referral values that are LDAP URLs follow these rules:
+        作为LDAP URL的referral值遵循以下规则：
 
    - If an alias was dereferenced, the <dn> part of the LDAP URL MUST be
      present, with the new target object name.
+        如果别名被取消引用，LDAP URL的<dn>部分必须存在，并带有新的目标对象名称。
 
    - It is RECOMMENDED that the <dn> part be present to avoid ambiguity.
+        建议使用<dn>部分，以避免歧义。
 
    - If the <dn> part is present, the client uses this name in its next
      request to progress the operation, and if it is not present the
      client uses the same name as in the original request.
+        如果 <dn> 部分存在，则客户端在其下一个请求中使用此名称来进行操作，
+        如果不存在，则客户端使用与原始请求中相同的名称。
 
    - Some servers (e.g., participating in distributed indexing) may
      provide a different filter in a URL of a referral for a Search
      operation.
+        某些服务器（例如，参与分布式索引）可能会在搜索操作的referral URL 中提供不同的过滤器。
 
    - If the <filter> part of the LDAP URL is present, the client uses
      this filter in its next request to progress this Search, and if it
      is not present the client uses the same filter as it used for that
      Search.
+        如果存在 LDAP URL的<filter>部分，则客户端在其下一个请求中使用此过滤器来进行此搜索，
+        如果不存在，则客户端使用与用于该搜索的过滤器相同的过滤器。
 
    - For Search, it is RECOMMENDED that the <scope> part be present to
      avoid ambiguity.
+        对于搜索，建议存在<scope>部分，以避免歧义。
 
    - If the <scope> part is missing, the scope of the original Search is
      used by the client to progress the operation.
+        如果缺少 <scope> 部分，客户端将使用原始搜索的范围来进行操作。
 
    - Other aspects of the new request may be the same as or different
      from the request that generated the referral.
+        新请求的其他方面可能与生成referral的请求相同或不同。
 
    Other kinds of URIs may be returned.  The syntax and semantics of
    such URIs is left to future specifications.  Clients may ignore URIs
    that they do not support.
+        可能会返回其他类型的 URI。 
+        此类 URI 的语法和语义留给未来的规范。 
+        客户端可能会忽略他们不支持的 URI。
 
    UTF-8 encoded characters appearing in the string representation of a
    DN, search filter, or other fields of the referral value may not be
    legal for URIs (e.g., spaces) and MUST be escaped using the % method
    in [RFC3986].
-
+        出现在 DN的字符串表示、搜索过滤器或referral值的其他字段 中的 UTF-8编码字符 
+            对于 URI(例如，空格)可能不合法，
+        并且必须使用 [RFC3986] 中的 % 方法进行转义。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -877,16 +1163,24 @@ RFC 4511                         LDAPv3                        June 2006
    Controls provide a mechanism whereby the semantics and arguments of
    existing LDAP operations may be extended.  One or more controls may
    be attached to a single LDAP message.  A control only affects the
-   semantics of the message it is attached to.
+   semantics of the message it is attached to.  
+        控件提供了一种机制，可以扩展现有 LDAP 操作的语义和参数。 
+        一个或多个控件可以附加到单个 LDAP message。 
+        控件只影响它所附加的消息/message的语义。
+    总结： 
+        control可以扩展现有LDAP操作的语义和参数
+        control只影响它所附加的message的语义
 
    Controls sent by clients are termed 'request controls', and those
    sent by servers are termed 'response controls'.
+        客户端/client 发送的 控件/control 称为“(request controls)请求控件”，
+        服务器/server 发送的 控件/control 称为“(response controls)响应控件”。
 
         Controls ::= SEQUENCE OF control Control
 
         Control ::= SEQUENCE {
-             controlType             LDAPOID,
-             criticality             BOOLEAN DEFAULT FALSE,
+             controlType             LDAPOID,                   #control的OID
+             criticality             BOOLEAN DEFAULT FALSE,     #布尔值，默认false
              controlValue            OCTET STRING OPTIONAL }
 
    The controlType field is the dotted-decimal representation of an
@@ -894,6 +1188,15 @@ RFC 4511                         LDAPv3                        June 2006
    provides unambiguous naming of controls.  Often, response control(s)
    solicited by a request control share controlType values with the
    request control.
+        controlType 字段
+            是唯一标识 控件/control 的 OBJECT IDENTIFIER(OID)(对象标识分配符) 的 点分十进制表示。 
+        这提供了明确的控件/control命名。 
+        通常，请求控件  请求的响应控件 与请求控件 共享controlType 值。
+    
+    总结： 
+        Controld的 controlType字段 
+            的值 是该control的OID(点分十进制字符串表示)
+        response control和request control使用相同的 controlType值
 
    The criticality field only has meaning in controls attached to
    request messages (except UnbindRequest).  For controls attached to
@@ -902,23 +1205,59 @@ RFC 4511                         LDAPv3                        June 2006
    value of TRUE indicates that it is unacceptable to perform the
    operation without applying the semantics of the control.
    Specifically, the criticality field is applied as follows:
-
+        关键性(临界)(criticality) 字段 
+            仅在 控件/control 附加到 请求消息中有意义（UnbindRequest 除外）。 
+        对于附加到响应消息和 UnbindRequest 的控制，
+            criticality字段应该是假的，并且必须被接收协议对等方忽略。 
+        TRUE 值表示在不应用控件语义的情况下执行操作是不可接受的。 
+        具体来说，criticality字段的应用如下：
+    
+    总结： 
+        Control的criticality字段
+            仅在control附加到 request message(UnbindRequest除外)时，
+                criticality字段 才有意义
+            对于control附加到 response message和UnbindRequest时   ，
+                criticality字段 应该设置为FALSE
+                并且接收方应该忽略 该字段
+            criticality设置为TRUE，则表明 
+                不使用 控件/control语义的情况下 不可执行操作
+            
    - If the server does not recognize the control type, determines that
      it is not appropriate for the operation, or is otherwise unwilling
      to perform the operation with the control, and if the criticality
      field is TRUE, the server MUST NOT perform the operation, and for
      operations that have a response message, it MUST return with the
      resultCode set to unavailableCriticalExtension.
+        如果服务器/server  不识别控件类型，确定它不适合操作，或者不愿意使用控件执行操作，并且如果criticality字段为 TRUE，
+            则服务器/server 不得/不能 执行操作，
+            并且对于 具有响应消息(response message)的操作，
+                它必须返回 并将 resultCode 设置为 unavailableCriticalExtension/不可用的临界扩展。
+    总结： 
+        如果server 
+            不能够识别control的类型/control不适合操作/不愿意使用control执行操作
+            并且criticality设置为 TRUE
+                则server不能执行操作
+        并且server
+            将resultCode字段设置为 unavailableCriticalExtension
+
 
    - If the server does not recognize the control type, determines that
      it is not appropriate for the operation, or is otherwise unwilling
      to perform the operation with the control, and if the criticality
      field is FALSE, the server MUST ignore the control.
+        如果服务器不识别控件类型，确定它不适合操作，或者不愿意用控件执行操作，并且如果关键性字段为 FALSE，
+            则服务器必须忽略控件。
+    总结： 
+        如果server 
+            不能够识别control的类型/control不适合操作/不愿意使用control执行操作
+            并且criticality设置为 FALSE
+                则server必须忽略control
 
    - Regardless of criticality, if a control is applied to an
      operation, it is applied consistently and impartially to the
      entire operation.
-
+        无论关键程度如何，如果将control应用于一项操作，它就会一致且公正地应用于整个操作。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -936,10 +1275,24 @@ RFC 4511                         LDAPv3                        June 2006
    with a control of its type.  When a controlValue is defined in terms
    of ASN.1, and BER-encoded according to Section 5.1, it also follows
    the extensibility rules in Section 4.
+        controlValue 可能包含与 controlType 相关的信息。 
+        它的格式由control的规范定义。 
+        实现必须准备好处理 controlValue 八位字节字符串(octet string)的任意内容，包括零字节。 
+        仅当没有与其类型的控件相关联的值信息时，它才不存在。 
+        当根据 ASN.1 定义 controlValue 并根据第 5.1 节进行 BER 编码时，它也遵循第 4 节中的可扩展性规则。
+    总结： 
+        Control的controlValue字段
+            包含与controlType相关的信息
+            的格式 由control的规范定义
+            的值 是 OCTET STRING，可能是0字节
+            没有和control的type相关的value时，才忽略它
 
    Servers list the controlType of request controls they recognize in
    the 'supportedControl' attribute in the root DSE (Section 5.1 of
    [RFC4512]).
+        服务器在 
+            root DSE([RFC4512]的第5.1节)的 “supportedControl”属性中
+        列出了它们识别的 请求控件(request control) 的controlType。
 
    Controls SHOULD NOT be combined unless the semantics of the
    combination has been specified.  The semantics of control
@@ -956,26 +1309,51 @@ RFC 4511                         LDAPv3                        June 2006
    operation fails with protocolError.  Again, controls with a
    criticality of FALSE may be ignored in order to arrive at a valid
    combination.
+        除非指定了组合的语义，
+            否则不应 组合控件/control。 
+        控件组合的语义（如果指定）
+            通常可以在最近发布的 控件/control规范 中找到。 
+        当遇到语义无效、未指定（或未知）的控件组合时，
+            认为消息格式不正确； 
+            因此，操作失败并附带protocolError。 
+        为了达到有效的组合，
+            可以忽略 criticality值为FALSE 的control。 
+        此外，除非在规范中给出依赖于顺序的语义，
+            否则 SEQUENCE 中控件组合的顺序将被忽略。 
+        如果订单要忽略但服务器不能忽略，
+            则认为消息格式不正确，
+            操作失败并显示 protocolError。 
+        同样，为了达到有效的组合，
+            可以忽略 criticality值为FALSE的control。
 
    This document does not specify any controls.  Controls may be
    specified in other documents.  Documents detailing control extensions
    are to provide for each control:
+        本文档未指定任何控件/control。 
+        控件/control 可能在其他文件中规定。 
+        详细说明控件扩展的文档将为每个控件提供：
 
    - the OBJECT IDENTIFIER assigned to the control,
+        分配给control的 OID(对象标识符)，
 
    - direction as to what value the sender should provide for the
      criticality field (note: the semantics of the criticality field are
      defined above should not be altered by the control's
      specification),
+        关于发送方应该为criticality字段提供什么值的方向
+        （注意：上面定义的criticality字段的语义不应被控件/control的规范改变），
 
    - whether the controlValue field is present, and if so, the format of
      its contents,
+        controlValue字段是否存在，如果存在，其内容的格式，
 
    - the semantics of the control, and
+        控件的语义，以及，
 
    - optionally, semantics regarding the combination of the control with
      other controls.
-
+        可选地，关于控件与其他控件组合的语义。
+#---------------------------------------------------------------------------------------
 
 
 
@@ -1029,7 +1407,7 @@ RFC 4511                         LDAPv3                        June 2006
      extensible as defined in Section 3.7 of [RFC4520].  Servers that do
      not support a choice supplied by a client return a BindResponse
      with the resultCode set to authMethodNotSupported.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -1083,7 +1461,7 @@ RFC 4511                         LDAPv3                        June 2006
    A client may abort a SASL bind negotiation by sending a BindRequest
    with a different value in the mechanism field of SaslCredentials, or
    an AuthenticationChoice other than sasl.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -1141,7 +1519,7 @@ RFC 4511                         LDAPv3                        June 2006
    The Unbind operation is not the antithesis of the Bind operation as
    the name implies.  The naming of these operations are historical.
    The Unbind operation should be thought of as the "quit" operation.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -1198,7 +1576,7 @@ RFC 4511                         LDAPv3                        June 2006
    transient network failure.  Note that this notification is not a
    response to an Unbind requested by the client.  Uncompleted
    operations are handled as specified in Section 3.1.
-
+#---------------------------------------------------------------------------------------
 
 
 
@@ -1256,7 +1634,7 @@ RFC 4511                         LDAPv3                        June 2006
              and             [0] SET SIZE (1..MAX) OF filter Filter,
              or              [1] SET SIZE (1..MAX) OF filter Filter,
              not             [2] Filter,
-
+#---------------------------------------------------------------------------------------
 
 
 Sermersheim                 Standards Track                    [Page 20]
@@ -1311,7 +1689,7 @@ RFC 4511                         LDAPv3                        June 2006
 
       singleLevel: The scope is constrained to the immediate
       subordinates of the entry named by baseObject.
-
+#---------------------------------------------------------------------------------------
 
 
 
