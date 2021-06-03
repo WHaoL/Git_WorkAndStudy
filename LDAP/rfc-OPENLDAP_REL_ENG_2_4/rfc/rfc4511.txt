@@ -828,7 +828,7 @@ RFC 4511                         LDAPv3                        June 2006
    request.
         LDAPResult
             是此协议中用于 
-            从服务器/servers 向客户端/clients 
+            从servers 向clients 
             返回成功或失败指示的构造。 
         对于各种请求，
             服务器/servers 将返回 LDAPResult响应，
@@ -847,7 +847,7 @@ RFC 4511                         LDAPv3                        June 2006
                   compareFalse                 (5),
                   compareTrue                  (6),
                   authMethodNotSupported       (7),
-                  strongerAuthRequired         (8),
+                  strongerAuthRequired         (8), #
                        -- 9 reserved --
                   referral                     (10),
                   adminLimitExceeded           (11),
@@ -1369,25 +1369,35 @@ RFC 4511                         LDAPv3                        June 2006
    operation should be thought of as the "authenticate" operation.
    Operational, authentication, and security-related semantics of this
    operation are given in [RFC4513].
+      绑定操作功能 是
+         允许在客户端和服务器之间交换 身份验证/认证信息。 
+      绑定操作 
+         应该被认为是“认证/authenticate”操作。 
+         [RFC4513] 中给出了该操作的：操作、认证和安全相关语义。 
+   
+   总结： 
+      绑定操作，主要用于 身份验证/认证
 
    The Bind request is defined as follows:
+      绑定请求(Bind request) 定义如下：
 
         BindRequest ::= [APPLICATION 0] SEQUENCE {
-             version                 INTEGER (1 ..  127),
-             name                    LDAPDN,
-             authentication          AuthenticationChoice }
+             version                 INTEGER (1 ..  127),      #版本号 -- (整数)
+             name                    LDAPDN,                   #DN 
+             authentication          AuthenticationChoice }    #选择 认证 的方式
 
         AuthenticationChoice ::= CHOICE {
-             simple                  [0] OCTET STRING,
-                                     -- 1 and 2 reserved
-             sasl                    [3] SaslCredentials,
+             simple                  [0] OCTET STRING,            #简单认证
+                                     -- 1 and 2 reserved 
+             sasl                    [3] SaslCredentials,         #SASL认证
              ...  }
 
-        SaslCredentials ::= SEQUENCE {
-             mechanism               LDAPString,
-             credentials             OCTET STRING OPTIONAL }
+        SaslCredentials ::= SEQUENCE {                            #SASL认证
+             mechanism               LDAPString,                     #指定一个字符串，代表了 一种机制
+             credentials             OCTET STRING OPTIONAL }         #证书，以 OCTET STRING编码
 
    Fields of the BindRequest are:
+      绑定请求(BindRequest) 的各个字段
 
    - version: A version number indicating the version of the protocol to
      be used at the LDAP message layer.  This document describes version
@@ -1395,6 +1405,22 @@ RFC 4511                         LDAPv3                        June 2006
      sets this field to the version it desires.  If the server does not
      support the specified version, it MUST respond with a BindResponse
      where the resultCode is set to protocolError.
+         version字段：
+            一个版本号，指示要在 LDAP消息层(LDAP message layer) 使用的协议的版本。 
+            本文档描述了协议的第3版。 
+         没有版本协商。 
+         客户端/client 
+            将此字段设置为其所需的版本。 
+         如果服务器/server 
+            不支持指定的版本，
+            它必须以 BindResponse 响应，其中 resultCode 设置为 protocolError。
+   
+   总结： 
+      BindRequest的 version字段
+         client 用于 指出它所需要的版本 (!!!)
+      若是server 不支持 client指定的version
+         那么返回 BindResponse
+         并 resultCode设置为protocolError 
 
    - name: If not empty, the name of the Directory object that the
      client wishes to bind as.  This field may take on a null value (a
@@ -1402,11 +1428,34 @@ RFC 4511                         LDAPv3                        June 2006
      Section 5.1) or when using SASL [RFC4422] authentication
      ([RFC4513], Section 5.2).  Where the server attempts to locate the
      named object, it SHALL NOT perform alias dereferencing.
+         name字段：
+            如果不为空，则为客户端希望绑定的 目录对象的名称。 
+         出于匿名绑定（[RFC4513]，第 5.1 节）或使用 SASL [RFC4422] 身份验证（[RFC4513]，第 5.2 节）的目的，
+            该字段可能采用空/null值（长度为0的字符串）。 
+         当服务器试图定位命名对象时，它不应执行别名解引用。
+
+   总结： 
+      BindRequest的 name字段
+         不为空，则为client希望绑定到的DN
+         匿名绑定/SASL认证 时，name可能为null值
+         当server试图定位name/DN 时， 不应该 解引用
+      client 用于 指出 它希望绑定到的DN (!!!)
 
    - authentication: Information used in authentication.  This type is
      extensible as defined in Section 3.7 of [RFC4520].  Servers that do
      not support a choice supplied by a client return a BindResponse
      with the resultCode set to authMethodNotSupported.
+         authentication/认证 字段：
+            用于认证的信息。 
+            这种类型是可扩展的，如 [RFC4520] 的第 3.7 节中所定义。 
+         不支持客户端提供的选择的服务器返回一个 BindResponse，
+            并将 resultCode 设置为 authMethodNotSupported。
+    总结： 
+      BindRequest的 authentication字段
+        client 用于指定 验证/认证方式 (!!!)
+    client指定了 认证方式，但是如果server不支持 这种认证方式
+        返回 BindResponse
+        并将 resultCode 设置为 authMethodNotSupported
 #---------------------------------------------------------------------------------------
 
 
@@ -1427,8 +1476,20 @@ RFC 4511                         LDAPv3                        June 2006
      consisting of other data (such as random octets) MUST NOT be
      altered.  The determination of whether a password is textual is a
      local client matter.
+            AuthenticationChoice 设置为simple 
+                那么 传输到服务器的 文本/明文 密码(由已知字符集和编码的字符序列组成)
+                应该使用 UTF-8[RFC3629]编码[Unicode] 转化/编码。 
+            在传输之前，
+                客户端应该通过应用 stringprep[RFC3454]算法的 SASLprep[RFC4013]配置文件 
+                来准备 文本密码 作为"query"字符串。 
+            不得更改由其他数据（例如随机八位字节）组成的密码。 
+            确定密码是否为文本是本地客户端的事情。
+    总结： 
+        当client使用sample验证时，使用UTF-8 对 文本/明文密码进行编码传输
+        不能使用其他类型的字符 来组成密码 
 
 4.2.1.  Processing of the Bind Request
+        处理 绑定请求(Bind Request)
 
    Before processing a BindRequest, all uncompleted operations MUST
    either complete or be abandoned.  The server may either wait for the
@@ -1436,11 +1497,35 @@ RFC 4511                         LDAPv3                        June 2006
    proceeds to authenticate the client in either a single-step or
    multi-step Bind process.  Each step requires the server to return a
    BindResponse to indicate the status of authentication.
+        在处理 BindRequest 之前，所有未完成的操作 必须 
+            要么完成 
+            要么被放弃。 
+        服务器/server 
+            可以等待未完成的操作完成，
+            或者放弃它们。 
+        然后服务器继续以单步或多步绑定过程对客户端进行身份验证。 
+        每一步都需要服务器返回一个 BindResponse 来指示认证的状态。
+    总结： 
+        server 去处理 绑定请求(Bind Request)
+        server 在处理BindResuest之前，对于未完成的操作 要么等待操作的完成 要么放弃操作
+        然后serer执行
+            单步绑定过程 或者
+            多步绑定过程
+                每一步都需要server返回一个BindResponse 来指示认证的状态
 
    After sending a BindRequest, clients MUST NOT send further LDAP PDUs
    until receiving the BindResponse.  Similarly, servers SHOULD NOT
    process or respond to requests received while processing a
    BindRequest.
+        在发送 BindRequest 之后，
+            client在收到BindResponse之前 不得发送更多的 LDAP PDU。 
+        同样，服务器 正在处理BindRequest时 不应该处理或响应 收到的请求。
+    总结： 
+        client 发出BindRequest之后，
+            如果还没有接收到 BindResponse，那么它不应该发送更多的LDAP-PDU 
+        server如果正在处理BindRequest，
+            那么不应该 处理/响应 接收到的 请求
+
 
    If the client did not bind before sending a request and receives an
    operationsError to that request, it may then send a BindRequest.  If
@@ -1448,19 +1533,46 @@ RFC 4511                         LDAPv3                        June 2006
    LDAP session, it may terminate the LDAP session, re-establish it, and
    begin again by first sending a BindRequest.  This will aid in
    interoperating with servers implementing other versions of LDAP.
+        如果client 
+            1)在发送请求之前没有绑定 并且 收到了 该请求的 操作错误码/operationsError，
+                那么它可以发送一个 BindRequest。 
+            2)如果这也失败了 或者 client选择不绑定现有的 LDAP-session/会话，
+                它可能会终止这个 LDAP-session/会话，
+                重新建立它，
+                然后通过首先发送 BindRequest 重新开始。 
+        这将有助于实现 与 其他LDAP版本的服务器 进行互操作。
 
    Clients may send multiple Bind requests to change the authentication
    and/or security associations or to complete a multi-stage Bind
    process.  Authentication from earlier binds is subsequently ignored.
+        client 
+            可以发送多个绑定请求(Bind request) 
+                来更改 身份验证 和/或 
+                安全关联 或 
+                完成多阶段绑定过程。 
+        随后忽略来自早期绑定的身份验证。
 
    For some SASL authentication mechanisms, it may be necessary for the
    client to invoke the BindRequest multiple times ([RFC4513], Section
    5.2).  Clients MUST NOT invoke operations between two Bind requests
    made as part of a multi-stage Bind.
+        对于某些 SASL身份验证机制，
+            client 可能需要多次调用 BindRequest（[RFC4513]，第 5.2 节）。 
+        作为多阶段绑定的一部分，的 在两个绑定请求(Bind request)之间, 
+            client不得调用 操作。
+    总结： 
+        对于SASL身份验证机制，client可能需要发送多个BindRequest
+        并且在执行多阶段绑定 的 两个绑定请求(Bind request)之间，client不得调用其他操作
 
    A client may abort a SASL bind negotiation by sending a BindRequest
    with a different value in the mechanism field of SaslCredentials, or
    an AuthenticationChoice other than sasl.
+        client可以通过发送
+                1)一个 在SaslCredentials机制字段中具有不同值的 BindRequest, 或者
+                2)一个 与SASL不同的AuthenticationChoice(认证选择)
+        来 终止 SASL绑定协商。
+
+
 #---------------------------------------------------------------------------------------
 
 
@@ -1479,23 +1591,46 @@ RFC 4511                         LDAPv3                        June 2006
    resultCode set to authMethodNotSupported.  This will allow the client
    to abort a negotiation if it wishes to try again with the same SASL
    mechanism.
+        如果client发送一个BindRequest 并且其中的 sasl mechanism字段 是个空字符串，
+            服server必须返回一个 BindResponse 并将 resultCode 设置为 authMethodNotSupported。 
+        如果client希望使用相同的 SASL mechanism/机制 再次尝试，这将允许客户端中止协商。
 
 4.2.2.  Bind Response
+        绑定响应
 
    The Bind response is defined as follows.
+        绑定响应定义如下。
 
         BindResponse ::= [APPLICATION 1] SEQUENCE {
              COMPONENTS OF LDAPResult,
              serverSaslCreds    [7] OCTET STRING OPTIONAL }
+        总结： 
+            BindResponse是LDAPResult的组成部分
 
    BindResponse consists simply of an indication from the server of the
    status of the client's request for authentication.
+        BindResponse仅包含
+            一个 来自server的
+            关于 client身份验证请求状态 的指示。
+    总结： 
+        BindResponse 是server返回给client的
+        只包含了一个状态指示
+            它是 client请求身份验证 的状态指示
 
    A successful Bind operation is indicated by a BindResponse with a
    resultCode set to success.  Otherwise, an appropriate result code is
    set in the BindResponse.  For BindResponse, the protocolError result
    code may be used to indicate that the version number supplied by the
    client is unsupported.
+        一个成功的绑定操作由一个 BindResponse 指示，
+            并将 resultCode 设置为 success。 
+        否则，在 BindResponse 中设置适当的 (result code)结果代码。 
+        对于BindResponse，可以使用protocolError结果码来指示 不支持客户端提供的版本号。
+   总结： 
+      绑定操作处成功后，
+         server将回复BindResponse，并将resultCode 设置为 success 
+      绑定失败时，
+         server将回复BindResponse，并使用protocolError 指示不支持此version   
 
    If the client receives a BindResponse where the resultCode is set to
    protocolError, it is to assume that the server does not support this
@@ -1505,6 +1640,20 @@ RFC 4511                         LDAPv3                        June 2006
    another version of this protocol is beyond the scope of this
    document.  Clients that are unable or unwilling to proceed SHOULD
    terminate the LDAP session.
+         如果client收到一个 BindResponse，
+            其中 resultCode 设置为 protocolError，
+            则假定服务器不支持此版本/version的 LDAP。 
+         虽然client可能能够继续使用此协议的另一个版本/version
+            （这可能需要或可能不需要 关闭和重新建立传输连接），
+            但如何继续使用此协议的另一个版本超出了本文档的描述范围。 
+         不能或不愿继续的 client应该终止 LDAP 会话。
+   总结： 
+      client收到一个BindResponse，并且发现 resultCode值为protocolError
+         那么，就了解到server不支持 我刚刚发送时 指示的version
+      如果client不想/不能继续会话，就应该终止会话
+      关于客户端在收到protocolError时 如何选择正确的version,
+         超出了本文档的范围
+
 
    The serverSaslCreds field is used as part of a SASL-defined bind
    mechanism to allow the client to authenticate the server to which it
@@ -1512,6 +1661,18 @@ RFC 4511                         LDAPv3                        June 2006
    If the client bound with the simple choice, or the SASL mechanism
    does not require the server to return information to the client, then
    this field SHALL NOT be included in the BindResponse.
+      serverSaslCreds字段     
+         用作 SASL定义的绑定机制 的一部分，
+         以允许client对其正在通信的server进行身份验证，或执行"challenge-response"身份验证。 
+      如果client绑定了简单的选择，
+      或者 SASL机制不要求server向client返回信息，则该字段不应包含在 BindResponse 中。
+   总结： 
+      当client选择的验证机制是sasl，
+         那么server 的BindResponse中将会有serverSaslCreds这个字段，
+         用以指示：允许client 执行身份验证
+      当client选择的验证机制是simple，或者不允许server向client返回信息，
+         那么server 的BindResponse中不应该包含serverSaslCreds这个字段
+         
 
 4.3.  Unbind Operation
 
@@ -1519,6 +1680,13 @@ RFC 4511                         LDAPv3                        June 2006
    The Unbind operation is not the antithesis of the Bind operation as
    the name implies.  The naming of these operations are historical.
    The Unbind operation should be thought of as the "quit" operation.
+      Unbind操作的功能是：终止LDAP会话。 
+         顾名思义，Unbind操作 并不是 Bind操作 的对立面。 
+      这些操作的命名是历史性的。 Unbind 操作应该被认为是"quit/退出"操作。
+   
+   总结： 
+      Unbind操作，是用来终止LDAP会话
+
 #---------------------------------------------------------------------------------------
 
 
@@ -1538,8 +1706,18 @@ RFC 4511                         LDAPv3                        June 2006
    upon receipt of the UnbindRequest, are to gracefully terminate the
    LDAP session as described in Section 5.3.  Uncompleted operations are
    handled as specified in Section 3.1.
+      客户端在传输 UnbindRequest 后，服务器在接收到 UnbindRequest 时，将如第 5.3 节所述优雅地终止 LDAP 会话。 
+      未完成的操作按照第 3.1 节中的规定处理。
+   总结： 
+      client发出UnbindRequest，并且server收到UnbindRequest之后，
+         就会终止LDAP会话
+      未完成的操作按照第 3.1 节中的规定处理
+         因为会话/连接 已经关闭，所以
+            未完成的操作都将被放弃
+            如果无法被放弃，那么执行完毕
 
 4.4.  Unsolicited Notification
+      主动通知
 
    An unsolicited notification is an LDAPMessage sent from the server to
    the client that is not in response to any LDAPMessage received by the
@@ -1547,27 +1725,68 @@ RFC 4511                         LDAPv3                        June 2006
    server or in the LDAP session between the client and the server.  The
    notification is of an advisory nature, and the server will not expect
    any response to be returned from the client.
+      主动通知是从server发送到client的 LDAPMessage，
+         它不响应server收到的任何 LDAPMessage。 
+      它用于表示 
+            server中 或 
+            client与server之间的LDAP会话中 
+         的异常情况。 
+      该通知具有咨询性质，server不会期望从client返回任何响应。
+   总结： 
+      Unsolicited Notification/主动通知 
+         是server主动发送给client的
+      用于告诉client，
+         server出现了异常， 或者
+         client和server之间的LDAP会话出现了异常
+      
 
    The unsolicited notification is structured as an LDAPMessage in which
    the messageID is zero and protocolOp is set to the extendedResp
    choice using the ExtendedResponse type (See Section 4.12).  The
    responseName field of the ExtendedResponse always contains an LDAPOID
    that is unique for this notification.
+      主动通知(unsolicited notification) 
+         被构造为LDAPMessage，
+         其中 messageID 为零，
+         并且 LDAPMessage的protocolOp字段 
+            被设置为使用ExtendedResponse类型的 extendedResp选项（参见第4.12节）。 
+      ExtendedResponse 的 responseName字段 始终包含此通知唯一的 LDAPOID。
+   总结： 
+      Unsolicited Notification/主动通知 
+         被构建为 LDAPMessage
+         messageID为0
+         protocolOp字段为ExtendedResponse类型的extendedResp
+         ExtendedResponse的responseName字段，包含了LDAPOID
 
    One unsolicited notification (Notice of Disconnection) is defined in
    this document.  The specification of an unsolicited notification
    consists of:
+      本文档中定义了一种主动通知（断开连接的通知）。 
+      主动通知的规范包括：
 
    - the OBJECT IDENTIFIER assigned to the notification (to be specified
      in the responseName,
+         -分配给通知的OID (在 responseName 中指定),
 
    - the format of the contents of the responseValue (if any),
+         - responseValue 内容的格式（如果有），
 
    - the circumstances which will cause the notification to be sent, and
+         - 导致通知被发送的情况，以及,
 
    - the semantics of the message.
+         - 消息的语义。
+   
+   总结： 
+      本文档中定义了一种主动通知（断开连接的通知）
+      主动通知的规范： 
+         分配给通知的OID (在 responseName 中指定),
+         responseValue 内容的格式（如果有），
+         导致通知被发送的情况，
+         消息的语义
 
 4.4.1.  Notice of Disconnection
+         断开连接的通知
 
    This notification may be used by the server to advise the client that
    the server is about to terminate the LDAP session on its own
@@ -1576,6 +1795,12 @@ RFC 4511                         LDAPv3                        June 2006
    transient network failure.  Note that this notification is not a
    response to an Unbind requested by the client.  Uncompleted
    operations are handled as specified in Section 3.1.
+         server可以使用此通知来通知client，
+            server将主动终止 LDAP会话。 
+         此通知旨在帮助client区分 
+            异常的server状况和暂时的网络故障。 
+         请注意，此通知不是对client请求的 Unbind 的响应。 
+         未完成的操作按照第 3.1 节中的规定处理。
 #---------------------------------------------------------------------------------------
 
 
@@ -1592,9 +1817,16 @@ RFC 4511                         LDAPv3                        June 2006
    with this message, it indicates that the server has detected that an
    established security association between the client and server has
    unexpectedly failed or been compromised.
+         responseName为1.3.6.1.4.1.1466.20036，
+         responseValue字段不存在，
+         resultCode用于指示断开的原因。 
+         当此消息返回  resultCode为strongAuthRequired 时，
+         表明server已检测到 client和server之间建立的安全关联 意外失败或被破坏。
 
    Upon transmission of the Notice of Disconnection, the server
    gracefully terminates the LDAP session as described in Section 5.3.
+         在传输 断开连接通知 后，
+         server会如第 5.3 节所述优雅地终止 LDAP会话。
 
 4.5.  Search Operation
 
@@ -1603,10 +1835,17 @@ RFC 4511                         LDAPv3                        June 2006
    a complex search criterion.  This can be used to read attributes from
    a single entry, from entries immediately subordinate to a particular
    entry, or from a whole subtree of entries.
+      搜索操作用于 请求server 根据访问控制和其他限制 返回一组 匹配复杂搜索条件的 条目。 
+      这可用于从 单个条目、直接从属于特定条目的条目 或从 条目的整个子树 中 读取属性。
+   总结： 
+      搜索操作，是client向server请求数据
+      即 读取条目的属性
 
 4.5.1.  Search Request
+         搜索请求
 
    The Search request is defined as follows:
+   搜索请求定义如下
 
         SearchRequest ::= [APPLICATION 3] SEQUENCE {
              baseObject      LDAPDN,
@@ -1673,6 +1912,9 @@ RFC 4511                         LDAPv3                        June 2006
    X.500 is not required to use the Read or List operations, although it
    may choose to do so, and if it does, it must provide the same
    semantics as the X.500 Search operation.
+      请注意，client可以模拟 X.500"list"-like 操作，
+         通过过滤器检查“objectClass”属性是否存在来请求单级搜索操作，并且 X.500“读取”类操作可以 由具有相同过滤器的 baseObject Search 操作模拟。 
+      为 X.500 提供网关的服务器不需要使用读取或列表操作，尽管它可以选择这样做，如果这样做，它必须提供与 X.500 搜索操作相同的语义。
 
 4.5.1.1.  SearchRequest.baseObject
 
