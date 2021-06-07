@@ -129,15 +129,15 @@ RFC 4511                         LDAPv3                        June 2006
    user, interacts with one or more servers (or Directory System Agents
    (DSA)).  Clients interact with servers using a directory access
    protocol.
-      目录是“合作 提供目录服务的 开放系统的 集合”[X.500]。 
+      目录是“ 合作提供目录服务的 开放系统的 集合”[X.500]。 
       目录用户（可以是人或其他实体）,
          通过
             客户端/client
             (或目录用户代理(DUA))
          访问目录。 
       客户端/client 
-         代表 目录用户 
-         与一台或多台服务器（或目录系统代理（DSA））
+         代表 目录用户/user  
+         与一台或多台服务器/server（或目录系统代理（DSA））
          进行交互。 
       客户端/client
          使用目录访问协议
@@ -157,7 +157,7 @@ RFC 4511                         LDAPv3                        June 2006
    [RFC4510], which obsoletes the previously defined LDAP technical
    specification, RFC 3377, in its entirety.
       本文档是 LDAP 技术规范 [RFC4510] 的组成部分，
-      它 完全废弃了 先前定义的LDAP技术规范RFC 3377。
+      它 完全废弃了 先前定义的LDAP技术规范RFC3377。
 
    This document, together with [RFC4510], [RFC4513], and [RFC4512],
    obsoletes RFC 2251 in its entirety.  Section 3.3 is obsoleted by
@@ -248,7 +248,7 @@ RFC 4511                         LDAPv3                        June 2006
    The term "LDAP session" refers to combined services (transport
    connection, TLS layer, SASL layer, LDAP message layer) and their
    associations.
-      术语"LDAP session"是指组合的服务（传输连接，TLS层，SASL层，LDAP消息层）及其关联。 
+      术语"LDAP session/会话"是指组合的服务（传输连接，TLS层，SASL层，LDAP消息层）及其关联。 
 
    See the table in Section 5 for an illustration of these four terms.
       有关这四个术语的说明，请参见第5节中的表。
@@ -262,21 +262,28 @@ RFC 4511                         LDAPv3                        June 2006
    the necessary operation(s) in the Directory.  Upon completion of an
    operation, the server typically returns a response containing
    appropriate data to the requesting client.
-      该协议采用的通用模型是 
-         对服务器执行协议操作的 客户端之一。 
+      该协议采用的通用/一般模型是 
+         客户端/client  对服务器/server 执行协议操作的 。
+         (总结： 即client发出请求) 
       在该模型中，
          客户端向服务器发送 
-            描述要执行的操作的协议请求。 
-         然后服务器负责在号码簿中执行必要的操作。 
+            描述 要执行的操作的 协议请求。 
+         然后服务器负责在号码簿中执行必要的操作。
+         (总结： 即client发出请求，server进行处理) 
       操作完成后，
          服务器通常会向 发出请求的客户端
          返回包含适当数据的响应。
+
+   总结： 即client发出请求，server处理 并 回复响应
 
    Protocol operations are generally independent of one another.  Each
    operation is processed as an atomic action, leaving the directory in
    a consistent state.
       协议操作通常彼此独立。 
       每个操作都作为一个原子操作进行处理，使目录保持一致状态。
+   总结：   
+      每个操作都是独立的 
+      每个操作都是原子性的
 
    Although servers are required to return responses whenever such
    responses are defined in the protocol, there is no requirement for
@@ -288,6 +295,9 @@ RFC 4511                         LDAPv3                        June 2006
          但是客户端或服务器端都不需要同步行为。 
       通常，可以在客户端和服务器之间 以任何顺序 交换对多个操作的请求和响应。 
       如果需要，同步行为可由客户端应用程序控制。
+   总结： 
+      默认情况下，响应的顺序和请求的顺序，并不相同；可以以任意顺序 交换请求和响应。 
+      如果需要： client可以控制 同步/交换 行为
 #---------------------------------------------------------------------------------------
 
 
@@ -310,6 +320,10 @@ RFC 4511                         LDAPv3                        June 2006
       充当 X.500目录网关的服务器实现 
         可能需要发出多个DAP请求 
         来为单个LDAP请求提供服务。
+   总结： 
+      本文档定义的核心操作是 X.500的子集 
+      有可能：
+         X.500的网关服务器 向X.500发出多个DAP请求；来为单个LDAP请求提供服务
 
 3.1.  Operation and LDAP Message Layer Relationship
         操作 与 LDAP消息层 关系
@@ -327,6 +341,12 @@ RFC 4511                         LDAPv3                        June 2006
             或者 在不传输响应的情况下完成（当无法放弃时）。 
         另外，当传输连接关闭时，
             客户端/client 不得假定 任何未完成的更新操作 已成功或失败。
+   总结： 
+      协议操作 在 LDAP message layer 交换。 
+      当传输连接关闭时： 
+         对于server的LDAP message layer上的任何未完成的操作：
+            如果可以被放弃，那么放弃 
+            如果不能被放弃，那么执行完毕
 
 4.  Elements of Protocol
         协议元素
@@ -338,7 +358,14 @@ RFC 4511                         LDAPv3                        June 2006
         该协议 
             使用 抽象语法符号一([ASN.1])进行描述，
             并使用 ASN.1基本编码规则([BER])的子集 进行传输。 
-        第5节指定了协议元素的编码和传输方式。
+        第5节/章 指定了协议元素的编码和传输方式。
+   总结： 
+      本协议使用 ASN.1进行描述 
+      使用ASN.1的基本编码规则(BER) 的子集 进行传输
+         (即 LDAP 使用BER进行编码然后传输)
+    总结： 
+        即 数据/data 编码为"ASN.1 BER"格式 
+
 
    In order to support future extensions to this protocol, extensibility
    is implied where it is allowed per ASN.1 (i.e., sequence, set,
@@ -370,7 +397,9 @@ RFC 4511                         LDAPv3                        June 2006
             作为BindRequest的一部分，如第4.2节所述。 
         如果客户端没有发送绑定，服务器必须假设客户端使用的是版本3或更高版本。
     
-    总结：client必须告诉server 自己的版本号 (!!!)
+    总结：
+        client必须告诉server 自己使用的版本号 (!!!)
+        client没有指定的话，server假定client使用的是 版本3或者更高版本
 
    Clients may attempt to determine the protocol versions a server
    supports by reading the 'supportedLDAPVersion' attribute from the
@@ -379,6 +408,9 @@ RFC 4511                         LDAPv3                        June 2006
             从根DSE（特定于DSA的条目）[RFC 4512]中
             读取“supportedLDAPVersion/支持的LDAP版本”属性
             来尝试确定服务器支持的协议版本。
+    总结： 
+        client 读取 root DSE的supportedLDAPVersion属性，
+        来尝试确定 server支持哪些版本/version
 
 4.1.  Common Elements
 
@@ -388,6 +420,9 @@ RFC 4511                         LDAPv3                        June 2006
         本节介绍 
             LDAPMessage 封装 协议数据单元(PDU/Protocol Data Unit) 格式，
             以及协议操作中使用的数据类型定义。
+   总结： 
+        介绍 如何使用LDAPMessage封装PDU(Protocol Data Unit)
+        以及 协议操作中使用的数据类型
 #---------------------------------------------------------------------------------------
 
 
@@ -406,10 +441,12 @@ RFC 4511                         LDAPv3                        June 2006
         为了协议交换的目的，所有协议操作都封装在 
             一个公共信封LDAPMessage中，
         该信封定义如下：
+    总结： 
+        协议操作的所有数据，封装在LDAPMessage中。(!!!)
 
-        LDAPMessage ::= SEQUENCE {                          #序列
-             messageID       MessageID,                     #消息ID -- messageID
-             protocolOp      CHOICE {                       #执行什么操作
+        LDAPMessage ::= SEQUENCE {                      -- 序列
+             messageID       MessageID,                     -- 消息ID -- messageID
+             protocolOp      CHOICE {                       -- 执行什么操作
                   bindRequest           BindRequest,
                   bindResponse          BindResponse,
                   unbindRequest         UnbindRequest,
@@ -432,14 +469,12 @@ RFC 4511                         LDAPv3                        June 2006
                   extendedResp          ExtendedResponse,
                   ...,
                   intermediateResponse  IntermediateResponse },
-             controls       [0] Controls OPTIONAL }             #控件 -- controls
-
-        MessageID ::= INTEGER (0 ..  maxInt)                    #消息ID是个整数，介于0和maxint之间
-
-        maxInt INTEGER ::= 2147483647 -- (2^^31 - 1) --
+             controls       [0] Controls OPTIONAL }           -- 控件
+        MessageID ::= INTEGER (0 ..  maxInt)                -- 消息ID是个整数，介于0和maxint之间 (请求和响应时，client和server使用同一消息ID )
+        maxInt INTEGER ::= 2147483647 -- (2^^31 - 1) --     -- 
 
    The ASN.1 type Controls is defined in Section 4.1.11.
-        ASN.1的控件类型，在4.1.11节中定义
+        ASN.1类型的控件，在4.1.11节中定义 [Page 14]
 
    The function of the LDAPMessage is to provide an envelope containing
    common fields required in all protocol exchanges.  At this time, the
@@ -450,7 +485,8 @@ RFC 4511                         LDAPv3                        June 2006
     
     总结：
         LDAPMessage是一个SEQUENCE(序列)
-        LDAPMessage中封装了公共字段 messageID 和 controls
+        LDAPMessage中封装了(使用LDAP协议交换数据 所需的字段)
+            公共字段 messageID/消息的ID 和 controls/控件
 
 
    If the server receives an LDAPMessage from the client in which the
@@ -469,16 +505,17 @@ RFC 4511                         LDAPv3                        June 2006
    described in Section 4.4.1, with the resultCode set to protocolError,
    and MUST immediately terminate the LDAP session as described in
    Section 5.3.
-        如果服务器从客户端接收到一个 LDAPMessage，
-            并且这个LDAPMessage的 SEQUENCE-tag 无法识别，
-            那么，将无法解析messageID，也就不会将protocolOp的tag 识别为请求，
+        如果server从client接收到一个 LDAPMessage，
+            并且这个LDAPMessage SEQUENCE tag 无法识别，
+                那么，将无法解析messageID，
+                也就不会将protocolOp的tag 识别为请求，
         或者发现 编码结构或数据字段的长度 不正确，
             则服务器应返回第4.4.1节中所述的 断开连接通知，
             并将resultCode设置为protocolError，
             并且必须立即按第5.3节中所述终止LDAP会话。
     
     总结： 
-        如果server无法识别client发送来的LDAPMessage(由于 它的SEQUENCE-tag无法识别)
+        如果server无法识别client发送来的LDAPMessage(由于 它的SEQUENCE tag无法识别)
             那么将无法解析messageID，
             也就不会将protocolOp的tag 识别为请求
         如果 编码结构或数据字段的长度 不正确
@@ -493,7 +530,7 @@ RFC 4511                         LDAPv3                        June 2006
    appropriate response to the request, with the resultCode set to
    protocolError.
         在客户端或服务器无法解析 LDAP PDU/(Protocol Data Unit) 的其他情况下，
-            它应该突然/立即终止 LDAP 会话（第 5.3 节），
+            它应该立即终止 LDAP 会话（第 5.3 节），
             因为进一步的通信（包括提供通知）将是有害的。 
         然后，服务器实现必须返回对请求的适当响应，
             并将resultCode设置为protocolError。
@@ -507,8 +544,8 @@ RFC 4511                         LDAPv3                        June 2006
 
    All LDAPMessage envelopes encapsulating responses contain the
    messageID value of the corresponding request LDAPMessage.
-        所有响应 封装的LDAPMessage信封 都包含 
-            相应的 LDAPMessage请求的messageID 值。
+        所有 封装的LDAPMessage信封 响应 都包含 
+            相应的 LDAPMessage请求的messageID值。
 
    The messageID of a request MUST have a non-zero value different from
    the messageID of any other request in progress in the same LDAP
@@ -659,7 +696,7 @@ RFC 4511                         LDAPv3                        June 2006
 
     总结： 
         AttributeDescription的类型是：LDAPString字符串
-        AttributeDescription包含一个attribute type和多个options
+        AttributeDescription包含一个attribute type和 0个或多个options
 
 4.1.5.  Attribute Value
         属性值
@@ -756,7 +793,7 @@ RFC 4511                         LDAPv3                        June 2006
         AssertionValue的 syntax/语法 取决于正在执行的 LDAP操作的 context/上下文
         例如：
             在对一个属性/attribute 执行比较操作时 将会使用 EQUALITY匹配规则 语法
-            通常，对于 属性类型的值 应用同样的语法
+            通常，对于 属性类型的 值 应用同样的语法
             但是，某些情况下 断言 语法与 值语法不同
 
 4.1.7.  Attribute and PartialAttribute
@@ -838,7 +875,7 @@ RFC 4511                         LDAPv3                        June 2006
         LDAPResult中包含的 elements/元素 表明了 请求操作的 最终处理状态
 
         LDAPResult ::= SEQUENCE {
-             resultCode         ENUMERATED {
+             resultCode         ENUMERATED {                -- 1. 返回码 (从枚举值中选择一个)
                   success                      (0),
                   operationsError              (1),
                   protocolError                (2),
@@ -894,9 +931,9 @@ RFC 4511                         LDAPv3                        June 2006
                        -- 72-79 unused --
                   other                        (80),
                   ...  },
-             matchedDN          LDAPDN,                 #
-             diagnosticMessage  LDAPString,             #诊断消息
-             referral           [3] Referral OPTIONAL } #
+             matchedDN          LDAPDN,                 #   -- 2. 匹配的DN
+             diagnosticMessage  LDAPString,             #   -- 3. 错误信息 即errorMessage
+             referral           [3] Referral OPTIONAL } #   -- 4. 引用(指定了一个URI)
         
         参看： 
             /OPENLDAP_REL_ENG_2_4/libraries/libldap/error.c
@@ -909,9 +946,9 @@ RFC 4511                         LDAPv3                        June 2006
    result code that best indicates the nature of the error encountered.
    Servers may return substituted result codes to prevent unauthorized
    disclosures.
-        resultCode枚举(resultCode enumeration) 是可扩展的，
+        resultCode的枚举值类型(resultCode enumeration) 是可扩展的，
             如 [RFC4520] 的第 3.8 节中所定义。 
-        列出的结果码(result codes)的含义在附录A中给出。
+        列出的结果码(result codes)的具体含义(即： 各个枚举值的具体含义)在附录A中给出。
             ([Page 48])
         如果服务器/server检测到一个操作的多个错误，
             则只返回一个结果码。 
@@ -1089,16 +1126,16 @@ RFC 4511                         LDAPv3                        June 2006
    A URI for a server implementing LDAP and accessible via TCP/IP (v4 or
    v6) [RFC793][RFC791] is written as an LDAP URL according to
    [RFC4516].
-        实现LDAP 并可通过TCP/IP(v4或v6)[RFC793][RFC791]访问的 服务器
-            的URI 
+        实现了LDAP 并可通过TCP/IP(v4或v6)[RFC793][RFC791]访问的 服务器/server
+            此server的的URI 
             根据[RFC4516] 被写为 LDAP URL。
 
    Referral values that are LDAP URLs follow these rules:
-        作为LDAP URL的referral值遵循以下规则：
+        referral的值是LDAP URLs时 遵循以下规则：
 
    - If an alias was dereferenced, the <dn> part of the LDAP URL MUST be
      present, with the new target object name.
-        如果别名被取消引用，LDAP URL的<dn>部分必须存在，并带有新的目标对象名称。
+        如果别名被解引用，LDAP URL的<dn>部分必须存在，并带有新的目标对象名称。
 
    - It is RECOMMENDED that the <dn> part be present to avoid ambiguity.
         建议使用<dn>部分，以避免歧义。
@@ -1118,7 +1155,7 @@ RFC 4511                         LDAPv3                        June 2006
      this filter in its next request to progress this Search, and if it
      is not present the client uses the same filter as it used for that
      Search.
-        如果存在 LDAP URL的<filter>部分，则客户端在其下一个请求中使用此过滤器来进行此搜索，
+        如果LDAP URL存在<filter>部分，则客户端在其下一个请求中使用此过滤器来进行此搜索，
         如果不存在，则客户端使用与用于该搜索的过滤器相同的过滤器。
 
    - For Search, it is RECOMMENDED that the <scope> part be present to
@@ -1144,7 +1181,7 @@ RFC 4511                         LDAPv3                        June 2006
    DN, search filter, or other fields of the referral value may not be
    legal for URIs (e.g., spaces) and MUST be escaped using the % method
    in [RFC3986].
-        出现在 DN的字符串表示、搜索过滤器或referral值的其他字段 中的 UTF-8编码字符 
+        出现在 一个DN字符串表示、搜索过滤器或referral值的其他字段 中的 UTF-8编码字符 
             对于 URI(例如，空格)可能不合法，
         并且必须使用 [RFC3986] 中的 % 方法进行转义。
 #---------------------------------------------------------------------------------------
@@ -1194,7 +1231,7 @@ RFC 4511                         LDAPv3                        June 2006
         通常，请求控件  请求的响应控件 与请求控件 共享controlType 值。
     
     总结： 
-        Controld的 controlType字段 
+        Control的 controlType字段 
             的值 是该control的OID(点分十进制字符串表示)
         response control和request control使用相同的 controlType值
 
@@ -1216,7 +1253,7 @@ RFC 4511                         LDAPv3                        June 2006
         Control的criticality字段
             仅在control附加到 request message(UnbindRequest除外)时，
                 criticality字段 才有意义
-            对于control附加到 response message和UnbindRequest时   ，
+            对于control附加到 response message和UnbindRequest时 ，
                 criticality字段 应该设置为FALSE
                 并且接收方应该忽略 该字段
             criticality设置为TRUE，则表明 
@@ -1229,7 +1266,7 @@ RFC 4511                         LDAPv3                        June 2006
      operations that have a response message, it MUST return with the
      resultCode set to unavailableCriticalExtension.
         如果服务器/server  不识别控件类型，确定它不适合操作，或者不愿意使用控件执行操作，并且如果criticality字段为 TRUE，
-            则服务器/server 不得/不能 执行操作，
+            则服务器/server 不能 执行操作，
             并且对于 具有响应消息(response message)的操作，
                 它必须返回 并将 resultCode 设置为 unavailableCriticalExtension/不可用的临界扩展。
     总结： 
@@ -1448,7 +1485,7 @@ RFC 4511                         LDAPv3                        June 2006
          authentication/认证 字段：
             用于认证的信息。 
             这种类型是可扩展的，如 [RFC4520] 的第 3.7 节中所定义。 
-         不支持客户端提供的选择的服务器返回一个 BindResponse，
+         不支持client提供的选择，服务器返回一个 BindResponse，
             并将 resultCode 设置为 authMethodNotSupported。
     总结： 
       BindRequest的 authentication字段
