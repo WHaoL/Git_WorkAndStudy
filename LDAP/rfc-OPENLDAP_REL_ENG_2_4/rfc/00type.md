@@ -18,7 +18,129 @@
 */
 ```
 
+# RFC
+```bash
+
+# https://ldap.com/ldap-related-rfcs/
+
+	1. 定义 LDAP 协议和其他核心规范的 RFC (RFCs Defining the LDAP Protocol and Other Core Specifications)
+	2. 包含信息文档、建议和最佳实践的 RFC  (RFCs Containing Informational Documents, Recommendations, and Best Practices)
+	3. RFC 定义控制和扩展操作        (RFCs Defining Controls and Extended Operations)
+	4. 定义核心 LDAP Schema的 RFC  (RFCs Defining Core LDAP Schema)
+	5. 包含附加 LDAP 架构定义的 RFC (RFCs Containing Additional LDAP Schema Definitions)
+	6. 包含通常与 LDAP 结合使用的其他规范的 RFC(RFCs Containing Other Specifications Commonly Used in Conjunction with LDAP)
+	7.  为信息目的提供的过时 RFC(Obsolete RFCs Provided for Informational Purposes)
+
+
+# https://ldap.com/ldapv3-wire-protocol-reference/
+
+
+
+```
+
 # 1. LDAP协议定义的数据类型
+ 
+# ASN.1 基本编码规则(The ASN.1 Basic Encoding Rules)
+https://ldap.com/ldapv3-wire-protocol-reference-asn1-ber/ 
+```txt
+LDAP是一种二进制协议，能紧凑且高效地解析。
+   它使用基于ASN.1的特定二进制编码，这是一个表示结构化数据的框架。
+   ASN.1实际上是一系列编码，对于不同的情况，每个编码都有自己的优缺点。
+   例如，如果您想确保编码表示尽可能小，您可以使用打包编码规则 (PER)，
+      或者如果您更喜欢编码/解码性能而不是大小，您可以使用八位字节编码规则 (OER)。
+   LDAP使用基本编码规则 (BER)，它在两者之间找到了一个很好的中间立场。
+
+完整的BER规范具有很大的灵活性和模糊性，并且有几种特殊情况需要考虑。
+   深入介绍所有内容将是一项艰巨的任务， 
+   如果您对所有细节感兴趣，
+   强烈推荐 John Larmouth 教授的优秀著作ASN.1 Complete，您可以在线免费下载PDF文件。
+
+幸运的是，LDAP使用了一个定义良好的BER子集，它具有较少的歧义和较少的特殊情况。
+    我们应该能够轻松理解LDAP协议所需的所有BER。
+
+在ASN.1 BER中，每条数据称为一个元素，
+    每个BER元素由三部分组成：type/类型、length/长度和value/值。
+    让我们仔细看看这些组件中的每一个。
+
+BER Types/BER类型
+    BER元素的类型用于指示该元素可以保存什么类型的信息，
+        这与在计算机程序中声明变量的数据类型（字符串/整数/布尔值等）不同。
+    BER类型有很多种，但如果我们只是谈论 LDAP对BER的使用，那么实际上我们只需要了解七种基本数据类型：
+        - (Null elements)/Null元素 没有值。
+        - (Boolean elements)/布尔元素 的值为true或false。
+        - (Integer elements)/整数元素 的值是一个整数，没有小数部分。
+        - (Octet string elements)/八位字节字符串元素 的值是零个或多个字节的集合。
+            八位字节字符串的值可能代表一个文本字符串，但它也可能只是一个二进制 blob。
+        - (Enumerated elements )/枚举元素 具有一组预定义的值，其中每个值都有特定的含义。
+        - (Sequence elements )/序列元素 封装零个或多个其他元素的集合，其中这些元素的顺序被认为是重要的。
+        - (Set elements)/集合元素 封装了零个或多个其他元素的集合，其中这些元素的顺序不重要。
+    使用这七种类型，我们可以构造任何类型的 LDAP 请求或响应。
+
+    因为BER是一种紧凑的二进制协议，
+        它使用一种紧凑的二进制表示来表示元素的类型。
+    尽管通用BER支持跨越多个字节的类型，
+        但您极不可能在LDAP消息中遇到使用多个字节作为其类型的BER元素。
+    该字节的布局如下：
+        Bits	 8	7	            6	             5	4	3	2	1
+        Purpose	 Class	 Primitive or Constructed?	    Tag Number
+
+The BER Type Class/BER的类类型
+    该字节中的两个最高有效位（即该字节的大端表示中最左边的两个位）表示该类型的类。  
+    您也可以将其视为类型的范围，
+        它让您知道相同 BER类型在两种不同设置中具有相同含义的可能性有多大。
+    由于类被编码为两位，因此有四种可能的值：
+        00 — 这是通用类/class。
+            通用类中的 BER类型总是意味着相同的东西，无论您在哪里看到它。
+            例如，如果您看到一个 BER元素的类型为00000010二进制（十六进制0x02，表示通用类，基元，标签编号为2），
+                则该元素的值将始终为整数。
+        01 — 这是应用程序类。
+            应用程序类中的 BER类型在一个应用程序中总是意味着相同的东西，但在另一个应用程序中可能意味着完全不同的东西。
+            这里的“应用程序”并不一定意味着计算机程序；对于 LDAP，它意味着完整的协议规范。
+            例如，如果您在 LDAP消息中看到一个BER元素，其类型为01100011二进制（0x63十六进制，这意味着应用程序类、构造的、标签编号为三），
+                则该元素的值将始终是 LDAP搜索请求协议操作(an LDAP search request protocol op).
+        10 — 这是特定于上下文的类。
+            特定于上下文的类中的 BER类型可以从一个元素到另一个元素具有不同的含义，您需要了解它的使用方式才能确定它的含义。
+            例如，如果您在 LDAP 消息中看到一个 BER 元素，其类型为10100011二进制（0xa3十六进制，这意味着上下文特定的类，构造的，标签编号为3），
+                那么它可能代表一组引用 URL，如果它出现在一个LDAPResult序列，
+                或者它可以代表搜索请求中的相等过滤器组件，
+                或者它可以在其他上下文中的其他地方表示完全不同的东西。
+        11 — 这是私有类。
+            它旨在介于通用类和应用程序类之间，
+            组织/organization 可以在其中定义自己的一组在所有应用程序中具有相同含义的类型，
+            但不鼓励使用私有类，几乎不可能在LDAP中遇到它。
+
+The BER Type Primitive/Constructed Bit(BER的 原始类型/构造位)
+
+```
+
+
+ASN.1简述： https://zh.wikipedia.org/wiki/ASN.1   
+```txt
+ASN.1（Abstract Syntax Notation One) 
+    是一套标准，
+    是描述数据的表示/编码/传输/解码 的灵活的记法。
+    它提供了一套正式、无歧义和精确的规则 以描述独立于特定计算机硬件的对象结构。[1]
+
+ASN.1本身只定义了表示信息的抽象句法，但是没有限定其编码的方法。
+    各种ASN.1编码规则提供了由ASN.1描述其抽象句法的数据的值的传送语法（具体表达）
+    标准的ASN.1编码规则有: 
+        基本编码规则（BER，Basic Encoding Rules）...等
+
+ASN.1与特定的ASN.1编码规则一起通过使用独立于计算机架构和编程语言的方法来描述数据结构，
+    为结构化数据的交互提供了手段，特别是在网络环境的应用程序。
+
+SEQUENCE部分   
+    30  --代表了 SEQUENCE
+        --octets长度
+        --value
+INTEGER
+    02  --代表了 INTEGER
+
+LDAPString 
+```
+
+
+      
 
 ## 1.1 common elements 
 
@@ -27,35 +149,49 @@
 RFC 4511	4.1. Common Elements
 
 		------------------------------------
+		LDAPMessage： https://ldap.com/ldapv3-wire-protocol-reference-ldap-message/
+		 RFC 4511 section 4.1.1
+
 		LDAPMessage
 			使用LDAP协议 交换数据时，公共信息 封装在 LDAPMessage中；
+
+			所有LDAPv3请求和响应都封装在LDAPMessage的BER sequence中
+
+			LDAP Request
+				每种类型的LDAP request都有一些不同，
+				每个request都被封装在LDAPMessage序列的protocolOp字段中
+			LDAP Response
+				大多数类型的LDAP response非常相似
+					除了protocolOp字段对于每种操作具有不同的BER类型
+				每个response都被封装在LDAPMessage序列的protocolOp字段中
+					add/compare/delete/modify/modify DN 的 响应消息的结构是一样的
 
 
 			LDAPMessage ::= SEQUENCE {                      -- 序列
 				messageID       MessageID,                     -- 消息ID -- messageID
 				protocolOp      CHOICE {                       -- 执行什么操作
-					bindRequest           BindRequest,
-					bindResponse          BindResponse,
-					unbindRequest         UnbindRequest,
-					searchRequest         SearchRequest,
-					searchResEntry        SearchResultEntry,
-					searchResDone         SearchResultDone,
-					searchResRef          SearchResultReference,
-					modifyRequest         ModifyRequest,
-					modifyResponse        ModifyResponse,
-					addRequest            AddRequest,
-					addResponse           AddResponse,
-					delRequest            DelRequest,
-					delResponse           DelResponse,
-					modDNRequest          ModifyDNRequest,
-					modDNResponse         ModifyDNResponse,
-					compareRequest        CompareRequest,
-					compareResponse       CompareResponse,
-					abandonRequest        AbandonRequest,
-					extendedReq           ExtendedRequest,
-					extendedResp          ExtendedResponse,
+					bindRequest           BindRequest,		   -- -- [APPLICATION 0]
+					bindResponse          BindResponse,		   -- -- [APPLICATION 1]
+					unbindRequest         UnbindRequest,	   -- -- [APPLICATION 2]
+					searchRequest         SearchRequest,	   -- -- [APPLICATION 3]
+					searchResEntry        SearchResultEntry,   -- -- [APPLICATION 4]
+					searchResDone         SearchResultDone,	   -- -- [APPLICATION 5]
+					searchResRef          SearchResultReference,-- -- [APPLICATION 19]
+					modifyRequest         ModifyRequest,	   -- -- [APPLICATION 6]
+					modifyResponse        ModifyResponse,	   -- -- [APPLICATION 7]
+					addRequest            AddRequest,		   -- -- [APPLICATION 8]
+					addResponse           AddResponse,		   -- -- [APPLICATION 9]
+					delRequest            DelRequest,          -- -- [APPLICATION 10]
+					delResponse           DelResponse,		   -- -- [APPLICATION 11]
+					modDNRequest          ModifyDNRequest,	   -- -- [APPLICATION 12]
+					modDNResponse         ModifyDNResponse,	   -- -- [APPLICATION 13]
+					compareRequest        CompareRequest,	   -- -- [APPLICATION 14]
+					compareResponse       CompareResponse,	   -- -- [APPLICATION 15]
+					abandonRequest        AbandonRequest,      -- -- [APPLICATION 16]
+					extendedReq           ExtendedRequest,	   -- -- [APPLICATION 23]
+					extendedResp          ExtendedResponse	   -- -- [APPLICATION 24]
 					...,
-					intermediateResponse  IntermediateResponse },
+					intermediateResponse  IntermediateResponse },-- -- [APPLICATION 25]
 				controls       [0] Controls OPTIONAL }           -- 控件
 		
 			MessageID ::= INTEGER (0 ..  maxInt) 
@@ -64,8 +200,28 @@ RFC 4511	4.1. Common Elements
 			MessageID：
 				非0整数；
 				同一会话中不可重复；
-				0是 留给通知消息的；
-				client发送的消息里携带，(对于同一个client)server回复消息时携带同样的messageID。
+				0是给 主动通知的特殊类型的消息保留的(server在没有任请求的情况下向cient发送的消息)；
+				client发送的消息时在 0-2147483647之间选择一个(该ID 尚未被该连接上的任何未完成请求使用)
+		总结:
+			LDAPMessage包含3个组件
+				messageID	--消息ID
+				protocolOp	--协议操作
+				controls	--一组可选的控件
+			LDAPMessage序列的messageID元素
+				用于关联请求和响应(server为该请求返回的响应 都具有与该请求相同的messageID)
+					1.允许LDAP异步运行，单个client可以由多个未完成的请求
+					2.允许多个应用程序线程 共享同一个连接
+					3.允许单个线程同时提交多个请求(但是一个请求的内容不能依赖于正在提交的另一个请求的响应)
+			LDAPMessage序列的protocolOp元素
+				它封装了有关请求或响应的所有详细信息，因此其格式因请求或响应的内容而异。
+			LDAPMessage序列的controls
+				一个LDAPMessage序列 可以任选地包括一组 提供有关该操作的附加信息的 控件/control；
+				如果client发送给server的request中包含了control，
+					那么control提供了 server应该如何处理该请求的 附加信息；
+				如果server回复给client的response中包含control，
+					那么control 向client提供了 操作的处理方式的 附加信息，
+					响应control通常由请求control触发
+
 		------------------------------------
 		String Types：
 			LDAPString是一种字符串；
@@ -138,6 +294,10 @@ RFC 4511	4.1. Common Elements
 
         		MatchingRuleId ::= LDAPString
 		------------------------------------
+
+		LDAPResult序列：https://ldap.com/ldapv3-wire-protocol-reference-ldap-result/
+		 RFC 4511 4.1.9
+
 		LDAPResult： 
 			server回复给client；
 			指示了对client请求的处理状态；
@@ -208,6 +368,7 @@ RFC 4511	4.1. Common Elements
 					(即errorMessage)
 					用于补充resultCode
 					是个文本字符串
+
 				matchedDN
 					matchedDN的值 由服务器/server返回；
 					对于结果代码/resultCode为： noSuchObject、aliasProblem、invalidDNSyntax、aliasDereferencingProblem
@@ -245,40 +406,50 @@ RFC 4511	4.1. Common Elements
 				用在何处： 附加到LDAPMessage.Controls=Controls'sName；
 				功能：    扩展现有LDAP操作的语义和参数；
 				一个或多个控件可以附加到单个 LDAPmessage;
-				只影响 附加到的LDAPMessage的...			
+				只影响 附加到的LDAPMessage的...	
 
 				client发送的 control称为 “(request controls)请求控件”
 				server 发送的 control 称为“(response controls)响应控件”
 
+				类型定义：
 					Controls ::= SEQUENCE OF control Control
 					Control ::= SEQUENCE {
 						controlType             LDAPOID,                   #control的OID
 						criticality             BOOLEAN DEFAULT FALSE,     #布尔值，默认false
 						controlValue            OCTET STRING OPTIONAL }		
+					LDAPOID ::= OCTET STRING -- Constrained to <numericoid>
+							   -- [RFC4512]
 
-					Control的 controlType 字段						
-						是control的OID表示
-						点分十进制 
+				因为LDAPMessage是个序列，所以Controls是一个序列中的序列，每个序列最多包含3个元素
+					controlType ： 点分十进制的数字组合
+						控件类型的OID
 						request control对应的 response control 共享controlType的值
-					Control的 criticality 字段
+					criticality ： bool值
+						指示 是否将control视为对操作处理至关重要；
+							当此字段设置为TRUE时，表明server必须使用control才能执行操作
 						仅当control附到request message(UnbindRequest除外)时，此字段才有意义，
 							即：LDAPMessage.protocolOp=xxxRequest时；
-						当control附到response message和UnbindRequest时，此字段应设置为FALSE，接收方应忽略这个字段
-						当此字段设置为TRUE时，表明：
-							必须使用control才能执行操作
-				
+						当control附到response message和/或UnbindRequest时，此字段应设置为FALSE，接收方应忽略这个字段
 						如果server 
 							识别不了control的类型，或者 不愿意使用control执行操作，
 							并且 criticality字段为TRUE，
 								则server 无法执行操作 
-							并且server 在response message中 将resultCode设置为unavailableCriticalExtension
+									那么server 在response message中 
+									将resultCode设置为unavailableCriticalExtension
 						如果server 
 							识别不了control的类型，或者 不愿意使用control执行操作，
 							并且 criticality字段为FALSE，
-								则server忽略control
-					Control的 controlValue 字段
-						包含了与controlType相关的信息
-						值是 OCTET STRING，可能是0字节
+								则server忽略control(好像control不存在一样)
+					controlValue ： 
+						controlType的值OID 是传达了control的信息，
+							也足以表达client想要server使用哪个control进行处理
+							但通常 还需要提供附加信息
+						controlValue的值提供了 server使用control进行处理时 所需的 附加信息
+						例子： 
+							如果某一次请求中controlType指定的OID，表明了这个control是个排序控件
+								那么，指示server对结果进行排序后，再返回给client
+							但是排序的顺序需要client指出
+								通过controlValue指出排序顺序(正序/逆序/...)
 				
 				server在
 					root DSE([RFC4512]的第5.1节)的 "supportedControl"的属性中 列出了
@@ -288,8 +459,72 @@ RFC 4511	4.1. Common Elements
 					control的OID
 					...
 		------------------------------------
+```
+### 一个DelRequest的例子：
+
+https://ldap.com/ldapv3-wire-protocol-reference-ldap-message/ 
+
+```txt
+网址： https://ldap.com/ldapv3-wire-protocol-reference-ldap-message/
+
+前言： 
+	虽然我们还没有深入学习任何 协议操作/protocolOp 和 控件/Controls 
+	但提供一个简单的 LDAPMessage仍有裨益
+
+例子的要求：
+	an LDAP message with a message ID of five that requests deleting the dc=example,dc=com entry and includes a subtree delete request control to indicate that the server should also remove any entries that exist below the target entry.
+	即：
+		messageID=5
+		删除条目 dc=example,dc=com 
+		包含一个conrtol，指示server 删除 这个条目的所有子树
+
+所需要用到的定义如下： 
+	DelRequest ::= [APPLICATION 10] LDAPDN
+	LDAPDN ::= LDAPString
+			-- Constrained to <distinguishedName> [RFC4514]
+	LDAPString ::= OCTET STRING -- UTF-8 encoded,
+				-- [ISO10646] characters
+简要总结： 
+	该 删除请求 协议操作被简单的编码为 OCTET STRING ；
+	其 BER类型为 特定于应用程序的10(0x4a) ；
+	请求中附带的控件为：删除子树控件/control，其OID为1.2.840.113556.1.4.805；并且没有值(值是附加在controlValue中)；
+	其 criticality/关键性 可能是true或false，我们将其设置为true，
+		这样若是server无法删除子树，操作就会失败，
+		这样就能区分 server是否支持 子树删除控件 以及 处理中的一些其他问题
+
+综上所述，DelRequest的LDAPMessage编码如下： 
+	30 35 02 01 05 4a 11 64 63 3d 65 78 61 6d 70 6c
+	65 2c 64 63 3d 63 6f 6d a0 1d 30 1b 04 16 31 2e
+	32 2e 38 34 30 2e 31 31 33 35 35 36 2e 31 2e 34
+	2e 38 30 35 01 01 ff
+
+这是一个带有注释的格式化版本，以便于解释。对于后续部分，将仅提供格式化的表示。
+	30 35 -- Begin the LDAPMessage sequence
+	   02 01 05 -- The message ID (integer value 5)
+	   4a 11 64 63 3d 65 78 61 6d 70 -- The delete request protocol op
+	         6c 65 2c 64 63 3d 63 6f -- (octet string
+	         6d                      -- dc=example,dc=com)
+	   a0 1d -- Begin the sequence for the set of controls
+	      30 1b -- Begin the sequence for the first control
+	         04 16 31 2e 32 2e 38 34 30 2e -- The control OID
+	 31 31 33 35 35 36 2e 31 -- (octet string
+	 2e 34 2e 38 30 35       -- 1.2.840.113556.1.4.805)
+	         01 01 ff -- The control criticality (Boolean true)
+
+30 35 -- 开始 LDAPMessage 序列
+   02 01 05 -- 消息 ID（整数值 5）
+   4a 11 64 63 3d 65 78 61 6d 70 -- 删除请求协议 op 
+         6c 65 2c 64 63 3d 63 et 6f -- (oct字符串
+         6d -- dc=example,dc=com) 
+   a0 1d -- 开始一组控件的序列 
+      30 1b -- 开始第一个控件的序列
+         04 16 31 2e 32 2e 38 34 30 2e -- 控件 OID 
+ 31 31 33 35 35 36 2e 31 -- (octet string 
+ 2e 34 2e 38 30 35 -- 1.2.840.113556.1.4.805) 
+         01 01 ff -- 控制临界值（布尔真）
 
 ```
+
 
 ## 1.2 Bind Operation
 ```txt
@@ -299,39 +534,80 @@ RFC 4511	4.2. Bind Operation
 	Bind Operation
 		主要用于交换 身份验证/认证信息
 
-        BindRequest ::= [APPLICATION 0] SEQUENCE {
-             version                 INTEGER (1 ..  127),      #版本号 -- (整数)
-             name                    LDAPDN,                   #DN 
-             authentication          AuthenticationChoice }    #选择 认证 的方式
-        AuthenticationChoice ::= CHOICE {
-             simple                  [0] OCTET STRING,            #简单认证
-                                     -- 1 and 2 reserved 
-             sasl                    [3] SaslCredentials,         #SASL认证
-             ...  }
-        SaslCredentials ::= SEQUENCE {                            #SASL认证
-             mechanism               LDAPString,                     #指定一个字符串，代表了 一种机制
-             credentials             OCTET STRING OPTIONAL }         #证书，以 OCTET STRING编码
+		BindRequest
+			(我推测：BindRequest被封装进LDAPMessage的protocolOp字段)
 
-		BindRequest各个字段：
-			version
-				指示 要在LDAP message layer上使用的协议的版本
-				client指出它所需要的版本
-				如果server不支持指定的版本，
-					那么使用BindResponse响应，
-					并且 resultCode设置为了 protocolError
-			name 
-				匿名绑定/SASL认证 时，name可能为null值
-				不为空，则为client希望绑定到的name/DN
-         		当server试图定位name/DN 时， 不应该 解引用
-      			client 用于 指出 它希望绑定到的DN (!!!)
-			authentication
-				此类型可以扩展；
-				client用于指定验证机制
-				如果server不支持这种验证机制，
-					使用BindResponse响应
-					并将resultCode 设置为 authMethodNotSupported
-				若是指定为simple
-					那么传输到server的秘密是明文 使用UTF-8编码
+			BindRequest ::= [APPLICATION 0] SEQUENCE {
+				version                 INTEGER (1 ..  127),      #版本号 -- (整数)
+				name                    LDAPDN,                   #DN 
+				authentication          AuthenticationChoice }    #选择 认证 的方式
+			AuthenticationChoice ::= CHOICE {
+				simple                  [0] OCTET STRING,            #简单认证
+										-- 1 and 2 reserved 
+				sasl                    [3] SaslCredentials,         #SASL认证
+				...  }
+			SaslCredentials ::= SEQUENCE {                            #SASL认证
+				mechanism               LDAPString,                     #指定一个字符串，代表了 一种机制
+				credentials             OCTET STRING OPTIONAL }         #证书，以 OCTET STRING编码
+
+			BindRequest各个字段：
+				version
+					指示 要在LDAP message layer上使用的协议的版本
+					client指出它所需要的版本
+					如果server不支持指定的版本，
+						那么使用BindResponse响应，
+						并且 resultCode设置为了 protocolError
+				name 
+					匿名绑定/SASL认证 时，name可能为null值
+					不为空，则为client希望绑定到的name/DN
+					当server试图定位name/DN 时， 不应该 解引用
+					client 用于 指出 它希望绑定到的DN (!!!)
+				authentication
+					此类型可以扩展；
+					client用于指定验证机制
+					如果server不支持这种验证机制，
+						使用BindResponse响应
+						并将resultCode 设置为 authMethodNotSupported
+					若是指定为simple
+						那么传输到server的秘密是明文 使用UTF-8编码
+			
+			
+		
+		Processing of the Bind Request
+			server
+				处理BindRequest；
+				在处理BindResuest之前，对于未完成的操作 要么等待操作的完成 要么放弃操作；
+				然后执行  单步绑定过程 或者 多步绑定过程(每一步都需要server返回一个BindResponse 来指示认证的状态);
+				如果正在处理BindRequest，那么不应该 处理/响应 接收到的 请求	
+			client 
+				发出BindRequest之后，如果还没有接收到 BindResponse，那么它不应该发送更多的LDAP-PDU ；
+				可以发送多个BindRequest 来更改 身份验证 和/或 安全关联 或 完成多阶段绑定过程。
+				对于SASL验证机制
+					可能多次调用BindRequest；
+					作为 多阶段绑定 的一部分，两个BindRequest之间 client不得调用其他操作
+				终止SASL绑定协商
+					发送一个BindRequest，
+						其中的SaslCredentials字段中的值不同，或者
+						AuthenticationChoice选择的不是SASL 
+				如果发送request时没有bind，并收到了operationsError
+					那么发送BindRequest；
+					如果失败了，那么终止这个LDAP-session，重新建立连接并发送BindRequest
+				发送的BindRequest中的 sasl的 mechanism字段 是个空字符串
+					那么server返回BindResponse，并将resultCode设置为authMethodNotSupported
+					如果使用相同的SASL mechanism再次尝试，那么将终止协商
+
+
+
+		Bind Response
+			(我推测：BindResponse被封装进LDAPMessage的protocolOp字段)
+
+			BindResponse ::= [APPLICATION 1] SEQUENCE {
+				COMPONENTS OF LDAPResult,						-- LDAPResult的组成部分
+				serverSaslCreds    [7] OCTET STRING OPTIONAL }
+			
+			绑定成功时
+				BindResponse 的 LDAPResult.resultCode = success
+
 	------------------------------------
 	
 	------------------------------------
@@ -352,6 +628,12 @@ RFC 4511	4.2. Bind Operation
 		------------------------------------
 		------------------------------------
 		------------------------------------
+```
+
+## OID 
+```bash
+## https://ldap.com/ldap-oid-reference-guide/ 
+
 ```
 
 # 2. OpenLDAP源码的数据类型
