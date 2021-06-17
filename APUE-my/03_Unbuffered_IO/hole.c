@@ -39,7 +39,7 @@ int main(void)
     /***
 检查文件的大小
 gos@gos-Latitude-5591:~/workspace/Git_WorkAndStudy/APUE-my/03_Unbuffered_IO$ ls -l file.hole 
--rw-r--r-- 1 gos gos 16394 6月   6 17:27 file01.hole
+-rw-r--r-- 1 gos gos 16394 6月  17 21:07 file.hole
 
 观察文件的实际内容
 gos@gos-Latitude-5591:~/workspace/Git_WorkAndStudy/APUE-my/03_Unbuffered_IO$ od -c file.hole 
@@ -47,7 +47,7 @@ gos@gos-Latitude-5591:~/workspace/Git_WorkAndStudy/APUE-my/03_Unbuffered_IO$ od 
 0000020  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0
 *
 0040000   A   B   C   D   E   F   G   H   I   J
-0040012     
+0040012 
      
     */
 
@@ -55,32 +55,32 @@ gos@gos-Latitude-5591:~/workspace/Git_WorkAndStudy/APUE-my/03_Unbuffered_IO$ od 
 
     int fd2;
     int count = 0;
-    char buf3[3] = "AB";
-
     if ((fd2 = creat("file.nohole", FILE_MODE)) < 0)
         err_sys("create error");
-
     while (count < 16394)
     {
-        if (write(fd2, buf3, 2) != 2)
-            err_sys("buf3 write error");
-        count += 2;
+        if (write(fd2, buf2, 10) != 10)
+            err_sys("buf2 write error");
+        count += 10;
     }
 
-    /*
+/*
 
 gos@gos-Latitude-5591:~/workspace/Git_WorkAndStudy/APUE-my/03_Unbuffered_IO$ ls -l file.nohole 
--rw-r--r-- 1 gos gos 16394 6月   6 17:36 file02.hole
+-rw-r--r-- 1 gos gos 16400 6月  17 21:07 file.nohole
 
 gos@gos-Latitude-5591:~/workspace/Git_WorkAndStudy/APUE-my/03_Unbuffered_IO$ od -c file.nohole 
-0000000   A   B   A   B   A   B   A   B   A   B   A   B   A   B   A   B
-*
-0040000   A   B   A   B   A   B   A   B   A   B
-0040012
+0000000   A   B   C   D   E   F   G   H   I   J   A   B   C   D   E   F
+0000020   G   H   I   J   A   B   C   D   E   F   G   H   I   J   A   B
+0000040   C   D   E   F   G   H   I   J   A   B   C   D   E   F   G   H
+一直持续下去...
+0037740   C   D   E   F   G   H   I   J   A   B   C   D   E   F   G   H
+0037760   I   J   A   B   C   D   E   F   G   H   I   J   A   B   C   D
+0040000   E   F   G   H   I   J   A   B   C   D   E   F   G   H   I   J
+0040020
+gos@gos-Latitude-5591:~/workspace/Git_WorkAndStudy/APUE-my/03_Unbuffered_IO$
 
-    */
-
-
+*/
 
     exit(0);
 }
