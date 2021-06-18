@@ -29,19 +29,14 @@ This document describes the protocol elements, along with their semantics and en
 ## 1. Introduction(简介)
 
 The Directory is "a collection of open systems cooperating to provide directory services" [X.500].  A directory user, which may be a human or other entity, accesses the Directory through a client (or Directory User Agent (DUA)).  The client, on behalf of the directory user, interacts with one or more servers (or Directory System Agents (DSA)).  Clients interact with servers using a directory access protocol.
-
 目录是“合作提供目录服务的开放系统的集合”[X.500]。 
-
 目录用户/user（可以是人或其他实体）通过 客户端/client（或目录用户代理 (DUA)）访问目录。 
-
 客户端/client  代表 目录用户/user 与一台或多台服务器（或目录系统代理 (DSA)）交互。 
-
 客户端使用目录访问协议与服务器交互。
 
 
 
 This document details the protocol elements of the Lightweight Directory Access Protocol (LDAP), along with their semantics. Following the description of protocol elements, it describes the way in which the protocol elements are encoded and transferred.
-
 本文档详细介绍了轻量级目录访问协议 (LDAP) 的协议元素及其语义。
 在协议元素的描述之后，它描述了协议元素的编码和传输方式。
 
@@ -50,7 +45,6 @@ This document details the protocol elements of the Lightweight Directory Access 
 ### 1.1. Relationship to Other LDAP Specifications(本文档与其他LDAP规范的关系)
 
 This document is an integral part of the LDAP Technical Specification[RFC4510], which obsoletes the previously defined LDAP technical  specification, RFC 3377, in its entirety.
-
 本文档是 LDAP 技术规范 [RFC 4510] 的组成部分，该规范完全废弃了先前定义的 LDAP 技术规范 RFC 3377。
 
 
@@ -62,12 +56,10 @@ This document, together with [RFC4510], [RFC4513], and [RFC4512],   obsoletes RF
 
 
 This document obsoletes RFC 2830, Sections 2 and 4.  The remainder of  RFC 2830 is obsoleted by [RFC4513].  Appendix C.2 summarizes  substantive changes to the remaining sections.
-
 本文档废弃了 RFC 2830 的第 2 节和第 4 节。RFC 2830 的其余部分已被 [RFC 4513] 废弃。 附录 C.2 总结了对其余部分的实质性更改。
 
 
 This document also obsoletes RFC 3771 in entirety.
-
 本文档还完全废弃了 RFC 3771。
 
 
@@ -109,11 +101,11 @@ The term "LDAP message layer" refers to the LDAP Message Protocol Data Unit (PDU
 
 
 The term "LDAP session" refers to combined services (transport connection, TLS layer, SASL layer, LDAP message layer) and their associations.
-      术语"LDAP session/会话"是指组合的服务（传输连接，TLS层，SASL层，LDAP消息层）及其关联。 
+术语"LDAP session/会话"是指组合的服务（传输连接，TLS层，SASL层，LDAP消息层）及其关联。 
 
 
 
-   See the table in Section 5 for an illustration of these four terms.
+See the table in Section 5 for an illustration of these four terms.
       有关这四个术语的说明，请参见第5节中的表。
 
 
@@ -121,15 +113,12 @@ The term "LDAP session" refers to combined services (transport connection, TLS l
 ## 3. Protocol Model(协议模型)
 
 The general model adopted by this protocol is one of clients performing protocol operations against servers.  In this model, a client transmits a protocol request describing the operation to be performed to a server.  The server is then responsible for performing the necessary operation(s) in the Directory.  Upon completion of an operation, the server typically returns a response containing appropriate data to the requesting client.
-
 该协议采用的通用模型是 客户端/client 对 服务器/serve 执行协议操作。 在该模型中，客户端向服务器发送 要执行操作的协议请求。 然后服务器负责在号码簿中执行必要的操作。 操作完成后，服务器通常会向发出请求的客户端返回包含适当数据的响应。
-
 总结： 即client发出请求，server处理 并 回复响应
 
 
 
 Protocol operations are generally independent of one another.  Each operation is processed as an atomic action, leaving the directory in a consistent state.
-
 协议操作通常彼此独立。 每个操作都作为一个原子操作进行处理，使目录保持一致状态。
 总结：   
    每个操作都是独立的 
@@ -138,7 +127,6 @@ Protocol operations are generally independent of one another.  Each operation is
 
 
 Although servers are required to return responses whenever such responses are defined in the protocol, there is no requirement for synchronous behavior on the part of either clients or servers. Requests and responses for multiple operations generally may be exchanged between a client and server in any order.  If required, synchronous behavior may be controlled by client applications.
-
 尽管只要在协议中定义了这样的响应，服务器就需要返回响应，但客户端或服务器都不需要同步行为。 多个操作的请求和响应通常可以以任何顺序在客户端和服务器之间交换。 如果需要，客户端应用程序可以控制同步行为。
 总结： 
    默认情况下，响应的顺序和请求的顺序，并不相同；可以以任意顺序 交换请求和响应。 (即 默认情况下是异步的)
@@ -147,7 +135,6 @@ Although servers are required to return responses whenever such responses are de
 
 
 The core protocol operations defined in this document can be mapped  to a subset of the X.500 (1993) Directory Abstract Service [X.511].  However, there is not a one-to-one mapping between LDAP operations  and X.500 Directory Access Protocol (DAP) operations.  Server  implementations acting as a gateway to X.500 directories may need to  make multiple DAP requests to service a single LDAP request.
-
 本文档中定义的核心协议操作可以映射到 X.500 (1993) 目录服务 [X.511] 的一个子集。 但是，LDAP 操作和 X.500 目录访问协议 (DAP) 操作之间没有一对一的映射。 充当 X.500 目录网关的服务器实现可能需要发出多个 DAP 请求来为单个 LDAP 请求提供服务。
    总结： 
       本文档定义的核心操作是 X.500的子集 
@@ -160,43 +147,36 @@ The core protocol operations defined in this document can be mapped  to a subset
 操作与 LDAP消息层 关系
 
 Protocol operations are exchanged at the LDAP message layer.  When  the transport connection is closed, any uncompleted operations at the  LDAP message layer are abandoned (when possible) or are completed  without transmission of the response (when abandoning them is not possible).  Also, when the transport connection is closed, the client MUST NOT assume that any uncompleted update operations have succeeded or failed.
-
 协议操作在 LDAP 消息层交换。 当传输连接关闭时，LDAP消息层中任何未完成的操作都将被放弃（如果可能）或在不传输响应的情况下完成（如果放弃它们是不可能的）。 此外，当传输连接关闭时，客户端不得假定任何未完成的更新操作已成功或失败。
 总结： 
-	协议操作 在 LDAP message layer 交换。 
-	当传输连接关闭时： 
-		对于server的LDAP message layer上的任何未完成的操作：
-		如果可以被放弃，那么放弃 
-		如果不能被放弃，那么执行完毕
+    协议操作 在 LDAP message layer 交换。 
+    当传输连接关闭时： 
+        对于server的LDAP message layer上的任何未完成的操作：
+        如果可以被放弃，那么放弃 
+        如果不能被放弃，那么执行完毕
 
 
 
 ## 4. Elements of Protocol(协议元素)
 
 The protocol is described using Abstract Syntax Notation One([ASN.1]) and is transferred using a subset of ASN.1 Basic Encoding Rules ([BER]).  Section 5 specifies how the protocol elements are encoded and transferred.
-
 该协议使用抽象语法符号一（[ASN.1]）进行描述，并使用 ASN.1 基本编码规则（[BER]）的子集进行传输。 第 5 节指定协议元素如何编码和传输。
-
 总结： 
-	本协议 
-		使用 ASN.1语法进行描述，
+    本协议 
+        使用 ASN.1语法进行描述，
         使用 ASN.1的基本编码规则[BER]的子集 进行编码传输。 
 
 
 
 In order to support future extensions to this protocol, extensibility is implied where it is allowed per ASN.1 (i.e., sequence, set, choice, and enumerated types are extensible).  In addition, ellipses  (...) have been supplied in ASN.1 types that are explicitly extensible as discussed in [RFC4520].  Because of the implied  extensibility, clients and servers MUST (unless otherwise specified)  ignore trailing SEQUENCE components whose tags they do not recognize.
-
 为了支持此协议的未来扩展，在每个 ASN.1 允许(扩展)的地方暗示了可扩展性（即sequence/序列、set/集合、choice/选择和enumerated/枚举类型是可扩展的）。 此外，省略号 (...) 已在 ASN.1 类型中提供，如 [RFC4520] 中所讨论的，这些类型可显式扩展。 由于隐含的可扩展性，客户端和服务器必须（除非另有说明）忽略 其标签无法识别 的 尾随的SEQUENCE 组件 。
-
 总结：
     sequence/set/choice/enumerated 都是本协议规定的 可扩展的 类型
 
 
 
 Changes to the protocol other than through the extension mechanisms described here require a different version number.  A client indicates the version it is using as part of the BindRequest, described in Section 4.2.  If a client has not sent a Bind, the server MUST assume the client is using version 3 or later.
-
 除了通过这里描述的扩展机制之外，协议的更改需要一个不同的版本号。 客户端指示它正在使用的版本作为 BindRequest 的一部分，如 4.2 节所述。 如果客户端没有发送绑定，服务器必须假设客户端使用的是版本 3 或更高版本。
-
 总结：
     client在BindRequest中必须告诉server 自己使用的版本号 (!!!)
     client没有发送Bind的话，server假定client使用的是 版本3或者更高版本   
@@ -204,7 +184,6 @@ Changes to the protocol other than through the extension mechanisms described he
 
 
 Clients may attempt to determine the protocol versions a server supports by reading the 'supportedLDAPVersion' attribute from the  root DSE (DSA-Specific Entry) [RFC4512].
-
 客户端可以尝试通过从根DSE (DSA-Specific Entry)读取'supportedLDAPVersion'属性来确定服务器支持的协议版本[RFC4512]。
     总结： 
         client 读取 root DSE的supportedLDAPVersion属性，
@@ -214,25 +193,21 @@ Clients may attempt to determine the protocol versions a server supports by read
 
 ### 4.1.  Common Elements(公共/通用元素)
 
-   This section describes the LDAPMessage envelope Protocol Data Unit
-   (PDU) format, as well as data type definitions, which are used in the
-   protocol operations.
-        本节介绍 
-            LDAPMessage 封装 协议数据单元(PDU/Protocol Data Unit) 格式，
-            以及协议操作中使用的数据类型定义。
-   总结： 
-        本节(4.1)介绍 如何使用LDAPMessage封装PDU(Protocol Data Unit)
-        以及 协议操作(protocolOp)中使用的数据类型(data-type)
+This section describes the LDAPMessage envelope Protocol Data Unit(PDU) format, as well as data type definitions, which are used in the protocol operations.
+本节介绍 
+   LDAPMessage 封装 协议数据单元(PDU/Protocol Data Unit) 格式，以及协议操作中使用的数据类型定义。
+总结： 
+   本节(4.1)介绍 如何使用LDAPMessage封装PDU(Protocol Data Unit)
+   以及 协议操作(protocolOp)中使用的数据类型(data-type)
 
 
 
 #### 4.1.1.  Message Envelope(封装消息)
 
 For the purposes of protocol exchanges, all protocol operations are  encapsulated in a common envelope, the LDAPMessage, which is defined as follows:
-
 为了实现协议交换的目的，所有协议操作都封装在一个通用的信封中，即LDAPMessage，它的定义如下:
-    总结： 
-       所有 协议操作，封装在LDAPMessage中。(!!!)
+总结： 
+   所有 协议操作，封装在LDAPMessage中。(!!!)
 
 
 
@@ -270,30 +245,24 @@ For the purposes of protocol exchanges, all protocol operations are  encapsulate
 
 
 The ASN.1 type Controls is defined in Section 4.1.11.
-
 ASN.1类型的控件，在4.1.11节中定义 [Page 14]
 
 
 
 The function of the LDAPMessage is to provide an envelope containing  common fields required in all protocol exchanges.  At this time, the only common fields are the messageID and the controls.
-
 LDAPMessage的功能是提供一个信封，其中包含所有协议交换所需的公共字段。此时，唯一常用的字段是messageID和controls/控件。
-
 总结：
     LDAPMessage是一个sequence
     LDAPMessage中封装了所有协议交换所需的公共字段
-		常用的字段是messageID和controls
+        常用的字段是messageID和controls
     
 
 If the server receives an LDAPMessage from the client in which the  LDAPMessage SEQUENCE tag cannot be recognized, the messageID cannot  be parsed, the tag of the protocolOp is not recognized as a request,  or the encoding structures or lengths of data fields are found to be  incorrect, then the server SHOULD return the Notice of Disconnection described in Section 4.4.1, with the resultCode set to protocolError, and MUST immediately terminate the LDAP session as described in  Section 5.3.
-
 如果服务器从客户端收到一个LDAPMessage，其中LDAPMessage SEQUENCE tag不能识别，messageID不能解析，protocolOp tag 不能识别为请求，或者数据字段的编码结构或长度不正确，然后服务器应该返回4.4.1中描述的断开连接通知，resultCode设置为protocolError，并且必须立即终止5.3中描述的LDAP会话。
 
 
 In other cases where the client or server cannot parse an LDAP PDU,   it SHOULD abruptly terminate the LDAP session (Section 5.3) where  further communication (including providing notice) would be  pernicious.  Otherwise, server implementations MUST return an  appropriate response to the request, with the resultCode set to  protocolError.
-
 在其他情况下，客户端或服务器不能解析LDAP PDU，它应该突然终止LDAP会话(章节5.3)，在那里进一步的通信(包括提供通知)将是有害的。否则，服务器实现必须返回一个适当的响应，并将resultCode设置为protocolError。
-
 总结：
     如果server/client 无法解析某个 PDU，
         那么立即终止通信
@@ -304,15 +273,11 @@ In other cases where the client or server cannot parse an LDAP PDU,   it SHOULD 
 ##### 4.1.1.1.  MessageID(消息ID)
 
 All LDAPMessage envelopes encapsulating responses contain the  messageID value of the corresponding request LDAPMessage.
-
 所有封装的 response-LDAPMessage 都包含相应request-LDAPMessage 的 messageID 值。
 
 
-
 The messageID of a request MUST have a non-zero value different from  the messageID of any other request in progress in the same LDAP session.  The zero value is reserved for the unsolicited notification  message.
-
 request的messageID 必须是非零值，不同于在同一 LDAP 会话中进行的 任何其他request的 messageID。 0值是为 主动提供的 通知消息保留的。
-
 总结： 
     messageID
         是非0值
@@ -321,14 +286,12 @@ request的messageID 必须是非零值，不同于在同一 LDAP 会话中进行
     
 
 Typical clients increment a counter for each request.
-    典型的客户端为每个请求增加一个计数器。
+典型的客户端为每个请求增加一个计数器。
 
 
 
 A client MUST NOT send a request with the same messageID as an  earlier request in the same LDAP session unless it can be determined  that the server is no longer servicing the earlier request (e.g.,  after the final response is received, or a subsequent Bind completes).  Otherwise, the behavior is undefined.  For this purpose,  note that Abandon and successfully abandoned operations do not send  responses.
-
 客户端不得在同一 LDAP 会话中发送与先前request相同messageID 的request，除非可以确定服务器不再为先前的request提供服务（例如，在收到最终响应之后，或后续绑定完成后） ）。 否则，行为是未定义的。 为此，请注意放弃和成功放弃的操作不会发送响应。
-
 总结： 
     在同一会话中，client发送的messageID不能重复 (除非server已经不为某一个messageID提供服务)
     放弃 / 成功放弃 操作不会发送响应    
@@ -345,7 +308,6 @@ LDAPString 是一种符号方便，尽管 LDAPString 类型的字符串编码为
 LDAPString ::= OCTET STRING -- UTF-8 encoded,
                             -- [ISO10646] characters总结：
 ```
-
 总结： 
     LDAPString是一种符号方便，是字符串
         LDAPStrin被编码为 ASN.1 OCTET STRING类型
@@ -356,24 +318,18 @@ LDAPString ::= OCTET STRING -- UTF-8 encoded,
 
 
 The LDAPOID is a notational convenience to indicate that the  permitted value of this string is a (UTF-8 encoded) dotted-decimal  representation of an OBJECT IDENTIFIER.  Although an LDAPOID is encoded as an OCTET STRING, values are limited to the definition of   <numericoid> given in Section 1.4 of [RFC4512].
-
 LDAPOID 是一种符号方便，用于指示此 string/字符串 的允许值是对象标识符/OID的（UTF-8 编码）点分十进制表示。 尽管 LDAPOID 被编码为 OCTET STRING，但值仅限于 [RFC4512] 的第 1.4 节中给出的 <numericoid> 定义。
-
 ```ASN.1
 LDAPOID ::= OCTET STRING -- Constrained to <numericoid>
                          -- [RFC4512]
 ```
-
-   For example,
-
+For example,
 ```ASN.1
     1.3.6.1.4.1.1466.1.2.3
 ```
-
 总结： 
-     LDAPOID是一种符号方便；
-
-​	LDAPOID是一种 点分十进制 表示的string/字符串 (UTF-8编码)，尽管LDAPOID被编码为 OCTET STRING，
+   LDAPOID是一种符号方便；
+   LDAPOID是一种 点分十进制 表示的string/字符串 (UTF-8编码)，尽管LDAPOID被编码为 OCTET STRING，
 ​        但 值 仅限于 [RFC4512]的1.4节定义的 <numericoid>
 
 
@@ -383,49 +339,38 @@ LDAPOID ::= OCTET STRING -- Constrained to <numericoid>
 #### 4.1.3.  Distinguished Name and Relative Distinguished Name(DN和RDN)
 
 An LDAPDN is defined to be the representation of a Distinguished Name (DN) after encoding according to the specification in [RFC4514].
-
 根据 [RFC 4514] 中的规范进行编码后，LDAPDN 被定义为  可分辨名称 (DN)   的表示。
-
 ```ASN.1
     LDAPDN ::= LDAPString
                -- Constrained to <distinguishedName> [RFC4514]
 ```
-
 总结： 
     LDAPDN 代表/表示了 DN
-
-​	LDAPDN的类型是：LDAPString
+   LDAPDN的类型是：LDAPString
 
 
 
 A RelativeLDAPDN is defined to be the representation of a Relative  Distinguished Name (RDN) after encoding according to the specification in [RFC4514].
-
 根据 [RFC 4514] 中的规范进行编码后，RelativeLDAPDN被定义为 相对可分辨名称 (RDN) 的表示。
-
 ```ASN.1
     RelativeLDAPDN ::= LDAPString
                        -- Constrained to <name-component> [RFC4514]
 ```
-
 总结： 
-    RelativeLDAPDN 代表/表示了 RDN
-
-​	RelativeLDAPDN的类型是：LDAPString
+   RelativeLDAPDN 代表/表示了 RDN
+​   RelativeLDAPDN的类型是：LDAPString
 
 
 
 #### 4.1.4.  Attribute Descriptions(属性描述)
 
 The definition and encoding rules for attribute descriptions are  defined in Section 2.5 of [RFC4512].  Briefly, an attribute  description is an attribute type and zero or more options.
-
 属性描述的 定义和编码规则在 [RFC4512] 的第 2.5 节中定义。 简而言之，属性描述 是一种属性类型和0个或多个选项。
-
 ```ASN.1
     AttributeDescription ::= LDAPString
                             -- Constrained to <attributedescription>
                             -- [RFC4512]
 ```
-
 总结： 
     AttributeDescription的类型是：LDAPString
     AttributeDescription包含 一个attribute type 和 0个或多个options
@@ -435,37 +380,30 @@ The definition and encoding rules for attribute descriptions are  defined in Sec
 #### 4.1.5.  Attribute Value(属性值)
 
 A field of type AttributeValue is an OCTET STRING containing an  encoded attribute value.  The attribute value is encoded according to  the LDAP-specific encoding definition of its corresponding syntax. The LDAP-specific encoding definitions for different syntaxes and attribute types may be found in other documents and in particular  [RFC4517].
-
 AttributeValue类型的字段 是一个OCTET STRING 包含了一个编码后的 attribute-value/属性值 。 attribute-value/属性值 根据 特定于LDAP编码定义 的相应语法 进行编码。   特定于LDAP编码的 不同语法和属性类型 定义  可以在其他文档中找到(特别是 [RFC4517]) 。
-
 ```ASN.1
     AttributeValue ::= OCTET STRING
 ```
-
 总结： 
-	AttributeValue的 值 编码为OCTET STRING
+    AttributeValue的 值 编码为OCTET STRING
 
 
 
 Note that there is no defined limit on the size of this encoding;  thus, protocol values may include multi-megabyte attribute values (e.g., photographs).
-
 请注意，此编码的大小没有定义限制； 因此，协议值可以包括多兆字节的属性值（例如，照片）。
-
 总结： 
     AttributeValue值的 编码大小没有限制
 
 
 
 Attribute values may be defined that have arbitrary and non-printable  syntax.  Implementations MUST NOT display or attempt to decode an attribute value if its syntax is not known.  The implementation may attempt to discover the subschema of the source entry and to retrieve the descriptions of 'attributeTypes' from it [RFC4512].
-
 可以定义具有任意和不可打印语法的属性值。实现 绝对不能 显示或试图解码 一个语法未知的属性值。该实现可能试图发现源条目的子模式，并从中检索'attributeTypes'的描述[RFC4512]。
 
 Clients MUST only send attribute values in a request that are valid  according to the syntax defined for the attributes.
-
 客户端 /client  必须根据属性定义的语法 只在请求request/中发送有效的属性值。
 
 总结： 
-  	     客户端 /client  必须根据属性定义的语法 只在请求request/中发送有效的属性值。
+      客户端 /client  必须根据属性定义的语法 只在请求request/中发送有效的属性值。
 
 
 
@@ -497,10 +435,10 @@ The syntax of the AssertionValue depends on the context of the LDAP operation be
 
 AssertionValue 的语法取决于 正在执行的 LDAP 操作的上下文。 例如，在执行比较操作时使用属性/attribute的 EQUALITY 匹配规则的语法。 通常这与用于属性类型值的语法相同，但在某些情况下，断言语法与值语法不同。 有关示例，请参阅 [RFC4517] 中的 objectIdentiferFirstComponentMatch。
 总结： 
-	AssertionValue的 syntax/语法 取决于正在执行的 LDAP操作的 context/上下文
-	例如：
+    AssertionValue的 syntax/语法 取决于正在执行的 LDAP操作的 context/上下文
+    例如：
             在 执行比较操作时 使用 属性/attribute的 EQUALITY匹配规则 语法
-	通常，对于 属性类型的值(attribute type‘s value) 应用同样的语法
+    通常，对于 属性类型的值(attribute type‘s value) 应用同样的语法
             但是，某些情况下 断言 语法与 值语法不同
 
 
@@ -508,10 +446,7 @@ AssertionValue 的语法取决于 正在执行的 LDAP 操作的上下文。 例
 #### 4.1.7.  Attribute and PartialAttribute(属性和部分属性)
 
 Attributes and partial attributes consist of an attribute description and attribute values.  A PartialAttribute allows zero values, while Attribute requires at least one value.
-
 属性和部分属性由 属性描述/attribute-description和属性值/attribute-values 组成。 部分属性允许零值，而属性至少需要一个值。
-
-
 ```ASN.1
         PartialAttribute ::= SEQUENCE {
              type       AttributeDescription,
@@ -521,7 +456,6 @@ Attributes and partial attributes consist of an attribute description and attrib
              ...,
              vals (SIZE(1..MAX))})
 ```
-
 总结： 
     Attributes / PartialAttribute都是由
         一个attribute-description
@@ -532,38 +466,30 @@ Attributes and partial attributes consist of an attribute description and attrib
 
 
 No two of the attribute values may be equivalent as described by Section 2.2 of [RFC4512].  The set of attribute values is unordered. Implementations MUST NOT rely upon the ordering being repeatable.
-
 如 [RFC 4512] 的第 2.2 节所述，没有两个属性值可能是等效的。 属性值集/attribute-values's set 是无序的。 实现 不能/不得/禁止  依赖于可重复的排序。
 总结： 
-		attribute-values 是set 是无序的
+        attribute-values 是set 是无序的
 
 
 
 #### 4.1.8.  Matching Rule Identifier(匹配规则 的 标识符)
 
 Matching rules are defined in Section 4.1.3 of [RFC4512].  A matching rule is identified in the protocol by the printable representation of either its <numericoid> or one of its short name descriptors [RFC4512], e.g., 'caseIgnoreMatch' or '2.5.13.2'.
-
 匹配规则在 [RFC4512] 的第 4.1.3 节中定义。 协议中定义的匹配规则 通过  其 可打印的 <numericoid> 或短名称 [RFC4512]  表示来标识，例如，“caseIgnoreMatch”或“2.5.13.2”。
-
 ```ASN.1
     MatchingRuleId ::= LDAPString
 ```
 
 
-
 #### 4.1.9.  Result Message返回结果消息
 
 The LDAPResult is the construct used in this protocol to return success or failure indications from servers to clients.  To various  requests, servers will return responses containing the elements found  in LDAPResult to indicate the final status of the protocol operation  request.
-
 LDAPResult 是此协议中用于从服务器向客户端 返回成功或失败指示 的构造/结构。 对于各种request，服务器将返回 包含在 LDAPResult 中找到的元素的 响应，以指示 协议操作请求/protocolOp-request 的最终状态。
 总结： 
-        LDAPResult是个构造；
-
-​		servers 向 clients 返回 LDAPResult；
-
-​		LDAPResult是 server给client的响应/response；
-
-​        LDAPResult中包含的 elements/元素 表明了 请求操作的 最终状态。
+    LDAPResult是个构造；
+​	 servers 向 clients 返回 LDAPResult；
+​	 LDAPResult是 server给client的响应/response；
+    LDAPResult中包含的 elements/元素 表明了 请求操作的 最终状态。
 
 
 
@@ -628,9 +554,7 @@ LDAPResult 是此协议中用于从服务器向客户端 返回成功或失败�
 
 
 The resultCode enumeration is extensible as defined in Section 3.8 of  [RFC4520].  The meanings of the listed result codes are given in  Appendix A.  If a server detects multiple errors for an operation,  only one result code is returned.  The server should return the  result code that best indicates the nature of the error encountered.  Servers may return substituted result codes to prevent unauthorized  disclosures.
-
 resultCode枚举 是可扩展的，如 [RFC4520] 的第 3.8 节中所定义。 在附录A中给出了 列出的结果码的含义。如果服务器检测到一个操作的多个错误，则只返回一个结果码/result-code。 服务器应返回最能表明所遇到错误性质的结果代码/result-code。 服务器可能会返回替换的结果代码以防止未经授权的披露。
-
 总结： 
     LDAPResult中的 resultCode/结果码 字段 是个枚举
         对于一个操作的多个错误，只返回一个result-code
@@ -639,9 +563,7 @@ resultCode枚举 是可扩展的，如 [RFC4520] 的第 3.8 节中所定义。 �
 
 
 The diagnosticMessage field of this construct may, at the server's option, be used to return a string containing a textual, human-readable diagnostic message (terminal control and page formatting characters should be avoided).  As this diagnostic message is not standardized, implementations MUST NOT rely on the values returned. Diagnostic messages typically supplement the resultCode with additional information.  If the server chooses not to return a textual diagnostic, the diagnosticMessage field MUST be empty.
-
 根据服务器的选择，该构造的diagnosticMessage(诊断消息) 字段可用于返回 一个包含文本的、人类可读的诊断信息 字符串（应避免 终端控制和页面格式化字符）。 由于此诊断消息未标准化，因此实现不得依赖于返回的值。 诊断消息通常用附加信息补充 resultCode。 如果服务器选择不返回文本诊断，则diagnosticMessage 字段必须为空。
-
 总结： 
     LDAPResult中的 diagnosticMessage(诊断信息)字段
         用于返回 一个 包含文本的 人类可读的诊断信息 字符串
@@ -651,17 +573,15 @@ The diagnosticMessage field of this construct may, at the server's option, be us
 
 
 For certain result codes (typically, but not restricted to  noSuchObject, aliasProblem, invalidDNSyntax, and  aliasDereferencingProblem), the matchedDN field is set (subject to access controls) to the name of the last entry (object or alias) used in finding the target (or base) object.  This will be a truncated   form of the provided name or, if an alias was dereferenced while attempting to locate the entry, of the resulting name.  Otherwise, the matchedDN field is empty.
-
 1) 对于某些结果代码（通常但不限于 noSuchObject、aliasProblem、invalidDNSyntax 和 aliasDereferencingProblem），matchedDN 字段被设置（受访问控制）为用于 查找目标(或基础)对象的 最后一个条目(对象或别名)的名称。 2) 如果在尝试定位条目时解引用别名，结果名称将是所提供名称的截断形式。 3) 否则，matchedDN 字段为空。 
-
 总结： 
     LDAPResult中的 matchedDN 字段
         1) 对于结果代码/resultCode 为 noSuchObject、aliasProblem、invalidDNSyntax、aliasDereferencingProblem的消息/message，
             服务器返回 在DIT中 可以为此操作找到的 最深的条目的DN
             (即：所查找对象的 最后一个条目的名称)
-        	参看：
-            	/OPENLDAP_REL_ENG_2_4/contrib/ldapc++/src/LDAPResult.h 
-            	的const std::string& getMatchedDN() const;
+            参看：
+                /OPENLDAP_REL_ENG_2_4/contrib/ldapc++/src/LDAPResult.h 
+                的const std::string& getMatchedDN() const;
 
 ​		2) 如果在尝试定位条目时解引用别名，结果名称将是所提供名称的截断形式
 
@@ -672,7 +592,6 @@ For certain result codes (typically, but not restricted to  noSuchObject, aliasP
 #### 4.1.10.  Referral(引用)
 
 The referral result code indicates that the contacted server cannot or will not perform the operation and that one or more other servers may be able to.  Reasons for this include:
-
 resultCode中的referral表示：被联系的服务器不能或不会执行操作，而一个或多个其他服务器可能能够执行。 原因包括：
 
    - The target entry of the request is not held locally, but the server has knowledge of its possible existence elsewhere.
@@ -689,7 +608,6 @@ resultCode中的referral表示：被联系的服务器不能或不会执行操�
             请求修改某条目，但此条目在此服务器上 只是个可读的副本
 
 The referral field is present in an LDAPResult if the resultCode is set to referral, and it is absent with all other result codes.  It contains one or more references to one or more servers or services that may be accessed via LDAP or other protocols.  Referrals can be returned in  to any operation request (except Unbind and Abandon, which do not have responses).  At least one URI MUST be present in the Referral.
-
 如果 LDAPResult的resultCode字段被设置为referral，则referral字段存在于 LDAPResult 中，当resultCode字段被设置为其他值时 都不存在referral字段。 它包含可通过 LDAP 或其他协议访问的一个或多个服务器或服务的一个或多个引用。 任何操作请求都可以返回referral（Unbind 和 Abandon 除外，它们没有响应）。 referral中必须至少存在一个 URI。
 总结： 
     当LDAPResult的resultCode 字段的值 被设置为referral时
@@ -718,10 +636,9 @@ If the client wishes to progress the operation, it contacts one of the supported
 
 Clients that follow referrals MUST ensure that they do not loop between servers.  They MUST NOT repeatedly contact the same server for the same request with the same parameters.  Some clients use a counter that is incremented each time referral handling occurs for an operation, and these kinds of clients MUST be able to handle at least ten nested referrals while progressing the operation.
 追踪referral的客户端必须确保它们不会在服务器之间循环。 对于具有相同参数的相同请求，他们不得重复联系同一服务器。 一些客户端使用一个计数器，每次发生操作的引用/referral处理时都会增加该计数器，并且这些类型的客户端必须能够在进行操作时处理至少十个嵌套引用/referral。
-
 总结： 
-		client会连接referral中的URI 
-        		但是，具有相同参数的相同请求 不能重复连接同一服务器/server 
+        client会连接referral中的URI 
+                但是，具有相同参数的相同请求 不能重复连接同一服务器/server 
 
 
 
@@ -780,7 +697,6 @@ server 发送的 Controls 称为“(response controls)响应控件”。
 The controlType field is the dotted-decimal representation of an OBJECT IDENTIFIER that uniquely identifies the control.  This provides unambiguous naming of controls.  Often, response control(s) solicited by a request control share controlType values with the request control.
 controlType字段 是唯一标识 control 的 OBJECT IDENTIFIER(OID) 的 点分十进制表示。 
 这提供了明确的control命名。通常，请求控件  请求的响应控件 与请求控件 共享controlType 值。
-
 总结： 
     Control的 controlType字段 的值     是该control的OID 的 点分十进制字符串表示
     response control和request control使用相同的 controlType值
@@ -803,7 +719,7 @@ criticality字段的值是TRUE 值表示 在不应用控件/control语义的情�
      总结：如果server 
              不能够识别control的类型 / control不适合操作 / 不愿意使用control执行操作，并且criticality设置为 TRUE
                  则server不能执行操作
-         		并且将resultCode字段设置为 unavailableCriticalExtension
+                 并且将resultCode字段设置为 unavailableCriticalExtension
 
 
    - If the server does not recognize the control type, determines that it is not appropriate for the operation, or is otherwise unwilling to perform the operation with the control, and if the criticality field is FALSE, the server MUST ignore the control.
@@ -815,7 +731,6 @@ criticality字段的值是TRUE 值表示 在不应用控件/control语义的情�
 
    - Regardless of criticality, if a control is applied to an operation, it is applied consistently and impartially to the entire operation.
         无论关键程度如何，如果将control应用于一项操作，它就会一致且公正地应用于整个操作。
-         
 
 The controlValue may contain information associated with the controlType.  Its format is defined by the specification of the control.  Implementations MUST be prepared to handle arbitrary contents of the controlValue octet string, including zero bytes.  It is absent only if there is no value information that is associated with a control of its type.  When a controlValue is defined in terms of ASN.1, and BER-encoded according to Section 5.1, it also follows the extensibility rules in Section 4.
 controlValue 可能包含与 controlType 相关的信息。 它的格式由control的规范定义。 
@@ -861,11 +776,10 @@ This document does not specify any controls.  Controls may be specified in other
 
 
 
-### 4.2.  Bind Operation(绑定操作)
+### 4.2.  Bind Operation(绑定操作(即验证身份))
 
 The function of the Bind operation is to allow authentication information to be exchanged between the client and server.  The Bind operation should be thought of as the "authenticate" operation. Operational, authentication, and security-related semantics of this operation are given in [RFC4513].
 绑定操作功能是允许 在客户端和服务器之间 交换身份认证信息。 绑定操作  应该被认为是 “认证/authenticate”操作。 [RFC4513] 中给出了该操作的：操作、认证和安全相关语义。 
-
 总结： 
       绑定操作，主要用于 身份验证/认证
 
@@ -895,448 +809,263 @@ The Bind request is defined as follows:
    - version: A version number indicating the version of the protocol to be used at the LDAP message layer.  This document describes version 3 of the protocol.  There is no version negotiation.  The client sets this field to the version it desires.  If the server does not support the specified version, it MUST respond with a BindResponse where the resultCode is set to protocolError.
      version字段：一个版本号，指示要在 LDAP消息层(LDAP message layer) 使用的协议的版本。 本文档描述了协议的第3版。 
      没有版本协商。 客户端/client 将此字段设置为其所需的版本。 如果服务器/server 不支持指定的版本，它必须以 BindResponse 响应，其中 resultCode 设置为 protocolError。 
-      总结：
-              BindRequest的 version字段client 用于 指出它所需要的版本 (!!!)
+     总结：
+              BindRequest的 version字段 ，client 用于 指出它所需要的版本 (!!!)
              若是server 不支持 client指定的version，那么返回 BindResponse 并 resultCode设置为protocolError 
-
+     
    - name: If not empty, the name of the Directory object that the client wishes to bind as.  This field may take on a null value (a zero-length string) for the purposes of anonymous binds ([RFC4513], Section 5.1) or when using SASL [RFC4422] authentication ([RFC4513], Section 5.2).  Where the server attempts to locate the named object, it SHALL NOT perform alias dereferencing.
-     name字段：
-            如果不为空，则为客户端希望绑定的 目录对象的名称。 
-         出于匿名绑定（[RFC4513]，第 5.1 节）或使用 SASL [RFC4422] 身份验证（[RFC4513]，第 5.2 节）的目的，
-            该字段可能采用空/null值（长度为0的字符串）。 
-         当服务器试图定位命名对象时，它不应执行别名解引用。
+     name字段：如果不为空，则为客户端 希望绑定的 目录对象的名称。 
+     出于匿名绑定([RFC4513]，第 5.1 节)或使用 SASL[RFC4422]身份验证([RFC4513]，第 5.2节)的目的，该字段可能采用 空/null 值（长度为0的字符串）。 
+     当服务器试图定位命名对象时，它不应执行别名解引用。 
+     总结：
+     ​	BindRequest的 name字段，
+     ​		不为空 则为client希望绑定到的DN；
+     ​         匿名绑定 或 SASL认证 时，name可能为null值；
+     ​         当server试图定位name/DN 时， 不应该 解引用。
+     ​      即：client 用于 指出 它希望绑定到的DN (!!!)
+     
+   - authentication: Information used in authentication.  This type is extensible as defined in Section 3.7 of [RFC4520].  Servers that do not support a choice supplied by a client return a BindResponse with the resultCode set to authMethodNotSupported.
+     authentication/认证 字段：(包含了)用于认证的信息。 这种类型是可扩展的，如 [RFC4520] 的第 3.7 节中所定义。 
+     若服务器不支持client提供的CHOICE，则返回一个 BindResponse，并将 resultCode 设置为 authMethodNotSupported。
+     总结： 
+         BindRequest的 authentication字段：
+            1) client 用于指定 验证/认证方式 (!!!)
+            2) 若client指定了 认证方式，但是如果server不支持 这种认证方式
+                  则返回 BindResponse
+                  并将 resultCode 设置为 authMethodNotSupported
 
-   总结： 
-      BindRequest的 name字段
-         不为空，则为client希望绑定到的DN
-         匿名绑定/SASL认证 时，name可能为null值
-         当server试图定位name/DN 时， 不应该 解引用
-      client 用于 指出 它希望绑定到的DN (!!!)
-
-   - authentication: Information used in authentication.  This type is
-     extensible as defined in Section 3.7 of [RFC4520].  Servers that do
-     not support a choice supplied by a client return a BindResponse
-     with the resultCode set to authMethodNotSupported.
-         authentication/认证 字段：
-            用于认证的信息。 
-            这种类型是可扩展的，如 [RFC4520] 的第 3.7 节中所定义。 
-         不支持client提供的选择，服务器返回一个 BindResponse，
-            并将 resultCode 设置为 authMethodNotSupported。
-
+Textual passwords (consisting of a character sequence with a known character set and encoding) transferred to the server using the simple AuthenticationChoice SHALL be transferred as UTF-8 [RFC3629] encoded [Unicode].  Prior to transfer, clients SHOULD prepare text passwords as "query" strings by applying the SASLprep [RFC4013] profile of the stringprep [RFC3454] algorithm.  Passwords consisting of other data (such as random octets) MUST NOT be altered.  The determination of whether a password is textual is a local client matter.
+若 使用AuthenticationChoice(即authentication字段)的simple方式 将 文本/明文密码(使用 已知字符集和编码 组成的字符序列)  传输到服务器，
+    那么 "应该"  使用 UTF-8[RFC3629]编码[Unicode] 传输。 
+在传输之前，客户端 "应该" 通过应用 stringprep[RFC3454]算法的 SASLprep[RFC4013]配置文件，
+    来准备 文本/明文密码 作为"query"字符串。 
+"禁止" 更改 由其他数据（例如随机八位字节）组成的密码。 
+确定密码是否为文本 是本地客户端的事情。
 总结： 
-  BindRequest的 authentication字段
-    client 用于指定 验证/认证方式 (!!!)
-client指定了 认证方式，但是如果server不支持 这种认证方式
-    返回 BindResponse
-    并将 resultCode 设置为 authMethodNotSupported
+    当client使用sample验证时，使用UTF-8 对 文本/明文密码进行编码传输
 
-#---------------------------------------------------------------------------------------
+#### 4.2.1.  Processing of the Bind Request(处理绑定请求)
 
-
-
-
-
-Sermersheim                 Standards Track                    [Page 16]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-     Textual passwords (consisting of a character sequence with a known
-     character set and encoding) transferred to the server using the
-     simple AuthenticationChoice SHALL be transferred as UTF-8 [RFC3629]
-     encoded [Unicode].  Prior to transfer, clients SHOULD prepare text
-     passwords as "query" strings by applying the SASLprep [RFC4013]
-     profile of the stringprep [RFC3454] algorithm.  Passwords
-     consisting of other data (such as random octets) MUST NOT be
-     altered.  The determination of whether a password is textual is a
-     local client matter.
-            AuthenticationChoice 设置为simple 
-                那么 传输到服务器的 文本/明文 密码(由已知字符集和编码的字符序列组成)
-                应该使用 UTF-8[RFC3629]编码[Unicode] 转化/编码。 
-            在传输之前，
-                客户端应该通过应用 stringprep[RFC3454]算法的 SASLprep[RFC4013]配置文件 
-                来准备 文本密码 作为"query"字符串。 
-            不得更改由其他数据（例如随机八位字节）组成的密码。 
-            确定密码是否为文本是本地客户端的事情。
-    总结： 
-        当client使用sample验证时，使用UTF-8 对 文本/明文密码进行编码传输
-        不能使用其他类型的字符 来组成密码 
-
-#### 4.2.1.  Processing of the Bind Request
-
-​        处理 绑定请求(Bind Request)
-
-   Before processing a BindRequest, all uncompleted operations MUST
-   either complete or be abandoned.  The server may either wait for the
-   uncompleted operations to complete, or abandon them.  The server then
-   proceeds to authenticate the client in either a single-step or
-   multi-step Bind process.  Each step requires the server to return a
-   BindResponse to indicate the status of authentication.
-        在处理 BindRequest 之前，所有未完成的操作 必须 
-            要么完成 
-            要么被放弃。 
-        服务器/server 
-            可以等待未完成的操作完成，
-            或者放弃它们。 
-        然后服务器继续以单步或多步绑定过程对客户端进行身份验证。 
-        每一步都需要服务器返回一个 BindResponse 来指示认证的状态。
-    总结： 
+Before processing a BindRequest, all uncompleted operations MUST either complete or be abandoned.  The server may either wait for the uncompleted operations to complete, or abandon them.  The server then proceeds to authenticate the client in either a single-step or multi-step Bind process.  Each step requires the server to return a BindResponse to indicate the status of authentication.
+在处理 BindRequest 之前，所有未完成的操作 必须：要么完成，要么被放弃；服务器/server 可以等待未完成的操作完成，或者放弃它们。 
+然后服务器继续 以单步或多步绑定过程 对客户端进行身份验证；每一步都需要服务器返回一个 BindResponse 来指示认证的状态。
+总结： 
         server 去处理 绑定请求(Bind Request)
         server 在处理BindResuest之前，对于未完成的操作 要么等待操作的完成 要么放弃操作
-        然后serer执行
-            单步绑定过程 或者
-            多步绑定过程
-                每一步都需要server返回一个BindResponse 来指示认证的状态
+        然后serer执行单步绑定过程 或者  步绑定过程；每一步都需要server返回一个BindResponse 来指示认证的状态
 
-   After sending a BindRequest, clients MUST NOT send further LDAP PDUs
-   until receiving the BindResponse.  Similarly, servers SHOULD NOT
-   process or respond to requests received while processing a
-   BindRequest.
-        在发送 BindRequest 之后，
-            client在收到BindResponse之前 不得发送更多的 LDAP PDU。 
-        同样，服务器 正在处理BindRequest时 不应该处理或响应 收到的请求。
-    总结： 
-        client 发出BindRequest之后，
-            如果还没有接收到 BindResponse，那么它不应该发送更多的LDAP-PDU 
-        server如果正在处理BindRequest，
-            那么不应该 处理/响应 接收到的 请求
+After sending a BindRequest, clients MUST NOT send further LDAP PDUs until receiving the BindResponse.  Similarly, servers SHOULD NOT process or respond to requests received while processing a BindRequest.
+client在发送 BindRequest 之后，并且在收到BindResponse之前 ， "禁止" 发送更多的 LDAP PDU。 
+同样，服务器 正在处理BindRequest时， "禁止" 处理或响应 收到的请求。
+总结： 
+        client 发出BindRequest之后，如果还没有接收到 BindResponse，那么它不应该发送更多的LDAP-PDU ；
+        server如果正在处理BindRequest，那么它不应该 处理/响应 接收到的 请求
 
+If the client did not bind before sending a request and receives an operationsError to that request, it may then send a BindRequest.  If this also fails or the client chooses not to bind on the existing LDAP session, it may terminate the LDAP session, re-establish it, and begin again by first sending a BindRequest.  This will aid in interoperating with servers implementing other versions of LDAP.
+如果client 
+    1)在发送request之前没有绑定 并且 收到了 该request的 操作错误码/operationsError，
+        那么它可能发送一个 BindRequest。 
+    2)如果这也失败了 或者 client选择不绑定现有的 LDAP-session/会话，
+        它可能会终止这个 LDAP-session/会话，
+        重新建立它，
+        然后通过首先发送 BindRequest 重新开始。 
+这将有助于实现 与 其他LDAP版本的服务器 进行互操作。
 
-   If the client did not bind before sending a request and receives an
-   operationsError to that request, it may then send a BindRequest.  If
-   this also fails or the client chooses not to bind on the existing
-   LDAP session, it may terminate the LDAP session, re-establish it, and
-   begin again by first sending a BindRequest.  This will aid in
-   interoperating with servers implementing other versions of LDAP.
-        如果client 
-            1)在发送请求之前没有绑定 并且 收到了 该请求的 操作错误码/operationsError，
-                那么它可以发送一个 BindRequest。 
-            2)如果这也失败了 或者 client选择不绑定现有的 LDAP-session/会话，
-                它可能会终止这个 LDAP-session/会话，
-                重新建立它，
-                然后通过首先发送 BindRequest 重新开始。 
-        这将有助于实现 与 其他LDAP版本的服务器 进行互操作。
+Clients may send multiple Bind requests to change the authentication and/or security associations or to complete a multi-stage Bind process.  Authentication from earlier binds is subsequently ignored.
+client 可以发送多个绑定请求(Bind request) 
+    来更改身份验证  和/或 安全关联 或 完成多阶段绑定过程。 
+随后忽略来自早期绑定的身份验证。
 
-   Clients may send multiple Bind requests to change the authentication
-   and/or security associations or to complete a multi-stage Bind
-   process.  Authentication from earlier binds is subsequently ignored.
-        client 
-            可以发送多个绑定请求(Bind request) 
-                来更改 身份验证 和/或 
-                安全关联 或 
-                完成多阶段绑定过程。 
-        随后忽略来自早期绑定的身份验证。
+For some SASL authentication mechanisms, it may be necessary for the  client to invoke the BindRequest multiple times ([RFC4513], Section 5.2).  Clients MUST NOT invoke operations between two Bind requests made as part of a multi-stage Bind.
+对于某些 SASL身份验证机制，client 可能需要多次调用 BindRequest（[RFC4513]，第 5.2 节）。 
+作为多阶段绑定的一部分，的 在两个绑定请求(Bind request)之间, client不得调用(其他)操作。
+总结： 
+    对于SASL身份验证机制，client可能需要发送多个BindRequest
+    并且 在执行多阶段绑定 的 两个绑定请求(Bind request)之间，client不得调用其他操作
 
-   For some SASL authentication mechanisms, it may be necessary for the
-   client to invoke the BindRequest multiple times ([RFC4513], Section
-   5.2).  Clients MUST NOT invoke operations between two Bind requests
-   made as part of a multi-stage Bind.
-        对于某些 SASL身份验证机制，
-            client 可能需要多次调用 BindRequest（[RFC4513]，第 5.2 节）。 
-        作为多阶段绑定的一部分，的 在两个绑定请求(Bind request)之间, 
-            client不得调用 操作。
-    总结： 
-        对于SASL身份验证机制，client可能需要发送多个BindRequest
-        并且在执行多阶段绑定 的 两个绑定请求(Bind request)之间，client不得调用其他操作
-
-   A client may abort a SASL bind negotiation by sending a BindRequest
-   with a different value in the mechanism field of SaslCredentials, or
-   an AuthenticationChoice other than sasl.
-        client可以通过发送
-                1)一个 在SaslCredentials机制字段中具有不同值的 BindRequest, 或者
-                2)一个 与SASL不同的AuthenticationChoice(认证选择)
-        来 终止 SASL绑定协商。
-
-
-#---------------------------------------------------------------------------------------
+A client may abort a SASL bind negotiation by sending a BindRequest with a different value in the mechanism field of SaslCredentials, or an AuthenticationChoice other than sasl.
+ client可以通过发送
+        1)一个 在AuthenticationChoice字段中的SaslCredentials字段中的mechanism字段的值  (与原SASL绑定协商)具有不同值的 BindRequest ；或者
+        2)一个 AuthenticationChoice字段的值不是sasl；
+    来 终止 SASL绑定协商。
 
 
 
+If the client sends a BindRequest with the sasl mechanism field as an empty string, the server MUST return a BindResponse with the resultCode set to authMethodNotSupported.  This will allow the client to abort a negotiation if it wishes to try again with the same SASL mechanism.
+如果client发送一个BindRequest 并且其中的 sasl 's' mechanism字段 是个空字符串，
+    server必须返回一个 BindResponse 并将 resultCode 设置为 authMethodNotSupported。 
+如果client使用相同的 SASL mechanism/机制 再次尝试，这将允许client中止协商。
 
 
 
+#### 4.2.2.  Bind Response(绑定请求的响应)
 
-Sermersheim                 Standards Track                    [Page 17]
-
-RFC 4511                         LDAPv3                        June 2006
+The Bind response is defined as follows.
+绑定响应定义如下。
 
+```ASN.1
+    BindResponse ::= [APPLICATION 1] SEQUENCE {
+         COMPONENTS OF LDAPResult,
+         serverSaslCreds    [7] OCTET STRING OPTIONAL }
+```
+总结： 
+    BindResponse是LDAPResult的组成部分
 
-   If the client sends a BindRequest with the sasl mechanism field as an
-   empty string, the server MUST return a BindResponse with the
-   resultCode set to authMethodNotSupported.  This will allow the client
-   to abort a negotiation if it wishes to try again with the same SASL
-   mechanism.
-        如果client发送一个BindRequest 并且其中的 sasl mechanism字段 是个空字符串，
-            服server必须返回一个 BindResponse 并将 resultCode 设置为 authMethodNotSupported。 
-        如果client希望使用相同的 SASL mechanism/机制 再次尝试，这将允许客户端中止协商。
+BindResponse consists simply of an indication from the server of the status of the client's request for authentication.
+BindResponse仅包含
+	一个 来自server的 关于client身份验证请求状态的指示。
+总结： 
+    BindResponse 是server返回给client的，包含了 LDAPResult + 一个状态指示
+    它是 client请求身份验证 的状态指示
 
-#### 4.2.2.  Bind Response
-
-​        绑定响应
-
-   The Bind response is defined as follows.
-        绑定响应定义如下。
-
-        BindResponse ::= [APPLICATION 1] SEQUENCE {
-             COMPONENTS OF LDAPResult,
-             serverSaslCreds    [7] OCTET STRING OPTIONAL }
-        总结： 
-            BindResponse是LDAPResult的组成部分
-
-   BindResponse consists simply of an indication from the server of the
-   status of the client's request for authentication.
-        BindResponse仅包含
-            一个 来自server的
-            关于 client身份验证请求状态 的指示。
-    总结： 
-        BindResponse 是server返回给client的
-        只包含了一个状态指示
-            它是 client请求身份验证 的状态指示
-
-   A successful Bind operation is indicated by a BindResponse with a
-   resultCode set to success.  Otherwise, an appropriate result code is
-   set in the BindResponse.  For BindResponse, the protocolError result
-   code may be used to indicate that the version number supplied by the
-   client is unsupported.
-        一个成功的绑定操作由一个 BindResponse 指示，
-            并将 resultCode 设置为 success。 
-        否则，在 BindResponse 中设置适当的 (result code)结果代码。 
-        对于BindResponse，可以使用protocolError结果码来指示 不支持客户端提供的版本号。
-   总结： 
-      绑定操作处成功后，
-         server将回复BindResponse，并将resultCode 设置为 success 
-      绑定失败时，
-         server将回复BindResponse，并使用protocolError 指示不支持此version   
-
-   If the client receives a BindResponse where the resultCode is set to
-   protocolError, it is to assume that the server does not support this
-   version of LDAP.  While the client may be able proceed with another
-   version of this protocol (which may or may not require closing and
-   re-establishing the transport connection), how to proceed with
-   another version of this protocol is beyond the scope of this
-   document.  Clients that are unable or unwilling to proceed SHOULD
-   terminate the LDAP session.
-         如果client收到一个 BindResponse，
-            其中 resultCode 设置为 protocolError，
-            则假定服务器不支持此版本/version的 LDAP。 
-         虽然client可能能够继续使用此协议的另一个版本/version
-            （这可能需要或可能不需要 关闭和重新建立传输连接），
-            但如何继续使用此协议的另一个版本超出了本文档的描述范围。 
-         不能或不愿继续的 client应该终止 LDAP 会话。
-   总结： 
-      client收到一个BindResponse，并且发现 resultCode值为protocolError
-         那么，就了解到server不支持 我刚刚发送时 指示的version
-      如果client不想/不能继续会话，就应该终止会话
-      关于客户端在收到protocolError时 如何选择正确的version,
-         超出了本文档的范围
+A successful Bind operation is indicated by a BindResponse with a resultCode set to success.  Otherwise, an appropriate result code is set in the BindResponse.  For BindResponse, the protocolError result code may be used to indicate that the version number supplied by the client is unsupported.
+绑定操作成功时，由一个 BindResponse 指示 ，
+​	此时BindResponse中 将resultCode 设置为 success。 
+否则，在 BindResponse 中设置适当的 (result code)结果代码。 
+​	例如：将 BindResponse中的result code设置为protocolError，来指示 不支持客户端提供的版本号。
+总结： 
+​    绑定操作成功后，
+​        server将回复BindResponse，并将resultCode 设置为 success 
+​    绑定失败时，
+​         server将回复BindResponse，并使用protocolError 指示不支持此version   
 
 
-   The serverSaslCreds field is used as part of a SASL-defined bind
-   mechanism to allow the client to authenticate the server to which it
-   is communicating, or to perform "challenge-response" authentication.
-   If the client bound with the simple choice, or the SASL mechanism
-   does not require the server to return information to the client, then
-   this field SHALL NOT be included in the BindResponse.
-      serverSaslCreds字段     
-         用作 SASL定义的绑定机制 的一部分，
-         以允许client对其正在通信的server进行身份验证，或执行"challenge-response"身份验证。 
-      如果client绑定了简单的选择，
-      或者 SASL机制不要求server向client返回信息，则该字段不应包含在 BindResponse 中。
-   总结： 
-      当client选择的验证机制是sasl，
-         那么server 的BindResponse中将会有serverSaslCreds这个字段，
-         用以指示：允许client 执行身份验证
-      当client选择的验证机制是simple，或者不允许server向client返回信息，
-         那么server 的BindResponse中不应该包含serverSaslCreds这个字段
+
+If the client receives a BindResponse where the resultCode is set to  protocolError, it is to assume that the server does not support this version of LDAP.  While the client may be able proceed with another version of this protocol (which may or may not require closing and re-establishing the transport connection), how to proceed with another version of this protocol is beyond the scope of this document.  Clients that are unable or unwilling to proceed SHOULD terminate the LDAP session.
+如果client收到一个 BindResponse，并且resultCode被设置为protocolError，则假定服务器不支持此版本/version的 LDAP。 
+虽然client可能能够继续使用此协议的另一个版本/version（这可能需要或可能不需要 关闭和重新建立传输连接），但如何继续使用此协议的另一个版本超出了本文档的描述范围。 
+不能或不愿继续的 client "应该" 终止LDAP会话。
+总结： 
+    client收到一个BindResponse，并且发现 resultCode字段的值为protocolError， 那么，就了解到server不支持 我刚刚发送时 指示的version；
+    如果client不想/不能继续会话，就应该终止会话；
+    关于客户端在收到protocolError时 如何选择正确的version，超出了本文档的范围；
+
+The serverSaslCreds field is used as part of a SASL-defined bind mechanism to allow the client to authenticate the server to which it is communicating, or to perform "challenge-response" authentication. If the client bound with the simple choice, or the SASL mechanism does not require the server to return information to the client, then this field SHALL NOT be included in the BindResponse.
+serverSaslCreds字段，用作 SASL定义的绑定机制 的一部分，
+	以允许client对其正在通信的server进行身份验证，或执行"challenge-response"身份验证。 
+	如果client绑定了simple的CHOICE，或者 SASL机制不要求server向client返回信息，则该字段不应包含在 BindResponse 中。
+总结： 
+	当client选择的验证机制是sasl，
+        那么server 的BindResponse中将会有serverSaslCreds这个字段，用以 允许client 验证server的身份；
+    当client选择的验证机制是simple，或者不允许server向client返回信息，
+        那么server 的BindResponse中不应该包含serverSaslCreds这个字段；
          
 
-### 4.3.  Unbind Operation
+### 4.3.  Unbind Operation(解除绑定)
 
-   The function of the Unbind operation is to terminate an LDAP session.
-   The Unbind operation is not the antithesis of the Bind operation as
-   the name implies.  The naming of these operations are historical.
-   The Unbind operation should be thought of as the "quit" operation.
-      Unbind操作的功能是：终止LDAP会话。 
-         顾名思义，Unbind操作 并不是 Bind操作 的对立面。 
-      这些操作的命名是历史性的。 Unbind 操作应该被认为是"quit/退出"操作。
+The function of the Unbind operation is to terminate an LDAP session. The Unbind operation is not the antithesis of the Bind operation as the name implies.  The naming of these operations are historical. The Unbind operation should be thought of as the "quit" operation.
+Unbind操作的功能是：终止LDAP会话。      顾名思义，Unbind操作 并不是 Bind操作 的对立面。 这些操作的命名是历史性的。 
+Unbind 操作应该被认为是"quit/退出"操作。
+总结： 
+   Unbind操作，用来终止LDAP会话
 
-   总结： 
-      Unbind操作，是用来终止LDAP会话
+The Unbind operation is defined as follows:
+绑定操作定义如下
 
-#---------------------------------------------------------------------------------------
+```ASN.1
+    UnbindRequest ::= [APPLICATION 2] NULL
+```
 
-
-
-
-
-Sermersheim                 Standards Track                    [Page 18]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   The Unbind operation is defined as follows:
-
-        UnbindRequest ::= [APPLICATION 2] NULL
-
-   The client, upon transmission of the UnbindRequest, and the server,
-   upon receipt of the UnbindRequest, are to gracefully terminate the
-   LDAP session as described in Section 5.3.  Uncompleted operations are
-   handled as specified in Section 3.1.
-      客户端在传输 UnbindRequest 后，服务器在接收到 UnbindRequest 时，将如第 5.3 节所述优雅地终止 LDAP 会话。 
-      未完成的操作按照第 3.1 节中的规定处理。
-   总结： 
-      client发出UnbindRequest，并且server收到UnbindRequest之后，
-         就会终止LDAP会话
+The client, upon transmission of the UnbindRequest, and the server, upon receipt of the UnbindRequest, are to gracefully terminate the LDAP session as described in Section 5.3.  Uncompleted operations are handled as specified in Section 3.1.
+客户端在传输 UnbindRequest 后，服务器在接收到 UnbindRequest 时，将如第 5.3 节所述优雅地终止 LDAP 会话。 未完成的操作按照第 3.1 节中的规定处理。
+总结： 
+   client发出UnbindRequest，
+      并且server收到UnbindRequest之后，就会终止LDAP会话
       未完成的操作按照第 3.1 节中的规定处理
-         因为会话/连接 已经关闭，所以
-            未完成的操作都将被放弃
-            如果无法被放弃，那么执行完毕
+         因为会话/连接 已经关闭，所以： 未完成的操作都将被放弃；如果无法被放弃，那么执行完毕
 
-### 4.4.  Unsolicited Notification
 
-​      主动通知
 
-   An unsolicited notification is an LDAPMessage sent from the server to
-   the client that is not in response to any LDAPMessage received by the
-   server.  It is used to signal an extraordinary condition in the
-   server or in the LDAP session between the client and the server.  The
-   notification is of an advisory nature, and the server will not expect
-   any response to be returned from the client.
-      主动通知是从server发送到client的 LDAPMessage，
-         它不响应server收到的任何 LDAPMessage。 
-      它用于表示 
-            server中 或 
-            client与server之间的LDAP会话中 
-         的异常情况。 
-      该通知具有咨询性质，server不会期望从client返回任何响应。
-   总结： 
-      Unsolicited Notification/主动通知 
-         是server主动发送给client的
-      用于告诉client，
-         server出现了异常， 或者
-         client和server之间的LDAP会话出现了异常
-      
+### 4.4.  Unsolicited Notification((server发送的)主动通知)
 
-   The unsolicited notification is structured as an LDAPMessage in which
-   the messageID is zero and protocolOp is set to the extendedResp
-   choice using the ExtendedResponse type (See Section 4.12).  The
-   responseName field of the ExtendedResponse always contains an LDAPOID
-   that is unique for this notification.
-      主动通知(unsolicited notification) 
-         被构造为LDAPMessage，
-         其中 messageID 为零，
-         并且 LDAPMessage的protocolOp字段 
-            被设置为使用ExtendedResponse类型的 extendedResp选项（参见第4.12节）。 
-      ExtendedResponse 的 responseName字段 始终包含此通知唯一的 LDAPOID。
-   总结： 
-      Unsolicited Notification/主动通知 
-         被构建为 LDAPMessage
-         messageID为0
-         protocolOp字段为ExtendedResponse类型的extendedResp
-         ExtendedResponse的responseName字段，包含了LDAPOID
+An unsolicited notification is an LDAPMessage sent from the server to the client that is not in response to any LDAPMessage received by the server.  It is used to signal an extraordinary condition in the server or in the LDAP session between the client and the server.  The notification is of an advisory nature, and the server will not expect any response to be returned from the client.
+主动通知是从server发送到client的 LDAPMessage，它不是server对收到的任何LDAPMessage的 响应/response。 
+它用于表示：server中 或 client与server之间的LDAP会话中 的异常情况。 
+该通知具有警示性质，server不会期望从client返回任何响应。
+总结： 
+   Unsolicited Notification/主动通知 是server主动发送给client的
+   用于告诉client：server出现了异常 或者  client和server之间的LDAP会话出现了异常
 
-   One unsolicited notification (Notice of Disconnection) is defined in
-   this document.  The specification of an unsolicited notification
-   consists of:
-      本文档中定义了一种主动通知（断开连接的通知）。 
-      主动通知的规范包括：
+The unsolicited notification is structured as an LDAPMessage in which the messageID is zero and protocolOp is set to the extendedResp choice using the ExtendedResponse type (See Section 4.12).  The responseName field of the ExtendedResponse always contains an LDAPOID that is unique for this notification.
+主动通知(unsolicited notification) 被构造为LDAPMessage，其中 messageID字段为零，并且protocolOp字段被设置为使用ExtendedResponse类型的 extendedResp选项（参见第4.12节）。 
+ExtendedResponse类型的 responseName字段 始终包含此通知  唯一的LDAPOID。
+总结： 
+   Unsolicited Notification/主动通知 被构建为 LDAPMessage，其中：
+      messageID为0
+      protocolOp字段为ExtendedResponse类型的extendedResp
+      ExtendedResponse的responseName字段，包含了LDAPOID
 
-   - the OBJECT IDENTIFIER assigned to the notification (to be specified
-     in the responseName,
-         -分配给通知的OID (在 responseName 中指定),
+One unsolicited notification (Notice of Disconnection) is defined in this document.  The specification of an unsolicited notification consists of:
+本文档中定义了一种主动通知（断开连接的通知）。 主动通知的规范包括：
 
+   - the OBJECT IDENTIFIER assigned to the notification (to be specified in the responseName,
+     分配给通知的OID (在 responseName 中指定),
+     
    - the format of the contents of the responseValue (if any),
-         - responseValue 内容的格式（如果有），
+     responseValue 内容的格式（如果有），
 
    - the circumstances which will cause the notification to be sent, and
-         - 导致通知被发送的情况，以及,
+     导致通知被发送的情况，以及,
 
    - the semantics of the message.
-         - 消息的语义。
+     message/消息的语义。
 
-   总结： 
-      本文档中定义了一种主动通知（断开连接的通知）
-      主动通知的规范： 
-         分配给通知的OID (在 responseName 中指定),
-         responseValue 内容的格式（如果有），
-         导致通知被发送的情况，
-         消息的语义
-
-#### 4.4.1.  Notice of Disconnection
-
-​         断开连接的通知
-
-   This notification may be used by the server to advise the client that
-   the server is about to terminate the LDAP session on its own
-   initiative.  This notification is intended to assist clients in
-   distinguishing between an exceptional server condition and a
-   transient network failure.  Note that this notification is not a
-   response to an Unbind requested by the client.  Uncompleted
-   operations are handled as specified in Section 3.1.
-         server可以使用此通知来通知client，
-            server将主动终止 LDAP会话。 
-         此通知旨在帮助client区分 
-            异常的server状况和暂时的网络故障。 
-         请注意，此通知不是对client请求的 Unbind 的响应。 
-         未完成的操作按照第 3.1 节中的规定处理。
-#---------------------------------------------------------------------------------------
+总结： 
+   主动通知== LDAPMessage { messageID=0;  protocolOp=extendedResp } 
+   本文档中定义了一种主动通知（断开连接的通知）
+   主动通知的规范： 
+      1) 分配给通知的OID (在 responseName 中指定),
+      2) responseValue 内容的格式（如果有），
+      3) 导致通知被发送的情况，
+      4) message/消息的语义
 
 
 
+#### 4.4.1.  Notice of Disconnection(断开连接通知)
 
-Sermersheim                 Standards Track                    [Page 19]
-
-RFC 4511                         LDAPv3                        June 2006
+This notification may be used by the server to advise the client that the server is about to terminate the LDAP session on its own initiative.  This notification is intended to assist clients in distinguishing between an exceptional server condition and a transient network failure.  Note that this notification is not a response to an Unbind requested by the client.  Uncompleted operations are handled as specified in Section 3.1.
+server可以使用此通知来通知client，server将主动终止 LDAP会话。  此通知旨在帮助client区分：server的异常状况 和 暂时的网络故障。 
+请注意，此通知不是server对client的Unbind-request的响应。    未完成的操作按照第 3.1 节中的规定处理。
+
+The responseName is 1.3.6.1.4.1.1466.20036, the responseValue field is absent, and the resultCode is used to indicate the reason for the disconnection.  When the strongerAuthRequired resultCode is returned with this message, it indicates that the server has detected that an established security association between the client and server has unexpectedly failed or been compromised.
+主动断开连接通知，是一个LDAPMessage { messageID=0;  protocolOp=extendedResp } 
+​	responseName字段的值为1.3.6.1.4.1.1466.20036，
+​	responseValue字段不存在，
+​	resultCode用于指示断开的原因。 
+​		当此message的 resultCode为strongAuthRequired 时，
+​		表明server已检测到 client和server之间建立的安全关联 意外失败或被破坏。
+
+Upon transmission of the Notice of Disconnection, the server gracefully terminates the LDAP session as described in Section 5.3.
+在传输了 断开连接通知 后，server会如第 5.3 节所述优雅地终止 LDAP会话。
 
 
-   The responseName is 1.3.6.1.4.1.1466.20036, the responseValue field
-   is absent, and the resultCode is used to indicate the reason for the
-   disconnection.  When the strongerAuthRequired resultCode is returned
-   with this message, it indicates that the server has detected that an
-   established security association between the client and server has
-   unexpectedly failed or been compromised.
-         responseName为1.3.6.1.4.1.1466.20036，
-         responseValue字段不存在，
-         resultCode用于指示断开的原因。 
-         当此消息返回  resultCode为strongAuthRequired 时，
-         表明server已检测到 client和server之间建立的安全关联 意外失败或被破坏。
 
-   Upon transmission of the Notice of Disconnection, the server
-   gracefully terminates the LDAP session as described in Section 5.3.
-         在传输 断开连接通知 后，
-         server会如第 5.3 节所述优雅地终止 LDAP会话。
+### 4.5.  Search Operation(搜索操作)
 
-### 4.5.  Search Operation
+The Search operation is used to request a server to return, subject  to access controls and other restrictions, a set of entries matching  a complex search criterion.  This can be used to read attributes from  a single entry, from entries immediately subordinate to a particular  entry, or from a whole subtree of entries.
+搜索操作 用于：请求server 根据访问控制和其他限制 返回一组 匹配复杂搜索条件的 条目。 
+这可用于从 单个条目、直接从属于特定条目的条目 或从 条目的整个子树 中 读取属性。
+总结： 
+   搜索操作，是client向server请求数据
+      
 
-   The Search operation is used to request a server to return, subject
-   to access controls and other restrictions, a set of entries matching
-   a complex search criterion.  This can be used to read attributes from
-   a single entry, from entries immediately subordinate to a particular
-   entry, or from a whole subtree of entries.
-      搜索操作用于 请求server 根据访问控制和其他限制 返回一组 匹配复杂搜索条件的 条目。 
-      这可用于从 单个条目、直接从属于特定条目的条目 或从 条目的整个子树 中 读取属性。
-   总结： 
-      搜索操作，是client向server请求数据
-      即 读取条目的属性
-
-#### 4.5.1.  Search Request
-
-​         搜索请求
+#### 4.5.1.  Search Request(搜索请求)
 
    The Search request is defined as follows:
    搜索请求定义如下
 
+```ASN.1
         SearchRequest ::= [APPLICATION 3] SEQUENCE {
              baseObject      LDAPDN,                  -- baseND 指定搜索的baseDN 
              scope           ENUMERATED {             -- scope  指定搜索的scope
-                  baseObject              (0),        -- -- 搜索baseDN自身
-                  singleLevel             (1),        -- -- 搜索baseDN的子树
-                  wholeSubtree            (2),        -- -- 搜索baseDN自身 以及 baseDN的子树
+                  baseObject              (0),        -- -- 搜索 baseDN自身
+                  singleLevel             (1),        -- -- 搜索 baseDN的第一代儿子
+                  wholeSubtree            (2),        -- -- 搜索 baseDN自身以及baseDN的所有子树
                   ...  },
              derefAliases    ENUMERATED {             -- 指示是否解引用别名
                   neverDerefAliases       (0),        -- -- 在搜索或定位baseDN(自身)时，不要解引用
-                  derefInSearching        (1),        -- -- 在搜索baseDN的子树/下级时， 解引用 搜索范围内的任何别名 ( 1)scope时wholeSubtree时，那么会继续搜索 解引用对象的子树 2)scope是singleLevel时，那么会搜索 解引用对象本身 但不搜索解引用对象的子树 )
-                  derefFindingBaseObj     (2),        -- -- 在搜索定位baseDN对象(自身)时解引用， 但搜索baseDN的子树时不执行解引用 
+                  derefInSearching        (1),        -- -- 在搜索baseDN的子树/下级时， 解引用 搜索范围内的任何别名 ( 1)scope是wholeSubtree时，那么会继续搜索 解引用对象的子树 2)scope是singleLevel时，那么会搜索 解引用对象本身 但不搜索解引用对象的子树 )
+                  derefFindingBaseObj     (2),        -- -- 在定位baseDN对象(自身)时解引用， 但搜索baseDN的子树时不执行解引用 
                   derefAlways             (3) },      -- -- 在搜索或定位baseDN(自身)时，解引用
              sizeLimit       INTEGER (0 ..  maxInt),  -- 限制 搜索返回条目的最大个数，为0则不限制
              timeLimit       INTEGER (0 ..  maxInt),  -- 限制 搜索所允许的最大时长，为0则不限制
@@ -1348,22 +1077,12 @@ RFC 4511                         LDAPv3                        June 2006
                         -- The LDAPString is constrained to
                         -- <attributeSelector> in Section 4.5.1.8
 
-
-​        
-​        -- /OPENLDAP_REL_ENG_2_4/libraries/libldap/filter.c 和此处相同
-​        -- A Filter looks like this (RFC 4511 as extended by RFC 4526):
-​        Filter ::= CHOICE {
-​             and             [0] SET SIZE (1..MAX) OF filter Filter, -- 与
-​             or              [1] SET SIZE (1..MAX) OF filter Filter, -- 或 
-​             not             [2] Filter,                             -- 非
-#---------------------------------------------------------------------------------------
-
-
-Sermersheim                 Standards Track                    [Page 20]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
+        -- /OPENLDAP_REL_ENG_2_4/libraries/libldap/filter.c 和此处相同
+        -- A Filter looks like this (RFC 4511 as extended by RFC 4526):
+        Filter ::= CHOICE {
+             and             [0] SET SIZE (1..MAX) OF filter Filter, -- 与
+             or              [1] SET SIZE (1..MAX) OF filter Filter, -- 或 
+             not             [2] Filter,                             -- 非
              equalityMatch   [3] AttributeValueAssertion,            -- 相等匹配：由属性和子类型的EQUALITY匹配规则定义
              substrings      [4] SubstringFilter,                    -- 子字符串匹配：详见SubstringFilter的规则和语法定义
              greaterOrEqual  [5] AttributeValueAssertion,            -- (范围 >=)：匹配规则 由属性类型或子类型的 ORDERING匹配规则定义
@@ -1389,226 +1108,136 @@ RFC 4511                         LDAPv3                        June 2006
       
       -- Note: tags in a CHOICE are always explicit 
       -- 注意： CHOICE中的tags总是显式的
+```
 
-   Note that an X.500 "list"-like operation can be emulated by the
-   client requesting a singleLevel Search operation with a filter
-   checking for the presence of the 'objectClass' attribute, and that an
-   X.500 "read"-like operation can be emulated by a baseObject Search
-   operation with the same filter.  A server that provides a gateway to
-   X.500 is not required to use the Read or List operations, although it
-   may choose to do so, and if it does, it must provide the same
-   semantics as the X.500 Search operation.
-      请注意，client可以模拟 X.500"list"-like 操作，
-         通过 过滤器检查“objectClass”属性是否存在 来请求单级搜索操作，
-      并且 X.500 "read"-like 操作 可以由
-         具有相同过滤器的 baseObject 搜索操作 模拟。 
-      为X.500提供网关的server 
-         不需要使用读取或列表操作，尽管它可以选择这样做，
-         如果这样做，它必须提供与 X.500 搜索操作相同的语义。
+Note that an X.500 "list"-like operation can be emulated by the client requesting a singleLevel Search operation with a filter checking for the presence of the 'objectClass' attribute, and that an X.500 "read"-like operation can be emulated by a baseObject Search operation with the same filter.  A server that provides a gateway to X.500 is not required to use the Read or List operations, although it may choose to do so, and if it does, it must provide the same semantics as the X.500 Search operation.
+请注意，client可以模拟 X.500"list"-like 操作，
+   通过 过滤器检查“objectClass”属性是否存在 来请求singleLevel搜索操作，
+并且 X.500 "read"-like 操作 可以由
+   具有相同过滤器的 baseObject 搜索操作 模拟。 
+为X.500提供网关的server 
+   不需要使用Read或List操作，尽管它可以选择这样做，
+   如果这样做，它必须提供与 X.500 搜索操作相同的语义。
 
-##### 4.5.1.1.  SearchRequest.baseObject
+##### 4.5.1.1.  SearchRequest.baseObject(baseDN)
 
-   The name of the base object entry (or possibly the root) relative to
-   which the Search is to be performed.
-      要执行搜索的基础对象条目（或可能是根）的名称。
-   总结： 
-      SearchRequest.baseObject即为： 搜索或者复制同步时使用的baseDN
+The name of the base object entry (or possibly the root) relative to  which the Search is to be performed.
+相对于要执行搜索的基础对象条目（或可能是根）的名称。
+总结： 
+	SearchRequest.baseObject即为： 搜索或者复制同步时使用的baseDN
 
-##### 4.5.1.2.  SearchRequest.scope
+##### 4.5.1.2.  SearchRequest.scope(scope)
 
-   Specifies the scope of the Search to be performed.  The semantics (as
-   described in [X.511]) of the defined values of this field are:
-      指定搜索范围。 
-      该字段的定义值的语义（如 [X.511] 中所述）是：
+Specifies the scope of the Search to be performed.  The semantics (as described in [X.511]) of the defined values of this field are:
+指定(要执行的)搜索范围。 定义 该字段的值 的语义(如 [X.511] 中所述)是/如下：
 
-      baseObject: The scope is constrained to the entry named by
-      baseObject.
-         baseObject：范围被限制为由 baseObject 命名的条目(baseDN自身)。
-    
-      singleLevel: The scope is constrained to the immediate
-      subordinates of the entry named by baseObject.
-         singleLevel：范围被限制为由 baseObject 命名的条目的直接下级(baseDN的子树)。
-#---------------------------------------------------------------------------------------
+baseObject: The scope is constrained to the entry named by baseObject.
+范围被限制为由 baseObject 命名的条目(baseDN自身)。
+
+singleLevel: The scope is constrained to the immediate subordinates of the entry named by baseObject.
+范围被限制为由 baseObject 命名的条目的直接下级(baseDN的第一代儿子)。
+
+wholeSubtree: The scope is constrained to the entry named by baseObject and to all its subordinates.
+范围被限制为由 baseObject 命名的条目及其所有下级(baseDN自身及其所有子树)。
+
+总结： 
+   SearchRequest.scope指定了搜索的范围
+      baseObject 	   -- DN自身
+      singleLevel		-- DN的第一代儿子
+      wholeSubtree	-- DN自身以及DN的所有子树
 
 
 
-Sermersheim                 Standards Track                    [Page 21]
-
-RFC 4511                         LDAPv3                        June 2006
+##### 4.5.1.3.  SearchRequest.derefAliases(是否对别名解引用)
 
+An indicator as to whether or not alias entries (as defined in [RFC4512]) are to be dereferenced during stages of the Search operation.
+该指示符用于指示：条目的别名(如[RFC4512]中定义的)是否在 搜索操作阶段 被解引用。
+总结： 
+   SearchRequest.derefAliases指示是否解引用条目的别名
 
-      wholeSubtree: The scope is constrained to the entry named by
-      baseObject and to all its subordinates.
-         WholeSubtree：范围被限制为由 baseObject 命名的条目及其所有下级(baseDN自身及其子树)。
+The act of dereferencing an alias includes recursively dereferencing aliases that refer to aliases.
+解引用的行为包括递归解引用别名的别名。
+总结： 
+   解引用 是会递归的
 
-   总结： 
-      SearchRequest.scope指定了搜索的范围
-         baseObject     ，搜索DN自身
-         singleLevel    ，搜索DN的子树
-         wholeSubtree   ，搜索DN自身，以及，DN的子树
+Servers MUST detect looping while dereferencing aliases in order to prevent denial-of-service attacks of this nature.
+服务器 "必须" 在解引用别名时 检测循环，以防止这种性质的拒绝服务攻击。
+总结： 
+   解引用时，必须检查循环，防止被攻击
 
-##### 4.5.1.3.  SearchRequest.derefAliases
+The semantics of the defined values of this field are:
+定义 该字段值 的语义 是/如下：
 
-   An indicator as to whether or not alias entries (as defined in
-   [RFC4512]) are to be dereferenced during stages of the Search
-   operation.
-      关于别名条目(如[RFC4512]中定义的)
-      是否在 搜索操作阶段 被 解引用 的指示符。
-   总结： 
-      SearchRequest.derefAliases指示 是否解引用别名
+- neverDerefAliases: Do not dereference aliases in searching or in  locating the base object of the Search.
+    - neverDerefAliases: 在搜索或定位 搜索的基础对象/baseObject/baseDN 时 不解引用别名。
+        	和 derefAlways 相反
+- derefInSearching: While searching subordinates of the base object, dereference any alias within the search scope.  Dereferenced objects become the vertices of further search scopes where the Search operation is also applied.  If the search scope is wholeSubtree, the Search continues in the subtree(s) of any dereferenced object.  If the search scope is singleLevel, the search is applied to any dereferenced objects and is not applied to their subordinates.  Servers SHOULD eliminate duplicate entries that arise due to alias dereferencing while searching.
+    - derefInSearching: 在搜索baseObject的下级/sub时，解引用搜索范围内的任何别名。 解引用的对象成为进一步搜索范围的顶点，其中也应用了搜索操作。 
+        如果scope是wholeSubtree ，则搜索将在任何解引用的对象的子树中继续。 
+        如果scope为singleLevel，则搜索将应用于任何解引用的对象，而不应用于其下属。 
+        对由于搜索时 解引用别名而出现的重复条目，服务器 "应该" 去重。
+- derefFindingBaseObj: Dereference aliases in locating the base object of the Search, but not when searching subordinates of the base object.
+    - derefFindingBaseObj：在定位搜索的基础对象/baseObject时 解引用别名，但在搜索基础对象/baseObject的下级时不会。
+- derefAlways: Dereference aliases both in searching and in locating the base object of the Search.
+    - derefAlways：在 搜索和定位 搜索的基础对象/baseObject 时，解引用别名。
 
-   The act of dereferencing an alias includes recursively dereferencing
-   aliases that refer to aliases.
-      解引用的行为包括递归解引用别名的别名。
-   总结： 
-      解引用 是会递归 解引用的
-
-   Servers MUST detect looping while dereferencing aliases in order to
-   prevent denial-of-service attacks of this nature.
-      服务器必须在 解引用别名时 检测循环，以防止这种性质的拒绝服务攻击。
-   总结： 
-      解引用时，必须 检查循环，防止 denial-of-service attacks 性质的攻击
-
-   The semantics of the defined values of this field are:
-      该字段的定义值的语义是：
-   总结：
-      SearchRequest.derefAliases字段的可能值，及其含义：
-
-      neverDerefAliases: Do not dereference aliases in searching or in
-      locating the base object of the Search.
-         neverDerefAliases：在 搜索或定位搜索的 基础对象时 不 解引用别名。
-      总结： 
-         SearchRequest.derefAliases字段的值 是 neverDerefAliases 时
-            那么： 在搜索或定位baseDN时，不要解引用
-            和 derefAlways 相反
-    
-      derefInSearching: While searching subordinates of the base object,
-      dereference any alias within the search scope.  Dereferenced
-      objects become the vertices of further search scopes where the
-      Search operation is also applied.  If the search scope is
-      wholeSubtree, the Search continues in the subtree(s) of any
-      dereferenced object.  If the search scope is singleLevel, the
-      search is applied to any dereferenced objects and is not applied
-      to their subordinates.  Servers SHOULD eliminate duplicate entries
-      that arise due to alias dereferencing while searching.
-         derefInSearching：
-            在搜索基础对象的下级/sub时，解引用搜索范围内的任何别名。 
-         解引用的对象成为进一步搜索范围的顶点，其中也应用了搜索操作。 
-            如果搜索 范围/scope 是 整个子树/wholeSubtree，
-               则搜索将在任何解引用的对象的子树中继续。 
-            如果搜索范围为 singleLevel，
-               则搜索将应用于任何解引用的对象，而不应用于其下属。 
-         服务器应该对 由于搜索时 别名解引用而出现的重复条目 去重。
-      总结： 
-         SearchRequest.derefAliases字段的值 是 derefInSearching 时
-            那么： 在搜索baseDN的子树时，解引用 搜索范围内的任何别名
-         解引用 后的对象(本身)，成为搜索范围的一部分
-            如果search scope是wholeSubtree，那么 会继续搜索 解引用对象的子树
-            如果search scope是singleLevel，那么  会搜索     解引用对象本身，但不搜索解引用对象的子树
-         serarch时 由于解引用别名导致条目重复，那么server应该 去重
-
-
-      derefFindingBaseObj: Dereference aliases in locating the base
-      object of the Search, but not when searching subordinates of the
-      base object.
-         derefFindingBaseObj：在定位搜索的基础对象时 解引用别名，但在搜索基础对象的下级时不会。
-      总结： 
-         SearchRequest.derefAliases字段的值 是 derefFindingBaseObj 时
-            那么： 搜索定位baseDN对象时解引用， 但搜索baseDN的子树时不执行解引用
-    
-      derefAlways: Dereference aliases both in searching and in locating
-      the base object of the Search.
-         derefAlways：在 搜索和定位搜索的 基础对象时，解引用别名。
-      总结： 
-         SearchRequest.derefAliases字段的值 是 derefAlways 时
-            那么： 在搜索或定位baseDN时，解引用
-            和 neverDerefAliases 相反
-
-##### 4.5.1.4.  SearchRequest.sizeLimit
-
-   A size limit that restricts the maximum number of entries to be
-   returned as a result of the Search.  A value of zero in this field
-   indicates that no client-requested size limit restrictions are in
-   effect for the Search.  Servers may also enforce a maximum number of
-   entries to return.
-      限制 作为搜索结果 
-         返回的最大条目数的大小限制。 
-      此字段中的值为零表示没有 客户端请求的 大小限制限制对搜索有效。 
-      服务器还可以强制执行最大数量的返回条目。
-   总结： 
-      限制 搜索结果 返回的最大条目数
-      若是值为0，表示 不限制搜索返回的 条目个数
-      服务器可以强制 返回 条目的最大个数
-#---------------------------------------------------------------------------------------
+总结： 
+	derefAliases字段的值
+		是neverDerefAliases时：搜索或定位baseDN时，不解引用别名；
+		是derefInSearching时： 在搜索baseDN的下级时，scope范围内的全部解引用；
+			1)scope是wholeSubtree时，那么会继续搜索 解引用对象的子树 
+			2)scope是singleLevel时，那么会搜索 解引用对象本身 但不搜索解引用对象的子树
+		是derefFindingBaseObj时：定位baseDN时，解引用别名；搜索baseDN的下级时，不解引用；
+		是derefAlways时：搜索和定位baseDN时，解引用别名；		
 
 
 
+##### 4.5.1.4.  SearchRequest.sizeLimit(返回条目的上限)
 
+A size limit that restricts the maximum number of entries to be returned as a result of the Search.  A value of zero in this field indicates that no client-requested size limit restrictions are in effect for the Search.  Servers may also enforce a maximum number of entries to return.
+限制 作为搜索结果 返回的最大条目数 的大小限制。 此字段中的值为0 表示客户端的请求 并没有大小限制 影响到此搜索。 服务器还可以强制执行返回最大数量的条目。
+总结： 
+   限制 搜索结果 返回的最大条目数
+   若是值为0，表示 不限制搜索返回的 条目个数
+   服务器可以强制 返回 条目的最大个数
 
+##### 4.5.1.5.  SearchRequest.timeLimit(搜索操作的最大时间)
 
-Sermersheim                 Standards Track                    [Page 22]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-4.5.1.5.  SearchRequest.timeLimit
-
-   A time limit that restricts the maximum time (in seconds) allowed for
-   a Search.  A value of zero in this field indicates that no client-
-   requested time limit restrictions are in effect for the Search.
-   Servers may also enforce a maximum time limit for the Search.
-      限制 搜索所允许的最长时间（以秒为单位）的时间限制。 
-      此字段中的值为零表示没有 客户端请求的 时间限制限制 对搜索有效。 
-      服务器还可以强制执行搜索的最大时间限制。
-   总结：   
-      搜索所允许的最大时长
-      若是值为0，那么不限制搜索时间
-      服务器 可以强制执行 最大时间限制
+A time limit that restricts the maximum time (in seconds) allowed for a Search.  A value of zero in this field indicates that no client-requested time limit restrictions are in effect for the Search. Servers may also enforce a maximum time limit for the Search.
+限制 搜索所允许的最长时间（以秒为单位）的时间限制。 此字段中的值为0 表示 客户端的请求 并没有时间限制限制 影响到此搜索。 
+服务器还可以强制执行搜索的最大时间限制。
+总结：   
+   搜索操作 所允许的最大时长
+   若是值为0，那么不限制搜索时间
+   服务器 可以强制执行 最大时间限制
 
 ##### 4.5.1.6.  SearchRequest.typesOnly
 
-   An indicator as to whether Search results are to contain both
-   attribute descriptions and values, or just attribute descriptions.
-   Setting this field to TRUE causes only attribute descriptions (and
-   not values) to be returned.  Setting this field to FALSE causes both
-   attribute descriptions and values to be returned.
-      关于搜索结果 是包含属性描述和值 还是仅包含属性描述的 指示符。 
+An indicator as to whether Search results are to contain both attribute descriptions and values, or just attribute descriptions. Setting this field to TRUE causes only attribute descriptions (and not values) to be returned.  Setting this field to FALSE causes both attribute descriptions and values to be returned.
+typesOnly：是个指示符，指示 搜索结果 是包含属性描述和值 还是仅包含属性描述。 
       将此字段设置为 TRUE 会导致仅返回属性描述（而不是值）。 
       将此字段设置为 FALSE 会导致返回属性描述和值。
-   总结: 
-      SearchRequest.typesOnly 
+总结: 
+   SearchRequest.typesOnly 
          为TRUE，只返回属性的描述
          为FALSE，返回属性的描述和值
 
-##### 4.5.1.7.  SearchRequest.filter
+##### 4.5.1.7.  SearchRequest.filter(过滤器)
 
-   A filter that defines the conditions that must be fulfilled in order
-   for the Search to match a given entry.
-      一个过滤器，用于定义 搜索匹配给定条目 必须满足的条件。
-   总结：   
-      根据条件匹配条目
+A filter that defines the conditions that must be fulfilled in order for the Search to match a given entry.
+过滤器 定义了  搜索匹配到给定条目 必须满足的条件。
 
-   The 'and', 'or', and 'not' choices can be used to form combinations
-   of filters.  At least one filter element MUST be present in an 'and'
-   or 'or' choice.  The others match against individual attribute values
-   of entries in the scope of the Search.  (Implementor's note: the
-   'not' filter is an example of a tagged choice in an implicitly-tagged
-   module.  In BER this is treated as if the tag were explicit.)
-      'and'、'or' 和 'not' 选项可用于形成过滤器的组合。
+# 阅读到此处！
+
+The 'and', 'or', and 'not' choices can be used to form combinations of filters.  At least one filter element MUST be present in an 'and' or 'or' choice.  The others match against individual attribute values of entries in the scope of the Search.  (Implementor's note: the 'not' filter is an example of a tagged choice in an implicitly-tagged module.  In BER this is treated as if the tag were explicit.)
+CHOICE中的'and'、'or' 和 'not' 选项可用于形成过滤器的组合。
        在'and'或'or'选项中必须至少出现一个过滤器元素。 
        其他 与搜索范围内 条目的各个属性值 匹配。 
          （实施者注意："not"过滤器是 隐式标记模块 中标记选择的一个示例。在 BER 中，这被视为标签是显式的。）
    总结： 
       使用 'and', 'or', 'not'组合filters
 
-
-   A server MUST evaluate filters according to the three-valued logic of
-   [X.511] (1993), Clause 7.8.1.  In summary, a filter is evaluated to
-   "TRUE", "FALSE", or "Undefined".  If the filter evaluates to TRUE for
-   a particular entry, then the attributes of that entry are returned as
-   part of the Search result (subject to any applicable access control
-   restrictions).  If the filter evaluates to FALSE or Undefined, then
-   the entry is ignored for the Search.
+A server MUST evaluate filters according to the three-valued logic of [X.511] (1993), Clause 7.8.1.  In summary, a filter is evaluated to "TRUE", "FALSE", or "Undefined".  If the filter evaluates to TRUE for a particular entry, then the attributes of that entry are returned as part of the Search result (subject to any applicable access control restrictions).  If the filter evaluates to FALSE or Undefined, then the entry is ignored for the Search.
       服务器/server 必须根据 [X.511](1993)第7.8.1条款的 三值逻辑 评估过滤器。 
       总之，过滤器被评估为"TRUE", "FALSE", or "Undefined"。 
       如果过滤器对 特定条目 的评估结果为 TRUE，则该条目的属性将作为搜索结果的一部分返回（受任何适用的访问控制限制）。 
@@ -1620,13 +1249,7 @@ RFC 4511                         LDAPv3                        June 2006
          FALSE: 忽略该条目
          Undefined: 忽略该条目 
 
-   A filter of the "and" choice is TRUE if all the filters in the SET OF
-   evaluate to TRUE, FALSE if at least one filter is FALSE, and
-   Undefined otherwise.  A filter of the "or" choice is FALSE if all the
-   filters in the SET OF evaluate to FALSE, TRUE if at least one filter
-   is TRUE, and Undefined otherwise.  A filter of the 'not' choice is
-   TRUE if the filter being negated is FALSE, FALSE if it is TRUE, and
-   Undefined if it is Undefined.
+A filter of the "and" choice is TRUE if all the filters in the SET OF evaluate to TRUE, FALSE if at least one filter is FALSE, and Undefined otherwise.  A filter of the "or" choice is FALSE if all the filters in the SET OF evaluate to FALSE, TRUE if at least one filter is TRUE, and Undefined otherwise.  A filter of the 'not' choice is TRUE if the filter being negated is FALSE, FALSE if it is TRUE, and Undefined if it is Undefined.
       如果SET OF中的
          所有过滤器评估为 TRUE，则“and”选项的过滤器为 TRUE，
          如果至少一个过滤器为 FALSE，则为 FALSE，
@@ -1654,8 +1277,7 @@ RFC 4511                         LDAPv3                        June 2006
          为FALSE，结果为TRUE
          为Undefined，结果为Undefined
 
-   A filter item evaluates to Undefined when the server would not be
-   able to determine whether the assertion value matches an entry.
+   A filter item evaluates to Undefined when the server would not be able to determine whether the assertion value matches an entry.
    Examples include:
       当服务器/server无法确定 断言值是否与条目匹配时，过滤器项评估为Undefined。 例子包括：
 #---------------------------------------------------------------------------------------
@@ -1668,9 +1290,7 @@ Sermersheim                 Standards Track                    [Page 23]
 RFC 4511                         LDAPv3                        June 2006
 
 
-   - An attribute description in an equalityMatch, substrings,
-     greaterOrEqual, lessOrEqual, approxMatch, or extensibleMatch filter
-     is not recognized by the server.
+   - An attribute description in an equalityMatch, substrings, greaterOrEqual, lessOrEqual, approxMatch, or extensibleMatch filter is not recognized by the server.
    - 服务器/server无法识别 
          equalityMatch、substrings、greaterOrEqual、lessOrEqual、approxMatch 或extensibleMatch 
       过滤器 中的 属性描述。
@@ -1678,8 +1298,7 @@ RFC 4511                         LDAPv3                        June 2006
    - The attribute type does not define the appropriate matching rule.
    - 属性类型 没有定义 合适的匹配规则。
 
-   - A MatchingRuleId in the extensibleMatch is not recognized by the
-     server or is not valid for the attribute type.
+   - A MatchingRuleId in the extensibleMatch is not recognized by the server or is not valid for the attribute type.
    - extensibleMatch 中的 MatchingRuleId 未被服务器识别 或 对属性类型无效。
 
    - The type of filtering requested is not implemented.
@@ -1688,18 +1307,13 @@ RFC 4511                         LDAPv3                        June 2006
    - The assertion value is invalid.
    - 断言值无效。
 
-   For example, if a server did not recognize the attribute type
-   shoeSize, the filters (shoeSize=*), (shoeSize=12), (shoeSize>=12),
-   and (shoeSize<=12) would each evaluate to Undefined.
+For example, if a server did not recognize the attribute type shoeSize, the filters (shoeSize=*), (shoeSize=12), (shoeSize>=12), and (shoeSize<=12) would each evaluate to Undefined.
       例如，
          如果服务器/server无法识别属性类型 shoesSize，
          则过滤器 (shoe Size=*)、(shoe Size=12)、(shoe Size>=12) 和 (shoeSize<=12) 
          都会评估为 Undefined .
 
-   Servers MUST NOT return errors if attribute descriptions or matching
-   rule ids are not recognized, assertion values are invalid, or the
-   assertion syntax is not supported.  More details of filter processing
-   are given in Clause 7.8 of [X.511].
+Servers MUST NOT return errors if attribute descriptions or matching rule ids are not recognized, assertion values are invalid, or the assertion syntax is not supported.  More details of filter processing are given in Clause 7.8 of [X.511].
       如果无法识别 
          属性描述或匹配规则ID、断言值无效或不支持断言语法，
       服务器不得返回错误。 
@@ -1709,10 +1323,7 @@ RFC 4511                         LDAPv3                        June 2006
 
    EQUALITY equality 相等
 
-   The matching rule for an equalityMatch filter is defined by the
-   EQUALITY matching rule for the attribute type or subtype.  The filter
-   is TRUE when the EQUALITY rule returns TRUE as applied to the
-   attribute or subtype and the asserted value.
+The matching rule for an equalityMatch filter is defined by the EQUALITY matching rule for the attribute type or subtype.  The filter is TRUE when the EQUALITY rule returns TRUE as applied to the attribute or subtype and the asserted value.
       equalMatch过滤器 的匹配规则 由
          属性类型或子类型的EQUALITY匹配规则 定义。 
       当 EQUALITY规则 应用于 属性或子类型和断言值 并返回TRUE时，过滤器为 TRUE。
@@ -1723,7 +1334,7 @@ RFC 4511                         LDAPv3                        June 2006
 
 ###### 4.5.1.7.2.  SearchRequest.filter.substrings
 
-      子字符串
+  子字符串
 
    There SHALL be at most one 'initial' and at most one 'final' in the
    'substrings' of a SubstringFilter.  If 'initial' is present, it SHALL
@@ -2112,12 +1723,14 @@ RFC 4511                         LDAPv3                        June 2006
    server (hostb) and issued the Search request for the subtree
    <OU=People,DC=Example,DC=NET>, the server might respond as follows:
 
-     SearchResultEntry for OU=People,DC=Example,DC=NET
-     SearchResultReference {
-       ldap://hoste/OU=Managers,OU=People,DC=Example,DC=NET??sub }
-     SearchResultReference {
-       ldap://hostf/OU=Consultants,OU=People,DC=Example,DC=NET??sub }
-     SearchResultDone (success)
+```ASN.1
+ SearchResultEntry for OU=People,DC=Example,DC=NET
+ SearchResultReference {
+   ldap://hoste/OU=Managers,OU=People,DC=Example,DC=NET??sub }
+ SearchResultReference {
+   ldap://hostf/OU=Consultants,OU=People,DC=Example,DC=NET??sub }
+ SearchResultDone (success)
+```
 
    Similarly, if a singleLevel Search of <DC=Example,DC=NET> is
    requested to the contacted server, it may return the following:
@@ -2559,9 +2172,12 @@ RFC 4511                         LDAPv3                        June 2006
    Each Extended operation consists of an Extended request and an
    Extended response.
 
-        ExtendedRequest ::= [APPLICATION 23] SEQUENCE {
-             requestName      [0] LDAPOID,
-             requestValue     [1] OCTET STRING OPTIONAL }
+```ASN.1
+    ExtendedRequest ::= [APPLICATION 23] SEQUENCE {
+         requestName      [0] LDAPOID,
+         requestValue     [1] OCTET STRING OPTIONAL }
+```
+
 #---------------------------------------------------------------------------------------
 
 
@@ -2581,10 +2197,12 @@ RFC 4511                         LDAPv3                        June 2006
    The server will respond to this with an LDAPMessage containing an
    ExtendedResponse.
 
-        ExtendedResponse ::= [APPLICATION 24] SEQUENCE {
-             COMPONENTS OF LDAPResult,
-             responseName     [10] LDAPOID OPTIONAL,
-             responseValue    [11] OCTET STRING OPTIONAL }
+```ASN.1
+    ExtendedResponse ::= [APPLICATION 24] SEQUENCE {
+         COMPONENTS OF LDAPResult,
+         responseName     [10] LDAPOID OPTIONAL,
+         responseValue    [11] OCTET STRING OPTIONAL }
+```
 
    The responseName field, when present, contains an LDAPOID that is
    unique for this extended operation or response.  This field is
@@ -2909,7 +2527,6 @@ the client, if it chooses to do so.
 Sermersheim                 Standards Track                    [Page 43]
 
 RFC 4511                         LDAPv3                        June 2006
-
 
    Use of cleartext password is strongly discouraged where the
    underlying transport service cannot guarantee confidentiality and may
