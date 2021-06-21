@@ -593,14 +593,12 @@ For certain result codes (typically, but not restricted to  noSuchObject, aliasP
 
 The referral result code indicates that the contacted server cannot or will not perform the operation and that one or more other servers may be able to.  Reasons for this include:
 resultCode中的referral表示：被联系的服务器不能或不会执行操作，而一个或多个其他服务器可能能够执行。 原因包括：
-
    - The target entry of the request is not held locally, but the server has knowledge of its possible existence elsewhere.
         请求的目标条目不在本地(本服务器)保存，但服务器知道它可能存在于其他地方。
-     
    - The operation is restricted on this server -- perhaps due to a read-only copy of an entry to be modified.
         该操作在此服务器上受到限制——可能是由于要修改的 是此条目的只读副本。
+        总结： 
 
-总结： 
     LDAPResult的resultCode字段的值 如果是 referral
         表明 此服务器无法执行 所请求的操作，但其他服务器可以执行 所请求的操作
         原因包括: 
@@ -632,13 +630,13 @@ During a Search operation, after the baseObject is located, and entries are bein
 If the client wishes to progress the operation, it contacts one of the supported services found in the referral.  If multiple URIs are present, the client assumes that any supported URI may be used to progress the operation.
 如果客户端希望推进操作，它会联系/连接referral中找到的支持服务之一。 如果存在多个 URI，则客户端假定任何受支持的 URI 均可用于推进操作。
 总结： 
-        client会连接referral中的URI，以继续执行操作
+   client会连接referral中的URI，以继续执行操作
 
 Clients that follow referrals MUST ensure that they do not loop between servers.  They MUST NOT repeatedly contact the same server for the same request with the same parameters.  Some clients use a counter that is incremented each time referral handling occurs for an operation, and these kinds of clients MUST be able to handle at least ten nested referrals while progressing the operation.
 追踪referral的客户端必须确保它们不会在服务器之间循环。 对于具有相同参数的相同请求，他们不得重复联系同一服务器。 一些客户端使用一个计数器，每次发生操作的引用/referral处理时都会增加该计数器，并且这些类型的客户端必须能够在进行操作时处理至少十个嵌套引用/referral。
 总结： 
-        client会连接referral中的URI 
-                但是，具有相同参数的相同请求 不能重复连接同一服务器/server 
+   client会连接referral中的URI 
+      但是，具有相同参数的相同请求 不能重复连接同一服务器/server 
 
 
 
@@ -650,9 +648,8 @@ referral的值是LDAP URLs时 遵循以下规则：
 
    - If an alias was dereferenced, the <dn> part of the LDAP URL MUST be present, with the new target object name.
         如果别名被解引用，LDAP URL的<dn>部分必须存在，并带有新的目标对象的名称。
-     
    - It is RECOMMENDED that the <dn> part be present to avoid ambiguity.
-        建议使用/存在<dn>部分，以避免歧义。
+        建议存在<dn>部分，以避免歧义。
    - If the <dn> part is present, the client uses this name in its next request to progress the operation, and if it is not present the client uses the same name as in the original request.
         如果 <dn> 部分存在，则客户端在其下一个请求中使用此名称来进行操作，如果不存在，则客户端使用与原始请求中相同的名称。
    - Some servers (e.g., participating in distributed indexing) may provide a different filter in a URL of a referral for a Search operation.
@@ -665,7 +662,7 @@ referral的值是LDAP URLs时 遵循以下规则：
    - If the <scope> part is missing, the scope of the original Search is used by the client to progress the operation.
         如果缺少 <scope> 部分，客户端将使用原始搜索的scope来进行操作。
    - Other aspects of the new request may be the same as or different from the request that generated the referral.
-        新请求的其他方面可能与生成referral的请求相同或不同。
+        新请求的其他方面 可能与 生成referral的请求 相同或不同。
 
 Other kinds of URIs may be returned.  The syntax and semantics of such URIs is left to future specifications.  Clients may ignore URIs that they do not support.
 可能会返回其他类型的 URI。此类 URI 的语法和语义留给未来的规范。 客户端可能会忽略他们不支持的 URI。
@@ -1226,502 +1223,337 @@ typesOnly：是个指示符，指示 搜索结果 是包含属性描述和值 �
 
 A filter that defines the conditions that must be fulfilled in order for the Search to match a given entry.
 过滤器 定义了  搜索匹配到给定条目 必须满足的条件。
-
-# 阅读到此处！
+总结：
+​	过滤器的作用 是 根据指定的条件去匹配条目
 
 The 'and', 'or', and 'not' choices can be used to form combinations of filters.  At least one filter element MUST be present in an 'and' or 'or' choice.  The others match against individual attribute values of entries in the scope of the Search.  (Implementor's note: the 'not' filter is an example of a tagged choice in an implicitly-tagged module.  In BER this is treated as if the tag were explicit.)
-CHOICE中的'and'、'or' 和 'not' 选项可用于形成过滤器的组合。
-       在'and'或'or'选项中必须至少出现一个过滤器元素。 
-       其他 与搜索范围内 条目的各个属性值 匹配。 
-         （实施者注意："not"过滤器是 隐式标记模块 中标记选择的一个示例。在 BER 中，这被视为标签是显式的。）
-   总结： 
-      使用 'and', 'or', 'not'组合filters
+CHOICE中的'and'、'or' 和 'not' 可用于形成过滤器的组合。在'and'或'or'中必须至少出现一个过滤器元素。 
+CHOICE中的其他选项 用于与搜索范围内 条目的各个属性值 匹配。 
+（实施者注意："not"过滤器是 隐式标记模块 中标记选择的一个示例。在 BER 中，这被视为标签是显式的。）
+总结： 
+   使用 'and', 'or', 'not'组合filters
 
 A server MUST evaluate filters according to the three-valued logic of [X.511] (1993), Clause 7.8.1.  In summary, a filter is evaluated to "TRUE", "FALSE", or "Undefined".  If the filter evaluates to TRUE for a particular entry, then the attributes of that entry are returned as part of the Search result (subject to any applicable access control restrictions).  If the filter evaluates to FALSE or Undefined, then the entry is ignored for the Search.
-      服务器/server 必须根据 [X.511](1993)第7.8.1条款的 三值逻辑 评估过滤器。 
-      总之，过滤器被评估为"TRUE", "FALSE", or "Undefined"。 
-      如果过滤器对 特定条目 的评估结果为 TRUE，则该条目的属性将作为搜索结果的一部分返回（受任何适用的访问控制限制）。 
-      如果过滤器的计算结果为 FALSE或Undefined，则搜索将忽略该条目。
-   总结： 
-      server根据 three-valued logic 去评估filters
-      对特定条目 评估结果为
-         TRUE : 该条目的属性 作为 搜索结果的一部分 返回 
-         FALSE: 忽略该条目
-         Undefined: 忽略该条目 
+服务器/server 必须根据 [X.511](1993)第7.8.1条款的 "三值逻辑" 评估过滤器。 总之，过滤器被评估为"TRUE", "FALSE", or "Undefined"。 
+如果过滤器对 特定条目 的评估结果为 TRUE，则该条目的属性将作为搜索结果的一部分返回（受任何适用的访问控制限制）。 
+如果过滤器的计算结果为 FALSE或Undefined，则搜索将忽略该条目。
+总结： 
+   server根据 three-valued logic 去评估filters
+   对特定条目 评估结果为
+      TRUE : 该条目的属性 作为 搜索结果的一部分 返回 
+      FALSE: 忽略该条目
+      Undefined: 忽略该条目 
 
 A filter of the "and" choice is TRUE if all the filters in the SET OF evaluate to TRUE, FALSE if at least one filter is FALSE, and Undefined otherwise.  A filter of the "or" choice is FALSE if all the filters in the SET OF evaluate to FALSE, TRUE if at least one filter is TRUE, and Undefined otherwise.  A filter of the 'not' choice is TRUE if the filter being negated is FALSE, FALSE if it is TRUE, and Undefined if it is Undefined.
-      如果SET OF中的
-         所有过滤器评估为 TRUE，则“and”选项的过滤器为 TRUE，
-         如果至少一个过滤器为 FALSE，则为 FALSE，
-         否则为 Undefined。 
-      如果SET OF中的
-         所有过滤器评估为 FALSE，则“or”选择的过滤器为 FALSE，
-         如果至少一个过滤器为 TRUE，则为 TRUE，
-         否则为 Undefined。 
-      如果"not"过滤器
-         为 FALSE，则“not”选择的过滤器为 TRUE，
-         如果为 TRUE，则为 FALSE，
-         如果为未定义则为 Undefined。
-   总结： 
+对于"and"过滤器，如果SET OF中的
+	所有/全部 过滤器评估为 TRUE，则过滤器为 TRUE，
+   如果至少一个过滤器为 FALSE，则为 FALSE，
+   否则为 Undefined。 
+对于"or"过滤器，如果SET OF中的
+   所有过滤器评估为 FALSE，则过滤器为 FALSE，
+   如果至少一个过滤器为 TRUE，则为 TRUE，
+   否则为 Undefined。 
+对于"not"过滤器，
+   为 FALSE，则过滤器为 TRUE，
+   如果为 TRUE，则为 FALSE，
+   如果为未定义则为 Undefined。
+总结： 
       "and""or""not" 和C语言中的 && || ～ 具有同样的含义
       当使用"and"组合filter时：        (与)
-         全为TRUE，结果才为TRUE；
-         只要由一个为FALSE，结果为FALSE
-         其他为Undefined
+         全为TRUE，结果才为TRUE；只要由一个为FALSE，结果为FALSE其他为Undefined
       当使用"or" 组合filter时：        (或)
-         全为FALSE，结果才为FALSE；
-         只要由一个为TRUE，结果为TRUE
-         其他为Undefined
+         全为FALSE，结果才为FALSE；只要由一个为TRUE，结果为TRUE其他为Undefined
       当使用"not"组合filter时：        (取反)
-         为TRUE，结果为FALSE；
-         为FALSE，结果为TRUE
-         为Undefined，结果为Undefined
+         为TRUE，结果为FALSE；为FALSE，结果为TRUE为Undefined，结果为Undefined
 
-   A filter item evaluates to Undefined when the server would not be able to determine whether the assertion value matches an entry.
-   Examples include:
-      当服务器/server无法确定 断言值是否与条目匹配时，过滤器项评估为Undefined。 例子包括：
-#---------------------------------------------------------------------------------------
+A filter item evaluates to Undefined when the server would not be able to determine whether the assertion value matches an entry. Examples include:
+当server无法确定 断言值是否与条目匹配时，过滤器项评估为Undefined。 例子包括：
+- An attribute description in an equalityMatch, substrings, greaterOrEqual, lessOrEqual, approxMatch, or extensibleMatch filter is not recognized by the server.
+  - server无法识别  equalityMatch、substrings、greaterOrEqual、lessOrEqual、approxMatch 或extensibleMatch 过滤器 中的 attribute-description。
 
+- The attribute type does not define the appropriate matching rule.
+   - attribute-type 没有定义 合适的匹配规则。
 
+- A MatchingRuleId in the extensibleMatch is not recognized by the server or is not valid for the attribute type.
+   - extensibleMatch 中的 MatchingRuleId 未被server识别 或 对attribute-type无效。
 
-
-Sermersheim                 Standards Track                    [Page 23]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   - An attribute description in an equalityMatch, substrings, greaterOrEqual, lessOrEqual, approxMatch, or extensibleMatch filter is not recognized by the server.
-   - 服务器/server无法识别 
-         equalityMatch、substrings、greaterOrEqual、lessOrEqual、approxMatch 或extensibleMatch 
-      过滤器 中的 属性描述。
-
-   - The attribute type does not define the appropriate matching rule.
-   - 属性类型 没有定义 合适的匹配规则。
-
-   - A MatchingRuleId in the extensibleMatch is not recognized by the server or is not valid for the attribute type.
-   - extensibleMatch 中的 MatchingRuleId 未被服务器识别 或 对属性类型无效。
-
-   - The type of filtering requested is not implemented.
+- The type of filtering requested is not implemented.
    - (server)未实现 请求的过滤类型。
 
-   - The assertion value is invalid.
+- The assertion value is invalid.
    - 断言值无效。
 
 For example, if a server did not recognize the attribute type shoeSize, the filters (shoeSize=*), (shoeSize=12), (shoeSize>=12), and (shoeSize<=12) would each evaluate to Undefined.
-      例如，
-         如果服务器/server无法识别属性类型 shoesSize，
-         则过滤器 (shoe Size=*)、(shoe Size=12)、(shoe Size>=12) 和 (shoeSize<=12) 
-         都会评估为 Undefined .
+例如，
+   如果服务器/server无法识别attribute-type: shoesSize，
+   则 (shoe Size=*)、(shoe Size=12)、(shoe Size>=12) 和 (shoeSize<=12) 过滤器 ，都会评估为 Undefined .
 
 Servers MUST NOT return errors if attribute descriptions or matching rule ids are not recognized, assertion values are invalid, or the assertion syntax is not supported.  More details of filter processing are given in Clause 7.8 of [X.511].
-      如果无法识别 
-         属性描述或匹配规则ID、断言值无效或不支持断言语法，
-      服务器不得返回错误。 
-      [X.511] 的第 7.8 节给出了过滤器处理的更多细节。
+如果无法识别 attribute-descriptions或maching-rule-ID、assertion-values无效或不支持assertion语法，服务器"禁止/不能"返回错误。 
+[X.511] 的第 7.8 节给出了过滤器处理的更多细节。
 
-###### 4.5.1.7.1.  SearchRequest.filter.equalityMatch
 
-   EQUALITY equality 相等
+
+###### 4.5.1.7.1.  SearchRequest.filter.equalityMatch(相等=匹配)
 
 The matching rule for an equalityMatch filter is defined by the EQUALITY matching rule for the attribute type or subtype.  The filter is TRUE when the EQUALITY rule returns TRUE as applied to the attribute or subtype and the asserted value.
-      equalMatch过滤器 的匹配规则 由
-         属性类型或子类型的EQUALITY匹配规则 定义。 
-      当 EQUALITY规则 应用于 属性或子类型和断言值 并返回TRUE时，过滤器为 TRUE。
-   总结：   
-      filter下的 equalityMatch的 匹配规则 
-         由 属性类型和子类型的EQUALITY匹配规则 定义
-      当 EQUALITY规则 应用于 属性或子类型和断言值 并返回TRUE时， --> filter为TRUE
-
-###### 4.5.1.7.2.  SearchRequest.filter.substrings
-
-  子字符串
-
-   There SHALL be at most one 'initial' and at most one 'final' in the
-   'substrings' of a SubstringFilter.  If 'initial' is present, it SHALL
-   be the first element of 'substrings'.  If 'final' is present, it
-   SHALL be the last element of 'substrings'.
-      SubstringFilter 的'substrings'中
-         最多有一个'initial/最初' 和 最多一个'final/最终'。 
-      如果 'initial' 存在，它应该是 'substrings' 的第一个元素。 
-      如果存在“final”，则它应该是“substrings”的最后一个元素。
-   总结： 
-      只能有一个 'initial' ,它位于 substrings的开头
-      只能有一个 'final' ,  它位于 substrings的结尾
-
-   The matching rule for an AssertionValue in a substrings filter item
-   is defined by the SUBSTR matching rule for the attribute type or
-   subtype.  The filter is TRUE when the SUBSTR rule returns TRUE as
-   applied to the attribute or subtype and the asserted value.
-      substrings过滤项中 
-         AssertionValue的匹配规则 由属性类型或子类型的 SUBSTR 匹配规则定义。 
-      当 SUBSTR规则 在应用于属性或子类型和断言值 并返回TRUE时，过滤器为 TRUE。
-(!!!)总结： 
-      filter下的 substrings中的 
-         AssertionValue的 匹配规则，
-            由 属性类型或子类型的 SUBSTR匹配规则定义
-      当 SUBSTR规则 应用于 属性或子类型和断言值 并返回TRUE时，--> 那么filter为TRUE
-
-   Note that the AssertionValue in a substrings filter item conforms to
-   the assertion syntax of the EQUALITY matching rule for the attribute
-   type rather than to the assertion syntax of the SUBSTR matching rule
-   for the attribute type.  Conceptually, the entire SubstringFilter is
-   converted into an assertion value of the substrings matching rule
-   prior to applying the rule.
-      请注意，
-         substrings过滤项中 AssertionValue 
-            符合属性类型的EQUALITY匹配规则 的断言语法，
-            而不是属性类型的 SUBSTR匹配规则 的断言语法。 
-      从概念上讲，在应用规则之前，将整个 SubstringFilter 转换为子substrings匹配规则的断言值。
-(!!!)总结：
-      filter下的 substrings中的
-         AssertionValue的 assertion syntax(断言语法)：
-            符合属性类型的 EQUALITY匹配规则的assertion syntax，
-            而不是 SUBSTR匹配规则的assertion syntax
-      应用(assertion syntax)规则之前
-         先将整个SubstringFilter，转换为substrings匹配规则的 assertion value 
-         （注意：substrings匹配规则 由 属性类型或子类型的 SUBSTR匹配规则定义）
-#---------------------------------------------------------------------------------------
-
-
-
-Sermersheim                 Standards Track                    [Page 24]
-
-RFC 4511                         LDAPv3                        June 2006
-
-###### 4.5.1.7.3.  SearchRequest.filter.greaterOrEqual
-
-   The matching rule for a greaterOrEqual filter is defined by the
-   ORDERING matching rule for the attribute type or subtype.  The filter
-   is TRUE when the ORDERING rule returns FALSE as applied to the
-   attribute or subtype and the asserted value.
-   总结： 
-      filter下的的greaterOrEqual的 匹配规则 
-         由属性类型或子类型的 ORDERING 匹配规则定义
-      当 ORDERING规则 应用于属性或子类型和断言值 并返回FALSE时 ，--> filter为TRUE
-
-###### 4.5.1.7.4.  SearchRequest.filter.lessOrEqual
-
-   The matching rules for a lessOrEqual filter are defined by the
-   ORDERING and EQUALITY matching rules for the attribute type or
-   subtype.  The filter is TRUE when either the ORDERING or EQUALITY
-   rule returns TRUE as applied to the attribute or subtype and the
-   asserted value.
-   总结： 
-      filter下的lessOrEqual的匹配规则 
-         由属性类型或子类型的 ORDERING和EQUALITY匹配规则定义。 
-      当ORDERING 或 EQUALITY规则
-         在应用于属性或子类型和断言值时 并返回TRUE时，
-         filter为 TRUE。
-
-###### 4.5.1.7.5.  SearchRequest.filter.present
-
-   A present filter is TRUE when there is an attribute or subtype of the
-   specified attribute description present in an entry, FALSE when no
-   attribute or subtype of the specified attribute description is
-   present in an entry, and Undefined otherwise.
-   总结： 
-      filter下的present 
-         当条目中存在 指定的属性描述的 属性或子类型时，filter为TRUE，
-         当条目中不存在 指定的属性描述的 属性或子类型时 filter为FALSE，
-         否则为 Undefined。
-   简言之：指定的属性描述 若存在于属性或子类型中，那么filter为true
-
-###### 4.5.1.7.6.  SearchRequest.filter.approxMatch
-
-   An approxMatch filter is TRUE when there is a value of the attribute
-   type or subtype for which some locally-defined approximate matching
-   algorithm (e.g., spelling variations, phonetic match, etc.) returns
-   TRUE.  If a value matches for equality, it also satisfies an
-   approximate match.  If approximate matching is not supported for the
-   attribute, this filter item should be treated as an equalityMatch.
-   总结： 
-      filter下的approxMatch 
-      使用 近似匹配过滤器 approxMatch
-         1) 当属性或子类型的值/value,被本地定义的近似匹配算法(例如 拼写变体 语音匹配等)返回TRUE时，则filter为TRUE
-         2) 如果一个值/value匹配相等/equality，它也满足近似匹配。 
-      如果属性不支持近似匹配，则应将此过滤器项视为 相等匹配/equalityMatch。
-
-###### 4.5.1.7.7.  SearchRequest.filter.extensibleMatch
-
-   The fields of the extensibleMatch filter item are evaluated as
-   follows:
-   filter的extensibleMatch字段评估如下：
-
-   - If the matchingRule field is absent, the type field MUST be
-     present, and an equality match is performed for that type.
-   - 如果 matchingRule 字段不存在，则必须存在类型字段，并且对该类型执行相等匹配。
-
-   - If the type field is absent and the matchingRule is present, the
-     matchValue is compared against all attributes in an entry that
-     support that matchingRule.
-
-   - If the type field is present and the matchingRule is present, the
-     matchValue is compared against the specified attribute type and its
-     subtypes.
-     #---------------------------------------------------------------------------------------
-
-
-
-
-Sermersheim                 Standards Track                    [Page 25]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   - If the dnAttributes field is set to TRUE, the match is additionally
-     applied against all the AttributeValueAssertions in an entry's
-     distinguished name, and it evaluates to TRUE if there is at least
-     one attribute or subtype in the distinguished name for which the
-     filter item evaluates to TRUE.  The dnAttributes field is present
-     to alleviate the need for multiple versions of generic matching
-     rules (such as word matching), where one applies to entries and
-     another applies to entries and DN attributes as well.
-
-   The matchingRule used for evaluation determines the syntax for the
-   assertion value.  Once the matchingRule and attribute(s) have been
-   determined, the filter item evaluates to TRUE if it matches at least
-   one attribute type or subtype in the entry, FALSE if it does not
-   match any attribute type or subtype in the entry, and Undefined if
-   the matchingRule is not recognized, the matchingRule is unsuitable
-   for use with the specified type, or the assertionValue is invalid.
-
-###### 4.5.1.8.  SearchRequest.attributes
-
-   A selection list of the attributes to be returned from each entry
-   that matches the search filter.  Attributes that are subtypes of
-   listed attributes are implicitly included.  LDAPString values of this
-   field are constrained to the following Augmented Backus-Naur Form
-   (ABNF) [RFC4234]:
-
-      attributeSelector = attributedescription / selectorspecial
-    
-      selectorspecial = noattrs / alluserattrs
-    
-      noattrs = %x31.2E.31 ; "1.1"
-    
-      alluserattrs = %x2A ; asterisk ("*")
-    
-      The <attributedescription> production is defined in Section 2.5 of
-      [RFC4512].
-    
-      There are three special cases that may appear in the attributes
-      selection list:
-    
-      1. An empty list with no attributes requests the return of all
-         user attributes.
-    
-      2. A list containing "*" (with zero or more attribute
-         descriptions) requests the return of all user attributes in
-         addition to other listed (operational) attributes.
-#---------------------------------------------------------------------------------------
-
-
-
-
-
-Sermersheim                 Standards Track                    [Page 26]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-      3. A list containing only the OID "1.1" indicates that no
-         attributes are to be returned.  If "1.1" is provided with other
-         attributeSelector values, the "1.1" attributeSelector is
-         ignored.  This OID was chosen because it does not (and can not)
-         correspond to any attribute in use.
-
-   Client implementors should note that even if all user attributes are
-   requested, some attributes and/or attribute values of the entry may
-   not be included in Search results due to access controls or other
-   restrictions.  Furthermore, servers will not return operational
-   attributes, such as objectClasses or attributeTypes, unless they are
-   listed by name.  Operational attributes are described in [RFC4512].
-
-   Attributes are returned at most once in an entry.  If an attribute
-   description is named more than once in the list, the subsequent names
-   are ignored.  If an attribute description in the list is not
-   recognized, it is ignored by the server.
-
-#### 4.5.2.  Search Result
-
-   The results of the Search operation are returned as zero or more
-   SearchResultEntry and/or SearchResultReference messages, followed by
-   a single SearchResultDone message.
-
-        SearchResultEntry ::= [APPLICATION 4] SEQUENCE {
-             objectName      LDAPDN,
-             attributes      PartialAttributeList }
-    
-        PartialAttributeList ::= SEQUENCE OF
-                             partialAttribute PartialAttribute
-    
-        SearchResultReference ::= [APPLICATION 19] SEQUENCE
-                                  SIZE (1..MAX) OF uri URI
-    
-        SearchResultDone ::= [APPLICATION 5] LDAPResult
-
-   Each SearchResultEntry represents an entry found during the Search.
-   Each SearchResultReference represents an area not yet explored during
-   the Search.  The SearchResultEntry and SearchResultReference messages
-   may come in any order.  Following all the SearchResultReference and
-   SearchResultEntry responses, the server returns a SearchResultDone
-   response, which contains an indication of success or details any
-   errors that have occurred.
-
-   Each entry returned in a SearchResultEntry will contain all
-   appropriate attributes as specified in the attributes field of the
-   Search Request, subject to access control and other administrative
-   policy.  Note that the PartialAttributeList may hold zero elements.
-#---------------------------------------------------------------------------------------
-
-
-Sermersheim                 Standards Track                    [Page 27]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   This may happen when none of the attributes of an entry were
-   requested or could be returned.  Note also that the partialAttribute
-   vals set may hold zero elements.  This may happen when typesOnly is
-   requested, access controls prevent the return of values, or other
-   reasons.
-
-   Some attributes may be constructed by the server and appear in a
-   SearchResultEntry attribute list, although they are not stored
-   attributes of an entry.  Clients SHOULD NOT assume that all
-   attributes can be modified, even if this is permitted by access
-   control.
-
-   If the server's schema defines short names [RFC4512] for an attribute
-   type, then the server SHOULD use one of those names in attribute
-   descriptions for that attribute type (in preference to using the
-   <numericoid> [RFC4512] format of the attribute type's object
-   identifier).  The server SHOULD NOT use the short name if that name
-   is known by the server to be ambiguous, or if it is otherwise likely
-   to cause interoperability problems.
-
-#### 4.5.3.  Continuation References in the Search Result
-
-   If the server was able to locate the entry referred to by the
-   baseObject but was unable or unwilling to search one or more non-
-   local entries, the server may return one or more
-   SearchResultReference messages, each containing a reference to
-   another set of servers for continuing the operation.  A server MUST
-   NOT return any SearchResultReference messages if it has not located
-   the baseObject and thus has not searched any entries.  In this case,
-   it would return a SearchResultDone containing either a referral or
-   noSuchObject result code (depending on the server's knowledge of the
-   entry named in the baseObject).
-
-   If a server holds a copy or partial copy of the subordinate naming
-   context (Section 5 of [RFC4512]), it may use the search filter to
-   determine whether or not to return a SearchResultReference response.
-   Otherwise, SearchResultReference responses are always returned when
-   in scope.
-
-   The SearchResultReference is of the same data type as the Referral.
-
-   If the client wishes to progress the Search, it issues a new Search
-   operation for each SearchResultReference that is returned.  If
-   multiple URIs are present, the client assumes that any supported URI
-   may be used to progress the operation.
-#---------------------------------------------------------------------------------------
-
-
-
-
-
-Sermersheim                 Standards Track                    [Page 28]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   Clients that follow search continuation references MUST ensure that
-   they do not loop between servers.  They MUST NOT repeatedly contact
-   the same server for the same request with the same parameters.  Some
-   clients use a counter that is incremented each time search result
-   reference handling occurs for an operation, and these kinds of
-   clients MUST be able to handle at least ten nested referrals while
-   progressing the operation.
-
-   Note that the Abandon operation described in Section 4.11 applies
-   only to a particular operation sent at the LDAP message layer between
-   a client and server.  The client must individually abandon subsequent
-   Search operations it wishes to.
-
-   A URI for a server implementing LDAP and accessible via TCP/IP (v4 or
-   v6) [RFC793][RFC791] is written as an LDAP URL according to
-   [RFC4516].
-
-   SearchResultReference values that are LDAP URLs follow these rules:
-
-   - The <dn> part of the LDAP URL MUST be present, with the new target
-     object name.  The client uses this name when following the
-     reference.
-
-   - Some servers (e.g., participating in distributed indexing) may
-     provide a different filter in the LDAP URL.
-
-   - If the <filter> part of the LDAP URL is present, the client uses
-     this filter in its next request to progress this Search, and if it
-     is not present the client uses the same filter as it used for that
-     Search.
-
-   - If the originating search scope was singleLevel, the <scope> part
-     of the LDAP URL will be "base".
-
-   - It is RECOMMENDED that the <scope> part be present to avoid
-     ambiguity.  In the absence of a <scope> part, the scope of the
-     original Search request is assumed.
-
-   - Other aspects of the new Search request may be the same as or
-     different from the Search request that generated the
-     SearchResultReference.
-
-   - The name of an unexplored subtree in a SearchResultReference need
-     not be subordinate to the base object.
-
-   Other kinds of URIs may be returned.  The syntax and semantics of
-   such URIs is left to future specifications.  Clients may ignore URIs
-   that they do not support.
-#---------------------------------------------------------------------------------------
-
-
-Sermersheim                 Standards Track                    [Page 29]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   UTF-8-encoded characters appearing in the string representation of a
-   DN, search filter, or other fields of the referral value may not be
-   legal for URIs (e.g., spaces) and MUST be escaped using the % method
-   in [RFC3986].
-
-##### 4.5.3.1.  Examples
-
-   For example, suppose the contacted server (hosta) holds the entry
-   <DC=Example,DC=NET> and the entry <CN=Manager,DC=Example,DC=NET>.  It
-   knows that both LDAP servers (hostb) and (hostc) hold
-   <OU=People,DC=Example,DC=NET> (one is the master and the other server
-   a shadow), and that LDAP-capable server (hostd) holds the subtree
-   <OU=Roles,DC=Example,DC=NET>.  If a wholeSubtree Search of
-   <DC=Example,DC=NET> is requested to the contacted server, it may
-   return the following:
-
-     SearchResultEntry for DC=Example,DC=NET
-     SearchResultEntry for CN=Manager,DC=Example,DC=NET
-     SearchResultReference {
-       ldap://hostb/OU=People,DC=Example,DC=NET??sub
-       ldap://hostc/OU=People,DC=Example,DC=NET??sub }
-     SearchResultReference {
-       ldap://hostd/OU=Roles,DC=Example,DC=NET??sub }
-     SearchResultDone (success)
-
-   Client implementors should note that when following a
-   SearchResultReference, additional SearchResultReference may be
-   generated.  Continuing the example, if the client contacted the
-   server (hostb) and issued the Search request for the subtree
-   <OU=People,DC=Example,DC=NET>, the server might respond as follows:
+equalMatch-filter 的匹配规则 由 attribute-type或subtype的EQUALITY/相等匹配规则 定义。 
+当 EQUALITY规则 应用于 attribute/属性类型或subtype/子类型和assert-value/断言值 并返回TRUE时，filter/过滤器为 TRUE。
+总结： 
+   equalityMatch过滤器使用 attribute-type/subtype 的EQUALITY匹配规则 定义。
+
+
+
+###### 4.5.1.7.2.  SearchRequest.filter.substrings(子串-匹配)
+
+There SHALL be at most one 'initial' and at most one 'final' in the 'substrings' of a SubstringFilter.  If 'initial' is present, it SHALL be the first element of 'substrings'.  If 'final' is present, it SHALL be the last element of 'substrings'.
+SubstringFilter 的'substrings'中
+   最多有一个'initial/最初' 和 最多一个'final/最终'。 
+   如果 'initial' 存在，它应该是 'substrings' 的第一个元素。 
+   如果存在“final”，则它应该是“substrings”的最后一个元素。
+总结： 
+   只能有一个 'initial' ,它位于 substrings的开头
+   只能有一个 'final' ,  它位于 substrings的结尾
+
+The matching rule for an AssertionValue in a substrings filter item is defined by the SUBSTR matching rule for the attribute type or subtype.  The filter is TRUE when the SUBSTR rule returns TRUE as applied to the attribute or subtype and the asserted value.
+substrings过滤项中 AssertionValue的匹配规则 由attribute-type或subtype的 SUBSTR 匹配规则定义。 
+当 SUBSTR规则 在应用于 attribute/属性类型或subtype/子类型和assert-value/断言值 并返回TRUE时，filter/过滤器为 TRUE。
+总结： 
+   substrings过滤器中的AssertionValue 使用 attribute-type/subtype 的SUBSTR匹配规则 定义。
+
+Note that the AssertionValue in a substrings filter item conforms to the assertion syntax of the EQUALITY matching rule for the attribute type rather than to the assertion syntax of the SUBSTR matching rule for the attribute type.  Conceptually, the entire SubstringFilter is converted into an assertion value of the substrings matching rule prior to applying the rule.
+请注意，substrings过滤项中的AssertionValue 
+   符合对attribute-type的EQUALITY匹配规则 的 assertion-syntax/断言语法，
+   而不是对attribute-type的 SUBSTR匹配规则 的 assertion-syntax/断言语法。 
+从概念上讲，在应用规则之前，将整个SubstringFilter转换为子substrings匹配规则的-断言值。
+
+
+
+###### 4.5.1.7.3.  SearchRequest.filter.greaterOrEqual(大于等于)
+
+The matching rule for a greaterOrEqual filter is defined by the ORDERING matching rule for the attribute type or subtype.  The filter is TRUE when the ORDERING rule returns FALSE as applied to the attribute or subtype and the asserted value.
+GreaterOrEqual过滤器的匹配规则  由attribute-type或subtype的ORDERING匹配规则定义。 
+当 ORDERING 规则在应用于attribute或subtype和assert-value时返回 FALSE 时，过滤器为 TRUE。
+
+
+
+###### 4.5.1.7.4.  SearchRequest.filter.lessOrEqual(小于等于)
+
+The matching rules for a lessOrEqual filter are defined by the ORDERING and EQUALITY matching rules for the attribute type or subtype.  The filter is TRUE when either the ORDERING or EQUALITY rule returns TRUE as applied to the attribute or subtype and the asserted value.
+lessOrEqual过滤器的匹配规则  由attribute或subtype的ORDERING和EQUALITY匹配规则定义。 
+当ORDERING或EQUALITY规则     在应用于attribute/属性类型或subtype/子类型和assert-value/断言值时返回 TRUE 时，filter/过滤器为 TRUE。
+
+
+
+###### 4.5.1.7.5.  SearchRequest.filter.present(存在)
+
+A present filter is TRUE when there is an attribute or subtype of the specified attribute description present in an entry, FALSE when no attribute or subtype of the specified attribute description is present in an entry, and Undefined otherwise.
+当entry中存在     指定的attribute-description的attribute或subtype时，present filter为 TRUE，
+当entry中不存在 指定的attribute-description的attribute或subtype时，为 FALSE，
+否则为 Undefined。
+总结： 
+   简言之：指定的attribute-description的attribute或subtype 若存在于entry中，那么filter为true
+
+
+
+###### 4.5.1.7.6.  SearchRequest.filter.approxMatch(近似-匹配)
+
+An approxMatch filter is TRUE when there is a value of the attribute type or subtype for which some locally-defined approximate matching algorithm (e.g., spelling variations, phonetic match, etc.) returns TRUE.  If a value matches for equality, it also satisfies an approximate match.  If approximate matching is not supported for the attribute, this filter item should be treated as an equalityMatch.
+对于atribute-type或subtype的value，当本地定义的近似匹配算法（例如，拼写变体、语音匹配等）为其返回 TRUE，approxMatch-filter为 TRUE。 
+如果一个value匹配相等，它也满足近似匹配。 
+如果属性不支持近似匹配，则应将此过滤器项视为 equalityMatch/相等匹配。
+
+
+
+###### 4.5.1.7.7.  SearchRequest.filter.extensibleMatch(可扩展-匹配)
+
+The fields of the extensibleMatch filter item are evaluated as follows:
+extensibleMatch 过滤器项的字段评估如下： 
+
+   - If the matchingRule field is absent, the type field MUST be present, and an equality match is performed for that type.
+        - 如果 matchingRule字段 不存在，则"必须"存在 type字段，并且对该type执行 相等匹配。
+   - If the type field is absent and the matchingRule is present, the matchValue is compared against all attributes in an entry that support that matchingRule.
+           - 如果 type字段 不存在而 matchingRule 存在，则将 matchValue 与支持该matchingRule的entry中的所有attribute进行比较。
+   - If the type field is present and the matchingRule is present, the matchValue is compared against the specified attribute type and its subtypes.
+           - 如果type字段和matchingRule字段都存在，则将 matchValue 与指定的attribute-type及其subtype进行比较。
+
+
+   - If the dnAttributes field is set to TRUE, the match is additionally applied against all the AttributeValueAssertions in an entry's distinguished name, and it evaluates to TRUE if there is at least one attribute or subtype in the distinguished name for which the filter item evaluates to TRUE.  The dnAttributes field is present to alleviate the need for multiple versions of generic matching rules (such as word matching), where one applies to entries and another applies to entries and DN attributes as well.
+
+        - 如果 dnAttributes字段 设置为 TRUE，则匹配项  会另外应用于entry's DN中的 所有AttributeValueAssertions，如果DN中至少有一个attribute或subtype过滤项的计算结果为 TRUE，则匹配结果为 TRUE . 出现 dnAttributes 字段是为了减少对通用匹配规则（例如单词匹配）的多个版本的需求，其中一个适用于条目，另一个也适用于entry和 DN-attribute。
+
+The matchingRule used for evaluation determines the syntax for the assertion value.  Once the matchingRule and attribute(s) have been determined, the filter item evaluates to TRUE if it matches at least one attribute type or subtype in the entry, FALSE if it does not match any attribute type or subtype in the entry, and Undefined if the matchingRule is not recognized, the matchingRule is unsuitable for use with the specified type, or the assertionValue is invalid.
+matchingRule用于评估确定assertion-value的语法。 
+一旦matchingRule和attribute被确定，
+   如果过滤项至少与entry中的一个attribute-type或subtype匹配，则它评估为 TRUE，
+   如果它不匹配条目中的任何attribute-type或subtype，则为 FALSE，
+   如果无法识别matchingRule，matchingRule不适合与指定类型一起使用，或assertionValue无效，则为Undefined。
+
+
+
+##### 4.5.1.8.  SearchRequest.attributes
+
+A selection list of the attributes to be returned from each entry that matches the search filter.  Attributes that are subtypes of listed attributes are implicitly included.  LDAPString values of this field are constrained to the following Augmented Backus-Naur Form (ABNF) [RFC4234]:
+要从  与search-filter匹配的   每个entry    返回的   attribute的选择列表。 
+所列attribute的  subtype的attribute  被隐式包含。 此字段的LDAPString值  受限于以下增强型Backus-Naur表格 (ABNF) [RFC4234]：
+
+```ASN.1
+  attributeSelector = attributedescription / selectorspecial
+
+  selectorspecial = noattrs / alluserattrs
+
+  noattrs = %x31.2E.31 ; "1.1"
+
+  alluserattrs = %x2A ; asterisk ("*")
+```
+The <attributedescription> production is defined in Section 2.5 of  [RFC4512].
+<attributedescription> 产生式在 [RFC4512] 的第 2.5 节中定义。
+
+There are three special cases that may appear in the attributes selection list:
+
+属性选择列表/attribute-selection-list  中可能会出现三种特殊情况：
+
+- 1)An empty list with no attributes requests the return of all user attributes.
+  - 没有属性的空列表-请求  返回 所有用户属性/user-attributes。
+- 2)A list containing "*" (with zero or more attribute descriptions) requests the return of all user attributes in addition to other listed (operational) attributes.
+  - 包含“*”(具有0个或多个attribute-description)的列表-请求  返回  除其他列出的(可操作的)属性之外的所有 用户属性/user-attributes。
+  - 1)A list containing only the OID "1.1" indicates that no attributes are to be returned.  If "1.1" is provided with other attributeSelector values, the "1.1" attributeSelector is ignored.  This OID was chosen because it does not (and can not) correspond to any attribute in use.
+    - 仅包含 OID "1.1" 的列表 表示不返回任何属性。 如果"1.1"与其他attributeSelector 值一起提供，则忽略"1.1" attributeSelector。 选择此 OID 是因为它不（也不能）对应于任何使用中的属性。
+
+Client implementors should note that even if all user attributes are requested, some attributes and/or attribute values of the entry may not be included in Search results due to access controls or other restrictions.  Furthermore, servers will not return operational attributes, such as objectClasses or attributeTypes, unless they are listed by name.  Operational attributes are described in [RFC4512].
+client实现者应注意，即使请求所有用户属性，由于访问控制或其他限制，条目的某些属性和/或属性值也可能不会包含在搜索结果中。 此外，服务器不会返回操作/operational属性，例如 objectClasses 或 attributeTypes，除非它们按名称列出。 [RFC4512]中描述了操作属性/operational-attributes。
+总结： 
+​	由于各种限制，有些属性或属性值 不会被返回；
+​	不会返回operational-attribute
+
+Attributes are returned at most once in an entry.  If an attribute description is named more than once in the list, the subsequent names are ignored.  If an attribute description in the list is not recognized, it is ignored by the server.
+属性在一个条目中最多返回一次。 如果属性描述在列表中多次命名，则后续名称将被忽略。 如果列表中的属性描述未被识别，则服务器将忽略它。
+总结： 
+   entry中的attribute最多返回一次
+
+
+
+#### 4.5.2.  Search Result(搜索结果)
+
+The results of the Search operation are returned as zero or more SearchResultEntry and/or SearchResultReference messages, followed by a single SearchResultDone message.
+搜索操作的结果作为0个或多个 SearchResultEntry 和/或 SearchResultReference 消息返回，后跟单个 SearchResultDone 消息。
+总结： 
+​	搜索结果 的组成：   0个或多个 SearchResultEntry / SearchResultReference  +  1个SearchResultDone。
+
+```ASN.1
+    SearchResultEntry ::= [APPLICATION 4] SEQUENCE {
+         objectName      LDAPDN,
+         attributes      PartialAttributeList }
+
+    PartialAttributeList ::= SEQUENCE OF
+                         partialAttribute PartialAttribute
+
+    SearchResultReference ::= [APPLICATION 19] SEQUENCE
+                              SIZE (1..MAX) OF uri URI
+
+    SearchResultDone ::= [APPLICATION 5] LDAPResult
+```
+
+Each SearchResultEntry represents an entry found during the Search. Each SearchResultReference represents an area not yet explored during the Search.  The SearchResultEntry and SearchResultReference messages may come in any order.  Following all the SearchResultReference and SearchResultEntry responses, the server returns a SearchResultDone response, which contains an indication of success or details any errors that have occurred.
+每个 SearchResultEntry 代表在搜索过程中找到的一个entry。 每个 SearchResultReference 代表搜索期间尚未探索的区域。 SearchResultEntry 和 SearchResultReference 消息可以按任何顺序出现。 在所有 SearchResultReference 和 SearchResultEntry 响应之后，服务器返回一个 SearchResultDone 响应，其中包含成功的指示或已发生的任何错误的详细信息。
+总结： 
+​	一个SearchResultEntry         表示  搜索到了一个entry；
+​	一个SearchResultReference表示   一个未完全处理的响应
+
+Each entry returned in a SearchResultEntry will contain all appropriate attributes as specified in the attributes field of the Search Request, subject to access control and other administrative policy.  Note that the PartialAttributeList may hold zero elements.
+SearchResultEntry 中返回的每个条目将包含搜索请求的属性字段中指定的所有适当属性，受访问控制和其他管理策略的约束。 请注意 PartialAttributeList 可能包含0个元素。
+总结：
+​	一个SearchResultEntry中 返回的每个entry，包含了  搜索请求的attribute字段中 指定的 合适的attribute
+
+This may happen when none of the attributes of an entry were requested or could be returned.  Note also that the partialAttribute vals set may hold zero elements.  This may happen when typesOnly is requested, access controls prevent the return of values, or other reasons.
+当一个entry: 没有任何属性被请求或无法返回任何属性时，可能会发生这种情况。 
+另请注意，partialAttribute vals 集可能包含零个元素。 
+当请求 typesOnly、访问控制阻止返回值或其他原因时，可能会发生这种情况。
+
+Some attributes may be constructed by the server and appear in a SearchResultEntry attribute list, although they are not stored attributes of an entry.  Clients SHOULD NOT assume that all attributes can be modified, even if this is permitted by access control.
+某些属性可能由服务器构造并出现在 SearchResultEntry 属性列表中，尽管它们不是条目的存储属性。 客户端"不应"假设所有属性都可以修改，即使访问控制允许这样做。
+总结： 
+​	SearchResultEntry的属性列表中，可能出现 某些由server构造的属性	
+
+If the server's schema defines short names [RFC4512] for an attribute type, then the server SHOULD use one of those names in attribute descriptions for that attribute type (in preference to using the <numericoid> [RFC4512] format of the attribute type's object identifier).  The server SHOULD NOT use the short name if that name is known by the server to be ambiguous, or if it is otherwise likely to cause interoperability problems.
+如果服务器的schema为attribute-type定义了短名称 [RFC4512]，那么服务器"应该"在该attribute-type的attribute-description中使用这些名称之一（优先使用attribute-type的对象标识符/OID的 <numericoid> [RFC4512] 格式 ）。 如果服务器知道该名称不明确，或者可能会导致互操作性问题，则服务器不应使用短名称。
+总结： 
+​	若是schema为 attribute-type定义了short-name，那么在 优先使用short-name表示 attribute-type；
+​	优先使用attribute-type的IOD 的 <numericoid> 格式；
+
+
+#### 4.5.3.  Continuation References in the Search Result(搜索结果中使用引用, 和4.1.10雷同)
+
+If the server was able to locate the entry referred to by the baseObject but was unable or unwilling to search one or more non-local entries, the server may return one or more SearchResultReference messages, each containing a reference to another set of servers for continuing the operation.  A server MUST NOT return any SearchResultReference messages if it has not located the baseObject and thus has not searched any entries.  In this case, it would return a SearchResultDone containing either a referral or noSuchObject result code (depending on the server's knowledge of the entry named in the baseObject).
+1- 如果服务器  1)能够找到 baseObject 引用的条目，2)但不能或不愿意搜索一个或多个非本地条目，则服务器可能会返回一个或多个 SearchResultReference message，每个message都包含对另一组服务器的引用以继续 操作。 
+2- 如果服务器 1)没有找到 baseObject 2)并因此没有搜索任何条目，则它"禁止/不得"返回任何 SearchResultReference 消息。 在这种情况下，它将返回一个 SearchResultDone，其中包含一个 引用/referral 或 noSuchObject 结果代码（取决于服务器对 baseObject 中命名的条目的了解）。
+
+If a server holds a copy or partial copy of the subordinate naming context (Section 5 of [RFC4512]), it may use the search filter to determine whether or not to return a SearchResultReference response. Otherwise, SearchResultReference responses are always returned when in scope.
+如果服务器持有 下级命名的 上下文的  副本或部分副本（[RFC4512] 的第 5 节），它可以使用搜索过滤器来确定是否返回 SearchResultReference 响应。 否则，SearchResultReference 响应始终在范围内返回。
+
+The SearchResultReference is of the same data type as the Referral.
+SearchResultReference 与Referral 具有相同的数据类型。
+
+If the client wishes to progress the Search, it issues a new Search operation for each SearchResultReference that is returned.  If multiple URIs are present, the client assumes that any supported URI may be used to progress the operation.
+如果客户端希望进行搜索，它会为每个返回的 SearchResultReference  issue/发出一个新的搜索操作。 如果存在多个 URI，则客户端假定任何受支持的 URI 均可用于推进操作。
+总结：
+​	如果client想继续进行搜索，那么为 每个SearchResultReference 发出一个新的搜索请求
+
+Clients that follow search continuation references MUST ensure that they do not loop between servers.  They MUST NOT repeatedly contact the same server for the same request with the same parameters.  Some clients use a counter that is incremented each time search result reference handling occurs for an operation, and these kinds of clients MUST be able to handle at least ten nested referrals while progressing the operation.
+搜索时 继续追踪referral的客户端"必须"确保它们不会在服务器之间循环。 对于具有相同参数的相同请求，他们不得重复联系同一服务器。 一些客户端使用一个计数器，每次发生搜索结果引用处理时都会增加一个计数器，并且这些类型的客户端必须能够在进行操作时处理至少十个嵌套引用。
+总结：
+​	client追踪referral时，不要重复发出请求；
+​	client要至少能处理10个嵌套referral
+这部分和  本文档的  4.1.10 referral相同 (！！！)
+
+Note that the Abandon operation described in Section 4.11 applies only to a particular operation sent at the LDAP message layer between a client and server.  The client must individually abandon subsequent Search operations it wishes to.
+请注意，第 4.11 节中描述的abandon-operation/放弃操作仅适用于在client和server之间的 LDAP-message-layer发送的特定操作。 客户端必须单独放弃它希望的后续搜索操作。
+
+A URI for a server implementing LDAP and accessible via TCP/IP (v4 or v6) [RFC793][RFC791] is written as an LDAP URL according to [RFC4516].
+(实现了LDAP 并可通过TCP/IP(v4或v6)[RFC793] [RFC791]访问的)服务器/server 的URI   根据[RFC4516] 被写为 LDAP URL。  
+
+SearchResultReference values that are LDAP URLs follow these rules:
+SearchResultReference 的值是LDAP URLs，并 遵循以下规则：
+- The <dn> part of the LDAP URL MUST be present, with the new target object name.  The client uses this name when following the reference.
+   - LDAP URL 的 <dn> 部分"必须"存在，并带有新的目标对象名称。 客户端在追踪引用时使用此名称。 (！！！)
+- Some servers (e.g., participating in distributed indexing) may provide a different filter in the LDAP URL.
+   - 某些服务器（例如，参与分布式索引）可能会在 LDAP URL 中提供不同的过滤器。
+- If the <filter> part of the LDAP URL is present, the client uses this filter in its next request to progress this Search, and if it is not present the client uses the same filter as it used for that Search.   
+   - 如果LDAP URL 中存在<filter> 部分，则客户端在其下一个请求中使用此过滤器来进行此搜索，如果不存在，则客户端使用与用于该搜索的过滤器相同的过滤器。
+- If the originating search scope was singleLevel, the <scope> part of the LDAP URL will be "base".
+   - 如果原始搜索范围是 singleLevel，LDAP URL 的 <scope> 部分将是“base”。
+- It is RECOMMENDED that the <scope> part be present to avoid ambiguity.  In the absence of a <scope> part, the scope of the original Search request is assumed.
+   - 建议存在 <scope> 部分以避免歧义。 如果没有 <scope> 部分，则使用 原始搜索请求的 scope/范围。
+- Other aspects of the new Search request may be the same as or different from the Search request that generated the SearchResultReference.
+   - 新搜索请求的其他方面  可能与  生成SearchResultReference的搜索请求  相同或不同。
+- The name of an unexplored subtree in a SearchResultReference need not be subordinate to the base object.
+   - SearchResultReference中未探索的子树的名称  不需要从属于base-object。
+
+Other kinds of URIs may be returned.  The syntax and semantics of such URIs is left to future specifications.  Clients may ignore URIs that they do not support.
+可能会返回其他类型的URI，此类URI 的语法和语义留给未来的规范。 客户端可能会忽略他们不支持的 URI。
+
+UTF-8-encoded characters appearing in the string representation of a DN, search filter, or other fields of the referral value may not be legal for URIs (e.g., spaces) and MUST be escaped using the % method in [RFC3986].
+出现在  DN的字符串表示、搜索过滤器 或 referral值的其他字段  中的UTF-8编码字符， 对于 URI(例如，空格)可能不合法，并且必须使用 [RFC3986] 中的 % 方法进行转义。
+
+##### 4.5.3.1.  Examples(实例)
+
+For example, suppose the contacted server (hosta) holds the entry <DC=Example,DC=NET> and the entry <CN=Manager,DC=Example,DC=NET>.  It knows that both LDAP servers (hostb) and (hostc) hold <OU=People,DC=Example,DC=NET> (one is the master and the other server a shadow), and that LDAP-capable server (hostd) holds the subtree <OU=Roles,DC=Example,DC=NET>.  If a wholeSubtree Search of <DC=Example,DC=NET> is requested to the contacted server, it may return the following:
+
+例如，假设联系的服务器 (hosta) 拥有条目 <DC=Example,DC=NET> 和条目 <CN=Manager,DC=Example,DC=NET>。 它知道 LDAP 服务器 (hostb) 和 (hostc) 持有 <OU=People,DC=Example,DC=NET>（一个是主服务器，另一个服务器是影子），并且  (hostd) 持有 子树 <OU=Roles,DC=Example,DC=NET>。 如果向联系的服务器(此处指hosta)请求 <DC=Example,DC=NET> 的wholeSubtree搜索，它可能会返回以下内容：
+
+```ASN.1
+ SearchResultEntry for DC=Example,DC=NET
+ SearchResultEntry for CN=Manager,DC=Example,DC=NET
+ SearchResultReference {
+   ldap://hostb/OU=People,DC=Example,DC=NET??sub
+   ldap://hostc/OU=People,DC=Example,DC=NET??sub }
+ SearchResultReference {
+   ldap://hostd/OU=Roles,DC=Example,DC=NET??sub }
+ SearchResultDone (success)
+```
+
+Client implementors should note that when following a SearchResultReference, additional SearchResultReference may be generated.  Continuing the example, if the client contacted the server (hostb) and issued the Search request for the subtree <OU=People,DC=Example,DC=NET>, the server might respond as follows:
+client实现者应注意，在遵循 SearchResultReference 时，可能会生成额外的 SearchResultReference。 继续这个例子，如果客户端联系服务器 (hostb) 并发出子树 <OU=People,DC=Example,DC=NET> 的搜索请求，服务器可能会响应如下：
 
 ```ASN.1
  SearchResultEntry for OU=People,DC=Example,DC=NET
@@ -1732,32 +1564,26 @@ RFC 4511                         LDAPv3                        June 2006
  SearchResultDone (success)
 ```
 
-   Similarly, if a singleLevel Search of <DC=Example,DC=NET> is
-   requested to the contacted server, it may return the following:
+   Similarly, if a singleLevel Search of <DC=Example,DC=NET> is requested to the contacted server, it may return the following:
 
-     SearchResultEntry for CN=Manager,DC=Example,DC=NET
-     SearchResultReference {
-       ldap://hostb/OU=People,DC=Example,DC=NET??base
-       ldap://hostc/OU=People,DC=Example,DC=NET??base }
-     SearchResultReference {
-       ldap://hostd/OU=Roles,DC=Example,DC=NET??base }
-     SearchResultDone (success)
-#---------------------------------------------------------------------------------------
-
-
-Sermersheim                 Standards Track                    [Page 30]
-
-RFC 4511                         LDAPv3                        June 2006
+```ASN.1
+ SearchResultEntry for CN=Manager,DC=Example,DC=NET
+ SearchResultReference {
+   ldap://hostb/OU=People,DC=Example,DC=NET??base
+   ldap://hostc/OU=People,DC=Example,DC=NET??base }
+ SearchResultReference {
+   ldap://hostd/OU=Roles,DC=Example,DC=NET??base }
+ SearchResultDone (success)
+```
 
 
-   If the contacted server does not hold the base object for the Search,
-   but has knowledge of its possible location, then it may return a
-   referral to the client.  In this case, if the client requests a
-   subtree Search of <DC=Example,DC=ORG> to hosta, the server returns a
-   SearchResultDone containing a referral.
 
-     SearchResultDone (referral) {
-       ldap://hostg/DC=Example,DC=ORG??sub }
+If the contacted server does not hold the base object for the Search, but has knowledge of its possible location, then it may return a referral to the client.  In this case, if the client requests a subtree Search of <DC=Example,DC=ORG> to hosta, the server returns a SearchResultDone containing a referral.
+
+```ASN.1
+ SearchResultDone (referral) {
+   ldap://hostg/DC=Example,DC=ORG??sub }
+```
 
 ### 4.6.  Modify Operation
 
