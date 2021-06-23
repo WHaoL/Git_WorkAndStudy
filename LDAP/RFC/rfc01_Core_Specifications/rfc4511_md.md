@@ -1538,7 +1538,6 @@ UTF-8-encoded characters appearing in the string representation of a DN, search 
 ##### 4.5.3.1.  Examples(实例)
 
 For example, suppose the contacted server (hosta) holds the entry <DC=Example,DC=NET> and the entry <CN=Manager,DC=Example,DC=NET>.  It knows that both LDAP servers (hostb) and (hostc) hold <OU=People,DC=Example,DC=NET> (one is the master and the other server a shadow), and that LDAP-capable server (hostd) holds the subtree <OU=Roles,DC=Example,DC=NET>.  If a wholeSubtree Search of <DC=Example,DC=NET> is requested to the contacted server, it may return the following:
-
 例如，假设联系的服务器 (hosta) 拥有条目 <DC=Example,DC=NET> 和条目 <CN=Manager,DC=Example,DC=NET>。 它知道 LDAP 服务器 (hostb) 和 (hostc) 持有 <OU=People,DC=Example,DC=NET>（一个是主服务器，另一个服务器是影子），并且  (hostd) 持有 子树 <OU=Roles,DC=Example,DC=NET>。 如果向联系的服务器(此处指hosta)请求 <DC=Example,DC=NET> 的wholeSubtree搜索，它可能会返回以下内容：
 
 ```ASN.1
@@ -1552,8 +1551,10 @@ For example, suppose the contacted server (hosta) holds the entry <DC=Example,DC
  SearchResultDone (success)
 ```
 
+
+
 Client implementors should note that when following a SearchResultReference, additional SearchResultReference may be generated.  Continuing the example, if the client contacted the server (hostb) and issued the Search request for the subtree <OU=People,DC=Example,DC=NET>, the server might respond as follows:
-client实现者应注意，在遵循 SearchResultReference 时，可能会生成额外的 SearchResultReference。 继续这个例子，如果客户端联系服务器 (hostb) 并发出子树 <OU=People,DC=Example,DC=NET> 的搜索请求，服务器可能会响应如下：
+client实现者应注意，在追踪SearchResultReference 时，可能会生成额外的 SearchResultReference。 继续这个例子，如果client联系server-hostb 并发出subtree <OU=People,DC=Example,DC=NET> 的搜索请求，服务器可能会响应如下：
 
 ```ASN.1
  SearchResultEntry for OU=People,DC=Example,DC=NET
@@ -1564,7 +1565,10 @@ client实现者应注意，在遵循 SearchResultReference 时，可能会生成
  SearchResultDone (success)
 ```
 
-   Similarly, if a singleLevel Search of <DC=Example,DC=NET> is requested to the contacted server, it may return the following:
+
+
+Similarly, if a singleLevel Search of <DC=Example,DC=NET> is requested to the contacted server, it may return the following:
+类似地，如果向联系的服务器请求 <DC=Example,DC=NET> 的singleLevel搜索，它可能会返回以下内容：
 
 ```ASN.1
  SearchResultEntry for CN=Manager,DC=Example,DC=NET
@@ -1579,424 +1583,339 @@ client实现者应注意，在遵循 SearchResultReference 时，可能会生成
 
 
 If the contacted server does not hold the base object for the Search, but has knowledge of its possible location, then it may return a referral to the client.  In this case, if the client requests a subtree Search of <DC=Example,DC=ORG> to hosta, the server returns a SearchResultDone containing a referral.
+如果被联系的服务器不持有用于搜索的baseObject，但知道其可能的位置，则它可能会向客户端返回一个引用/referral。 在这种情况下，如果客户端向 hosta 请求 <DC=Example,DC=ORG> 的subtree搜索，则服务器将返回包含引用的 SearchResultDone。
 
 ```ASN.1
  SearchResultDone (referral) {
    ldap://hostg/DC=Example,DC=ORG??sub }
 ```
 
-### 4.6.  Modify Operation
-
-   The Modify operation allows a client to request that a modification
-   of an entry be performed on its behalf by a server.  The Modify
-   Request is defined as follows:
-       修改操作 允许客户端 请求 由服务器代表其执行 条目的修改。 修改请求定义如下：
-
-        ModifyRequest ::= [APPLICATION 6] SEQUENCE {
-             object          LDAPDN,
-             changes         SEQUENCE OF change SEQUENCE {
-                  operation       ENUMERATED {
-                       add     (0),
-                       delete  (1),
-                       replace (2),
-                       ...  },
-                  modification    PartialAttribute } }
-
-   Fields of the Modify Request are:
-        修改请求的字段是：
-
-   - object: The value of this field contains the name of the entry to
-     be modified.  The server SHALL NOT perform any alias dereferencing
-     in determining the object to be modified.
-        object：
-            该字段的值 包含 要修改的条目的 名称/DN。 
-            服务器不应 在确定要修改的对象时 执行任何别名解引用。
-
-   - changes: A list of modifications to be performed on the entry.  The
-     entire list of modifications MUST be performed in the order they
-     are listed as a single atomic operation.  While individual
-     modifications may violate certain aspects of the directory schema
-     (such as the object class definition and Directory Information Tree
-     (DIT) content rule), the resulting entry after the entire list of
-     modifications is performed MUST conform to the requirements of the
-     directory model and controlling schema [RFC4512].
-        changes：
-            要对条目执行的 修改列表。 
-            作为一个单原子操作 整个修改列表 必须按照它们  列出的顺序执行。 
-            虽然个别修改 可能违反目录模式/schema的某些方面(例如对象类定义和目录信息树(DIT)内容规则），
-            但 执行整个修改列表后的 结果条目 必须符合 目录模型 和控制模式 的要求[RFC4512]。
 
 
-     -  operation: Used to specify the type of modification being
-        performed.  Each operation type acts on the following
-        modification.  The values of this field have the following
-        semantics, respectively:
-        operation：
-            用于指定 将要被执行的 修改类型。
-            每个操作类型 都作用于 以下修改。 
-            该字段的值分别具有以下语义：
+### 4.6.  Modify Operation(修改属性)
+
+The Modify operation allows a client to request that a modification of an entry be performed on its behalf by a server.  The Modify Request is defined as follows:
+修改操作 允许客户端 请求 由服务器代表其执行 条目的修改。 修改请求定义如下：
+
+```ASN.1
+    ModifyRequest ::= [APPLICATION 6] SEQUENCE {
+         object          LDAPDN,
+         changes         SEQUENCE OF change SEQUENCE {
+              operation       ENUMERATED {
+                   add     (0),
+                   delete  (1),
+                   replace (2),
+                   ...  },
+              modification    PartialAttribute } }
+```
+
+Fields of the Modify Request are:
+修改请求的各个字段如下：
+
+- 1) object: The value of this field contains the name of the entry to be modified.  The server SHALL NOT perform any alias dereferencing in determining the object to be modified.
+    该字段的值 包含了 要修改的entry的 名称/DN。 服务器 "不应 " 在确定要修改的对象时 执行 任何别名解引用。
     
-           add: add values listed to the modification attribute,
-           creating the attribute if necessary.
-            add: 
-                将 列出的值 添加到 (要修改的/)修改 属性中，
-                必要时创建该属性。
-#---------------------------------------------------------------------------------------
-
-
-
-Sermersheim                 Standards Track                    [Page 31]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-           delete: delete values listed from the modification attribute.
-           If no values are listed, or if all current values of the
-           attribute are listed, the entire attribute is removed.
-            delete: 
-                从 修改属性 中 删除 列出的值。 
-                如果 未列出任何值，或者 列出了该属性的所有当前值，则会删除整个属性。
+- 2) changes: A list of modifications to be performed on the entry.  The entire list of modifications MUST be performed in the order they are listed as a single atomic operation.  While individual modifications may violate certain aspects of the directory schema (such as the object class definition and Directory Information Tree (DIT) content rule), the resulting entry after the entire list of modifications is performed MUST conform to the requirements of the directory model and controlling schema [RFC4512].
+    (该字段的值，是个list/列表，包含了)要对entry执行的 修改列表。 作为一个单原子操作 整个修改列表 "必须" 按照它们  列出的顺序执行。 
+    虽然个别修改 可能违反  目录模式/schema的某些方面(例如对象类定义和目录信息树(DIT)内容规则），
+    但 执行整个修改列表后的 结果条目 必须符合 目录模型 和控制模式/schema 的要求[RFC4512]。
+    - 2.1) operation: Used to specify the type of modification being performed.  Each operation type acts on the following modification.  The values of this field have the following semantics, respectively:
+      (该字段的值)用于指定 将要被执行的 修改类型。每个操作类型 都作用于 以下修改。 该字段的值分别具有以下语义：
+     - 2.1.1) add: add values listed to the modification attribute, creating the attribute if necessary.
+       将 列出的值 添加到  (要修改的/)修改 属性中，必要时创建该属性。
+     - 2.1.2) delete: delete values listed from the modification attribute. If no values are listed, or if all current values of the attribute are listed, the entire attribute is removed.
+        将 列出的值 从(要修改的/)修改属性中 删除。 
+        如果 未列出任何值，或者 列出了该属性的所有当前值，则会删除整个属性。
+     - 2.1.3) replace: replace all existing values of the modification  attribute with the new values listed, creating the attribute if it did not already exist.  A replace with no value will delete the entire attribute if it exists, and it is ignored if the attribute does not exist.
+        对于 (要修改的/)修改 属性：
+            用 列出的新值 替换 所有现有值，
+            如果该属性不存在 则创建该属性。 
+         一个 不含任何 值/value 的  替换/replace，
+            如果属性存在，那么将删除整个属性，
+            如果属性不存在，则忽略 这个替换。
     
-           replace: replace all existing values of the modification
-           attribute with the new values listed, creating the attribute
-           if it did not already exist.  A replace with no value will
-           delete the entire attribute if it exists, and it is ignored
-           if the attribute does not exist.
-            replace: 
-                对修改属性 
-                    用 列出的新值 替换 所有现有值，
-                    如果该属性不存在 则创建该属性。 
-                一个不含任何值/value的替换/replace
-                    如果属性存在，那么将删除整个属性，
-                    如果属性不存在，则忽略 这个替换。
-    
-     -  modification: A PartialAttribute (which may have an empty SET
-        of vals) used to hold the attribute type or attribute type and
-        values being modified.
-         modification: 
-            用于保存 PartialAttribute的 被修改的 “属性类型”或“属性类型和值”
-            （PartialAttribute 的值 可能是一个空值）。
-
-   Upon receipt of a Modify Request, the server attempts to perform the
-   necessary modifications to the DIT and returns the result in a Modify
-   Response, defined as follows:
-        一旦收到 修改请求，
-            服务器尝试对DIT执行必要的修改，并在修改响应中返回结果，定义如下：
-        Upon receipt：一旦收到...
-
-        ModifyResponse ::= [APPLICATION 7] LDAPResult
-
-   The server will return to the client a single Modify Response
-   indicating either the successful completion of the DIT modification,
-   or the reason that the modification failed.  Due to the requirement
-   for atomicity in applying the list of modifications in the Modify
-   Request, the client may expect that no modifications of the DIT have
-   been performed if the Modify Response received indicates any sort of
-   error, and that all requested modifications have been performed if
-   the Modify Response indicates successful completion of the Modify
-   operation.  Whether or not the modification was applied cannot be
-   determined by the client if the Modify Response was not received
-   (e.g., the LDAP session was terminated or the Modify operation was
-   abandoned).
-      服务器将向客户端返回 单个修改响应，
-         指示 DIT修改成功完成 或 修改失败的原因。 
-      由于 在修改请求中 应用修改列表时 原子性的要求，
-         如果 收到的 修改响应 指示任何类型的错误，客户端可能期望没有对DIT执行修改，
-         如果 修改响应 表示 修改操作成功完成， 那么表示 所有 请求的修改 都已执行
-      如果 没有收到 修改响应（例如，LDAP会话终止 或 修改操作被放弃），
-         客户端无法确定是否修改。 
-
-   Servers MUST ensure that entries conform to user and system schema
-   rules or other data model constraints.  The Modify operation cannot
-   be used to remove from an entry any of its distinguished values,
-   i.e., those values which form the entry's relative distinguished
-   name.  An attempt to do so will result in the server returning the
-   notAllowedOnRDN result code.  The Modify DN operation described in
-   Section 4.9 is used to rename an entry.
-      服务器必须确保条目符合用户和系统模式规则或其他数据模型约束。 
-      修改操作不能用于从条目中删除其任何可分辨值，即构成条目相对可分辨名称的那些值。 
-      尝试这样做将导致服务器返回 notAllowedOnRDN 结果代码。 
-      第 4.9 节中描述的修改 DN 操作用于重命名条目。
-
-   For attribute types that specify no equality matching, the rules in
-   Section 2.5.1 of [RFC4512] are followed.
-
-   Note that due to the simplifications made in LDAP, there is not a
-   direct mapping of the changes in an LDAP ModifyRequest onto the
-   changes of a DAP ModifyEntry operation, and different implementations
-#---------------------------------------------------------------------------------------
-
-
-
-Sermersheim                 Standards Track                    [Page 32]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   of LDAP-DAP gateways may use different means of representing the
-   change.  If successful, the final effect of the operations on the
-   entry MUST be identical.
-
-### 4.7.  Add Operation
-
-   The Add operation allows a client to request the addition of an entry
-   into the Directory.  The Add Request is defined as follows:
-
-        AddRequest ::= [APPLICATION 8] SEQUENCE {
-             entry           LDAPDN,
-             attributes      AttributeList }
-    
-        AttributeList ::= SEQUENCE OF attribute Attribute
-
-   Fields of the Add Request are:
-
-   - entry: the name of the entry to be added.  The server SHALL NOT
-     dereference any aliases in locating the entry to be added.
-
-   - attributes: the list of attributes that, along with those from the
-     RDN, make up the content of the entry being added.  Clients MAY or
-     MAY NOT include the RDN attribute(s) in this list.  Clients MUST
-     NOT supply NO-USER-MODIFICATION attributes such as the
-     createTimestamp or creatorsName attributes, since the server
-     maintains these automatically.
+  - 2.2) modification: A PartialAttribute (which may have an empty SET of vals) used to hold the attribute type or attribute type and values being modified.
+     PartialAttribute 用于保存 将被修改的 “属性类型”或“属性类型和值”
+      (PartialAttribute 的值 可能是一个空值)。
 
-   Servers MUST ensure that entries conform to user and system schema
-   rules or other data model constraints.  For attribute types that
-   specify no equality matching, the rules in Section 2.5.1 of [RFC4512]
-   are followed (this applies to the naming attribute in addition to any
-   multi-valued attributes being added).
+Upon receipt of a Modify Request, the server attempts to perform the necessary modifications to the DIT and returns the result in a Modify Response, defined as follows:
+一旦收到 修改请求，服务器尝试对DIT执行必要的修改，并在修改响应中返回结果，定义如下：
+短语 Upon receipt：一旦收到...
 
-   The entry named in the entry field of the AddRequest MUST NOT exist
-   for the AddRequest to succeed.  The immediate superior (parent) of an
-   object or alias entry to be added MUST exist.  For example, if the
-   client attempted to add <CN=JS,DC=Example,DC=NET>, the
-   <DC=Example,DC=NET> entry did not exist, and the <DC=NET> entry did
-   exist, then the server would return the noSuchObject result code with
-   the matchedDN field containing <DC=NET>.
+```ASN.1
+    ModifyResponse ::= [APPLICATION 7] LDAPResult
+```
 
-   Upon receipt of an Add Request, a server will attempt to add the
-   requested entry.  The result of the Add attempt will be returned to
-   the client in the Add Response, defined as follows:
+The server will return to the client a single Modify Response indicating either the successful completion of the DIT modification, or the reason that the modification failed.  Due to the requirement for atomicity in applying the list of modifications in the Modify Request, the client may expect that no modifications of the DIT have been performed if the Modify Response received indicates any sort of error, and that all requested modifications have been performed if the Modify Response indicates successful completion of the Modify operation.  Whether or not the modification was applied cannot be determined by the client if the Modify Response was not received (e.g., the LDAP session was terminated or the Modify operation was abandoned).
+服务器将向客户端返回 单个修改响应，指示 对DIT 修改成功完成 或 修改失败的原因。 
+由于/由于 修改请求的修改列表中 应用了原子性的要求，
+	如果 收到的 修改响应 指示任何类型的错误，客户端可能期望没有对DIT执行修改，
+	如果 修改响应 表示 修改操作成功完成， 那么表示 所有 请求的修改 都已执行
+如果 没有收到 修改响应（例如，LDAP会话终止 或 修改操作被放弃），客户端无法确定是否修改。 
 
-        AddResponse ::= [APPLICATION 9] LDAPResult
-#---------------------------------------------------------------------------------------
+Servers MUST ensure that entries conform to user and system schema rules or other data model constraints.  The Modify operation cannot be used to remove from an entry any of its distinguished values, i.e., those values which form the entry's relative distinguished name.  An attempt to do so will result in the server returning the notAllowedOnRDN result code.  The Modify DN operation described in Section 4.9 is used to rename an entry.
+服务器必须确保entry符合 用户和系统 schema规则或其他数据模型约束。 
+修改操作不能用于从 entry/条目 中删除其任何 可分辨值，即 构成 entry/条目  RDN/相对可分辨名称 的那些值。 尝试这样做将导致服务器返回 notAllowedOnRDN 结果代码。 第4.9节中描述的修改DN操作  用于重命名条目。
 
+For attribute types that specify no equality matching, the rules in Section 2.5.1 of [RFC4512] are followed.
+对于没有指定相等匹配的attribute-type，遵循 [RFC4512] 第 2.5.1 节中的规则。
 
+Note that due to the simplifications made in LDAP, there is not a direct mapping of the changes in an LDAP ModifyRequest onto the changes of a DAP ModifyEntry operation, and different implementations of LDAP-DAP gateways may use different means of representing the  change.  If successful, the final effect of the operations on the entry MUST be identical.
+请注意，由于 LDAP 中的简化，LDAP-ModifyRequest中的更改 没有直接映射到 DAP-ModifyEntry操作的更改，并且 LDAP-DAP 网关的不同实现可能使用不同的方式来表示更改。 如果成功，对条目的操作的最终效果必须相同。
 
+总结： 
+	修改请求/操作 是针对 entry的attribute的；
+		1) 先指定 entry's DN; (不对别名进行解引用)
+		2) 然后指定 修改类型 add/delete/replace
+		3) 然后指定 "attribute" 或 "attribute+value"		
+   对于2)和3)：
+		add时：     2)中指定为"add"，3)中指定  "attribute+value" -- 将属性和值添加到条目中，若是条目不存在那么创建条目。
+		delete时:    2)中指定为"delete" 3)中 -- 若是只列出了部分属性 那么只删除这些属性；若是没有列出任何属性 或者列出了全部的属性 那么删除全部的属性。
+		replace时:  
+						 2)中指定为"replace" 
+					     3)中 --  
+							当列出了"attribute+value"  若属性存在 那么更新这些属性的旧值，若属性不存在 那么创建属性并保存值；
+							当只列出了"attribute"  若属性存在 那么删除该属性，若是属性不存在则忽略。
+​	 注意，修改请求/操作 不可用于删除entry的  DN或RDN，4.9的Modify-DN-Operation专门用于 重命名entry
 
-Sermersheim                 Standards Track                    [Page 33]
-
-RFC 4511                         LDAPv3                        June 2006
 
 
-   A response of success indicates that the new entry has been added to
-   the Directory.
 
-### 4.8.  Delete Operation
+### 4.7.  Add Operation(添加条目)
 
-   The Delete operation allows a client to request the removal of an
-   entry from the Directory.  The Delete Request is defined as follows:
+The Add operation allows a client to request the addition of an entry into the Directory.  The Add Request is defined as follows:
+添加操作允许客户端请求将条目添加到目录中。 添加请求定义如下：
 
-        DelRequest ::= [APPLICATION 10] LDAPDN
+```ASN.1
+    AddRequest ::= [APPLICATION 8] SEQUENCE {
+         entry           LDAPDN,
+         attributes      AttributeList }
 
-   The Delete Request consists of the name of the entry to be deleted.
-   The server SHALL NOT dereference aliases while resolving the name of
-   the target entry to be removed.
+    AttributeList ::= SEQUENCE OF attribute Attribute
+```
 
-   Only leaf entries (those with no subordinate entries) can be deleted
-   with this operation.
+Fields of the Add Request are:
+添加请求的字段 是/如下：
 
-   Upon receipt of a Delete Request, a server will attempt to perform
-   the entry removal requested and return the result in the Delete
-   Response defined as follows:
+- entry: the name of the entry to be added.  The server SHALL NOT dereference any aliases in locating the entry to be added.
+  - (该字段的值，包含了)要添加的条目的名称/DN。 服务器在定位要添加的条目时"不得/禁止"解引用任何别名。
+- attributes: the list of attributes that, along with those from the RDN, make up the content of the entry being added.  Clients MAY or MAY NOT include the RDN attribute(s) in this list.  Clients MUST NOT supply NO-USER-MODIFICATION attributes such as the createTimestamp or creatorsName attributes, since the server maintains these automatically.
+  - (属性列表)与来自RDN的属性一起构成 要添加到条目 的属性列表。 客户端"可以"或"不可以"在此列表中包含 RDN 属性。 client"不得/禁止"提供 NO-USER-MODIFICATION 属性，例如 createTimestamp 或 creatorsName 属性，因为server会自动维护这些属性/attribute。
 
-        DelResponse ::= [APPLICATION 11] LDAPResult
+Servers MUST ensure that entries conform to user and system schema rules or other data model constraints.  For attribute types that specify no equality matching, the rules in Section 2.5.1 of [RFC4512] are followed (this applies to the naming attribute in addition to any multi-valued attributes being added).
+服务器 "必须" 确保entry符合 用户和系统  schema/模式规则或其他数据模型约束。 对于没有指定相等匹配的attribute-type，遵循 [RFC4512] 第 2.5.1 节中的规则（这适用   任何被添加的多值属性  的命名属性）。
 
-4.9.  Modify DN Operation
+The entry named in the entry field of the AddRequest MUST NOT exist for the AddRequest to succeed.  The immediate superior (parent) of an object or alias entry to be added MUST exist.  For example, if the client attempted to add <CN=JS,DC=Example,DC=NET>, the <DC=Example,DC=NET> entry did not exist, and the <DC=NET> entry did exist, then the server would return the noSuchObject result code with the matchedDN field containing <DC=NET>.
+为了使 AddRequest 成功，在 AddRequest的 entry字段中的 条目名称 "禁止"存在(在server端不存在)。 要添加的对象或别名条目的直接上级（父级）必须存在。 
+例如，(！！！) (？？？)
+​  如果客户端尝试添加不存在的条目 <CN=JS,DC=Example,DC=NET>，<DC=Example,DC=NET> ，
+  而 <DC=NET> 条目确实存在，
+  则 服务器将返回  resultCode为noSuchObject 并且 matchedDN字段包含<DC=NET>    。 (？？？)
 
-   The Modify DN operation allows a client to change the Relative
-   Distinguished Name (RDN) of an entry in the Directory and/or to move
-   a subtree of entries to a new location in the Directory.  The Modify
-   DN Request is defined as follows:
+Upon receipt of an Add Request, a server will attempt to add the requested entry.  The result of the Add attempt will be returned to the client in the Add Response, defined as follows:
+一旦收到添加请求，服务器将尝试添加请求的条目。 添加尝试的结果将在添加响应中返回给客户端，定义如下：
 
-        ModifyDNRequest ::= [APPLICATION 12] SEQUENCE {
-             entry           LDAPDN,
-             newrdn          RelativeLDAPDN,
-             deleteoldrdn    BOOLEAN,
-             newSuperior     [0] LDAPDN OPTIONAL }
+```ASN.1
+    AddResponse ::= [APPLICATION 9] LDAPResult
+```
 
-   Fields of the Modify DN Request are:
+A response of success indicates that the new entry has been added to the Directory.
+成功响应表示新条目已添加到目录中。
 
-   - entry: the name of the entry to be changed.  This entry may or may
-     not have subordinate entries.
+总结: 
+​	添加请求/操作 用来添加新entry；
+​	AddRequest中指定的 entry的名称/名字  在server端"禁止"存在，这样 AddRequest才能成功被执行；
+​	要添加某个entry，那么它的   直接上级/父级  必须存在。
 
-   - newrdn: the new RDN of the entry.  The value of the old RDN is
-     supplied when moving the entry to a new superior without changing
-     its RDN.  Attribute values of the new RDN not matching any
-     attribute value of the entry are added to the entry, and an
-     appropriate error is returned if this fails.
-     #---------------------------------------------------------------------------------------
 
 
+### 4.8.  Delete Operation(删除条目)
 
+The Delete operation allows a client to request the removal of an entry from the Directory.  The Delete Request is defined as follows:
+删除操作允许客户端 请求从目录中删除条目。 删除请求定义如下：
 
-Sermersheim                 Standards Track                    [Page 34]
-
-RFC 4511                         LDAPv3                        June 2006
+```ASN.1
+    DelRequest ::= [APPLICATION 10] LDAPDN
+```
 
+The Delete Request consists of the name of the entry to be deleted. The server SHALL NOT dereference aliases while resolving the name of the target entry to be removed.
+删除请求由要删除的条目的名称组成。 在解析要删除的目标条目的名称时，服务器 "不应" 解引用别名。
 
-   - deleteoldrdn: a boolean field that controls whether the old RDN
-     attribute values are to be retained as attributes of the entry or
-     deleted from the entry.
+Only leaf entries (those with no subordinate entries) can be deleted with this operation.
+此操作只能删除叶条目（那些没有从属条目的条目）。
 
-   - newSuperior: if present, this is the name of an existing object
-     entry that becomes the immediate superior (parent) of the
-     existing entry.
+Upon receipt of a Delete Request, a server will attempt to perform the entry removal requested and return the result in the Delete  Response defined as follows:
+收到删除请求后，服务器将尝试执行请求的条目删除，并在删除响应中返回结果，定义如下：
 
-   The server SHALL NOT dereference any aliases in locating the objects
-   named in entry or newSuperior.
+```ASN.1
+    DelResponse ::= [APPLICATION 11] LDAPResult
+```
 
-   Upon receipt of a ModifyDNRequest, a server will attempt to perform
-   the name change and return the result in the Modify DN Response,
-   defined as follows:
+总结： 
+​	删除请求：删除条目；
+​	只能删除 叶条目。
 
-        ModifyDNResponse ::= [APPLICATION 13] LDAPResult
 
-   For example, if the entry named in the entry field was <cn=John
-   Smith,c=US>, the newrdn field was <cn=John Cougar Smith>, and the
-   newSuperior field was absent, then this operation would attempt to
-   rename the entry as <cn=John Cougar Smith,c=US>.  If there was
-   already an entry with that name, the operation would fail with the
-   entryAlreadyExists result code.
 
-   Servers MUST ensure that entries conform to user and system schema
-   rules or other data model constraints.  For attribute types that
-   specify no equality matching, the rules in Section 2.5.1 of [RFC4512]
-   are followed (this pertains to newrdn and deleteoldrdn).
+### 4.9.  Modify DN Operation(修改DN)
 
-   The object named in newSuperior MUST exist.  For example, if the
-   client attempted to add <CN=JS,DC=Example,DC=NET>, the
-   <DC=Example,DC=NET> entry did not exist, and the <DC=NET> entry did
-   exist, then the server would return the noSuchObject result code with
-   the matchedDN field containing <DC=NET>.
+The Modify DN operation allows a client to change the Relative Distinguished Name (RDN) of an entry in the Directory and/or to move a subtree of entries to a new location in the Directory.  The Modify DN Request is defined as follows:
+修改DN操作 允许客户端 更改目录中entry的相对可分辨名称 (RDN) 和/或 将entry的子树/subtree 移动到目录中的新位置。 修改DN请求 定义如下：
 
-   If the deleteoldrdn field is TRUE, the attribute values forming the
-   old RDN (but not the new RDN) are deleted from the entry.  If the
-   deleteoldrdn field is FALSE, the attribute values forming the old RDN
-   will be retained as non-distinguished attribute values of the entry.
+```ASN.1
+    ModifyDNRequest ::= [APPLICATION 12] SEQUENCE {
+         entry           LDAPDN,
+         newrdn          RelativeLDAPDN,
+         deleteoldrdn    BOOLEAN,
+         newSuperior     [0] LDAPDN OPTIONAL }
+```
 
-   Note that X.500 restricts the ModifyDN operation to affect only
-   entries that are contained within a single server.  If the LDAP
-   server is mapped onto DAP, then this restriction will apply, and the
-   affectsMultipleDSAs result code will be returned if this error
-   occurred.  In general, clients MUST NOT expect to be able to perform
-   arbitrary movements of entries and subtrees between servers or
-   between naming contexts.
-#---------------------------------------------------------------------------------------
+Fields of the Modify DN Request are:
+修改 DN 请求的字段是：
 
+   - entry: the name of the entry to be changed.  This entry may or may not have subordinate entries.
+        - entry：要更改的条目的名称。 该条目可能有(从属条目) 也可能没有从属条目。
+   - newrdn: the new RDN of the entry.  The value of the old RDN is supplied when moving the entry to a new superior without changing its RDN.  Attribute values of the new RDN not matching any attribute value of the entry are added to the entry, and an appropriate error is returned if this fails.
+        - newrdn：条目的新RDN。 将条目移动到新的上级而不更改其 RDN 时，将提供 旧RDN 的值。 与条目的任何属性值 都不匹配的 新RDN的属性值 被添加到条目中，如果失败则返回适当的错误。
 
+   - deleteoldrdn: a boolean field that controls whether the old RDN attribute values are to be retained as attributes of the entry or deleted from the entry.
+        - deleteoldrdn：一个布尔字段，用于控制 旧的RDN属性值 是作为条目的属性保留 还是从条目中删除。
+   - newSuperior: if present, this is the name of an existing object entry that becomes the immediate superior (parent) of the existing entry.
+        - newSuperior：如果存在，这 成为现有条目的  直接上级(父级)的现有对象条目的名称。
+        - newSuperior：如果存在，这是一个已存在的条目对象的名称，该条目对象成为已存在条目的直接上级(父级)。
 
-Sermersheim                 Standards Track                    [Page 35]
-
-RFC 4511                         LDAPv3                        June 2006
+The server SHALL NOT dereference any aliases in locating the objects named in entry or newSuperior.
+在entry 或 newSuperior 中 定位  命名的对象时，服务器"不应"解引用任何别名。
 
-### 4.10.  Compare Operation
+Upon receipt of a ModifyDNRequest, a server will attempt to perform the name change and return the result in the Modify DN Response, defined as follows:
+一旦收到ModifyDNRequest后，服务器将尝试执行名称更改 并在Modify DN Response中返回结果，定义如下：
 
-   The Compare operation allows a client to compare an assertion value
-   with the values of a particular attribute in a particular entry in
-   the Directory.  The Compare Request is defined as follows:
+```ASN.1
+    ModifyDNResponse ::= [APPLICATION 13] LDAPResult
+```
 
-        CompareRequest ::= [APPLICATION 14] SEQUENCE {
-             entry           LDAPDN,
-             ava             AttributeValueAssertion }
+For example, if the entry named in the entry field was <cn=John Smith,c=US>, the newrdn field was <cn=John Cougar Smith>, and the newSuperior field was absent, then this operation would attempt to rename the entry as <cn=John Cougar Smith,c=US>.  If there was already an entry with that name, the operation would fail with the entryAlreadyExists result code.
+例如，如果entry字段是 <cn=John Smith,c=US>，newrdn字段是 <cn=John Cougar Smith>，并且没有 newSuperior 字段，则此操作将尝试重命名 条目为 <cn=John Cougar Smith,c=US>。 如果已经存在具有该名称的条目，则操作将失败并返回 entryAlreadyExists 结果代码。
 
-   Fields of the Compare Request are:
+Servers MUST ensure that entries conform to user and system schema rules or other data model constraints.  For attribute types that specify no equality matching, the rules in Section 2.5.1 of [RFC4512] are followed (this pertains to newrdn and deleteoldrdn).
+服务器必须确保entry 符合用户和系统 schema/模式规则或其他数据模型约束。 对于没有指定相等匹配的属性类型，遵循 [RFC4512] 第 2.5.1 节中的规则（这与 newrdn 和 deleteoldrdn 有关）。
 
-   - entry: the name of the entry to be compared.  The server SHALL NOT
-     dereference any aliases in locating the entry to be compared.
+The object named in newSuperior MUST exist.  For example, if the client attempted to add <CN=JS,DC=Example,DC=NET>, the <DC=Example,DC=NET> entry did not exist, and the <DC=NET> entry did exist, then the server would return the noSuchObject result code with the matchedDN field containing <DC=NET>.
+newSuperior 中命名的对象必须存在。 例如，如果客户端尝试添加不存在的条目 <CN=JS,DC=Example,DC=NET>，<DC=Example,DC=NET> ，而 <DC=NET> 条目确实存在，则 服务器将返回(响应)：matchedDN字段为<DC=NET>  resultCode字段为noSuchObject。( ？？？)
 
+If the deleteoldrdn field is TRUE, the attribute values forming the old RDN (but not the new RDN) are deleted from the entry.  If the deleteoldrdn field is FALSE, the attribute values forming the old RDN will be retained as non-distinguished attribute values of the entry.
+如果 deleteoldrdn 字段为 TRUE，则从条目中删除形成旧 RDN（但不是新 RDN）的属性值。 如果 deleteoldrdn 字段为 FALSE，则形成旧 RDN 的属性值将作为条目的非可区分属性值保留。
+
+Note that X.500 restricts the ModifyDN operation to affect only entries that are contained within a single server.  If the LDAP server is mapped onto DAP, then this restriction will apply, and the affectsMultipleDSAs result code will be returned if this error occurred.  In general, clients MUST NOT expect to be able to perform arbitrary movements of entries and subtrees between servers or between naming contexts.
+请注意，X.500 将 ModifyDN 操作限制为仅影响单个服务器中包含的条目。 如果 LDAP 服务器映射到 DAP，则将应用此限制，并且如果发生此错误，则返回 ImpactMultipleDSA 结果代码。 通常，客户端  不能期望   能够在服务器之间或命名上下文之间   执行条目和子树的任意移动。
+
+总结 : 
+	修改DN请求：
+		entry字段：entry的name，即DN；
+		newrdn：
+				(当没有newSuperior字段时)将entry自己的 RDN 改为 newrdn (若是newrdn已经存在 则操作时失败 并且resultCode为entryAlreadyExists)；
+				(含有newSuperior字段时    )那么将entry移动到新的上级；
+				若newrdn不存在，那么 新的RDN被添加；
+		deleteoldrdn：为TRUE则将RDN的旧值删除；为FALSE则将RDN的旧值 作为non-distinguish attribute值保存
+		newSuperior：指定直接上级/父级
+
+
+
+### 4.10.  Compare Operation(比较)
+
+The Compare operation allows a client to compare an assertion value with the values of a particular attribute in a particular entry in the Directory.  The Compare Request is defined as follows:
+比较操作允许客户端  将 断言值/assert-value 与目录中特定条目中特定属性的值/attribute-value进行比较。 比较请求定义如下：
+
+```ASN.1
+    CompareRequest ::= [APPLICATION 14] SEQUENCE {
+         entry           LDAPDN,
+         ava             AttributeValueAssertion }
+```
+
+Fields of the Compare Request are:
+比较请求的(各个)字段如下：
+
+   - entry: the name of the entry to be compared.  The server SHALL NOT dereference any aliases in locating the entry to be compared.
+        - entry：要比较的条目的名称。 服务器在定位要比较的条目时 "不应" 解引用任何别名。
    - ava: holds the attribute value assertion to be compared.
+        - ava：保存要比较的 属性值断言 / attribute-value-assertion。
 
-   Upon receipt of a Compare Request, a server will attempt to perform
-   the requested comparison and return the result in the Compare
-   Response, defined as follows:
+Upon receipt of a Compare Request, a server will attempt to perform the requested comparison and return the result in the Compare Response, defined as follows:
+一旦收到比较请求后，服务器将尝试执行 "比较请求" 并在"比较响应"中返回结果，定义如下：
 
-        CompareResponse ::= [APPLICATION 15] LDAPResult
+```ASN.1
+    CompareResponse ::= [APPLICATION 15] LDAPResult
+```
 
-   The resultCode is set to compareTrue, compareFalse, or an appropriate
-   error.  compareTrue indicates that the assertion value in the ava
-   field matches a value of the attribute or subtype according to the
-   attribute's EQUALITY matching rule.  compareFalse indicates that the
-   assertion value in the ava field and the values of the attribute or
-   subtype did not match.  Other result codes indicate either that the
-   result of the comparison was Undefined (Section 4.5.1.7), or that
-   some error occurred.
+The resultCode is set to compareTrue, compareFalse, or an appropriate error.  compareTrue indicates that the assertion value in the ava field matches a value of the attribute or subtype according to the attribute's EQUALITY matching rule.  compareFalse indicates that the assertion value in the ava field and the values of the attribute or subtype did not match.  Other result codes indicate either that the result of the comparison was Undefined (Section 4.5.1.7), or that some error occurred.
+resultCode 设置为 compareTrue、compareFalse 或适当的错误/error。 compareTrue 表示 ava字段中的assert-value 根据属性的 EQUALITY匹配规则  匹配  attribute或subtype的value。 compareFalse 表示ava字段中的assert-value与attribute或subtype的value不匹配。 其他结果代码表明比较的结果是未定义的/Undefined（第 4.5.1.7 节），或者发生了一些错误/error。
 
-   Note that some directory systems may establish access controls that
-   permit the values of certain attributes (such as userPassword) to be
-   compared but not interrogated by other means.
+Note that some directory systems may establish access controls that permit the values of certain attributes (such as userPassword) to be compared but not interrogated by other means.
+请注意，某些目录系统可能会建立访问控制，允许比较某些属性（例如 userPassword）的值，但不能通过其他方式进行查询。
 
-### 4.11.  Abandon Operation
-
-   The function of the Abandon operation is to allow a client to request
-   that the server abandon an uncompleted operation.  The Abandon
-   Request is defined as follows:
-
-        AbandonRequest ::= [APPLICATION 16] MessageID
-
-   The MessageID is that of an operation that was requested earlier at
-   this LDAP message layer.  The Abandon request itself has its own
-   MessageID.  This is distinct from the MessageID of the earlier
-   operation being abandoned.
-#---------------------------------------------------------------------------------------
+总结： 
+	CompareRequest：
+		1) entry 要比较的entry的name，即DN；
+		2) ava中保存的Value  与 attribute/subtype中的value进行比较(根据attribute的EQUALITY匹配规则，去匹配 attribute/subtype的value)
+			resultCode设置为compareTrue，表明 匹配；
+			resultCode设置为compareFalse  表明 不匹配；
+			其他情况下resultCode 要么为Undefined 要么是一些error；
 
 
-Sermersheim                 Standards Track                    [Page 36]
-
-RFC 4511                         LDAPv3                        June 2006
+
+### 4.11.  Abandon Operation(放弃)
+
+The function of the Abandon operation is to allow a client to request that the server abandon an uncompleted operation.  The Abandon Request is defined as follows:
+Abandon操作  的作用是  允许客户端 请求服务器放弃一个未完成的操作。 放弃请求定义如下：
+
+```ASN.1
+    AbandonRequest ::= [APPLICATION 16] MessageID
+```
+
+The MessageID is that of an operation that was requested earlier at this LDAP message layer.  The Abandon request itself has its own MessageID.  This is distinct from the MessageID of the earlier operation being abandoned.
+MessageID是先前在此  LDAP消息层  的请求操作的ID。 放弃请求本身有自己的 MessageID。 这与被放弃的较早操作的 MessageID 不同。
+
+There is no response defined in the Abandon operation.  Upon receipt of an AbandonRequest, the server MAY abandon the operation identified by the MessageID.  Since the client cannot tell the difference between a successfully abandoned operation and an uncompleted operation, the application of the Abandon operation is limited to uses where the client does not require an indication of its outcome.
+放弃操作中没有定义响应。 收到 AbandonRequest 后，服务器可以放弃由 MessageID 标识的操作。 由于客户端无法区分   成功放弃的操作和未完成的操作，因此放弃操作的应用仅限于客户端不需要指示其结果的用途。
+
+Abandon, Bind, Unbind, and StartTLS operations cannot be abandoned.
+Abandon、Bind、Unbind 和 StartTLS 操作不能被放弃。
+
+In the event that a server receives an Abandon Request on a Search operation in the midst of transmitting responses to the Search, that server MUST cease transmitting entry responses to the abandoned request immediately, and it MUST NOT send the SearchResultDone.  Of course, the server MUST ensure that only properly encoded LDAPMessage PDUs are transmitted.
+如果服务器 在向Search传输响应的过程中  接收到有关Search操作的Abandon Request，则该服务器 "必须" 立即停止传输 对 被放弃请求 的条目响应，并且它"不得"发送 SearchResultDone。 当然，服务器必须确保只传输正确编码的 LDAPMessage PDU。
+
+The ability to abandon other (particularly update) operations is at the discretion of the server.
+放弃其他（特别是更新）操作的能力由服务器决定。
+
+Clients should not send Abandon requests for the same operation multiple times, and they MUST also be prepared to receive results from operations they have abandoned (since these might have been in transit when the Abandon was requested or might not be able to be abandoned).
+客户端不应多次为同一操作发送放弃请求，并且他们还必须准备好接收已放弃操作的结果（因为在请求放弃时这些可能已经在传输中或可能无法放弃）。
+
+Servers MUST discard Abandon requests for messageIDs they do not recognize, for operations that cannot be abandoned, and for operations that have already been abandoned.
+服务器必须丢弃  对于它们无法识别的 messageID 的放弃请求，对于不能放弃的操作，对于已经放弃的操作。
+
+总结： 
+	Abandon操作：	
+		请求server放弃一个未完成的操作；
+		1) AbandonRequest中包含了一个MessageID，这是需要被放弃的操作的(先前请求的操作的)ID；同时AbandonRequest自身有属于自己的MessageID。
+		server中没有定义对AbandonRequest的响应；
+		Abandon、Bind、Unbind 和 StartTLS 操作不能被放弃。
+
+​		对同一操作，不得多次发送 AbandonRequest;
+
+​		对于 已经放弃的操作 / 不能放弃的操作 / 无法识别messageID的操作  均丢弃
 
 
-   There is no response defined in the Abandon operation.  Upon receipt
-   of an AbandonRequest, the server MAY abandon the operation identified
-   by the MessageID.  Since the client cannot tell the difference
-   between a successfully abandoned operation and an uncompleted
-   operation, the application of the Abandon operation is limited to
-   uses where the client does not require an indication of its outcome.
 
-   Abandon, Bind, Unbind, and StartTLS operations cannot be abandoned.
+### 4.12.  Extended Operation(扩展操作！！！)
 
-   In the event that a server receives an Abandon Request on a Search
-   operation in the midst of transmitting responses to the Search, that
-   server MUST cease transmitting entry responses to the abandoned
-   request immediately, and it MUST NOT send the SearchResultDone.  Of
-   course, the server MUST ensure that only properly encoded LDAPMessage
-   PDUs are transmitted.
+The Extended operation allows additional operations to be defined for services not already available in the protocol; for example, to Add operations to install transport layer security (see Section 4.14).
+扩展操作 允许为 协议中尚不可用的服务 定义额外的操作； 例如，添加操作 以安装 传输层安全性（请参阅第 4.14 节）。
 
-   The ability to abandon other (particularly update) operations is at
-   the discretion of the server.
+The Extended operation allows clients to make requests and receive responses with predefined syntaxes and semantics.  These may be defined in RFCs or be private to particular implementations.
+扩展操作 允许客户端使用预定义的语法和语义 发出请求和接收响应。 这些可能在 RFC 中定义，也可能是特定实现私有的。
 
-   Clients should not send Abandon requests for the same operation
-   multiple times, and they MUST also be prepared to receive results
-   from operations they have abandoned (since these might have been in
-   transit when the Abandon was requested or might not be able to be
-   abandoned).
-
-   Servers MUST discard Abandon requests for messageIDs they do not
-   recognize, for operations that cannot be abandoned, and for
-   operations that have already been abandoned.
-
-### 4.12.  Extended Operation
-
-   The Extended operation allows additional operations to be defined for
-   services not already available in the protocol; for example, to Add
-   operations to install transport layer security (see Section 4.14).
-
-   The Extended operation allows clients to make requests and receive
-   responses with predefined syntaxes and semantics.  These may be
-   defined in RFCs or be private to particular implementations.
-
-   Each Extended operation consists of an Extended request and an
-   Extended response.
+Each Extended operation consists of an Extended request and an Extended response.
+每个扩展操作由一个扩展请求和一个扩展响应组成。
 
 ```ASN.1
     ExtendedRequest ::= [APPLICATION 23] SEQUENCE {
@@ -2004,24 +1923,11 @@ RFC 4511                         LDAPv3                        June 2006
          requestValue     [1] OCTET STRING OPTIONAL }
 ```
 
-#---------------------------------------------------------------------------------------
+The requestName is a dotted-decimal representation of the unique OBJECT IDENTIFIER corresponding to the request.  The requestValue is information in a form defined by that request, encapsulated inside an OCTET STRING.
+requestName是与该请求相对应的  唯一OID 的点分十进制表示。 requestValue包含该请求的信息，封装在 OCTET STRING 中。
 
-
-
-
-
-Sermersheim                 Standards Track                    [Page 37]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   The requestName is a dotted-decimal representation of the unique
-   OBJECT IDENTIFIER corresponding to the request.  The requestValue is
-   information in a form defined by that request, encapsulated inside an
-   OCTET STRING.
-
-   The server will respond to this with an LDAPMessage containing an
-   ExtendedResponse.
+The server will respond to this with an LDAPMessage containing an ExtendedResponse.
+服务器将会 使用 一个  包含了ExtendedResponse的LDAPMessage  对此做出响应。
 
 ```ASN.1
     ExtendedResponse ::= [APPLICATION 24] SEQUENCE {
@@ -2030,819 +1936,767 @@ RFC 4511                         LDAPv3                        June 2006
          responseValue    [11] OCTET STRING OPTIONAL }
 ```
 
-   The responseName field, when present, contains an LDAPOID that is
-   unique for this extended operation or response.  This field is
-   optional (even when the extension specification defines an LDAPOID
-   for use in this field).  The field will be absent whenever the server
-   is unable or unwilling to determine the appropriate LDAPOID to
-   return, for instance, when the requestName cannot be parsed or its
-   value is not recognized.
+The responseName field, when present, contains an LDAPOID that is unique for this extended operation or response.  This field is optional (even when the extension specification defines an LDAPOID for use in this field).  The field will be absent whenever the server is unable or unwilling to determine the appropriate LDAPOID to return, for instance, when the requestName cannot be parsed or its value is not recognized.
+responseName字段(如果存在)包含了 此扩展操作或响应唯一的 LDAPOID。 此字段是可选的（即使"扩展规范"定义了用于此字段的 LDAPOID）。 每当服务器无法或不愿 确定 要返回的适当LDAPOID时，该字段将不存在，例如，当无法解析 requestName 或无法识别其值时。
 
-   Where the requestName is not recognized, the server returns
-   protocolError.  (The server may return protocolError in other cases.)
+Where the requestName is not recognized, the server returns protocolError.  (The server may return protocolError in other cases.)
+如果 requestName/OID 未被识别，服务器将返回 protocolError。 （在其他情况下，服务器可能会返回 protocolError。）
 
-   The requestValue and responseValue fields contain information
-   associated with the operation.  The format of these fields is defined
-   by the specification of the Extended operation.  Implementations MUST
-   be prepared to handle arbitrary contents of these fields, including
-   zero bytes.  Values that are defined in terms of ASN.1 and BER-
-   encoded according to Section 5.1 also follow the extensibility rules
-   in Section 4.
+The requestValue and responseValue fields contain information associated with the operation.  The format of these fields is defined by the specification of the Extended operation.  Implementations MUST be prepared to handle arbitrary contents of these fields, including zero bytes.  Values that are defined in terms of ASN.1 and BER-encoded according to Section 5.1 also follow the extensibility rules in Section 4.
 
-   Servers list the requestName of Extended Requests they recognize in
-   the 'supportedExtension' attribute in the root DSE (Section 5.1 of
-   [RFC4512]).
+requestValue 和 responseValue 字段包含与操作相关的信息。 这些字段的格式由扩展操作的规范定义。 实现必须准备好处理这些字段的任意内容，包括零字节。 根据第 5.1 节根据 ASN.1 和 BER 编码定义的值也遵循第 4 节中的可扩展性规则。
 
-   Extended operations may be specified in other documents.  The
-   specification of an Extended operation consists of:
+Servers list the requestName of Extended Requests they recognize in the 'supportedExtension' attribute in the root DSE (Section 5.1 of [RFC4512]).
+服务器在根 DSE 的“supportedExtension”属性中列出它们识别的扩展请求的 requestName（[RFC4512] 的第 5.1 节）。
+
+Extended operations may be specified in other documents.  The specification of an Extended operation consists of:
+扩展操作可能会在其他文档中指定。 扩展操作的规范包括：
 
    - the OBJECT IDENTIFIER assigned to the requestName,
-
-   - the OBJECT IDENTIFIER (if any) assigned to the responseName (note
-     that the same OBJECT IDENTIFIER may be used for both the
-     requestName and responseName),
-     #---------------------------------------------------------------------------------------
-
-
-
-
-
-
-Sermersheim                 Standards Track                    [Page 38]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   - the format of the contents of the requestValue and responseValue
-     (if any), and
-
+        - 分配给 requestName 的 OID，
+   - the OBJECT IDENTIFIER (if any) assigned to the responseName (note that the same OBJECT IDENTIFIER may be used for both the requestName and responseName),
+        - 分配给 responseName 的 OID（如果有）（请注意，相同的 OID可用于 requestName 和 responseName），
+   - the format of the contents of the requestValue and responseValue (if any), and
+        - requestValue 和 responseValue（如果有）的内容格式，以及
    - the semantics of the operation.
+        - 操作的语义。
 
-### 4.13.  IntermediateResponse Message
+总结： 
+​	ExtendedRequest
+​		requestName字段是 此请求的 OID的点分十进制表示；(当server无法识别OID时，返回protocolError)
+​		requestValue字段 是 此请求的 内容 ；
+​	ExtendedResponse
+​		responseName字段是 此请求或操作的 OID的点分十进制表示；(是可选的)(当无法确定适当的OID时 或 不愿返回OID时 这个字段不存在)
+​		responseValue字段是 此响应的 内容
+​	server的 根DSE的supportedExtension属性中 列出了它们可以识别的requestName(即OID)；
+​	要准备好处理 requestValue和responseValue的任意内容。
 
-   While the Search operation provides a mechanism to return multiple
-   response messages for a single Search request, other operations, by
-   nature, do not provide for multiple response messages.
 
-   The IntermediateResponse message provides a general mechanism for
-   defining single-request/multiple-response operations in LDAP.  This
-   message is intended to be used in conjunction with the Extended
-   operation to define new single-request/multiple-response operations
-   or in conjunction with a control when extending existing LDAP
-   operations in a way that requires them to return Intermediate
-   response information.
 
-   It is intended that the definitions and descriptions of Extended
-   operations and controls that make use of the IntermediateResponse
-   message will define the circumstances when an IntermediateResponse
-   message can be sent by a server and the associated meaning of an
-   IntermediateResponse message sent in a particular circumstance.
+### 4.13.  IntermediateResponse Message(中间响应消息)
 
-        IntermediateResponse ::= [APPLICATION 25] SEQUENCE {
-                responseName     [0] LDAPOID OPTIONAL,
-                responseValue    [1] OCTET STRING OPTIONAL }
+While the Search operation provides a mechanism to return multiple response messages for a single Search request, other operations, by nature, do not provide for multiple response messages.
+虽然搜索操作 提供了为单个搜索请求    返回多个响应消息的机制，但其他操作本质上不提供多个响应消息。
 
-   IntermediateResponse messages SHALL NOT be returned to the client
-   unless the client issues a request that specifically solicits their
-   return.  This document defines two forms of solicitation: Extended
-   operation and request control.  IntermediateResponse messages are
-   specified in documents describing the manner in which they are
-   solicited (i.e., in the Extended operation or request control
-   specification that uses them).  These specifications include:
+The IntermediateResponse message provides a general mechanism for defining single-request/multiple-response operations in LDAP.  This message is intended to be used in conjunction with the Extended operation to define new single-request/multiple-response operations or in conjunction with a control when extending existing LDAP operations in a way that requires them to return Intermediate response information.
+IntermediateResponse消息 提供了一种  在 LDAP 中定义单请求/多响应操作的 通用机制。 此消息旨在与 Extended-operation 结合使用以定义新的单请求/多响应操作，或者 在 要求它们返回中间响应信息的方式扩展现有 LDAP 操作时  与控件/Controls结合使用。
+
+It is intended that the definitions and descriptions of Extended operations and controls that make use of the IntermediateResponse message will define the circumstances when an IntermediateResponse message can be sent by a server and the associated meaning of an IntermediateResponse message sent in a particular circumstance.
+
+使用IntermediateResponse消息的ExtendedOperation和Controls 的定义和描述，是为了定义：服务器可以发送 IntermediateResponse 消息的情况 以及 在特定情况下发送的 IntermediateResponse消息 的相关含义
+
+```ASN.1
+    IntermediateResponse ::= [APPLICATION 25] SEQUENCE {
+            responseName     [0] LDAPOID OPTIONAL,
+            responseValue    [1] OCTET STRING OPTIONAL }
+```
+
+IntermediateResponse messages SHALL NOT be returned to the client unless the client issues a request that specifically solicits their return.  This document defines two forms of solicitation: Extended operation and request control.  IntermediateResponse messages are specified in documents describing the manner in which they are solicited (i.e., in the Extended operation or request control specification that uses them).  These specifications include:
+IntermediateResponse消息"不应"返回给客户端，除非客户端发出 明确要求其返回的 请求。 本文档定义了两种形式的请求：扩展操作和请求控制。 IntermediateResponse 消息在描述它们被请求方式的文档中指定（即，在使用它们的扩展操作或请求控制规范中）。 这些规格包括：
 
    - the OBJECT IDENTIFIER (if any) assigned to the responseName,
-
+        - 分配给 responseName的OID（如果有），
    - the format of the contents of the responseValue (if any), and
-
+        - responseValue内容的格式（如果有），以及
    - the semantics associated with the IntermediateResponse message.
+        - 与 IntermediateResponse消息 关联的语义。
 
-   Extensions that allow the return of multiple types of
-   IntermediateResponse messages SHALL identify those types using unique
-   responseName values (note that one of these may specify no value).
-#---------------------------------------------------------------------------------------
+Extensions that allow the return of multiple types of IntermediateResponse messages SHALL identify those types using unique responseName values (note that one of these may specify no value).
+允许返回多种类型的 IntermediateResponse 消息的扩展"应该"使用唯一的 responseName 值标识这些类型（注意其中之一可能不指定值）。
 
+Sections 4.13.1 and 4.13.2 describe additional requirements on the inclusion of responseName and responseValue in IntermediateResponse messages.
+4.13.1 和 4.13.2 节描述了在 IntermediateResponse 消息中包含 responseName 和 responseValue 的附加要求。
 
-
-
-Sermersheim                 Standards Track                    [Page 39]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   Sections 4.13.1 and 4.13.2 describe additional requirements on the
-   inclusion of responseName and responseValue in IntermediateResponse
-   messages.
-
-#### 4.13.1.  Usage with LDAP ExtendedRequest and ExtendedResponse
-
-   A single-request/multiple-response operation may be defined using a
-   single ExtendedRequest message to solicit zero or more
-   IntermediateResponse messages of one or more kinds, followed by an
-   ExtendedResponse message.
-
-#### 4.13.2.  Usage with LDAP Request Controls
-
-   A control's semantics may include the return of zero or more
-   IntermediateResponse messages prior to returning the final result
-   code for the operation.  One or more kinds of IntermediateResponse
-   messages may be sent in response to a request control.
-
-   All IntermediateResponse messages associated with request controls
-   SHALL include a responseName.  This requirement ensures that the
-   client can correctly identify the source of IntermediateResponse
-   messages when:
-
-   - two or more controls using IntermediateResponse messages are
-     included in a request for any LDAP operation or
-
-   - one or more controls using IntermediateResponse messages are
-     included in a request with an LDAP Extended operation that uses
-     IntermediateResponse messages.
-
-### 4.14.  StartTLS Operation
-
-   The Start Transport Layer Security (StartTLS) operation's purpose is
-   to initiate installation of a TLS layer.  The StartTLS operation is
-   defined using the Extended operation mechanism described in Section
-   4.12.
-
-#### 4.14.1.  StartTLS Request
-
-   A client requests TLS establishment by transmitting a StartTLS
-   request message to the server.  The StartTLS request is defined in
-   terms of an ExtendedRequest.  The requestName is
-   "1.3.6.1.4.1.1466.20037", and the requestValue field is always
-   absent.
-#---------------------------------------------------------------------------------------
+总结： 
+​	IntermediateResponse-Message 提供了一种机制：定义 单个请求/多个响应 的通用机制；
+​	本文档定义了两种形式的请求：ExtendedOperation和Request-Control；
+​		与ExtendedOperation结合使用，以定义新的 单请求/多响应操作；
+​		与Controls结合使用，以返回 中间响应消息 的方式 扩展现有LDAP操作；
+​	IntermediateResponse"不应"发送给client(除非client明确要求了)；
 
 
 
+#### 4.13.1.  Usage with LDAP ExtendedRequest and ExtendedResponse(和LDAP的扩展请求和扩展响应一起使用)
+
+A single-request/multiple-response operation may be defined using a single ExtendedRequest message to solicit zero or more IntermediateResponse messages of one or more kinds, followed by an ExtendedResponse message.
+可以使用  单个ExtendedRequest消息  来定义  单请求/多响应操作，
+以请求0个或多个 1种或多种类型的中间响应消息/IntermediateResponse消息，
+然后是ExtendedResponse消息。
+
+总结： 
+​	单个ExtendedRequest-message；
+​	0个或多个 IntermediateResponse-message；
+​	一个ExtendedResponse-message。
 
 
 
-Sermersheim                 Standards Track                    [Page 40]
-
-RFC 4511                         LDAPv3                        June 2006
+#### 4.13.2.  Usage with LDAP Request Controls(和LDAP-request中的Controls一起使用)
 
+A control's semantics may include the return of zero or more IntermediateResponse messages prior to returning the final result code for the operation.  One or more kinds of IntermediateResponse messages may be sent in response to a request control.
+控件的语义：可能包括 在返回操作的最终resultCode 之前 返回0个或多个中间响应消息。 
+可以发送  一种或多种IntermediateResponse消息 以响应 请求控件/request-control。
 
-   The client MUST NOT send any LDAP PDUs at this LDAP message layer
-   following this request until it receives a StartTLS Extended response
-   and, in the case of a successful response, completes TLS
-   negotiations.
+All IntermediateResponse messages associated with request controls SHALL include a responseName.  This requirement ensures that the client can correctly identify the source of IntermediateResponse messages when:
+所有与 请求控件/request-control 相关的 IntermediateResponse-message都应包含一个 responseName。 此要求确保client可以在以下情况下正确识别 IntermediateResponse-message的来源：
 
-   Detected sequencing problems (particularly those detailed in Section
-   3.1.1 of [RFC4513]) result in the resultCode being set to
-   operationsError.
+   - two or more controls using IntermediateResponse messages are included in a request for any LDAP operation or
+        - 在LDAP 操作的请求中 有两个或多个Controls都使用了IntermediateResponse-message，或
+   - one or more controls using IntermediateResponse messages are included in a request with an LDAP Extended operation that uses IntermediateResponse messages.
+        - 一个使用了IntermediateResponse-message的 ExtendedOperation请求 中，包含了1个或多个Controls，并且这些Controls使用了IntermediateResponse-message
 
-   If the server does not support TLS (whether by design or by current
-   configuration), it returns with the resultCode set to protocolError
-   as described in Section 4.12.
+总结： 
+​	IntermediateResponse-message必须携带 responseName ；
 
-#### 4.14.2.  StartTLS Response
+​	1) 因为请求操作的Controls中 使用了IntermediateResponse-message;
 
-   When a StartTLS request is received, servers supporting the operation
-   MUST return a StartTLS response message to the requestor.  The
-   responseName is "1.3.6.1.4.1.1466.20037" when provided (see Section
-   4.12).  The responseValue is always absent.
-
-   If the server is willing and able to negotiate TLS, it returns the
-   StartTLS response with the resultCode set to success.  Upon client
-   receipt of a successful StartTLS response, protocol peers may
-   commence with TLS negotiation as discussed in Section 3 of [RFC4513].
-
-   If the server is otherwise unwilling or unable to perform this
-   operation, the server is to return an appropriate result code
-   indicating the nature of the problem.  For example, if the TLS
-   subsystem is not presently available, the server may indicate this by
-   returning with the resultCode set to unavailable.  In cases where a
-   non-success result code is returned, the LDAP session is left without
-   a TLS layer.
-
-#### 4.14.3.  Removal of the TLS Layer
-
-   Either the client or server MAY remove the TLS layer and leave the
-   LDAP message layer intact by sending and receiving a TLS closure
-   alert.
-
-   The initiating protocol peer sends the TLS closure alert and MUST
-   wait until it receives a TLS closure alert from the other peer before
-   sending further LDAP PDUs.
-
-   When a protocol peer receives the initial TLS closure alert, it may
-   choose to allow the LDAP message layer to remain intact.  In this
-   case, it MUST immediately transmit a TLS closure alert.  Following
-   this, it MAY send and receive LDAP PDUs.
-#---------------------------------------------------------------------------------------
+​	2) 扩展请求/ExtendedRequest 中使用了IntermediateResponse-message ，并且扩展请求包含的Controls中使用了IntermediateResponse-message；
 
 
 
-Sermersheim                 Standards Track                    [Page 41]
-
-RFC 4511                         LDAPv3                        June 2006
+### 4.14.  StartTLS Operation(传输层安全)
+
+The Start Transport Layer Security (StartTLS) operation's purpose is to initiate installation of a TLS layer.  The StartTLS operation is defined using the Extended operation mechanism described in Section 4.12.
+启动传输层安全 (StartTLS) 操作 的目的 是启动 TLS 层的安装。 StartTLS 操作是使用第 4.12 节中描述的 扩展操作机制/Extended-Operation-mechanism 定义的。
 
 
-   Protocol peers MAY terminate the LDAP session after sending or
-   receiving a TLS closure alert.
 
-## 5. Protocol Encoding, Connection, and Transfer
+#### 4.14.1.  StartTLS Request(StartTLS请求)
 
-This protocol is designed to run over connection-oriented, reliable
-transports, where the data stream is divided into octets (8-bit
-units), with each octet and each bit being significant.
+A client requests TLS establishment by transmitting a StartTLS request message to the server.  The StartTLS request is defined in terms of an ExtendedRequest.  The requestName is "1.3.6.1.4.1.1466.20037", and the requestValue field is always absent.
+客户端通过向服务器发送 StartTLS-request消息 来请求建立TLS。 StartTLS-request是根据/依据ExtendedRequest 定义的。 requestName 为“1.3.6.1.4.1.1466.20037”，requestValue 字段始终不存在。
 
-One underlying service, LDAP over TCP, is defined in Section 5.2.
-This service is generally applicable to applications providing or
-consuming X.500-based directory services on the Internet.  This
-specification was generally written with the TCP mapping in mind.
-Specifications detailing other mappings may encounter various
-obstacles.
+The client MUST NOT send any LDAP PDUs at this LDAP message layer following this request until it receives a StartTLS Extended response and, in the case of a successful response, completes TLS negotiations.
+客户端不得在此请求之后在此 LDAP 消息层发送任何 LDAP PDU，直到它收到 StartTLS Extended 响应，并且在成功响应的情况下，完成 TLS 协商。
 
-Implementations of LDAP over TCP MUST implement the mapping as
-described in Section 5.2.
+Detected sequencing problems (particularly those detailed in Section 3.1.1 of [RFC4513]) result in the resultCode being set to operationsError.
+检测到的排序问题（特别是 [RFC4513] 的第 3.1.1 节中详述的那些）导致 resultCode 设置为operationsError。
 
-This table illustrates the relationship among the different layers
-involved in an exchange between two protocol peers:
+If the server does not support TLS (whether by design or by current configuration), it returns with the resultCode set to protocolError as described in Section 4.12.
+如果服务器不支持 TLS（无论是设计还是当前配置），它会返回并将 resultCode 设置为 protocolError，如第 4.12 节所述。
+
+
+
+总结： 
+​	StartTLSRequest 是依据 ExtendedRequest定义的；
+​		其中requestName字段是"1.3.6.1.4.1.1466.20037"， 
+​		requestValue字段不存在。	
+​	client在 此LDAP-message-layer上发送了StartTLSRequest之后，禁止 发送任何LDAP-PDU，直到   收到StartTLSResponse并且是成功完成TLS协商；
+​	当server不支持TLS时，resultCode设置为protocolError；
+
+
+
+
+
+#### 4.14.2.  StartTLS Response(StartTLS响应)
+
+When a StartTLS request is received, servers supporting the operation MUST return a StartTLS response message to the requestor.  The   responseName is "1.3.6.1.4.1.1466.20037" when provided (see Section 4.12).  The responseValue is always absent.
+当收到 StartTLS-request时，支持该操作的服务器"必须"向请求者返回一个 StartTLS-response消息。responseName为“1.3.6.1.4.1.1466.20037”（参见第 4.12 节）。 responseValue 始终不存在。
+
+If the server is willing and able to negotiate TLS, it returns the StartTLS response with the resultCode set to success.  Upon client receipt of a successful StartTLS response, protocol peers may commence with TLS negotiation as discussed in Section 3 of [RFC4513].
+如果服务器愿意并且能够协商 TLS，它会返回 StartTLS-response并将 resultCode 设置为success。 在客户端收到成功的 StartTLS-response后，协议对等方可以开始 TLS 协商，如 [RFC4513] 的第 3 节中讨论的那样。
+
+If the server is otherwise unwilling or unable to perform this operation, the server is to return an appropriate result code indicating the nature of the problem.  For example, if the TLS subsystem is not presently available, the server may indicate this by returning with the resultCode set to unavailable.  In cases where a non-success result code is returned, the LDAP session is left without a TLS layer.
+如果服务器不愿意或无法执行此操作，则服务器将返回一个适当的resultCode，指示问题的性质。 例如，如果 TLS 子系统当前不可用，服务器可以通过返回resultCode设置为unavailable 来指示这一点。 在返回非成功结果代码的情况下，LDAP会话 没有 TLS层。
+
+总结： 
+	StartTLSResponse依据ExtendedResponse定义：
+		responseName字段是"1.3.6.1.4.1.1466.20037"，
+		responseValue字段不存在。
+		resultCode 
+			为success，表明能够进行TLS协商，client在收到StartTLSResponse后，开始TLS协商；--> 建立TLS-layer/层
+			为non-success时，那么无法进行TLS协商，那么LDAP-session/会话 没有TLS-layer/层；			
+
+
+
+#### 4.14.3.  Removal of the TLS Layer(移除TLS层)
+
+Either the client or server MAY remove the TLS layer and leave the LDAP message layer intact by sending and receiving a TLS closure alert.
+客户端或服务器  可以通过  发送和接收TLS关闭警报 来移除 TLS-layer并保持 LDAP-message-layer完好无损。
+
+The initiating protocol peer sends the TLS closure alert and MUST wait until it receives a TLS closure alert from the other peer before sending further LDAP PDUs.
+协议对等方(其一)  最初/开始 发送 TLS 关闭警报，并且"必须"等待 直到从对等方(另一)收到 TLS关闭警报，然后再发送进一步的 LDAP PDU。
+
+When a protocol peer receives the initial TLS closure alert, it may choose to allow the LDAP message layer to remain intact.  In this case, it MUST immediately transmit a TLS closure alert.  Following this, it MAY send and receive LDAP PDUs.
+当协议对等方收到初始TLS关闭警报时，它可以选择允许 LDAP-message-layer保持完整。 在这种情况下，它必须立即发送 TLS 关闭警报。 在此之后，它可以发送和接收 LDAP PDU。
+
+Protocol peers MAY terminate the LDAP session after sending or receiving a TLS closure alert.
+协议对等体可以在发送或接收 TLS 关闭警报后终止 LDAP-session会话。
+
+总结： 
+​	协议对等方 发送和接收  ：TLS关闭警报
+​		1) 可以立即终止LDAP-session/会话；
+​		2) 接收方可以选择保留LDAP-message-layer的完整性，然后立即发送TLS关闭警报给对方，
+​			之后双方仍然可以发送和接收LDAP-PDU(只不过此时的LDAP-session没有了TLS-layer而已)；
+
+​	
+
+
+
+## 5. Protocol Encoding, Connection, and Transfer(协议的编码，连接，传输)
+
+This protocol is designed to run over connection-oriented, reliable transports, where the data stream is divided into octets (8-bit units), with each octet and each bit being significanorientedt.
+该协议 旨在 运行在面向连接的 可靠传输上，其中数据流被分成八位字节（8-bit单元），每个八位字节和每一位都是重要的。
+
+One underlying service, LDAP over TCP, is defined in Section 5.2. This service is generally applicable to applications providing or consuming X.500-based directory services on the Internet.  This specification was generally written with the TCP mapping in mind. Specifications detailing other mappings may encounter various obstacles.
+第 5.2 节定义了一种底层服务，即基于TCP的LDAP。 此服务 通常适用于  在Internet上提供或使用基于X.500目录服务的应用程序。 该规范通常是在考虑 TCP 映射的情况下编写的。 详细说明其他映射的规范可能会遇到各种障碍。
+
+Implementations of LDAP over TCP MUST implement the mapping as described in Section 5.2.
+基于TCP的LDAP实现必须实现 5.2 节中描述的映射。
+
+This table illustrates the relationship among the different layers involved in an exchange between two protocol peers:
+下表说明了 两个协议对等方之间的交换  所涉及的不同层之间的关系：
 
 ```
-        +----------------------+
-        |  LDAP message layer  |
-        +----------------------+ > LDAP PDUs
-        +----------------------+ < data
-        |      SASL layer      |
-        +----------------------+ > SASL-protected data
-        +----------------------+ < data
-        |       TLS layer      |
+               +----------------------+
+               |  LDAP message layer  |
+               +----------------------+ > LDAP PDUs
+               +----------------------+ < data
+               |      SASL layer      |
+               +----------------------+ > SASL-protected data
+               +----------------------+ < data
+               |       TLS layer      |
+   Application +----------------------+ > TLS-protected data
+   ------------+----------------------+ < data
+     Transport | transport connection |
+               +----------------------+
 ```
-Application +----------------------+ > TLS-protected data
-------------+----------------------+ < data
-  Transport | transport connection |
-            +----------------------+
 
-### 5.1.  Protocol Encoding
+总结: 
+​	LDAP协议：
+​		面向连接，安全传输；
+​		数据流使用 8位字节(8-bit单元)(每个8位字节和每个bit都重要)；
+​		基于TCP的LDAP实现，必须实现5.2节中描述的映射；
 
-   The protocol elements of LDAP SHALL be encoded for exchange using the
-   Basic Encoding Rules [BER] of [ASN.1] with the following
-   restrictions:
+
+
+### 5.1.  Protocol Encoding(协议的编码)
+
+The protocol elements of LDAP SHALL be encoded for exchange using the Basic Encoding Rules [BER] of [ASN.1] with the following restrictions:
+
+LDAP 的协议元素"应该"使用 [ASN.1] 的基本编码规则 [BER] 进行编码以进行交换，并具有以下限制：
 
    - Only the definite form of length encoding is used.
-
+        - 仅使用长度编码的确定形式。
    - OCTET STRING values are encoded in the primitive form only.
+        - OCTET STRING 值仅以 primitive/原始 形式编码。
+   - If the value of a BOOLEAN type is true, the encoding of the value octet is set to hex "FF".
+        - 如果 BOOLEAN 类型的值为真，则值八位字节的编码设置为十六进制“FF”。
+   - If a value of a type is its default value, it is absent.  Only some BOOLEAN and INTEGER types have default values in this protocol definition.
+        - 如果某个类型的值是其默认值，则它不存在。 在此协议定义中，只有一些 BOOLEAN 和 INTEGER 类型具有默认值。
 
-   - If the value of a BOOLEAN type is true, the encoding of the value
-     octet is set to hex "FF".
-     #---------------------------------------------------------------------------------------
+These restrictions are meant to ease the overhead of encoding and decoding certain elements in BER.
+这些限制旨在减轻编码和解码 BER 中某些元素的开销。
+
+These restrictions do not apply to ASN.1 types encapsulated inside of OCTET STRING values, such as attribute values, unless otherwise stated.
+除非另有说明，否则这些限制不适用于封装在 OCTET STRING 值内的 ASN.1 类型，例如属性值。
+
+总结： 
+
+​	LDAP的协议单元，"应该"使用ASN.1的基本编码格式BER进行编码；
+​		长度要编码(占多少字节)；
+​		BOOLEAN为true时，编码为octet 是 FF (hex);
+​		某类型的值若是默认值，那么它不存在(本协议中，只有BOOLEAN和INTEGER类型具有默认值)；
+​	这些限制是为了减轻BER编解码的开销；
+​	这些限制是特定于LDAP协议的
 
 
-
-Sermersheim                 Standards Track                    [Page 42]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-   - If a value of a type is its default value, it is absent.  Only some
-     BOOLEAN and INTEGER types have default values in this protocol
-     definition.
-
-   These restrictions are meant to ease the overhead of encoding and
-   decoding certain elements in BER.
-
-   These restrictions do not apply to ASN.1 types encapsulated inside of
-   OCTET STRING values, such as attribute values, unless otherwise
-   stated.
 
 ### 5.2.  Transmission Control Protocol (TCP)
 
-   The encoded LDAPMessage PDUs are mapped directly onto the TCP
-   [RFC793] bytestream using the BER-based encoding described in Section
-   5.1.  It is recommended that server implementations running over the
-   TCP provide a protocol listener on the Internet Assigned Numbers
-   Authority (IANA)-assigned LDAP port, 389 [PortReg].  Servers may
-   instead provide a listener on a different port number.  Clients MUST
-   support contacting servers on any valid TCP port.
-
-### 5.3.  Termination of the LDAP session
-
-   Termination of the LDAP session is typically initiated by the client
-   sending an UnbindRequest (Section 4.3), or by the server sending a
-   Notice of Disconnection (Section 4.4.1).  In these cases, each
-   protocol peer gracefully terminates the LDAP session by ceasing
-   exchanges at the LDAP message layer, tearing down any SASL layer,
-   tearing down any TLS layer, and closing the transport connection.
-
-   A protocol peer may determine that the continuation of any
-   communication would be pernicious, and in this case, it may abruptly
-   terminate the session by ceasing communication and closing the
-   transport connection.
-
-   In either case, when the LDAP session is terminated, uncompleted
-   operations are handled as specified in Section 3.1.
-
-## 6. Security Considerations
-
-This version of the protocol provides facilities for simple
-authentication using a cleartext password, as well as any SASL
-[RFC4422] mechanism.  Installing SASL and/or TLS layers can provide
-integrity and other data security services.
-
-It is also permitted that the server can return its credentials to
-the client, if it chooses to do so.
-#---------------------------------------------------------------------------------------
-
-
-
-Sermersheim                 Standards Track                    [Page 43]
-
-RFC 4511                         LDAPv3                        June 2006
-
-   Use of cleartext password is strongly discouraged where the
-   underlying transport service cannot guarantee confidentiality and may
-   result in disclosure of the password to unauthorized parties.
-
-   Servers are encouraged to prevent directory modifications by clients
-   that have authenticated anonymously [RFC4513].
+The encoded LDAPMessage PDUs are mapped directly onto the TCP [RFC793] bytestream using the BER-based encoding described in Section 5.1.  It is recommended that server implementations running over the TCP provide a protocol listener on the Internet Assigned Numbers Authority (IANA)-assigned LDAP port, 389 [PortReg].  Servers may instead provide a listener on a different port number.  Clients MUST support contacting servers on any valid TCP port.
+使用第 5.1 节中描述的基于BER 的编码，编码的 LDAPMessage PDUs 被直接映射到 TCP [RFC793] 字节流。 
+建议在 TCP 上运行的服务器 实现 在 Internet 编号分配机构 (IANA) 分配的 LDAP 端口 389 [PortReg] 上提供协议侦听器。 服务器可能会在不同的端口号上提供侦听器。 客户端必须支持在任何有效的 TCP 端口上联系服务器。
 
-   Security considerations for authentication methods, SASL mechanisms,
-   and TLS are described in [RFC4513].
+总结：
+​	使用 5.1节描述的BER 编码后的LDAPMessage-PDUs可以直接映射到TCP字节流；
+​	server应该监听 LDAP的TCP的389端口；
+​	client应该能通过任何有效的TCP端口联系server；
 
-   Note that SASL authentication exchanges do not provide data
-   confidentiality or integrity protection for the version or name
-   fields of the BindRequest or the resultCode, diagnosticMessage, or
-   referral fields of the BindResponse, nor for any information
-   contained in controls attached to Bind requests or responses.  Thus,
-   information contained in these fields SHOULD NOT be relied on unless
-   it is otherwise protected (such as by establishing protections at the
-   transport layer).
 
-   Implementors should note that various security factors (including
-   authentication and authorization information and data security
-   services) may change during the course of the LDAP session or even
-   during the performance of a particular operation.  For instance,
-   credentials could expire, authorization identities or access controls
-   could change, or the underlying security layer(s) could be replaced
-   or terminated.  Implementations should be robust in the handling of
-   changing security factors.
 
-   In some cases, it may be appropriate to continue the operation even
-   in light of security factor changes.  For instance, it may be
-   appropriate to continue an Abandon operation regardless of the
-   change, or to continue an operation when the change upgraded (or
-   maintained) the security factor.  In other cases, it may be
-   appropriate to fail or alter the processing of the operation.  For
-   instance, if confidential protections were removed, it would be
-   appropriate either to fail a request to return sensitive data or,
-   minimally, to exclude the return of sensitive data.
+### 5.3.  Termination of the LDAP session(结束LDAP会话)
 
-   Implementations that cache attributes and entries obtained via LDAP
-   MUST ensure that access controls are maintained if that information
-   is to be provided to multiple clients, since servers may have access
-   control policies that prevent the return of entries or attributes in
-   Search results except to particular authenticated clients.  For
-   example, caches could serve result information only to the client
-   whose request caused it to be in the cache.
-#---------------------------------------------------------------------------------------
+Termination of the LDAP session is typically initiated by the client sending an UnbindRequest (Section 4.3), or by the server sending a Notice of Disconnection (Section 4.4.1).  In these cases, each protocol peer gracefully terminates the LDAP session by ceasing exchanges at the LDAP message layer, tearing down any SASL layer, tearing down any TLS layer, and closing the transport connection.
+LDAP会话 的终止  通常由客户端发送 UnbindRequest（第 4.3 节）或 由服务器发送断开连接通知（第 4.4.1 节）启动。 在这些情况下，每个协议对等体通过停止 LDAP-message-layer的交换、拆除任何 SASL-layer、拆除任何 TLS-layer 并关闭传输连接  来优雅地终止 LDAP 会话。
 
+A protocol peer may determine that the continuation of any communication would be pernicious, and in this case, it may abruptly terminate the session by ceasing communication and closing the transport connection.
+协议对等方可能会确定任何通信的继续是有害的，在这种情况下，它可能会通过停止通信并关闭传输连接来突然终止会话。
 
+In either case, when the LDAP session is terminated, uncompleted operations are handled as specified in Section 3.1.
+在任一情况下，当 LDAP 会话终止时，未完成的操作将按照第 3.1 节中的规定进行处理。
 
+总结： 
+​	终止LDAP-session：
+​			1) client发送UnbindRequest
+​			2) server 发送Notice of Disconnection(主动断开连接通知)
+​		在这些情况下，每个协议对等方/体， 结束LDAP-message-layer的交换  拆除SASL-layer 拆除TLS-layer 关闭传输层连接 来结束LDAP-session；
+​			3) 当协议对等方法下通信是有害的，会通过 通知通信 关闭连接 来突然终止LDAP-session；
 
 
-Sermersheim                 Standards Track                    [Page 44]
-
-RFC 4511                         LDAPv3                        June 2006
 
+## 6. Security Considerations(安全注意事项)
 
-   Servers may return referrals or Search result references that
-   redirect clients to peer servers.  It is possible for a rogue
-   application to inject such referrals into the data stream in an
-   attempt to redirect a client to a rogue server.  Clients are advised
-   to be aware of this and possibly reject referrals when
-   confidentiality measures are not in place.  Clients are advised to
-   reject referrals from the StartTLS operation.
+This version of the protocol provides facilities for simple authentication using a cleartext password, as well as any SASL [RFC4422] mechanism.  Installing SASL and/or TLS layers can provide integrity and other data security services.
+该版本的协议 提供了 使用明文密码进行简单身份验证的设施，以及任何 SASL [RFC4422] 机制。安装 SASL 和/或 TLS-layer可以提供完整性和其他数据安全服务。
 
-   The matchedDN and diagnosticMessage fields, as well as some
-   resultCode values (e.g., attributeOrValueExists and
-   entryAlreadyExists), could disclose the presence or absence of
-   specific data in the directory that is subject to access and other
-   administrative controls.  Server implementations should restrict
-   access to protected information equally under both normal and error
-   conditions.
+It is also permitted that the server can return its credentials to the client, if it chooses to do so.
+如果它选择这样做，也允许服务器可以将其证书返回给客户端。
 
-   Protocol peers MUST be prepared to handle invalid and arbitrary-
-   length protocol encodings.  Invalid protocol encodings include: BER
-   encoding exceptions, format string and UTF-8 encoding exceptions,
-   overflow exceptions, integer value exceptions, and binary mode on/off
-   flag exceptions.  The LDAPv3 PROTOS [PROTOS-LDAP] test suite provides
-   excellent examples of these exceptions and test cases used to
-   discover flaws.
+Use of cleartext password is strongly discouraged where the underlying transport service cannot guarantee confidentiality and may result in disclosure of the password to unauthorized parties.
+在 底层传输服务不能保证机密性，并且可能导致密码泄露给未授权方的情况下，强烈建议不要使用明文密码。
 
-   In the event that a protocol peer senses an attack that in its nature
-   could cause damage due to further communication at any layer in the
-   LDAP session, the protocol peer should abruptly terminate the LDAP
-   session as described in Section 5.3.
+Servers are encouraged to prevent directory modifications by clients that have authenticated anonymously [RFC4513].
+server 阻止匿名身份验证的client 修改目录 [RFC4513]。
 
-## 7. Acknowledgements
+Security considerations for authentication methods, SASL mechanisms, and TLS are described in [RFC4513].
+[RFC4513] 中描述了  身份验证方法、SASL 机制和 TLS 的安全注意事项。
 
-This document is based on RFC 2251 by Mark Wahl, Tim Howes, and Steve
-Kille.  RFC 2251 was a product of the IETF ASID Working Group.
+Note that SASL authentication exchanges do not provide data confidentiality or integrity protection for the version or name fields of the BindRequest or the resultCode, diagnosticMessage, or referral fields of the BindResponse, nor for any information contained in controls attached to Bind requests or responses.  Thus, information contained in these fields SHOULD NOT be relied on unless it is otherwise protected (such as by establishing protections at the transport layer).
+请注意，SASL身份验证交换不为  BindRequest的version字段或name字段  或 BindResponse的resultCode diagnosticMessage字段或referral字段  提供数据机密性或完整性保护，也不为附加到 Bind-request或response的Control中包含的任何信息提供数据机密性或完整性保护。因此，这些字段中包含的信息"不应该"被依赖，除非它受到其他保护（例如通过在传输层建立保护）。
+总结： 
+​	SASL身份验证交换 不提供 数据机密性和完整性保护，
+​	TLS-layer 提供；
 
-It is also based on RFC 2830 by Jeff Hodges, RL "Bob" Morgan, and
-Mark Wahl.  RFC 2830 was a product of the IETF LDAPEXT Working Group.
+Implementors should note that various security factors (including authentication and authorization information and data security services) may change during the course of the LDAP session or even during the performance of a particular operation.  For instance, credentials could expire, authorization identities or access controls could change, or the underlying security layer(s) could be replaced or terminated.  Implementations should be robust in the handling of changing security factors.
+实施者应注意，各种安全因素（包括身份验证和授权信息以及数据安全服务）可能会在 LDAP 会话过程中甚至在特定操作的执行过程中发生变化。例如，证书可能会过期，授权身份或访问控制可能会发生变化，或者底层安全层可能会被替换或终止。实现在处理不断变化的安全因素时应该是健壮的。
 
-It is also based on RFC 3771 by Roger Harrison and Kurt Zeilenga.
-RFC 3771 was an individual submission to the IETF.
+In some cases, it may be appropriate to continue the operation even in light of security factor changes.  For instance, it may be appropriate to continue an Abandon operation regardless of the change, or to continue an operation when the change upgraded (or maintained) the security factor.  In other cases, it may be appropriate to fail or alter the processing of the operation.  For instance, if confidential protections were removed, it would be appropriate either to fail a request to return sensitive data or, minimally, to exclude the return of sensitive data.
+在某些情况下，即使考虑到安全因素的变化，继续操作也可能是合适的。例如，无论更改如何，都可以继续执行放弃操作/Abandon-operation，或者在更改升级（或维护）安全因素时继续操作可能是合适的。在其他情况下，失败或更改操作的处理可能是适当的。例如，如果删除了机密保护，则可以使返回敏感数据的请求失败，或者至少排除敏感数据的返回。
 
-This document is a product of the IETF LDAPBIS Working Group.
-Significant contributors of technical review and content include Kurt
-Zeilenga, Steven Legg, and Hallvard Furuseth.
-#---------------------------------------------------------------------------------------
+Implementations that cache attributes and entries obtained via LDAP MUST ensure that access controls are maintained if that information is to be provided to multiple clients, since servers may have access control policies that prevent the return of entries or attributes in Search results except to particular authenticated clients.  For example, caches could serve result information only to the client whose request caused it to be in the cache.
+如果要向多个客户端提供该信息，则 通过LDAP获得的属性和条目的缓存实现 "必须"确保 维护 访问控制，因为服务器可能具有阻止在搜索结果中返回条目或属性的访问控制策略，除非经过特定身份验证的客户端.例如，缓存可以只向其请求导致它在缓存中的客户端提供结果信息。
+总结： 
+​	当需要向多个client提供信息时， 对属性和条目的缓存实现 也要确保维护了 访问控制，只向经过身份验证的client返回属性或条目；
 
+Servers may return referrals or Search result references that redirect clients to peer servers.  It is possible for a rogue application to inject such referrals into the data stream in an attempt to redirect a client to a rogue server.  Clients are advised to be aware of this and possibly reject referrals when confidentiality measures are not in place.  Clients are advised to reject referrals from the StartTLS operation.
+服务器可能会返回将客户端重定向到对等服务器的引用或搜索结果引用。恶意应用程序可能会将此类引用注入数据流中，以尝试将客户端重定向到恶意服务器。建议客户注意这一点，并在没有采取保密措施时可能会拒绝推荐。建议客户端拒绝来自 StartTLS 操作的引用。
+总结： 
+​	server可能返回 referrals或Search-result-references 来将client重定向到 对等server；
+​	恶意程序可能将 恶意referrals注入到数据流中，所以client应该拒绝来自StartTLS-operation的referrals；
 
+The matchedDN and diagnosticMessage fields, as well as some resultCode values (e.g., attributeOrValueExists and entryAlreadyExists), could disclose the presence or absence of specific data in the directory that is subject to access and other administrative controls.  Server implementations should restrict access to protected information equally under both normal and error conditions.
+matchedDN字段 和diagnosticMessage 字段以及一些resultCode 值（例如，attributeOrValueExists 和entryAlreadyExists）可以揭示目录中是否存在受访问和其他管理控制的特定数据。服务器实现应该在正常和错误条件下 同等地 限制 对受保护信息的访问。
+总结： 
+​	对于 受保护的信息 进行访问，在正常和错误条件下，同等地收到限制；
 
+Protocol peers MUST be prepared to handle invalid and arbitrary-length protocol encodings.  Invalid protocol encodings include: BER encoding exceptions, format string and UTF-8 encoding exceptions, overflow exceptions, integer value exceptions, and binary mode on/off flag exceptions.  The LDAPv3 PROTOS [PROTOS-LDAP] test suite provides excellent examples of these exceptions and test cases used to discover flaws.
+协议对等点必须准备好处理无效和任意长度的协议编码。无效的协议编码包括：BER 编码异常、格式字符串和 UTF-8 编码异常、溢出异常、整数值异常和二进制模式开/关标志异常。 LDAPv3 PROTOS [PROTOS-LDAP] 测试套件提供了这些异常和用于发现缺陷的测试用例的优秀示例。
+总结： 
+​	准备好处理 无效或任意长度的 协议编码；
+​	无效的协议编码 包括：BER 编码异常、格式字符串和 UTF-8 编码异常、溢出异常、整数值异常和二进制模式开/关标志异常；
 
+In the event that a protocol peer senses an attack that in its nature could cause damage due to further communication at any layer in the LDAP session, the protocol peer should abruptly terminate the LDAP session as described in Section 5.3.
+如果协议对等体检测到攻击本质上可能由于 LDAP 会话中任何层的进一步通信而造成损害，则协议对等体应如第 5.3 节所述突然终止 LDAP 会话。
 
 
 
-Sermersheim                 Standards Track                    [Page 45]
-
-RFC 4511                         LDAPv3                        June 2006
+## 7. Acknowledgements(致谢)
 
-## 8. Normative References
+This document is based on RFC 2251 by Mark Wahl, Tim Howes, and Steve Kille.  RFC 2251 was a product of the IETF ASID Working Group.
 
-[ASN.1]       ITU-T Recommendation X.680 (07/2002) | ISO/IEC 8824-
-              1:2002 "Information Technology - Abstract Syntax
-              Notation One (ASN.1): Specification of basic notation".
+It is also based on RFC 2830 by Jeff Hodges, RL "Bob" Morgan, and Mark Wahl.  RFC 2830 was a product of the IETF LDAPEXT Working Group.
 
-[BER]         ITU-T Rec. X.690 (07/2002) | ISO/IEC 8825-1:2002,
-              "Information technology - ASN.1 encoding rules:
-              Specification of Basic Encoding Rules (BER), Canonical
-              Encoding Rules (CER) and Distinguished Encoding Rules
-              (DER)", 2002.
+It is also based on RFC 3771 by Roger Harrison and Kurt Zeilenga. RFC 3771 was an individual submission to the IETF.
 
-[ISO10646]    Universal Multiple-Octet Coded Character Set (UCS) -
-              Architecture and Basic Multilingual Plane, ISO/IEC
-              10646-1 : 1993.
+This document is a product of the IETF LDAPBIS Working Group. Significant contributors of technical review and content include Kurt Zeilenga, Steven Legg, and Hallvard Furuseth.
 
-[RFC791]      Postel, J., "Internet Protocol", STD 5, RFC 791,
-              September 1981.
 
-[RFC793]      Postel, J., "Transmission Control Protocol", STD 7, RFC
-              793, September 1981.
+## 8. Normative References(参考的规范)
 
-[RFC2119]     Bradner, S., "Key words for use in RFCs to Indicate
-              Requirement Levels", BCP 14, RFC 2119, March 1997.
+[ASN.1]       ITU-T Recommendation X.680 (07/2002) | ISO/IEC 8824-1:2002 "Information Technology - Abstract Syntax Notation One (ASN.1): Specification of basic notation". 
 
-[RFC3454]     Hoffman P. and M. Blanchet, "Preparation of
-              Internationalized Strings ('stringprep')", RFC 3454,
-              December 2002.
+[BER]         ITU-T Rec. X.690 (07/2002) | ISO/IEC 8825-1:2002,"Information technology - ASN.1 encoding rules:Specification of Basic Encoding Rules (BER), Canonical Encoding Rules (CER) and Distinguished Encoding Rules(DER)", 2002.
 
-[RFC3629]     Yergeau, F., "UTF-8, a transformation format of ISO
-              10646", STD 63, RFC 3629, November 2003.
+[ISO10646]    Universal Multiple-Octet Coded Character Set (UCS) -Architecture and Basic Multilingual Plane, ISO/IEC10646-1 : 1993.
 
-[RFC3986]     Berners-Lee, T., Fielding, R., and L. Masinter,
-              "Uniform Resource Identifier (URI): Generic Syntax",
-              STD 66, RFC 3986, January 2005.
+[RFC791]      Postel, J., "Internet Protocol", STD 5, RFC 791,September 1981.
 
-[RFC4013]     Zeilenga, K., "SASLprep: Stringprep Profile for User
-              Names and Passwords", RFC 4013, February 2005.
+[RFC793]      Postel, J., "Transmission Control Protocol", STD 7, RFC793, September 1981.
 
-[RFC4234]     Crocker, D. and P. Overell, "Augmented BNF for Syntax
-              Specifications: ABNF", RFC 4234, October 2005.
+[RFC2119]     Bradner, S., "Key words for use in RFCs to Indicate Requirement Levels", BCP 14, RFC 2119, March 1997.
 
-[RFC4346]     Dierks, T. and E. Rescorla, "The TLS Protocol Version
-              1.1", RFC 4346, March 2006.
+[RFC3454]     Hoffman P. and M. Blanchet, "Preparation ofInternationalized Strings ('stringprep')", RFC 3454,December 2002.
 
-[RFC4422]     Melnikov, A., Ed. and K. Zeilenga, Ed., "Simple
-              Authentication and Security Layer (SASL)", RFC 4422,
-              June 2006.
-#---------------------------------------------------------------------------------------
+[RFC3629]     Yergeau, F., "UTF-8, a transformation format of ISO10646", STD 63, RFC 3629, November 2003.
 
+[RFC3986]     Berners-Lee, T., Fielding, R., and L. Masinter,"Uniform Resource Identifier (URI): Generic Syntax",STD 66, RFC 3986, January 2005.
 
-Sermersheim                 Standards Track                    [Page 46]
-
-RFC 4511                         LDAPv3                        June 2006
+[RFC4013]     Zeilenga, K., "SASLprep: Stringprep Profile for User Names and Passwords", RFC 4013, February 2005.
 
+[RFC4234]     Crocker, D. and P. Overell, "Augmented BNF for Syntax Specifications: ABNF", RFC 4234, October 2005.
 
-   [RFC4510]     Zeilenga, K., Ed., "Lightweight Directory Access
-                 Protocol (LDAP): Technical Specification Road Map", RFC
-                 4510, June 2006.
+[RFC4346]     Dierks, T. and E. Rescorla, "The TLS Protocol Version1.1", RFC 4346, March 2006.
 
-   [RFC4512]     Zeilenga, K., Lightweight Directory Access Protocol
-                 (LDAP): Directory Information Models", RFC 4512, June
-                 2006.
+[RFC4422]     Melnikov, A., Ed. and K. Zeilenga, Ed., "Simple Authentication and Security Layer (SASL)", RFC 4422,June 2006.
 
-   [RFC4513]     Harrison, R., Ed., "Lightweight Directory Access
-                 Protocol (LDAP): Authentication Methods and Security
-                 Mechanisms", RFC 4513, June 2006.
+[RFC4510]     Zeilenga, K., Ed., "Lightweight Directory Access Protocol (LDAP): Technical Specification Road Map", RFC4510, June 2006.
 
-   [RFC4514]     Zeilenga, K., Ed., "Lightweight Directory Access
-                 Protocol (LDAP): String Representation of Distinguished
-                 Names", RFC 4514, June 2006.
+[RFC4512]     Zeilenga, K., Lightweight Directory Access Protocol(LDAP): Directory Information Models", RFC 4512, June 2006.
 
-   [RFC4516]     Smith, M., Ed. and T. Howes, "Lightweight Directory
-                 Access Protocol (LDAP): Uniform Resource Locator", RFC
-                 4516, June 2006.
+[RFC4513]     Harrison, R., Ed., "Lightweight Directory Access Protocol (LDAP): Authentication Methods and Security Mechanisms", RFC 4513, June 2006.
 
-   [RFC4517]     Legg, S., Ed., "Lightweight Directory Access Protocol
-                 (LDAP): Syntaxes and Matching Rules", RFC 4517, June
-                 2006.
+[RFC4514]     Zeilenga, K., Ed., "Lightweight Directory Access Protocol (LDAP): String Representation of Distinguished Names", RFC 4514, June 2006.
 
-   [RFC4520]     Zeilenga, K., "Internet Assigned Numbers Authority
-                 (IANA) Considerations for the Lightweight Directory
-                 Access Protocol (LDAP)", BCP 64, RFC 4520, June 2006.
+[RFC4516]     Smith, M., Ed. and T. Howes, "Lightweight Directory Access Protocol (LDAP): Uniform Resource Locator", RFC4516, June 2006.
 
-   [Unicode]     The Unicode Consortium, "The Unicode Standard, Version
-                 3.2.0" is defined by "The Unicode Standard, Version
-                 3.0" (Reading, MA, Addison-Wesley, 2000. ISBN 0-201-
-                 61633-5), as amended by the "Unicode Standard Annex
-                 #27: Unicode 3.1"
-                 (http://www.unicode.org/reports/tr27/) and by the
-                 "Unicode Standard Annex #28: Unicode 3.2"
-                 (http://www.unicode.org/reports/tr28/).
+[RFC4517]     Legg, S., Ed., "Lightweight Directory Access Protocol(LDAP): Syntaxes and Matching Rules", RFC 4517, June 2006.
 
-   [X.500]       ITU-T Rec. X.500, "The Directory: Overview of Concepts,
-                 Models and Service", 1993.
+[RFC4520]     Zeilenga, K., "Internet Assigned Numbers Authority(IANA) Considerations for the Lightweight Directory Access Protocol (LDAP)", BCP 64, RFC 4520, June 2006.
 
-   [X.511]       ITU-T Rec. X.511, "The Directory: Abstract Service
-                 Definition", 1993.
-#---------------------------------------------------------------------------------------
+[Unicode]     The Unicode Consortium, "The Unicode Standard, Version3.2.0" is defined by "The Unicode Standard, Version3.0" (Reading, MA, Addison-Wesley, 2000. ISBN 0-201-61633-5), as amended by the "Unicode Standard Annex #27: Unicode 3.1"(http://www.unicode.org/reports/tr27/) and by the "Unicode Standard Annex #28: Unicode 3.2" (http://www.unicode.org/reports/tr28/).
 
+[X.500]       ITU-T Rec. X.500, "The Directory: Overview of Concepts,Models and Service", 1993.
 
+[X.511]       ITU-T Rec. X.511, "The Directory: Abstract Service Definition", 1993.
 
 
 
+## 9. Informative References(参考资料)
 
+[CharModel]   Whistler, K. and M. Davis, "Unicode Technical Report  #17, Character Encoding Model", UTR17, 
+   <http://www.unicode.org/unicode/reports/tr17/>, August 2000.
+   Unicode技术报告，字符编码模型。
 
+[Glossary]    The Unicode Consortium, "Unicode Glossary",  
+   <http://www.unicode.org/glossary/>.  
+   Unicode词汇表
 
-Sermersheim                 Standards Track                    [Page 47]
-
-RFC 4511                         LDAPv3                        June 2006
+[PortReg]     IANA, "Port Numbers",  
+   <http://www.iana.org/assignments/port-numbers>.
+   端口号
 
-## 9. Informative References
+[PROTOS-LDAP] University of Oulu, "PROTOS Test-Suite: c06-ldapv3" 
+   <http://www.ee.oulu.fi/research/ouspg/protos/testing/c06/ldapv3/>.
+   PROTOS测试套件
 
-[CharModel]   Whistler, K. and M. Davis, "Unicode Technical Report
-              #17, Character Encoding Model", UTR17,
-              <http://www.unicode.org/unicode/reports/tr17/>, August
-              2000.
 
-[Glossary]    The Unicode Consortium, "Unicode Glossary",
-              <http://www.unicode.org/glossary/>.
 
-[PortReg]     IANA, "Port Numbers",
-              <http://www.iana.org/assignments/port-numbers>.
+## 10. IANA Considerations(IANA事项)
 
-[PROTOS-LDAP] University of Oulu, "PROTOS Test-Suite: c06-ldapv3"
-              <http://www.ee.oulu.fi/research/ouspg/protos/testing/
-              c06/ldapv3/>.
+The Internet Assigned Numbers Authority (IANA) has updated the LDAP result code registry to indicate that this document provides the definitive technical specification for result codes 0-36, 48-54, 64-70, 80-90.  It is also noted that one resultCode value (strongAuthRequired) has been renamed (to strongerAuthRequired).
+Internet 编号分配机构 (IANA) 已更新 "LDAP-resultCode注册表"，以表明本文档为resultCode 0-36、48-54、64-70、80-90 提供了最终技术规范。 
+还应注意的是，一个 resultCode 值 (strongAuthRequired) 已重命名为（ strongerAuthRequired ）。
 
-## 10. IANA Considerations
+The IANA has also updated the LDAP Protocol Mechanism registry to indicate that this document and [RFC4513] provides the definitive technical specification for the StartTLS (1.3.6.1.4.1.1466.20037) Extended operation.
+IANA 还更新了 "LDAP协议机制注册表"，以表明本文档和 [RFC4513] 为 StartTLS (1.3.6.1.4.1.1466.20037) 扩展操作提供了明确的技术规范。
 
-   The Internet Assigned Numbers Authority (IANA) has updated the LDAP
-   result code registry to indicate that this document provides the
-   definitive technical specification for result codes 0-36, 48-54, 64-
-   70, 80-90.  It is also noted that one resultCode value
-   (strongAuthRequired) has been renamed (to strongerAuthRequired).
+IANA has assigned LDAP Object Identifier 18 [RFC4520] to identify the ASN.1 module defined in this document.
+IANA 已分配 LDAP 对象标识符 18 [RFC4520] 来标识本文档中定义的 ASN.1 模块。
 
-   The IANA has also updated the LDAP Protocol Mechanism registry to
-   indicate that this document and [RFC4513] provides the definitive
-   technical specification for the StartTLS (1.3.6.1.4.1.1466.20037)
-   Extended operation.
+```ASN.1
+    Subject: Request for LDAP Object Identifier Registration
+    Person & email address to contact for further information:
+         Jim Sermersheim <jimse@novell.com>
+    Specification: RFC 4511
+    Author/Change Controller: IESG
+    Comments:
+         Identifies the LDAP ASN.1 module
+```
 
-   IANA has assigned LDAP Object Identifier 18 [RFC4520] to identify the
-   ASN.1 module defined in this document.
 
-        Subject: Request for LDAP Object Identifier Registration
-        Person & email address to contact for further information:
-             Jim Sermersheim <jimse@novell.com>
-        Specification: RFC 4511
-        Author/Change Controller: IESG
-        Comments:
-             Identifies the LDAP ASN.1 module
-#---------------------------------------------------------------------------------------
 
 
 
+## Appendix A.  LDAP Result Codes(附录A: ResultCode)
 
+This normative appendix details additional considerations regarding LDAP result codes and provides a brief, general description of each LDAP result code enumerated in Section 4.1.9.
+本规范性附录详细说明了有关 LDAP-resultCode的其他注意事项，并提供了第 4.1.9 节中列举的每个 LDAP 结果代码的简要概括说明。
 
+Additional result codes MAY be defined for use with extensions [RFC4520].  Client implementations SHALL treat any result code that they do not recognize as an unknown error condition.
+可以定义额外的resultCode以与扩展 [RFC4520] 一起使用。 客户端实现应将它们无法识别的任何resultCode视为未知错误条件。
 
+The descriptions provided here do not fully account for result code substitutions used to prevent unauthorized disclosures (such as substitution of noSuchObject for insufficientAccessRights, or invalidCredentials for insufficientAccessRights).
+此处提供的描述 并未完全说明 用于阻止未经授权的披露的结果代码替换（例如，将 noSuchObject 替换为不充分的访问权限，或将 invalidCredentials 替换为不充分的访问权限）。
 
 
 
+### A.1.  Non-Error Result Codes
 
-Sermersheim                 Standards Track                    [Page 48]
-
-RFC 4511                         LDAPv3                        June 2006
+These result codes (called "non-error" result codes) do not indicate an error condition:
 
-## Appendix A.  LDAP Result Codes
+这些resultCode（称为“non-error”resultode）并不表示  错误情况：
 
-   This normative appendix details additional considerations regarding
-   LDAP result codes and provides a brief, general description of each
-   LDAP result code enumerated in Section 4.1.9.
+```ASN.1
+    success (0),
+    compareFalse (5),
+    compareTrue (6),
+    referral (10), and
+    saslBindInProgress (14).
+```
 
-   Additional result codes MAY be defined for use with extensions
-   [RFC4520].  Client implementations SHALL treat any result code that
-   they do not recognize as an unknown error condition.
+The success, compareTrue, and compareFalse result codes indicate successful completion (and, hence, are referred to as "successful" result codes).
+success、compareTrue 和 compareFalse resultCode表示成功完成（因此称为“成功”结果代码）。
 
-   The descriptions provided here do not fully account for result code
-   substitutions used to prevent unauthorized disclosures (such as
-   substitution of noSuchObject for insufficientAccessRights, or
-   invalidCredentials for insufficientAccessRights).
+The referral and saslBindInProgress result codes indicate the client needs to take additional action to complete the operation.
+referral 和 saslBindInProgress resultode 表明client需要采取额外的操作来完成操作。
 
-A.1.  Non-Error Result Codes
 
-   These result codes (called "non-error" result codes) do not indicate
-   an error condition:
 
-        success (0),
-        compareFalse (5),
-        compareTrue (6),
-        referral (10), and
-        saslBindInProgress (14).
+### A.2.  Result Codes(每个resultCode的具体含义)
 
-   The success, compareTrue, and compareFalse result codes indicate
-   successful completion (and, hence, are referred to as "successful"
-   result codes).
+Existing LDAP result codes are described as follows:
+现有 LDAP-resultcode描述如下：
 
-   The referral and saslBindInProgress result codes indicate the client
-   needs to take additional action to complete the operation.
 
-A.2.  Result Codes
 
-   Existing LDAP result codes are described as follows:
+#### success (0)
 
-      success (0)
-         Indicates the successful completion of an operation.  Note:
-         this code is not used with the Compare operation.  See
-         compareFalse (5) and compareTrue (6).
-#---------------------------------------------------------------------------------------
+Indicates the successful completion of an operation.  Note:  this code is not used with the Compare operation. See compareFalse (5) and compareTrue(6).
+表示操作成功完成。 注意：此代码不用于比较操作/CompareOperation。 请参阅 compareFalse (5) 和 compareTrue(6)。
 
+<font color=red>表示：操作成功</font>
 
 
 
+####   operationsError (1)
 
+Indicates that the operation is not properly sequenced with relation to other operations (of same or different type).
+表示该操作与其他操作(相同或不同类型)的顺序不正确。
 
+For example, this code is returned if the client attempts to StartTLS [RFC4346] while there are other uncompleted operations or if a TLS layer was already installed.
+例如，如果客户端尝试 StartTLS [RFC4346] 而还有其他未完成的操作或者如果已经安装了 TLS 层，则会返回此代码。
 
+<font color=red>表示：操作的顺序不对</font>
 
 
-Sermersheim                 Standards Track                    [Page 49]
-
-RFC 4511                         LDAPv3                        June 2006
 
+####   protocolError (2)
 
-      operationsError (1)
-         Indicates that the operation is not properly sequenced with
-         relation to other operations (of same or different type).
-    
-         For example, this code is returned if the client attempts to
-         StartTLS [RFC4346] while there are other uncompleted operations
-         or if a TLS layer was already installed.
-    
-      protocolError (2)
-         Indicates the server received data that is not well-formed.
-    
-         For Bind operation only, this code is also used to indicate
-         that the server does not support the requested protocol
-         version.
-    
-         For Extended operations only, this code is also used to
-         indicate that the server does not support (by design or
-         configuration) the Extended operation associated with the
-         requestName.
-    
-         For request operations specifying multiple controls, this may
-         be used to indicate that the server cannot ignore the order
-         of the controls as specified, or that the combination of the
-         specified controls is invalid or unspecified.
-    
-      timeLimitExceeded (3)
-         Indicates that the time limit specified by the client was
-         exceeded before the operation could be completed.
-    
-      sizeLimitExceeded (4)
-         Indicates that the size limit specified by the client was
-         exceeded before the operation could be completed.
-    
-      compareFalse (5)
-         Indicates that the Compare operation has successfully
-         completed and the assertion has evaluated to FALSE or
-         Undefined.
-    
-      compareTrue (6)
-         Indicates that the Compare operation has successfully
-         completed and the assertion has evaluated to TRUE.
-    
-      authMethodNotSupported (7)
-         Indicates that the authentication method or mechanism is not
-         supported.
-#---------------------------------------------------------------------------------------
-
-
-
-
-
-Sermersheim                 Standards Track                    [Page 50]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-      strongerAuthRequired (8)
-         Indicates the server requires strong(er) authentication in
-         order to complete the operation.
-    
-         When used with the Notice of Disconnection operation, this
-         code indicates that the server has detected that an
-         established security association between the client and
-         server has unexpectedly failed or been compromised.
-    
-      referral (10)
-         Indicates that a referral needs to be chased to complete the
-         operation (see Section 4.1.10).
-    
-      adminLimitExceeded (11)
-         Indicates that an administrative limit has been exceeded.
-    
-      unavailableCriticalExtension (12)
-         Indicates a critical control is unrecognized (see Section
-         4.1.11).
-    
-      confidentialityRequired (13)
-         Indicates that data confidentiality protections are required.
-    
-      saslBindInProgress (14)
-         Indicates the server requires the client to send a new bind
-         request, with the same SASL mechanism, to continue the
-         authentication process (see Section 4.2).
-    
-      noSuchAttribute (16)
-         Indicates that the named entry does not contain the specified
-         attribute or attribute value.
-    
-      undefinedAttributeType (17)
-         Indicates that a request field contains an unrecognized
-         attribute description.
-    
-      inappropriateMatching (18)
-         Indicates that an attempt was made (e.g., in an assertion) to
-         use a matching rule not defined for the attribute type
-         concerned.
-    
-      constraintViolation (19)
-         Indicates that the client supplied an attribute value that
-         does not conform to the constraints placed upon it by the
-         data model.
-    
-         For example, this code is returned when multiple values are
-         supplied to an attribute that has a SINGLE-VALUE constraint.
-#---------------------------------------------------------------------------------------
-
-Sermersheim                 Standards Track                    [Page 51]
-
-RFC 4511                         LDAPv3                        June 2006
-
-
-      attributeOrValueExists (20)
-         Indicates that the client supplied an attribute or value to
-         be added to an entry, but the attribute or value already
-         exists.
-    
-      invalidAttributeSyntax (21)
-         Indicates that a purported attribute value does not conform
-         to the syntax of the attribute.
-    
-      noSuchObject (32)
-         Indicates that the object does not exist in the DIT.
-    
-      aliasProblem (33)
-         Indicates that an alias problem has occurred.  For example,
-         the code may used to indicate an alias has been dereferenced
-         that names no object.
-    
-      invalidDNSyntax (34)
-         Indicates that an LDAPDN or RelativeLDAPDN field (e.g., search
-         base, target entry, ModifyDN newrdn, etc.) of a request does
-         not conform to the required syntax or contains attribute
-         values that do not conform to the syntax of the attribute's
-         type.
-    
-      aliasDereferencingProblem (36)
-         Indicates that a problem occurred while dereferencing an
-         alias.  Typically, an alias was encountered in a situation
-         where it was not allowed or where access was denied.
-    
-      inappropriateAuthentication (48)
-         Indicates the server requires the client that had attempted
-         to bind anonymously or without supplying credentials to
-         provide some form of credentials.
-    
-      invalidCredentials (49)
-         Indicates that the provided credentials (e.g., the user's name
-         and password) are invalid.
-    
-      insufficientAccessRights (50)
-         Indicates that the client does not have sufficient access
-         rights to perform the operation.
-    
-      busy (51)
-         Indicates that the server is too busy to service the
-         operation.
+Indicates the server received data that is not well-formed.
+指示服务器接收到的格式不正确的数据。
+
+For Bind operation only, this code is also used to indicate that the server does not support the requested protocol version.
+仅用于绑定操作，此代码还用于表明服务器不支持所请求的协议版本。
+
+For Extended operations only, this code is also used to indicate that the server does not support (by design or configuration) the Extended operation associated with the  requestName.
+仅对于Extended操作，此代码还用于指示服务器(通过设计或配置)不支持与requestName关联的Extended操作。
+
+For request operations specifying multiple controls, this may  be used to indicate that the server cannot ignore the order of the controls as specified, or that the combination of the specified controls is invalid or unspecified.
+对于指定多个控件的请求操作，这可用于指示服务器不能忽略指定控件的顺序，或指定控件的组合无效或未指定。
+
+<font color=red>表示：server收到的数据 格式不正确</font>
+
+<font color=red>特定于BindOperation时，表示 server不支持client请求的version</font>
+
+<font color=red>特定于ExtendedOperation时，表示 server不支持requestName关联的Extended操作</font>
+
+<font color=red>特定于  附带了多个control的RequestOperation时，表示 controls的顺序无法忽略 / controls的组合无效 / 未指定controls的组合</font>
+
+
+
+####   timeLimitExceeded (3)
+
+Indicates that the time limit specified by the client was exceeded before the operation could be completed.
+指示在操作完成之前超出了客户端指定的时间限制。
+
+<font color=red>表示：server执行operation的时间，超出了client指定的时间</font>
+
+
+
+####   sizeLimitExceeded (4)
+
+Indicates that the size limit specified by the client was exceeded before the operation could be completed.
+指示在操作完成之前超出了客户端指定的大小限制。
+
+<font color=red>表示：server执行operation的结果大小，超出了client指定的大小</font>
+
+
+
+####   compareFalse (5)
+
+Indicates that the Compare operation has successfully completed and the assertion has evaluated to FALSE or Undefined.
+表示比较操作已成功完成并且断言已评估为 FALSE 或未定义。
+
+<font color=red>表示：CompareOperation被评估为FALSE或Undefined</font>
+
+
+
+####   compareTrue (6)
+
+Indicates that the Compare operation has successfully completed and the assertion has evaluated to TRUE.
+表示比较操作已成功完成并且断言已评估为 TRUE。
+
+<font color=red>表示：CompareOperation被评估为TRUE</font>
+
+
+
+####   authMethodNotSupported (7)
+
+Indicates that the authentication method or mechanism is not supported.
+表示不支持认证方法或机制。
+
+<font color=red>表示：server不支持 此种 认证方法或认证机制</font>
+
+
+
+####   strongerAuthRequired (8)
+
+Indicates the server requires strong(er) authentication in order to complete the operation.
+表示服务器需要强（更）身份验证才能完成操作。
+
+When used with the Notice of Disconnection operation, this code indicates that the server has detected that an established security association between the client and server has unexpectedly failed or been compromised.
+当与“断开连接通知”操作一起使用时，此代码表示服务器已检测到客户端和服务器之间已建立的安全关联意外失败或遭到破坏。
+
+<font color=red>表示：需要更强的 身份验证</font>
+
+<font color=red>当sever同时发送了Notice of Disconnection，表示：server已经检测到 安全关联失败/被破坏</font>
+
+
+
+####   referral (10)
+
+Indicates that a referral needs to be chased to complete the operation (see Section 4.1.10).
+表示需要追逐一个referral来完成操作（参见第 4.1.10 节）。
+
+<font color=red>表示：client需要追踪referral 才能完成操作</font>
+
+
+
+####   adminLimitExceeded (11)
+
+Indicates that an administrative limit has been exceeded.
+表示已超出管理限制。
+
+<font color=red>表示：超出了管理限制</font>
+
+
+
+####   unavailableCriticalExtension (12)
+
+Indicates a critical control is unrecognized (see Section 4.1.11).
+表示无法识别关键控制（请参阅第 4.1.11 节）。
+
+<font color=red>表示：server无法识别 critical control</font>
+
+
+
+####   confidentialityRequired (13)
+
+Indicates that data confidentiality protections are required.
+表示需要数据保密保护。
+
+<font color=red>表示：需要数据保密(措施/机制)</font>
+
+
+
+#### saslBindInProgress (14)
+
+Indicates the server requires the client to send a new bind request, with the same SASL mechanism, to continue the authentication process (see Section 4.2).
+表示服务器要求客户端使用相同的 SASL 机制发送新的绑定请求，以继续身份验证过程（参见第 4.2 节）。
+
+<font color=red>表示：server希望client使用相同的SASL机制来发送Bindrequest，以继续身份验证过程</font>
+
+
+
+####   noSuchAttribute (16)
+
+Indicates that the named entry does not contain the specified attribute or attribute value.
+指示命名条目不包含指定的属性或属性值。
+
+<font color=red>表示：entry中不包含 指定的attribute或attribute-value</font>
+
+
+
+#### undefinedAttributeType (17)
+
+Indicates that a request field contains an unrecognized attribute description.
+表示请求字段包含无法识别的属性描述。
+
+<font color=red>表示：server无法识别(request中的) attribute-description</font>
+
+
+
+####  inappropriateMatching (18)
+
+Indicates that an attempt was made (e.g., in an assertion) to use a matching rule not defined for the attribute type concerned.
+表示已尝试（例如，在断言中）使用未为相关属性类型定义的匹配规则。
+
+
+
+
+
+####   constraintViolation (19)
+
+Indicates that the client supplied an attribute value that does not conform to the constraints placed upon it by the data model.
+指示客户端提供的属性值不符合数据模型对其施加的约束。
+
+For example, this code is returned when multiple values are supplied to an attribute that has a SINGLE-VALUE constraint.
+例如，当为具有 SINGLE-VALUE 约束的属性提供多个值时，将返回此代码。
+
+<font color=red>指示：client提供的attribute-value不符合data-model</font>
+
+
+
+#### attributeOrValueExists (20)
+
+​     Indicates that the client supplied an attribute or value to
+​     be added to an entry, but the attribute or value already
+​     exists.
+
+#### invalidAttributeSyntax (21)
+
+Indicates that a purported attribute value does not conform  to the syntax of the attribute.
+表示声称的属性值不符合属性的语法。
+
+<font color=red>表示：client提供的attribute-value不符合attribute语法</font>
+
+
+
+####   noSuchObject (32)
+
+Indicates that the object does not exist in the DIT.
+表示该对象在 DIT 中不存在。
+
+<font color=red>表示：DIT中没有此entry</font>
+
+
+
+####   aliasProblem (33)
+
+Indicates that an alias problem has occurred.  For example,  the code may used to indicate an alias has been dereferenced  that names no object.
+
+表示发生了别名问题。 例如，该代码可用于指示：已解引用 没任何对象的别名。
+
+
+
+####   invalidDNSyntax (34)
+
+​     Indicates that an LDAPDN or RelativeLDAPDN field (e.g., search
+​     base, target entry, ModifyDN newrdn, etc.) of a request does
+​     not conform to the required syntax or contains attribute
+​     values that do not conform to the syntax of the attribute's
+​     type.
+
+####   aliasDereferencingProblem (36)
+
+​     Indicates that a problem occurred while dereferencing an
+​     alias.  Typically, an alias was encountered in a situation
+​     where it was not allowed or where access was denied.
+
+####   inappropriateAuthentication (48)
+
+​     Indicates the server requires the client that had attempted
+​     to bind anonymously or without supplying credentials to
+​     provide some form of credentials.
+
+####   invalidCredentials (49)
+
+​     Indicates that the provided credentials (e.g., the user's name
+​     and password) are invalid.
+
+####   insufficientAccessRights (50)
+
+​     Indicates that the client does not have sufficient access
+​     rights to perform the operation.
+
+####   busy (51)
+
+Indicates that the server is too busy to service the operation.
+
+表示服务器太忙，无法为操作提供服务。
+
+<font color=red>表示：server太忙，无法提供服务</font>
+
 #---------------------------------------------------------------------------------------
 
 
@@ -2853,66 +2707,59 @@ Sermersheim                 Standards Track                    [Page 52]
 
 RFC 4511                         LDAPv3                        June 2006
 
+####   unavailable (52)
 
-      unavailable (52)
-         Indicates that the server is shutting down or a subsystem
-         necessary to complete the operation is offline.
-    
-      unwillingToPerform (53)
-         Indicates that the server is unwilling to perform the
-         operation.
-    
-      loopDetect (54)
-         Indicates that the server has detected an internal loop (e.g.,
-         while dereferencing aliases or chaining an operation).
-    
-      namingViolation (64)
-         Indicates that the entry's name violates naming restrictions.
-    
-      objectClassViolation (65)
-         Indicates that the entry violates object class restrictions.
-    
-      notAllowedOnNonLeaf (66)
-         Indicates that the operation is inappropriately acting upon a
-         non-leaf entry.
-    
-      notAllowedOnRDN (67)
-         Indicates that the operation is inappropriately attempting to
-         remove a value that forms the entry's relative distinguished
-         name.
-    
-      entryAlreadyExists (68)
-         Indicates that the request cannot be fulfilled (added, moved,
-         or renamed) as the target entry already exists.
-    
-      objectClassModsProhibited (69)
-         Indicates that an attempt to modify the object class(es) of
-         an entry's 'objectClass' attribute is prohibited.
-    
-         For example, this code is returned when a client attempts to
-         modify the structural object class of an entry.
-    
-      affectsMultipleDSAs (71)
-         Indicates that the operation cannot be performed as it would
-         affect multiple servers (DSAs).
-    
-      other (80)
-         Indicates the server has encountered an internal error.
-#---------------------------------------------------------------------------------------
+​     Indicates that the server is shutting down or a subsystem necessary to complete the operation is offline.
+
+####   unwillingToPerform (53)
+
+​     Indicates that the server is unwilling to perform the operation.
+
+####   loopDetect (54)
+
+​     Indicates that the server has detected an internal loop (e.g., while dereferencing aliases or chaining an operation).
+
+####   namingViolation (64)
+
+​     Indicates that the entry's name violates naming restrictions.
+
+####   objectClassViolation (65)
+
+​     Indicates that the entry violates object class restrictions.
+
+####   notAllowedOnNonLeaf (66)
+
+​     Indicates that the operation is inappropriately acting upon a non-leaf entry.
+
+####   notAllowedOnRDN (67)
+
+​     Indicates that the operation is inappropriately attempting to remove a value that forms the entry's relative distinguished name.
+
+####   entryAlreadyExists (68)
+
+​     Indicates that the request cannot be fulfilled (added, moved, or renamed) as the target entry already exists.
+
+####   objectClassModsProhibited (69)
+
+​     Indicates that an attempt to modify the object class(es) of an entry's 'objectClass' attribute is prohibited.
+
+​     For example, this code is returned when a client attempts to modify the structural object class of an entry.
+
+####   affectsMultipleDSAs (71)
+
+​     Indicates that the operation cannot be performed as it would affect multiple servers (DSAs).
+
+  other (80)
+     Indicates the server has encountered an internal error.
 
 
 
+## Appendix B.  Complete ASN.1 Definition(使用ASN.1完整定义的LDAP)
 
+This appendix is normative.
 
-
-Sermersheim                 Standards Track                    [Page 53]
-
-RFC 4511                         LDAPv3                        June 2006
-
-## Appendix B.  Complete ASN.1 Definition
-
-   This appendix is normative.
-
+本附录是规范性的。
+```ASN.1
         Lightweight-Directory-Access-Protocol-V3 {1 3 6 1 1 18}
         -- Copyright (C) The Internet Society (2006).  This version of
         -- this ASN.1 module is part of RFC 4511; see the RFC itself
@@ -2956,14 +2803,6 @@ RFC 4511                         LDAPv3                        June 2006
     
         LDAPString ::= OCTET STRING -- UTF-8 encoded,
                                     -- [ISO10646] characters
-#---------------------------------------------------------------------------------------
-
-
-
-Sermersheim                 Standards Track                    [Page 54]
-
-RFC 4511                         LDAPv3                        June 2006
-
 
         LDAPOID ::= OCTET STRING -- Constrained to <numericoid>
                                  -- [RFC4512]
@@ -3013,12 +2852,6 @@ RFC 4511                         LDAPv3                        June 2006
                   unavailableCriticalExtension (12),
                   confidentialityRequired      (13),
                   saslBindInProgress           (14),
-#---------------------------------------------------------------------------------------
-
-
-Sermersheim                 Standards Track                    [Page 55]
-
-RFC 4511                         LDAPv3                        June 2006
 
 
                   noSuchAttribute              (16),
@@ -3068,13 +2901,6 @@ RFC 4511                         LDAPv3                        June 2006
              controlType             LDAPOID,
              criticality             BOOLEAN DEFAULT FALSE,
              controlValue            OCTET STRING OPTIONAL }
-#---------------------------------------------------------------------------------------
-
-
-
-Sermersheim                 Standards Track                    [Page 56]
-
-RFC 4511                         LDAPv3                        June 2006
 
 
         BindRequest ::= [APPLICATION 0] SEQUENCE {
@@ -3125,11 +2951,6 @@ RFC 4511                         LDAPv3                        June 2006
              or              [1] SET SIZE (1..MAX) OF filter Filter,
              not             [2] Filter,
              equalityMatch   [3] AttributeValueAssertion,
-#---------------------------------------------------------------------------------------
-
-Sermersheim                 Standards Track                    [Page 57]
-
-RFC 4511                         LDAPv3                        June 2006
 
 
              substrings      [4] SubstringFilter,
@@ -3177,15 +2998,6 @@ RFC 4511                         LDAPv3                        June 2006
                   modification    PartialAttribute } }
     
         ModifyResponse ::= [APPLICATION 7] LDAPResult
-#---------------------------------------------------------------------------------------
-
-
-
-
-
-Sermersheim                 Standards Track                    [Page 58]
-
-RFC 4511                         LDAPv3                        June 2006
 
 
         AddRequest ::= [APPLICATION 8] SEQUENCE {
@@ -3230,47 +3042,36 @@ RFC 4511                         LDAPv3                        June 2006
              responseValue    [1] OCTET STRING OPTIONAL }
     
         END
-#---------------------------------------------------------------------------------------
+```
 
-
-
-
-
-
-
-
-Sermersheim                 Standards Track                    [Page 59]
-
-RFC 4511                         LDAPv3                        June 2006
-
-## Appendix C.  Changes
+## Appendix C.  Changes(RFC的更新)
 
    This appendix is non-normative.
 
    This appendix summarizes substantive changes made to RFC 2251, RFC
    2830, and RFC 3771.
 
-C.1.  Changes Made to RFC 2251
+### C.1.  Changes Made to RFC 2251
 
    This section summarizes the substantive changes made to Sections 1,
    2, 3.1, and 4, and the remainder of RFC 2251.  Readers should
    consult [RFC4512] and [RFC4513] for summaries of changes to other
    sections.
 
-C.1.1.  Section 1 (Status of this Memo)
+#### C.1.1.  Section 1 (Status of this Memo)
 
    - Removed IESG note.  Post publication of RFC 2251, mandatory LDAP
      authentication mechanisms have been standardized which are
      sufficient to remove this note.  See [RFC4513] for authentication
      mechanisms.
 
-C.1.2.  Section 3.1 (Protocol Model) and others
+#### C.1.2.  Section 3.1 (Protocol Model) and others
 
    - Removed notes giving history between LDAP v1, v2, and v3.  Instead,
      added sufficient language so that this document can stand on its
      own.
 
-C.1.3.  Section 4 (Elements of Protocol)
+#### C.1.3.  Section 4 (Elements of Protocol)
 
    - Clarified where the extensibility features of ASN.1 apply to the
      protocol.  This change affected various ASN.1 types by the
@@ -3279,7 +3080,7 @@ C.1.3.  Section 4 (Elements of Protocol)
      later MUST provide the 'supportedLDAPVersion' attribute.  This
      statement provided no interoperability advantages.
 
-C.1.4.  Section 4.1.1 (Message Envelope)
+#### C.1.4.  Section 4.1.1 (Message Envelope)
 
    - There was a mandatory requirement for the server to return a
      Notice of Disconnection and drop the transport connection when a
@@ -3287,7 +3088,7 @@ C.1.4.  Section 4.1.1 (Message Envelope)
      the server SHOULD return the Notice of Disconnection, and it MUST
      terminate the LDAP Session.
 
-C.1.5.  Section 4.1.1.1 (Message ID)
+#### C.1.5.  Section 4.1.1.1 (Message ID)
 
    - Required that the messageID of requests MUST be non-zero as the
      zero is reserved for Notice of Disconnection.
@@ -3303,23 +3104,21 @@ RFC 4511                         LDAPv3                        June 2006
      used messageID.  RFC 2251 accidentally imposed synchronous server
      behavior in its wording of this.
 
-C.1.6.  Section 4.1.2 (String Types)
+#### C.1.6.  Section 4.1.2 (String Types)
 
    - Stated that LDAPOID is constrained to <numericoid> from [RFC4512].
 
-C.1.7.  Section 4.1.5.1 (Binary Option) and others
+#### C.1.7.  Section 4.1.5.1 (Binary Option) and others
 
-   - Removed the Binary Option from the specification.  There are
-     numerous interoperability problems associated with this method of
-     alternate attribute type encoding.  Work to specify a suitable
-     replacement is ongoing.
+   - Removed the Binary Option from the specification.  There are numerous interoperability problems associated with this method of alternate attribute type encoding.  Work to specify a suitable replacement is ongoing.
+   - 从规范中删除了"二进制选项"。 有许多与这种替代 属性类型编码方法 相关的互操作性问题。 指定合适的替代品的工作正在进行中。
 
-C.1.8.  Section 4.1.8 (Attribute)
+#### C.1.8.  Section 4.1.8 (Attribute)
 
    - Combined the definitions of PartialAttribute and Attribute here,
      and defined Attribute in terms of PartialAttribute.
 
-C.1.9.  Section 4.1.10 (Result Message)
+#### C.1.9.  Section 4.1.10 (Result Message)
 
    - Renamed "errorMessage" to "diagnosticMessage" as it is allowed to
      be sent for non-error results.
@@ -3330,7 +3129,7 @@ C.1.9.  Section 4.1.10 (Result Message)
      clarify that this code may often be returned to indicate that a
      stronger authentication is needed to perform a given operation.
 
-C.1.10.  Section 4.1.11 (Referral)
+#### C.1.10.  Section 4.1.11 (Referral)
 
    - Defined referrals in terms of URIs rather than URLs.
    - Removed the requirement that all referral URIs MUST be equally
@@ -3354,8 +3153,7 @@ Sermersheim                 Standards Track                    [Page 61]
 
 RFC 4511                         LDAPv3                        June 2006
 
-
-C.1.11.  Section 4.1.12 (Controls)
+#### C.1.11.  Section 4.1.12 (Controls)
 
    - Specified how control values defined in terms of ASN.1 are to be
      encoded.
@@ -3375,7 +3173,7 @@ C.1.11.  Section 4.1.12 (Controls)
      implementations must be able to handle this (as both parse
      controls).
 
-C.1.12.  Section 4.2 (Bind Operation)
+#### C.1.12.  Section 4.2 (Bind Operation)
 
    - Mandated that servers return protocolError when the version is not
      supported.
@@ -3389,7 +3187,7 @@ C.1.12.  Section 4.2 (Bind Operation)
      to help ensure interoperability of passwords being sent from
      different clients.
 
-C.1.13.  Section 4.2.1 (Sequencing of the Bind Request)
+#### C.1.13.  Section 4.2.1 (Sequencing of the Bind Request)
 
    - This section was largely reorganized for readability, and language
      was added to clarify the authentication state of failed and
@@ -3416,7 +3214,7 @@ RFC 4511                         LDAPv3                        June 2006
      are received.  This is needed to ensure proper sequencing of the
      Bind in relationship to other operations.
 
-C.1.14.  Section 4.2.3 (Bind Response)
+#### C.1.14.  Section 4.2.3 (Bind Response)
 
    - Moved most error-related text to Appendix A, and added text
      regarding certain errors used in conjunction with the Bind
@@ -3424,17 +3222,17 @@ C.1.14.  Section 4.2.3 (Bind Response)
    - Prohibited the server from specifying serverSaslCreds when not
      appropriate.
 
-C.1.15.  Section 4.3 (Unbind Operation)
+#### C.1.15.  Section 4.3 (Unbind Operation)
 
    - Specified that both peers are to cease transmission and terminate
      the LDAP session for the Unbind operation.
 
-C.1.16.  Section 4.4 (Unsolicited Notification)
+#### C.1.16.  Section 4.4 (Unsolicited Notification)
 
    - Added instructions for future specifications of Unsolicited
      Notifications.
 
-C.1.17.  Section 4.5.1 (Search Request)
+#### C.1.17.  Section 4.5.1 (Search Request)
 
    - SearchRequest attributes is now defined as an AttributeSelection
      type rather than AttributeDescriptionList, and an ABNF is
@@ -3468,22 +3266,22 @@ RFC 4511                         LDAPv3                        June 2006
 
 
 
-C.1.18.  Section 4.5.2 (Search Result)
+#### C.1.18.  Section 4.5.2 (Search Result)
 
    - Recommended that servers not use attribute short names when it
      knows they are ambiguous or may cause interoperability problems.
    - Removed all mention of ExtendedResponse due to lack of
      implementation.
 
-C.1.19.  Section 4.5.3 (Continuation References in the Search Result)
+#### C.1.19.  Section 4.5.3 (Continuation References in the Search Result)
 
    - Made changes similar to those made to Section 4.1.11.
 
-C.1.20.  Section 4.5.3.1 (Example)
+#### C.1.20.  Section 4.5.3.1 (Example)
 
    - Fixed examples to adhere to changes made to Section 4.5.3.
 
-C.1.21.  Section 4.6 (Modify Operation)
+#### C.1.21.  Section 4.6 (Modify Operation)
 
    - Replaced AttributeTypeAndValues with Attribute as they are
      equivalent.
@@ -3491,7 +3289,7 @@ C.1.21.  Section 4.6 (Modify Operation)
      temporarily violate schema.  Some readers were under the impression
      that any temporary schema violation was allowed.
 
-C.1.22.  Section 4.7 (Add Operation)
+#### C.1.22.  Section 4.7 (Add Operation)
 
    - Aligned Add operation with X.511 in that the attributes of the RDN
      are used in conjunction with the listed attributes to create the
@@ -3504,7 +3302,7 @@ C.1.22.  Section 4.7 (Add Operation)
    - Removed recommendation regarding placement of objects.  This is
      covered in the data model document.
 
-C.1.23.  Section 4.9 (Modify DN Operation)
+#### C.1.23.  Section 4.9 (Modify DN Operation)
 
    - Required servers to not dereference aliases for Modify DN.  This
      was added for consistency with other operations and to help ensure
@@ -3522,8 +3320,7 @@ Sermersheim                 Standards Track                    [Page 64]
 
 RFC 4511                         LDAPv3                        June 2006
 
-
-C.1.24.  Section 4.10 (Compare Operation)
+#### C.1.24.  Section 4.10 (Compare Operation)
 
    - Specified that compareFalse means that the Compare took place and
      the result is false.  There was confusion that led people to
@@ -3532,13 +3329,13 @@ C.1.24.  Section 4.10 (Compare Operation)
      added for consistency with other operations and to help ensure
      data consistency.
 
-C.1.25.  Section 4.11 (Abandon Operation)
+#### C.1.25.  Section 4.11 (Abandon Operation)
 
    - Explained that since Abandon returns no response, clients should
      not use it if they need to know the outcome.
    - Specified that Abandon and Unbind cannot be abandoned.
 
-C.1.26.  Section 4.12 (Extended Operation)
+#### C.1.26.  Section 4.12 (Extended Operation)
 
    - Specified how values of Extended operations defined in terms of
      ASN.1 are to be encoded.
@@ -3547,12 +3344,12 @@ C.1.26.  Section 4.12 (Extended Operation)
    - Added a recommendation that servers advertise supported Extended
      operations.
 
-C.1.27.  Section 5.2 (Transfer Protocols)
+#### C.1.27.  Section 5.2 (Transfer Protocols)
 
    - Moved referral-specific instructions into referral-related
      sections.
 
-C.1.28.  Section 7 (Security Considerations)
+#### C.1.28.  Section 7 (Security Considerations)
 
    - Reworded notes regarding SASL not protecting certain aspects of
      the LDAP Bind messages.
@@ -3578,19 +3375,18 @@ Sermersheim                 Standards Track                    [Page 65]
 
 RFC 4511                         LDAPv3                        June 2006
 
-
-C.1.29.  Appendix A (Complete ASN.1 Definition)
+#### C.1.29.  Appendix A (Complete ASN.1 Definition)
 
    - Added "EXTENSIBILITY IMPLIED" to ASN.1 definition.
    - Removed AttributeType.  It is not used.
 
-C.2.  Changes Made to RFC 2830
+### C.2.  Changes Made to RFC 2830
 
    This section summarizes the substantive changes made to Sections of
    RFC 2830.  Readers should consult [RFC4513] for summaries of changes
    to other sections.
 
-C.2.1.  Section 2.3 (Response other than "success")
+#### C.2.1.  Section 2.3 (Response other than "success")
 
    - Removed wording indicating that referrals can be returned from
      StartTLS.
@@ -3601,14 +3397,14 @@ C.2.1.  Section 2.3 (Response other than "success")
      present.  There are circumstances where this is impossible, and
      requiring this is at odds with language in Section 4.12.
 
-C.2.1.  Section 4 (Closing a TLS Connection)
+#### C.2.1.  Section 4 (Closing a TLS Connection)
 
    - Reworded most of this section to align with definitions of the
      LDAP protocol layers.
    - Removed instructions on abrupt closure as this is covered in other
      areas of the document (specifically, Section 5.3)
 
-C.3.  Changes Made to RFC 3771
+### C.3.  Changes Made to RFC 3771
 
    - Rewrote to fit into this document.  In general, semantics were
      preserved.  Supporting and background language seen as redundant
