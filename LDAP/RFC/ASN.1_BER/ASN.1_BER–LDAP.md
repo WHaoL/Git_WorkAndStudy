@@ -1220,6 +1220,7 @@ Sometimes you want to have a sequence that is just a list containing some number
 
 ```ASN.1
 ListOfIntegers ::= SEQUENCE OF listItem INTEGER
+-- name       赋值 "SEQUENCE OF"  type's-name  type
 ```
 
 总结： 
