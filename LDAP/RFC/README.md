@@ -9,15 +9,13 @@
 
 
 
-## 1.首先看 `./ASN.1_BER/`下的文档
-
+## 1.首先看 `./rfc00_base/`下的文档
+ASN.1_BER_LDAP.md [阅读rfc44511的必备知识]
 ​	熟悉：
-
 ​		基本的ASN.1-BER基本编码规则；
-
 ​		BER的类型以及BER类型的十六进制编码；
-
 ​		BER类型 如何表示为 ASN.1 string/字符串
+Augmented_BNF.md[阅读rfc4512的必备知识]
 
 
 
