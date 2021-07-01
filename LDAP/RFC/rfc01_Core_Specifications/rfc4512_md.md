@@ -1022,11 +1022,10 @@ As defined in [X.501]: 如[X.501]所定义：
 
 
 
-### 4.1.  Schema Definitions(模式定义/schema定义)
+### 4.1.  Schema Definitions(schema的定义)
 
 Schema definitions in this section are described using ABNF and rely on the common productions specified in Section 1.2 as well as these:
-
-本节中的schema定义 使用ABNF描述，并依赖 1.2节(注意：其实是本文档的1.4节)中指定的 常见的产生方式  以及这些：
+<font color=red>本节中的schema定义 使用ABNF描述</font>，并依赖 1.2节(注意：其实是本文档的1.4节)中指定的 常见的产生方式  以及这些：
 
 ```ABNF
   noidlen = numericoid [ LCURLY len RCURLY ]                      -- LCURLY="{" RCURLY="}"
@@ -1059,319 +1058,327 @@ Schema definitions in this section are described using ABNF and rely on the comm
 ```
 
 Schema definitions in this section also share a number of common terms.
-
-
-
-Zeilenga                    Standards Track                    [Page 23]
-
-RFC 4512                      LDAP Models                      June 2006
+本节中的schema定义，也共享许多通用术语。
 
 The NAME field provides a set of short names (descriptors) that are to be used as aliases for the OID.
+NAME字段 提供了：一组用作 OID别名的短名称(描述符)。
 
 The DESC field optionally allows a descriptive string to be provided by the directory administrator and/or implementor.  While specifications may suggest a descriptive string, there is no requirement that the suggested (or any) descriptive string be used.
+DESC字段可选地允许 目录管理员和/或实现者 提供描述性字符串。 虽然规范可能会建议一个描述性字符串，但并不要求使用建议的(或任何)描述性字符串。
 
 The OBSOLETE field, if present, indicates the element is not active.
+OBSOLETE 字段(如果存在)：表示该元素未处于活动状态。
 
-Implementors should note that future versions of this document may expand these definitions to include additional terms.  Terms whose identifier begins with "X-" are reserved for private experiments and are followed by <SP> and <qdstrings> tokens.
+Implementors should note that future versions of this document may expand these definitions to include additional terms.  Terms whose identifier begins with "X-" are reserved for private experiments and are followed by `<SP>` and `<qdstrings>` tokens.
+实施者应注意，本文档的未来版本可能会扩展这些定义以包括附加术语。 
+标识符以“X-”开头的术语保留用于私人实验，后跟 `<SP> `和 `<qdstrings>` 标记。
 
-#### 4.1.1.  Object Class Definitions
 
-   Object Class definitions are written according to the ABNF:
+
+#### 4.1.1.  Object Class Definitions(object-class的定义)
+
+Object Class definitions are written according to the ABNF:
+<font color=red>object-class的定义 是根据ABNF编写的：</font>
 
 ```ASN.1
  ObjectClassDescription = LPAREN WSP
-     numericoid                 ; object identifier
-     [ SP "NAME" SP qdescrs ]   ; short names (descriptors)
-     [ SP "DESC" SP qdstring ]  ; description
-     [ SP "OBSOLETE" ]          ; not active
-     [ SP "SUP" SP oids ]       ; superior object classes
-     [ SP kind ]                ; kind of class
-     [ SP "MUST" SP oids ]      ; attribute types
-     [ SP "MAY" SP oids ]       ; attribute types
+     numericoid                 ; object identifier			-- OID
+     [ SP "NAME" SP qdescrs ]   ; short names (descriptors)	-- 1个或多个短名称(OID的别名)
+     [ SP "DESC" SP qdstring ]  ; description               -- 描述性字符串，是个UTF-8编码的字符串
+     [ SP "OBSOLETE" ]          ; not active                -- 表示：未激活
+     [ SP "SUP" SP oids ]       ; superior object classes   -- 指定该object-class的直接 superclass
+     [ SP kind ]                ; kind of class             -- ABSTRACT或STRUCTURAL或AUXILIARY，默认是structural
+     [ SP "MUST" SP oids ]      ; attribute types           -- 必需包含的 attribute-type集合
+     [ SP "MAY" SP oids ]       ; attribute types           -- 可以包含的 attribute-type集合
      extensions WSP RPAREN
 
  kind = "ABSTRACT" / "STRUCTURAL" / "AUXILIARY"
 ```
 
-   where:
-     <numericoid> is object identifier assigned to this object class;
-     NAME <qdescrs> are short names (descriptors) identifying this
-         object class;
-     DESC <qdstring> is a short descriptive string;
-     OBSOLETE indicates this object class is not active;
-     SUP <oids> specifies the direct superclasses of this object class;
-     the kind of object class is indicated by one of ABSTRACT,
-         STRUCTURAL, or AUXILIARY (the default is STRUCTURAL);
-     MUST and MAY specify the sets of required and allowed attribute
-         types, respectively; and
-     <extensions> describe extensions.
+where: 
+其中：
+
+   `<numericoid>` is object identifier assigned to this object class; 
+   `<numericoid>` 是分配给这个object-class的 对象标识符/OID；
+
+   NAME `<qdescrs>` are short names (descriptors) identifying this object class;
+   NAME `<qdescrs>` 是标识这个object-class的短名称（描述符）；     
+
+​	 DESC` <qdstring>` is a short descriptive string;
+​	 DESC` <qdstring>` 是一个简短的描述性字符串；
+
+   OBSOLETE indicates this object class is not active;
+​	 OBSOLETE 表示该object-class未激活；
+
+   SUP `<oids>` specifies the direct superclasses of this object class;
+   SUP `<oids>` 指定了这个object-class的直接超类/superclasses；
+
+   the kind of object class is indicated by one of ABSTRACT, STRUCTURAL, or AUXILIARY (the default is STRUCTURAL);
+   object-class的种类：由ABSTRACT/abstract、STRUCTURAL/structural 或 AUXILIARY/auxiliary 之一指示（默认为 STRUCTURAL/structural）；
+
+   MUST and MAY specify the sets of required and allowed attribute types, respectively; and 
+   MUST和MAY分别指定必需和允许的属性类型集； 和
+
+   `<extensions>` describe extensions.
+   `<extensions>`描述扩展。
 
 
 
+#### 4.1.2.  Attribute Types(attribute-type的定义)
 
+Attribute Type definitions are written according to the ABNF:
+<font color=red>attribute-type的定义 是根据ABNF编写的：</font>
 
-
-
-Zeilenga                    Standards Track                    [Page 24]
-
-RFC 4512                      LDAP Models                      June 2006
-
-#### 4.1.2.  Attribute Types
-
-   Attribute Type definitions are written according to the ABNF:
-
+```ASN.1
      AttributeTypeDescription = LPAREN WSP
-         numericoid                    ; object identifier
-         [ SP "NAME" SP qdescrs ]      ; short names (descriptors)
-         [ SP "DESC" SP qdstring ]     ; description
-         [ SP "OBSOLETE" ]             ; not active
-         [ SP "SUP" SP oid ]           ; supertype
+         numericoid                    ; object identifier        -- OID
+         [ SP "NAME" SP qdescrs ]      ; short names (descriptors)-- 短名称
+         [ SP "DESC" SP qdstring ]     ; description              --描述性字符串
+         [ SP "OBSOLETE" ]             ; not active               --表示：未激活
+         [ SP "SUP" SP oid ]           ; supertype                --指定它的直接supertype
          [ SP "EQUALITY" SP oid ]      ; equality matching rule
          [ SP "ORDERING" SP oid ]      ; ordering matching rule
          [ SP "SUBSTR" SP oid ]        ; substrings matching rule
-         [ SP "SYNTAX" SP noidlen ]    ; value syntax
-         [ SP "SINGLE-VALUE" ]         ; single-value
-         [ SP "COLLECTIVE" ]           ; collective
-         [ SP "NO-USER-MODIFICATION" ] ; not user modifiable
-         [ SP "USAGE" SP usage ]       ; usage
-         extensions WSP RPAREN         ; extensions
+         [ SP "SYNTAX" SP noidlen ]    ; value syntax             -- oid标识的 值语法
+         [ SP "SINGLE-VALUE" ]         ; single-value             -- 单值
+         [ SP "COLLECTIVE" ]           ; collective               -- 集合
+         [ SP "NO-USER-MODIFICATION" ] ; not user modifiable      -- 用户不可修改
+         [ SP "USAGE" SP usage ]       ; usage                    -- 用法  
+         extensions WSP RPAREN         ; extensions               --扩展
     
      usage = "userApplications"     /  ; user
              "directoryOperation"   /  ; directory operational
              "distributedOperation" /  ; DSA-shared operational
              "dSAOperation"            ; DSA-specific operational
+```
+where:
+其中
+   <numericoid> is object identifier assigned to this attribute type;
+   <numericoid> 是分配给该attribute-type的 对象标识符/OID；
 
-   where:
-     <numericoid> is object identifier assigned to this attribute type;
-     NAME <qdescrs> are short names (descriptors) identifying this
-         attribute type;
-     DESC <qdstring> is a short descriptive string;
-     OBSOLETE indicates this attribute type is not active;
-     SUP oid specifies the direct supertype of this type;
-     EQUALITY, ORDERING, and SUBSTR provide the oid of the equality,
-         ordering, and substrings matching rules, respectively;
-     SYNTAX identifies value syntax by object identifier and may suggest
-         a minimum upper bound;
-     SINGLE-VALUE indicates attributes of this type are restricted to a
-         single value;
-     COLLECTIVE indicates this attribute type is collective
-         [X.501][RFC3671];
-     NO-USER-MODIFICATION indicates this attribute type is not user
-         modifiable;
-     USAGE indicates the application of this attribute type; and
-     <extensions> describe extensions.
+   NAME <qdescrs> are short names (descriptors) identifying this attribute type;
+   NAME <qdescrs> 是标识此attribute-type的短名称（描述符）；
 
-   Each attribute type description must contain at least one of the SUP
-   or SYNTAX fields.  If no SYNTAX field is provided, the attribute type
-   description takes its value from the supertype.
+   DESC <qdstring> is a short descriptive string;
+   DESC <qdstring> 是一个简短的描述性字符串；
 
+   OBSOLETE indicates this attribute type is not active;
+   OBSOLETE 表示该attribute-type未激活；
 
+   SUP oid specifies the direct supertype of this type;
+   SUP oid 指定该attribute-type的 直接 超类型/supertype；
 
-Zeilenga                    Standards Track                    [Page 25]
-
-RFC 4512                      LDAP Models                      June 2006
+   EQUALITY, ORDERING, and SUBSTR provide the oid of the equality, ordering, and substrings matching rules, respectively;
+   EQUALITY、ORDERING、SUBSTR分别提供了：oid的 相等、排序、子串  匹配规则；
 
+   SYNTAX identifies value syntax by object identifier and may suggest a minimum upper bound;
+   SYNTAX通过OID识别值语法，并可能建议一个最小上限；
 
-   If SUP field is provided, the EQUALITY, ORDERING, and SUBSTRING
-   fields, if not specified, take their value from the supertype.
+   SINGLE-VALUE indicates attributes of this type are restricted to a single value;
+   SINGLE-VALUE 表示该attribute-type的attribute仅限于单个值/value；
 
-   Usage of userApplications, the default, indicates that attributes of
-   this type represent user information.  That is, they are user
-   attributes.
+   COLLECTIVE indicates this attribute type is collective [X.501][RFC3671];
+   COLLECTIVE 表示该attribute-type是集体/集合 [X.501][RFC3671]；
 
-   A usage of directoryOperation, distributedOperation, or dSAOperation
-   indicates that attributes of this type represent operational and/or
-   administrative information.  That is, they are operational
-   attributes.
+   NO-USER-MODIFICATION indicates this attribute type is not user modifiable;
+   NO-USER-MODIFICATION 表示该attribute-type是用户不可修改的；
 
-   directoryOperation usage indicates that the attribute of this type is
-   a directory operational attribute.  distributedOperation usage
-   indicates that the attribute of this type is a DSA-shared usage
-   operational attribute.  dSAOperation usage indicates that the
-   attribute of this type is a DSA-specific operational attribute.
+   USAGE indicates the application of this attribute type; and
+   USAGE 表示该属性类型的应用； 和
 
-   COLLECTIVE requires usage userApplications.  Use of collective
-   attribute types in LDAP is discussed in [RFC3671].
+   <extensions> describe extensions.
+   <extensions> 描述扩展。
 
-   NO-USER-MODIFICATION requires an operational usage.
+Each attribute type description must contain at least one of the SUP or SYNTAX fields.  If no SYNTAX field is provided, the attribute type description takes its value from the supertype.
+<font color=red>每个attribute-type-description必须至少包含 SUP字段 或 SYNTAX 字段之一。 </font>
+<font color=red>如果未提供 SYNTAX 字段，则attribute-type-description从supertype中获取其值/value。</font>
 
-   Note that the <AttributeTypeDescription> does not list the matching
-   rules that can be used with that attribute type in an extensibleMatch
-   search filter [RFC4511].  This is done using the 'matchingRuleUse'
-   attribute described in Section 4.1.4.
-
-   This document refines the schema description of X.501 by requiring
-   that the SYNTAX field in an <AttributeTypeDescription> be a string
-   representation of an object identifier for the LDAP string syntax
-   definition, with an optional indication of the suggested minimum
-   bound of a value of this attribute.
-
-   A suggested minimum upper bound on the number of characters in a
-   value with a string-based syntax, or the number of bytes in a value
-   for all other syntaxes, may be indicated by appending this bound
-   count inside of curly braces following the syntax's OBJECT IDENTIFIER
-   in an Attribute Type Description.  This bound is not part of the
-   syntax name itself.  For instance, "1.3.6.4.1.1466.0{64}" suggests
-   that server implementations should allow a string to be 64 characters
-   long, although they may allow longer strings.  Note that a single
-   character of the Directory String syntax may be encoded in more than
-   one octet since UTF-8 [RFC3629] is a variable-length encoding.
+If SUP field is provided, the EQUALITY, ORDERING, and SUBSTRING fields, if not specified, take their value from the supertype.
+<font color=red>如果提供了 SUP 字段，则EQUALITY、ORDERING 和 SUBSTRING 字段(如果未指定)  从supertype中获取它们的值/value。</font>
 
 
 
+Usage of userApplications, the default, indicates that attributes of this type represent user information.  That is, they are user attributes.
+<font color=red>usage = userApplications时，默认值，指示该type的attribute：代表用户信息。 也就是说，它们是用户属性/user-attribute。</font>
+
+A usage of directoryOperation, distributedOperation, or dSAOperation indicates that attributes of this type represent operational and/or administrative information.  That is, they are operational attributes.
+<font color=red>当usage是directoryOperation、distributedOperation 或 dSAOperation时，指示这种type的attribute：代表操作和/或管理信息。 也就是说，它们是操作属性。</font>
+
+directoryOperation usage indicates that the attribute of this type is a directory operational attribute.  distributedOperation usage indicates that the attribute of this type is a DSA-shared usage operational attribute.  dSAOperation usage indicates that the attribute of this type is a DSA-specific operational attribute.
+<font color=red>usage = directoryOperation时，指示该type的attribute：为目录操作属性。 </font>
+<font color=red>usage = distributedOperation时，指示该type的attribute：是DSA-共享用法操作属性。</font> 
+<font color=red>usage = dSAOperation时，表明该type的attribute：是DSA-特定的操作属性。</font>
 
 
 
+COLLECTIVE requires usage userApplications.  Use of collective attribute types in LDAP is discussed in [RFC3671].
+<font color=red>COLLECTIVE需要usage=userApplications。 [RFC3671] 中讨论了LDAP中 集合属性类型 的使用。</font>
 
-Zeilenga                    Standards Track                    [Page 26]
-
-RFC 4512                      LDAP Models                      June 2006
+NO-USER-MODIFICATION requires an operational usage.
+<font color=red>NO-USER-MODIFICATION 需要 usage = XXXOperation。</font>
 
-#### 4.1.3. Matching Rules(匹配规则)
+
+
+Note that the `<AttributeTypeDescription> `does not list the matching rules that can be used with that attribute type in an extensibleMatch search filter [RFC4511].  This is done using the 'matchingRuleUse' attribute described in Section 4.1.4.
+请注意，`<AttributeTypeDescription> `未列出  可在extensibleMatch搜索过滤器[RFC4511]中  与该attribute-type一起使用的匹配规则。 
+这是使用第4.1.4节中描述的'matchingRuleUse'-attribute完成的。
+
+This document refines the schema description of X.501 by requiring that the SYNTAX field in an <AttributeTypeDescription> be a string representation of an object identifier for the LDAP string syntax definition, with an optional indication of the suggested minimum bound of a value of this attribute.
+本文档通过要求  `<AttributeTypeDescription>`中的SYNTAX字段  是LDAP字符串语法定义的OID  的字符串表示  来改进/细化 X.501的schema描述，并可选指示此此attribute-value的建议最小界限。
+
+A suggested minimum upper bound on the number of characters in a value with a string-based syntax, or the number of bytes in a value for all other syntaxes, may be indicated by appending this bound count inside of curly braces following the syntax's OBJECT IDENTIFIER in an Attribute Type Description.  This bound is not part of the syntax name itself.  For instance, "1.3.6.4.1.1466.0{64}" suggests that server implementations should allow a string to be 64 characters long, although they may allow longer strings.  Note that a single character of the Directory String syntax may be encoded in more than one octet since UTF-8 [RFC3629] is a variable-length encoding.
+当value 是基于  a string-based syntax 时，我们可以 建议value(是字符组成的字符串)的字符数的最小上限，或者 当value基于其他语法 也可以...
+<font color=red>可以在attribute-type-description的syntax's OID  后面的大括号内  追加此边界数  (来限制value的字符个数)。</font>
+这个界限不是 syntax-name/语法名称 本身的一部分。 
+例如，"1.3.6.4.1.1466.0{64}"建议server实现应该  允许一个字符串长度为 64 个字符，尽管它们可能允许更长的字符串。 
+请注意，由于UTF-8[RFC3629]是一种可变长度编码，因此  目录字符串语法  的单个字符可能会被编码为多个八位字节。
+
+
+
+#### 4.1.3. Matching Rules(match-rule的定义)
 
 Matching rules are used in performance of attribute value assertions, such as in performance of a Compare operation.  They are also used in evaluating search filters, determining which individual values are to be added or deleted during performance of a Modify operation, and in comparing distinguished names.
-
-匹配规则用于执行属性值断言/判断，例如执行比较操作。 它们还用于评估搜索过滤器、确定在执行修改操作期间要添加或删除哪些单独的值，以及比较可分辨名称。
-
-
+<font color=red>matching-rule  用于执行   attribute-value-assertion，例如执行compare-operation。 </font>
+<font color=red>它们还用于评估search-filter、确定在执行修改操作期间要添加或删除哪些单独的值/value，以及比较 可分辨名称/DN。</font>
 
 Each matching rule is identified by an object identifier (OID) and, optionally, one or more short names (descriptors).
-
-每个匹配规则由对象标识符 (OID) 和可选的一个或多个短名称（描述符）标识。
-
-
+<font color=red>每个matching-rule由对象标识符 (OID) 和可选的一个或多个短名称（描述符）标识。</font>
 
 Matching rule definitions are written according to the ABNF:
+<font color=red>matching-rule定义 根据ABNF编写：</font>
 
-匹配规则定义根据 ABNF 编写：
+```ASN.1
+ MatchingRuleDescription = LPAREN WSP
+     numericoid                 ; object identifier         -- OID
+     [ SP "NAME" SP qdescrs ]   ; short names (descriptors) -- 短名称
+     [ SP "DESC" SP qdstring ]  ; description               -- 描述字符串
+     [ SP "OBSOLETE" ]          ; not active                -- 未激活
+     SP "SYNTAX" SP numericoid  ; assertion syntax          -- 语法
+     extensions WSP RPAREN      ; extensions                -- 扩展
+```
 
-     MatchingRuleDescription = LPAREN WSP
-         numericoid                 ; object identifier
-         [ SP "NAME" SP qdescrs ]   ; short names (descriptors)
-         [ SP "DESC" SP qdstring ]  ; description
-         [ SP "OBSOLETE" ]          ; not active
-         SP "SYNTAX" SP numericoid  ; assertion syntax
-         extensions WSP RPAREN      ; extensions
+where:
+   <numericoid> is object identifier assigned to this matching rule;
+   <numericoid> 是分配给该match-rule/匹配规则的对象标识符/OID；
 
-   where:
-     <numericoid> is object identifier assigned to this matching rule;
-​			<numericoid> 是分配给该匹配规则的对象标识符/OID；
-​     NAME <qdescrs> are short names (descriptors) identifying thismatching rule;
-​			NAME <qdescrs> 是标识此匹配规则的短名称（描述符）；
-​     DESC <qdstring> is a short descriptive string;
-​			DESC <qdstring> 是一个简短的描述性字符串；
-​     OBSOLETE indicates this matching rule is not active;
-​			OBSOLETE 表示此匹配规则未激活；
-​     SYNTAX identifies the assertion syntax (the syntax of the assertion value) by object identifier; and<extensions> describe extensions.
-​			SYNTAX 通过 对象标识符/OID 标识断言语法（断言值的语法）； 和<extensions> 描述扩展。
+   NAME <qdescrs> are short names (descriptors) identifying this matching rule;
+   NAME <qdescrs> 是标识此matching-rule的短名称（描述符）；
 
+   DESC <qdstring> is a short descriptive string;
+   DESC <qdstring> 是一个简短的描述性字符串；
 
+   OBSOLETE indicates this matching rule is not active;
+   OBSOLETE 表示matching-rule未激活；
+
+   SYNTAX identifies the assertion syntax (the syntax of the assertion value) by object identifier; and
+   SYNTAX 通过 OID 标识 断言语法/assertion-syntax(断言值的语法)； 和
+
+   <extensions> describe extensions.
+   <extensions> 描述扩展。
 
 
 
 ##### 补充([ABNF](https://en.wikipedia.org/wiki/Augmented_Backus%E2%80%93Naur_form)的概述)
 
 An ABNF specification is a set of derivation rules, written as:
-
 一个ABNF规范是一些推导规则的集合，书写为：
 
 ```
 rule = definition ; comment CR LF
-规则 = 定义;注释CR LF
+规则 = 定义;注释 回车 换行
 ```
 
 where rule is a [case-insensitive](https://en.wikipedia.org/wiki/Case_sensitivity) [nonterminal](https://en.wikipedia.org/wiki/Nonterminal), the definition consists of sequences of symbols that define the rule, a comment for documentation, and ending with a carriage return and line feed.
-
 其中：
 
-- “规则”是不区分大小写的非最终符号
+- <font color=red>“规则/rule”是不区分大小写的 非最终符号</font>
 - “定义”由定义该规则的一系列符号组成
 - “注释”用于记录
 - “CR LF”（回车、换行）用来结束
 
 Rule names are case-insensitive: `<rulename>`, `<Rulename>`, `<RULENAME>`, and `<rUlENamE>` all refer to the same rule. Rule names consist of a letter followed by letters, numbers, and hyphens.
-
-规则名字是不区分大小写的: `<rulename>`, `<Rulename>`, `<RULENAME>`和`<rUlENamE>`都指的是同一个规则。规则名字由一个字母以及后续的多个字母、数字和连字符（减号）组成。
+规则名字是不区分大小写的: `<rulename>`, `<Rulename>`, `<RULENAME>`和`<rUlENamE>`都指的是同一个规则。
+规则名字由一个字母以及后续的多个字母、数字和连字符（减号）组成。
 
 Angle brackets (`<`, `>`) are not required around rule names (as they are in BNF). However, they may be used to delimit a rule name when used in prose to discern a rule name.
-
-用尖括号（“`<`”，“`>`”）包围规则名并不是必需的（如同它们在BNF里那样），但是它们可以用来在散文中界定规则名，以方便识别出规则名。
-
+用尖括号（“`<`”，“`>`”）包围 规则名/rule-name 并不是必需的（如同它们在BNF里那样），但是它们可以用来在散文中  界定规则名，以方便识别出 规则名。
 
 
 
+#### 4.1.4.  Matching Rule Uses(match-rule-use的定义)
 
-#### 4.1.4.  Matching Rule Uses
+A matching rule use lists the attribute types that are suitable for use with an extensibleMatch search filter.
+<font color=red>matching-rule-use列出了: 适合与 extensibleMatch搜索过滤器  一起使用的  属性类型。</font>
 
-   A matching rule use lists the attribute types that are suitable for
-   use with an extensibleMatch search filter.
+Matching rule use descriptions are written according to the following ABNF:
+<font color=red>Matching-rule-use-descriptions按照以下ABNF编写：</font>
 
-   Matching rule use descriptions are written according to the following
-   ABNF:
+```ASN.1
+ MatchingRuleUseDescription = LPAREN WSP
+     numericoid                 ; object identifier         -- matching-rule的OID
+     [ SP "NAME" SP qdescrs ]   ; short names (descriptors) -- 
+     [ SP "DESC" SP qdstring ]  ; description
+     [ SP "OBSOLETE" ]          ; not active
+     SP "APPLIES" SP oids       ; attribute types           -- 列出了适合与 extensibleMatch搜索过滤器 一起使用的 attribute-type
+     extensions WSP RPAREN      ; extensions
+```
+where:
+其中
+   <numericoid> is the object identifier of the matching rule associated with this matching rule use description;
+   <numericoid> 是与此matching-rule-use-description相关联的matching-rule的OID；
 
-     MatchingRuleUseDescription = LPAREN WSP
-         numericoid                 ; object identifier
-         [ SP "NAME" SP qdescrs ]   ; short names (descriptors)
-         [ SP "DESC" SP qdstring ]  ; description
-         [ SP "OBSOLETE" ]          ; not active
-         SP "APPLIES" SP oids       ; attribute types
-         extensions WSP RPAREN      ; extensions
+   NAME <qdescrs> are short names (descriptors) identifying this matching rule use;
+   NAME <qdescrs> 是标识此matching-rule-use的短名称（描述符）；
+
+   DESC <qdstring> is a short descriptive string;
+   DESC <qdstring> 是一个简短的描述性字符串；
+
+   OBSOLETE indicates this matching rule use is not active;
+   OBSOLETE 表示此matching-rule-use未激活；
+
+   APPLIES provides a list of attribute types the matching rule applies to; and
+   APPLIES 提供了matching-rule适用的attribute-type列表； 和
+
+   <extensions> describe extensions.
+   <extensions>描述扩展。
+
+#### 4.1.5.  LDAP Syntaxes(LDAP语法)
+
+LDAP Syntaxes of (attribute and assertion) values are described in terms of ASN.1 [X.680] and, optionally, have an octet string encoding known as the LDAP-specific encoding.  Commonly, the LDAP-specific encoding is constrained to a string of Unicode [Unicode] characters in UTF-8 [RFC3629] form.
+(属性和断言)值的LDAP-syntax 根据ASN.1[X.680] 进行描述，并且可选地，具有称为 LDAP-specific-encoding的八位字节字符串编码/octet-string-encoding。 
+通常，LDAP-specific-encoding 被限制为 UTF-8[RFC3629]格式的 Unicode[Unicode]字符字符串。
+
+Each LDAP syntax is identified by an object identifier (OID).
+每个 LDAP-syntax都由OID标识。
+
+LDAP syntax definitions are written according to the ABNF:
+LDAP-syntax 定义是根据 ABNF 编写的：
+
+```ASN.1
+ SyntaxDescription = LPAREN WSP
+     numericoid                 ; object identifier
+     [ SP "DESC" SP qdstring ]  ; description
+     extensions WSP RPAREN      ; extensions
+```
+where:
+   <numericoid> is the object identifier assigned to this LDAP syntax;
+   <numericoid> 是分配给此 LDAP-syntax的OID；
+
+   DESC <qdstring> is a short descriptive string; and
+   DESC <qdstring> 是一个简短的描述性字符串； 和
+
+   <extensions> describe extensions.
+   <extensions> 描述扩展。
 
 
 
+#### 4.1.6.  DIT Content Rules(DIT内容规则)
 
+A DIT content rule is a "rule governing the content of entries of a particular structural object class" [X.501].
 
-Zeilenga                    Standards Track                    [Page 27]
-
-RFC 4512                      LDAP Models                      June 2006
+For DIT entries of a particular structural object class, a DIT content rule specifies which auxiliary object classes the entries are allowed to belong to and which additional attributes (by type) are required, allowed, or not allowed to appear in the entries.
 
-
-   where:
-     <numericoid> is the object identifier of the matching rule
-         associated with this matching rule use description;
-     NAME <qdescrs> are short names (descriptors) identifying this
-         matching rule use;
-     DESC <qdstring> is a short descriptive string;
-     OBSOLETE indicates this matching rule use is not active;
-     APPLIES provides a list of attribute types the matching rule
-         applies to; and
-     <extensions> describe extensions.
-
-#### 4.1.5.  LDAP Syntaxes
-
-   LDAP Syntaxes of (attribute and assertion) values are described in
-   terms of ASN.1 [X.680] and, optionally, have an octet string encoding
-   known as the LDAP-specific encoding.  Commonly, the LDAP-specific
-   encoding is constrained to a string of Unicode [Unicode] characters
-   in UTF-8 [RFC3629] form.
-
-   Each LDAP syntax is identified by an object identifier (OID).
-
-   LDAP syntax definitions are written according to the ABNF:
-
-     SyntaxDescription = LPAREN WSP
-         numericoid                 ; object identifier
-         [ SP "DESC" SP qdstring ]  ; description
-         extensions WSP RPAREN      ; extensions
-
-   where:
-     <numericoid> is the object identifier assigned to this LDAP syntax;
-     DESC <qdstring> is a short descriptive string; and
-     <extensions> describe extensions.
-
-#### 4.1.6.  DIT Content Rules
-
-   A DIT content rule is a "rule governing the content of entries of a
-   particular structural object class" [X.501].
-
-   For DIT entries of a particular structural object class, a DIT
-   content rule specifies which auxiliary object classes the entries are
-   allowed to belong to and which additional attributes (by type) are
-   required, allowed, or not allowed to appear in the entries.
-
-   The list of precluded attributes cannot include any attribute listed
-   as mandatory in the rule, the structural object class, or any of the
-   allowed auxiliary object classes.
+The list of precluded attributes cannot include any attribute listed as mandatory in the rule, the structural object class, or any of the allowed auxiliary object classes.
 
 
 
@@ -1382,31 +1389,17 @@ Zeilenga                    Standards Track                    [Page 28]
 RFC 4512                      LDAP Models                      June 2006
 
 
-   Each content rule is identified by the object identifier, as well as
-   any short names (descriptors), of the structural object class it
-   applies to.
+   Each content rule is identified by the object identifier, as well as any short names (descriptors), of the structural object class it applies to.
 
-   An entry may only belong to auxiliary object classes listed in the
-   governing content rule.
+   An entry may only belong to auxiliary object classes listed in the governing content rule.
 
-   An entry must contain all attributes required by the object classes
-   the entry belongs to as well as all attributes required by the
-   governing content rule.
+   An entry must contain all attributes required by the object classes the entry belongs to as well as all attributes required by the governing content rule.
 
-   An entry may contain any non-precluded attributes allowed by the
-   object classes the entry belongs to as well as all attributes allowed
-   by the governing content rule.
+   An entry may contain any non-precluded attributes allowed by the object classes the entry belongs to as well as all attributes allowed by the governing content rule.
 
-   An entry cannot include any attribute precluded by the governing
-   content rule.
+   An entry cannot include any attribute precluded by the governing content rule.
 
-   An entry is governed by (if present and active in the subschema) the
-   DIT content rule that applies to the structural object class of the
-   entry (see Section 2.4.2).  If no active rule is present for the
-   entry's structural object class, the entry's content is governed by
-   the structural object class (and possibly other aspects of user and
-   system schema).  DIT content rules for superclasses of the structural
-   object class of an entry are not applicable to that entry.
+   An entry is governed by (if present and active in the subschema) the DIT content rule that applies to the structural object class of the entry (see Section 2.4.2).  If no active rule is present for the entry's structural object class, the entry's content is governed by the structural object class (and possibly other aspects of user and system schema).  DIT content rules for superclasses of the structural object class of an entry are not applicable to that entry.
 
    DIT content rule descriptions are written according to the ABNF:
 
@@ -1422,14 +1415,11 @@ RFC 4512                      LDAP Models                      June 2006
          extensions WSP RPAREN      ; extensions
 
    where:
-     <numericoid> is the object identifier of the structural object
-         class associated with this DIT content rule;
-     NAME <qdescrs> are short names (descriptors) identifying this DIT
-         content rule;
+     <numericoid> is the object identifier of the structural object class associated with this DIT content rule;
+     NAME <qdescrs> are short names (descriptors) identifying this DIT content rule;
      DESC <qdstring> is a short descriptive string;
      OBSOLETE indicates this DIT content rule use is not active;
-     AUX specifies a list of auxiliary object classes that entries
-         subject to this DIT content rule may belong to;
+     AUX specifies a list of auxiliary object classes that entries subject to this DIT content rule may belong to;
 
 
 
@@ -1437,11 +1427,8 @@ Zeilenga                    Standards Track                    [Page 29]
 
 RFC 4512                      LDAP Models                      June 2006
 
-
-     MUST, MAY, and NOT specify lists of attribute types that are
-         required, allowed, or precluded, respectively, from appearing
-         in entries subject to this DIT content rule; and
-     <extensions> describe extensions.
+ MUST, MAY, and NOT specify lists of attribute types that are required, allowed, or precluded, respectively, from appearing in entries subject to this DIT content rule; and
+ <extensions> describe extensions.
 
 #### 4.1.7.  DIT Structure Rules and Name Forms
 
@@ -1549,7 +1536,7 @@ Zeilenga                    Standards Track                    [Page 31]
 
 RFC 4512                      LDAP Models                      June 2006
 
-### 4.2.  Subschema Subentries
+## 4.2.  Subschema Subentries
 
    Subschema (sub)entries are used for administering information about
    the directory schema.  A single subschema (sub)entry contains all
@@ -1780,6 +1767,8 @@ RFC 4512                      LDAP Models                      June 2006
    Clients SHOULD NOT assume that a published subschema is complete,
    that the server supports all of the schema elements it publishes, or
    that the server does not support an unpublished element.
+
+
 
 # 5. DSA (Server) Informational Model
 
