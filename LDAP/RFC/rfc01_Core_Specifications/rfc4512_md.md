@@ -453,7 +453,7 @@ All structural object classes derive (directly or indirectly) from the 'top' abs
 The following is the object class definition (see Section 4.1.1) for  the 'top' object class:
 <font color=red>"top"Abstract-object-class的定义如下：</font>
 
-```schema
+```ASN.1
   ( 2.5.6.0 NAME 'top' ABSTRACT MUST objectClass )
 ```
 
@@ -544,9 +544,11 @@ where <attributetype> identifies the attribute type and each <option>   identifi
 Examples of valid attribute-descriptions:
 有效的 attribute-descriptions 的示例：
 
-      2.5.4.0
-      cn;lang-de;lang-en
-      owner
+```ASN.1
+  2.5.4.0
+  cn;lang-de;lang-en
+  owner
+```
 
 An attribute description with an unrecognized attribute type is to be treated as unrecognized.  Servers SHALL treat an attribute description with an unrecognized attribute option as unrecognized. Clients MAY treat an unrecognized attribute option as a tagging option (see Section 2.5.2.1).
 含有无法识别的attribute-type的attribute-description将被视为无法识别。
@@ -873,7 +875,7 @@ This attribute appears in entries that were added using the protocol (e.g., usin
 <font color=red>该attribute出现在 使用协议添加  的entry中(例如 使用 add-operation)。</font>
 <font color=red>value是 创建者的DN。</font>
 
-```ASN.1
+```ABNF
   ( 2.5.18.3 NAME 'creatorsName'             -- 此attribute/属性   的 name= 'creatorsName'               
     EQUALITY distinguishedNameMatch          -- 此attribute/属性   的 匹配规则 是 distinguishedNameMatch --匹配规则 对DN进行匹配
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.12     -- 此attribute/属性   的语法的OID 是                        --语法
@@ -892,7 +894,7 @@ This attribute appears in entries that were added using the protocol (e.g., usin
 <font color=red>该attribute出现在 使用协议添加  的entry中(例如 使用 add-operation)。</font>
 <font color=red>value是entry被添加的时间。</font>
 
-```ASN.1
+```ABNF
   ( 2.5.18.1 NAME 'createTimestamp'          -- 此attribute/属性   的  name
     EQUALITY generalizedTimeMatch            -- 此attribute/属性   的  匹配规则  对产生时间进行匹配
     ORDERING generalizedTimeOrderingMatch    -- 此attribute/属性   的  匹配规则  对产生时间的顺序进行匹配
@@ -910,7 +912,7 @@ This attribute appears in entries that have been modified using the protocol (e.
 <font color=red>该attribute出现在  使用协议修改的 entry中(例如 使用Modify-operation)。</font>
 <font color=red>value是 最后修改者的DN。</font>
 
-```ASN.1
+```ABNF
   ( 2.5.18.4 NAME 'modifiersName'            -- 此attribute/属性   的  name
     EQUALITY distinguishedNameMatch          -- 此attribute/属性   的  匹配规则  对DN使用相等匹配
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.12     -- 此attribute/属性   的  语法
@@ -929,7 +931,7 @@ This attribute appears in entries that have been modified using the  protocol (e
 <font color=red>该attribute出现在  使用协议修改的 entry中(例如 使用Modify-operation)。</font>
 <font color=red>value是 该entry最后被修改的时间</font>
 
-```ASN.1
+```ABNF
   ( 2.5.18.2 NAME 'modifyTimestamp'          -- 此attribute/属性   的  name
     EQUALITY generalizedTimeMatch            -- 此attribute/属性   的  匹配规则 对产生时间进行匹配
     ORDERING generalizedTimeOrderingMatch    -- 此attribute/属性   的  匹配规则 对产生时间的顺序进行匹配
@@ -948,7 +950,7 @@ The 'generalizedTimeMatch' and 'generalizedTimeOrderingMatch'  matching rules an
 This attribute indicates the structural object class of the entry.
 <font color=red>该attribute指示entry的structural-object-class。</font>
 
-```ASN.1
+```ABNF
   ( 2.5.21.9 NAME 'structuralObjectClass'    -- 此attribute/属性   的  name
     EQUALITY objectIdentifierMatch           -- 此attribute/属性   的  匹配规则  IOD进行匹配
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.38     -- 此attribute/属性   的  语法 
@@ -966,7 +968,7 @@ The 'objectIdentifierMatch' matching rule and OBJECT IDENTIFIER  (1.3.6.1.4.1.14
 This attribute indicates the structure rule governing the entry.
 <font color=red>该attribute指示 管理entry的structure-rule/结构规则。</font>
 
-```ASN.1
+```ABNF
   ( 2.5.21.10 NAME 'governingStructureRule'  -- 此attribute/属性   的  name
     EQUALITY integerMatch                    -- 此attribute/属性   的  匹配规则  对integer进行匹配
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.27     -- 此attribute/属性   的  语法
@@ -1022,7 +1024,7 @@ As defined in [X.501]: 如[X.501]所定义：
 
 
 
-### 4.1.  Schema Definitions(schema的定义)
+## 4.1.  Schema Definitions(schema的定义)
 
 Schema definitions in this section are described using ABNF and rely on the common productions specified in Section 1.2 as well as these:
 <font color=red>本节中的schema定义 使用ABNF描述</font>，并依赖 1.2节(注意：其实是本文档的1.4节)中指定的 常见的产生方式  以及这些：
@@ -1075,12 +1077,12 @@ Implementors should note that future versions of this document may expand these 
 
 
 
-#### 4.1.1.  Object Class Definitions(object-class的定义)
+#### 4.1.1.  Object Class Definitions(object-class的ABNF定义定义)
 
 Object Class definitions are written according to the ABNF:
 <font color=red>object-class的定义 是根据ABNF编写的：</font>
 
-```ASN.1
+```ABNF
  ObjectClassDescription = LPAREN WSP
      numericoid                 ; object identifier			-- OID
      [ SP "NAME" SP qdescrs ]   ; short names (descriptors)	-- 1个或多个短名称(OID的别名)
@@ -1129,7 +1131,7 @@ where:
 Attribute Type definitions are written according to the ABNF:
 <font color=red>attribute-type的定义 是根据ABNF编写的：</font>
 
-```ASN.1
+```ABNF
      AttributeTypeDescription = LPAREN WSP
          numericoid                    ; object identifier        -- OID
          [ SP "NAME" SP qdescrs ]      ; short names (descriptors)-- 短名称
@@ -1181,7 +1183,7 @@ where:
    COLLECTIVE 表示该attribute-type是集体/集合 [X.501][RFC3671]；
 
    NO-USER-MODIFICATION indicates this attribute type is not user modifiable;
-   NO-USER-MODIFICATION 表示该attribute-type是用户不可修改的；
+   NO-USER-MODIFICATION 表示该attribute-type是用户/user不可修改的；
 
    USAGE indicates the application of this attribute type; and
    USAGE 表示该属性类型的应用； 和
@@ -1247,7 +1249,7 @@ Each matching rule is identified by an object identifier (OID) and, optionally, 
 Matching rule definitions are written according to the ABNF:
 <font color=red>matching-rule定义 根据ABNF编写：</font>
 
-```ASN.1
+```ABNF
  MatchingRuleDescription = LPAREN WSP
      numericoid                 ; object identifier         -- OID
      [ SP "NAME" SP qdescrs ]   ; short names (descriptors) -- 短名称
@@ -1283,7 +1285,7 @@ where:
 An ABNF specification is a set of derivation rules, written as:
 一个ABNF规范是一些推导规则的集合，书写为：
 
-```
+```ABNF
 rule = definition ; comment CR LF
 规则 = 定义;注释 回车 换行
 ```
@@ -1313,7 +1315,7 @@ A matching rule use lists the attribute types that are suitable for use with an 
 Matching rule use descriptions are written according to the following ABNF:
 <font color=red>Matching-rule-use-descriptions按照以下ABNF编写：</font>
 
-```ASN.1
+```ABNF
  MatchingRuleUseDescription = LPAREN WSP
      numericoid                 ; object identifier         -- matching-rule的OID
      [ SP "NAME" SP qdescrs ]   ; short names (descriptors) -- 
@@ -1342,17 +1344,17 @@ where:
    <extensions> describe extensions.
    <extensions>描述扩展。
 
-#### 4.1.5.  LDAP Syntaxes(LDAP语法)
+#### 4.1.5.  LDAP Syntaxes(LDAP-syntax的定义)
 
 LDAP Syntaxes of (attribute and assertion) values are described in terms of ASN.1 [X.680] and, optionally, have an octet string encoding known as the LDAP-specific encoding.  Commonly, the LDAP-specific encoding is constrained to a string of Unicode [Unicode] characters in UTF-8 [RFC3629] form.
-(属性和断言)值的LDAP-syntax 根据ASN.1[X.680] 进行描述，并且可选地，具有称为 LDAP-specific-encoding的八位字节字符串编码/octet-string-encoding。 
-通常，LDAP-specific-encoding 被限制为 UTF-8[RFC3629]格式的 Unicode[Unicode]字符字符串。
+<font color=red>(属性和断言)值的LDAP-syntax 根据ASN.1[X.680] 进行描述，并且可选地，具有称为 LDAP-specific-encoding的八位字节字符串编码/octet-string-encoding。 </font>
+<font color=red>通常，LDAP-specific-encoding 被限制为 UTF-8[RFC3629]格式的 Unicode[Unicode]字符字符串。</font>
 
 Each LDAP syntax is identified by an object identifier (OID).
-每个 LDAP-syntax都由OID标识。
+<font color=red>每个 LDAP-syntax都由OID标识。</font>
 
 LDAP syntax definitions are written according to the ABNF:
-LDAP-syntax 定义是根据 ABNF 编写的：
+<font color=red>LDAP-syntax 定义是根据 ABNF 编写的：</font>
 
 ```ASN.1
  SyntaxDescription = LPAREN WSP
@@ -1372,82 +1374,95 @@ where:
 
 
 
-#### 4.1.6.  DIT Content Rules(DIT内容规则)
+#### 4.1.6.  DIT Content Rules(DIT-content-rule的定义)
 
 A DIT content rule is a "rule governing the content of entries of a particular structural object class" [X.501].
+<font color=red>DIT-content-rule是 “管理  特定的structural-object-class's -entry   的content-rule”[X.501]。</font>
 
 For DIT entries of a particular structural object class, a DIT content rule specifies which auxiliary object classes the entries are allowed to belong to and which additional attributes (by type) are required, allowed, or not allowed to appear in the entries.
+<font color=red>对于  特定structural-object-class  的DIT-entry，</font>
+<font color=red>DIT-content-rule则指定   允许entry属于哪些auxiliary-object-class  以及    哪些附加attribute(按type) "required/必须"、"allowed/允许"或"not-allowed/不允许"出现在entry中。</font>
 
 The list of precluded attributes cannot include any attribute listed as mandatory in the rule, the structural object class, or any of the allowed auxiliary object classes.
+排除属性-列表  不能包括  rule中列为强制性的任何attribute、structural-object-class或任何允许的auxiliary-object-class。
 
+Each content rule is identified by the object identifier, as well as any short names (descriptors), of the structural object class it applies to.
+<font color=red>每个content--rule由  OID 以及 它适用的structural-object-class的任何短名称(描述符) 标识。</font>
 
+An entry may only belong to auxiliary object classes listed in the governing content rule.
+<font color=red>一个entry可能只属于  governing-content-rule中列出的auxiliary-object-class。</font>
 
+An entry must contain all attributes required by the object classes the entry belongs to as well as all attributes required by the governing content rule.
+<font color=blue>entry  "必须/must" 包含  entry所属的/requiredobject-class所需的所有attribute  以及 governing-content-rule所需的/required所有attribute。</font>
 
+An entry may contain any non-precluded attributes allowed by the object classes the entry belongs to as well as all attributes allowed by the governing content rule.
+<font color=blue>entry  可以/可能  包含   entry所属的object-class允许的  任何非排除attribute   以及  governing-content-rule允许的所有attribute。</font>
 
-Zeilenga                    Standards Track                    [Page 28]
-
-RFC 4512                      LDAP Models                      June 2006
+An entry cannot include any attribute precluded by the governing content rule.
+<font color=blue>entry  不能包含  任何被governing-content-rule排除的attribute。</font>
 
+An entry is governed by (if present and active in the subschema) the DIT content rule that applies to the structural object class of the entry (see Section 2.4.2).  If no active rule is present for the entry's structural object class, the entry's content is governed by the structural object class (and possibly other aspects of user and system schema).  DIT content rules for superclasses of the structural object class of an entry are not applicable to that entry.
+<font color=green>entry(如果存在并在subschema/子模式中处于活动状态)  受  适用于 entry的structural-object-class的 DIT-content-rule   的管理(参见第 2.4.2 节)。 </font>
+<font color=green>如果entry的structural-object-class不存在 活动的-rule，则entry的content由structural-object-class(以及用户和系统schema的可能其他方面)管理。 </font>
+<font color=green>entry的structural-object-class的superclass的 DIT-content-rule  不适用于该entry。</font>
 
-   Each content rule is identified by the object identifier, as well as any short names (descriptors), of the structural object class it applies to.
+DIT content rule descriptions are written according to the ABNF:
+<font color=red>DIT-content-rule-description  是根据 ABNF 编写的：</font>
 
-   An entry may only belong to auxiliary object classes listed in the governing content rule.
-
-   An entry must contain all attributes required by the object classes the entry belongs to as well as all attributes required by the governing content rule.
-
-   An entry may contain any non-precluded attributes allowed by the object classes the entry belongs to as well as all attributes allowed by the governing content rule.
-
-   An entry cannot include any attribute precluded by the governing content rule.
-
-   An entry is governed by (if present and active in the subschema) the DIT content rule that applies to the structural object class of the entry (see Section 2.4.2).  If no active rule is present for the entry's structural object class, the entry's content is governed by the structural object class (and possibly other aspects of user and system schema).  DIT content rules for superclasses of the structural object class of an entry are not applicable to that entry.
-
-   DIT content rule descriptions are written according to the ABNF:
-
+```ABNF
      DITContentRuleDescription = LPAREN WSP
          numericoid                 ; object identifier
          [ SP "NAME" SP qdescrs ]   ; short names (descriptors)
          [ SP "DESC" SP qdstring ]  ; description
          [ SP "OBSOLETE" ]          ; not active
-         [ SP "AUX" SP oids ]       ; auxiliary object classes
+         [ SP "AUX" SP oids ]       ; auxiliary object classes    -- 受此DIT-content-rule约束的entry，可能属于的auxiliary-object-class的列表
          [ SP "MUST" SP oids ]      ; attribute types
          [ SP "MAY" SP oids ]       ; attribute types
          [ SP "NOT" SP oids ]       ; attribute types
          extensions WSP RPAREN      ; extensions
+```
+where:
+   <numericoid> is the object identifier of the structural object class associated with this DIT content rule;
+   <numericoid> 是与此 DIT-content-rule 关联的structutral-object-class的OID；
 
-   where:
-     <numericoid> is the object identifier of the structural object class associated with this DIT content rule;
-     NAME <qdescrs> are short names (descriptors) identifying this DIT content rule;
-     DESC <qdstring> is a short descriptive string;
-     OBSOLETE indicates this DIT content rule use is not active;
-     AUX specifies a list of auxiliary object classes that entries subject to this DIT content rule may belong to;
+   NAME <qdescrs> are short names (descriptors) identifying this DIT content rule;
+   NAME <qdescrs> 是标识此 DIT-content-rule  的短名称（描述符）；
+
+   DESC <qdstring> is a short descriptive string;
+   DESC <qdstring> 是一个简短的描述性字符串；
+
+   OBSOLETE indicates this DIT content rule use is not active;
+   OBSOLETE 表示此 DIT-content-rule的使用未激活；
+
+   AUX specifies a list of auxiliary object classes that entries subject to this DIT content rule may belong to;
+   AUX指定  受此DIT-content-rule约束的  entry可能属于的  auxiliary-object-class的列表；
+
+   MUST, MAY, and NOT specify lists of attribute types that are required, allowed, or precluded, respectively, from appearing in entries subject to this DIT content rule; and
+   MUST、MAY和NOT 分别指定： 需要、允许或禁止，出现在 受此DIT-content-rule约束 的entry   中的attrbute-type列表；
+
+   <extensions> describe extensions.
+   <extensions> 描述扩展。
 
 
 
-Zeilenga                    Standards Track                    [Page 29]
-
-RFC 4512                      LDAP Models                      June 2006
+#### 4.1.7.  DIT Structure Rules and Name Forms(DIT结构规则和命名形式)
 
- MUST, MAY, and NOT specify lists of attribute types that are required, allowed, or precluded, respectively, from appearing in entries subject to this DIT content rule; and
- <extensions> describe extensions.
+It is sometimes desirable to regulate where object and alias entries can be placed in the DIT and how they can be named based upon their structural object class.
+<font color=red>**有时需要规定 entry和alias-entry可以放置在 DIT 中的什么位置，以及如何根据它们的structrual-object-class来命名它们。**</font>
 
-#### 4.1.7.  DIT Structure Rules and Name Forms
 
-   It is sometimes desirable to regulate where object and alias entries
-   can be placed in the DIT and how they can be named based upon their
-   structural object class.
 
-##### 4.1.7.1.  DIT Structure Rules
+##### 4.1.7.1.  DIT Structure Rules(DIT-structural-rule的定义)
 
-   A DIT structure rule is a "rule governing the structure of the DIT by
-   specifying a permitted superior to subordinate entry relationship.  A
-   structure rule relates a name form, and therefore a structural object
-   class, to superior structure rules.  This permits entries of the
-   structural object class identified by the name form to exist in the
-   DIT as subordinates to entries governed by the indicated superior
-   structure rules" [X.501].
+A DIT structure rule is a "rule governing the structure of the DIT by specifying a permitted superior to subordinate entry relationship.  A structure rule relates a name form, and therefore a structural object class, to superior structure rules.  This permits entries of the structural object class identified by the name form to exist in the DIT as subordinates to entries governed by the indicated superior structure rules" [X.501].
+<font color=green>DIT-structure-rule 是  “ 通过指定  允许的上级到下级条目的关系  来管理 DIT的structural的rule。</font>
+<font color=green>structural-rule，将name-form和structural-object-class  与上级structural-rule相关联。</font>
+<font color=green>这允许  由name-form标识的  structural-object-class的entry 存在于 DIT 中，作为  受指示的 上级structure-rule管理的  entry的从属 “ [X.501]。</font>
 
-   DIT structure rule descriptions are written according to the ABNF:
+DIT structure rule descriptions are written according to the ABNF:
+<font color=red>DIT-structure-rule-description 是根据ABNF编写的：</font>
 
+```ABNF
      DITStructureRuleDescription = LPAREN WSP
          ruleid                     ; rule identifier
          [ SP "NAME" SP qdescrs ]   ; short names (descriptors)
@@ -1460,354 +1475,340 @@ RFC 4512                      LDAP Models                      June 2006
      ruleids = ruleid / ( LPAREN WSP ruleidlist WSP RPAREN )
      ruleidlist = ruleid *( SP ruleid )
      ruleid = number
+```
+where:
+其中
+   <ruleid> is the rule identifier of this DIT structure rule;
+   <ruleid>是这个DIT-structure-rule的rule-OID；
 
-   where:
-     <ruleid> is the rule identifier of this DIT structure rule;
-     NAME <qdescrs> are short names (descriptors) identifying this DIT
-         structure rule;
-     DESC <qdstring> is a short descriptive string;
-     OBSOLETE indicates this DIT structure rule use is not active;
-     FORM is specifies the name form associated with this DIT structure
-         rule;
-     SUP identifies superior rules (by rule id); and
-     <extensions> describe extensions.
+   NAME <qdescrs> are short names (descriptors) identifying this DIT structure rule;
+   NAME <qdescrs> 是标识此 DIT-structure-rule 的短名称（描述符）；
 
+   DESC <qdstring> is a short descriptive string;
+   DESC <qdstring> 是一个简短的描述性字符串；
 
+   OBSOLETE indicates this DIT structure rule use is not active;
+   OBSOLETE DIT-structure-rule 的使用未激活；
 
+   FORM is specifies the name form associated with this DIT structure rule;
+   FORM 是指定与此 DIT-structure-rule  相关联的name-form；
 
+   SUP identifies superior rules (by rule id); and
+  <font color=red> **SUP 识别/确定 上级/rule（通过rule-id）**</font>； 和
 
-Zeilenga                    Standards Track                    [Page 30]
-
-RFC 4512                      LDAP Models                      June 2006
+   <extensions> describe extensions.
+   <extensions> 描述扩展。
 
-
-   If no superior rules are identified, the DIT structure rule applies
-   to an autonomous administrative point (e.g., the root vertex of the
-   subtree controlled by the subschema) [X.501].
-
-##### 4.1.7.2.  Name Forms
-
-   A name form "specifies a permissible RDN for entries of a particular
-   structural object class.  A name form identifies a named object class
-   and one or more attribute types to be used for naming (i.e., for the
-   RDN).  Name forms are primitive pieces of specification used in the
-   definition of DIT structure rules" [X.501].
-
-   Each name form indicates the structural object class to be named, a
-   set of required attribute types, and a set of allowed attribute
-   types.  A particular attribute type cannot be in both sets.
-
-   Entries governed by the form must be named using a value from each
-   required attribute type and zero or more values from the allowed
-   attribute types.
-
-   Each name form is identified by an object identifier (OID) and,
-   optionally, one or more short names (descriptors).
-
-   Name form descriptions are written according to the ABNF:
-
-     NameFormDescription = LPAREN WSP
-         numericoid                 ; object identifier
-         [ SP "NAME" SP qdescrs ]   ; short names (descriptors)
-         [ SP "DESC" SP qdstring ]  ; description
-         [ SP "OBSOLETE" ]          ; not active
-         SP "OC" SP oid             ; structural object class
-         SP "MUST" SP oids          ; attribute types
-         [ SP "MAY" SP oids ]       ; attribute types
-         extensions WSP RPAREN      ; extensions
-
-   where:
-     <numericoid> is object identifier that identifies this name form;
-     NAME <qdescrs> are short names (descriptors) identifying this name
-         form;
-     DESC <qdstring> is a short descriptive string;
-     OBSOLETE indicates this name form is not active;
-     OC identifies the structural object class this rule applies to,
-     MUST and MAY specify the sets of required and allowed,
-         respectively, naming attributes for this name form; and
-     <extensions> describe extensions.
-
-   All attribute types in the required ("MUST") and allowed ("MAY")
-   lists shall be different.
+If no superior rules are identified, the DIT structure rule applies to an autonomous administrative point (e.g., the root vertex of the subtree controlled by the subschema) [X.501].
+如果没有识别 上级rule，则 DIT-structure-rule 适用于 自治管理点（例如，由子模式/subschema 控制的  子树/subtree的根/root顶点）[X.501]。
 
 
 
-Zeilenga                    Standards Track                    [Page 31]
-
-RFC 4512                      LDAP Models                      June 2006
+##### 4.1.7.2.  Name Forms(命名形式)
+
+A name form "specifies a permissible RDN for entries of a particular structural object class.  A name form identifies a named object class and one or more attribute types to be used for naming (i.e., for the RDN).  Name forms are primitive pieces of specification used in the definition of DIT structure rules" [X.501].
+<font color=red>name-form/命名形式  “为 特定structural-object-class的entry 指定了一个允许的RDN。</font>
+<font color=red>name-form/命名形式  标识了1个name-object-class  和  1个或多个用于命名(即 用于RDN)的attribute-type。</font>
+<font color=red>name-form/命名形式  是 DIT-structural-rule定义中使用的基本规范”[X.501]。</font>
+
+Each name form indicates the structural object class to be named, a set of required attribute types, and a set of allowed attribute types.  A particular attribute type cannot be in both sets.
+<font color=red>每个name-form指示：要被命名的structural-object-class、一组必需的attribute-type和一组允许的attribute-type。 </font>
+<font color=red>一个特定的attribute-type不能同时出现在两个集合/set 中。</font>
+
+Entries governed by the form must be named using a value from each required attribute type and zero or more values from the allowed attribute types.
+<font color=blue>必须使用  来自每个"必需"attribute-type的value  和  来自"允许"attribute-type的0个或多个value  **来命名**  由form管理的entry。</font>
+
+Each name form is identified by an object identifier (OID) and, optionally, one or more short names (descriptors).
+<font color=blue>每个name-form都由 OID和可选的1个或多个短名称（描述符）标识。</font>
+
+Name form descriptions are written according to the ABNF:
+<font color=red>name-form-description 是根据 ABNF 编写的：</font>
+
+```ABNF
+ NameFormDescription = LPAREN WSP
+     numericoid                 ; object identifier
+     [ SP "NAME" SP qdescrs ]   ; short names (descriptors)
+     [ SP "DESC" SP qdstring ]  ; description
+     [ SP "OBSOLETE" ]          ; not active
+     SP "OC" SP oid             ; structural object class   -- 标识此rule适用的structural-object-class
+     SP "MUST" SP oids          ; attribute types
+     [ SP "MAY" SP oids ]       ; attribute types
+     extensions WSP RPAREN      ; extensions
+```
+where:
+   <numericoid> is object identifier that identifies this name form;
+   <numericoid> 是标识此name-form 的OID；
+
+   NAME <qdescrs> are short names (descriptors) identifying this name form;
+   NAME <qdescrs> 是标识此name-form 的短名称（描述符）；
+
+   DESC <qdstring> is a short descriptive string;
+   DESC <qdstring> 是一个简短的描述性字符串；
+
+   OBSOLETE indicates this name form is not active;
+   OBSOLETE 表示此name-form 未激活；
+
+   OC identifies the structural object class this rule applies to,
+   OC 标识此rule适用的structural-object-class，
+
+   MUST and MAY specify the sets of required and allowed, respectively, naming attributes for this name form; and
+   MUST 和 MAY 分别为这个name-form指定了必需和允许的命名属性集/naming-attribute-set；和
+
+   <extensions> describe extensions.
+   <extensions> 描述扩展。
+
+All attribute types in the required ("MUST") and allowed ("MAY") lists shall be different.
+<font color=red>**required ("MUST") 和 allowed ("MAY")列表中的 所有attribute-type都应不同。**</font>
+
+
 
 ## 4.2.  Subschema Subentries
 
-   Subschema (sub)entries are used for administering information about
-   the directory schema.  A single subschema (sub)entry contains all
-   schema definitions (see Section 4.1) used by entries in a particular
-   part of the directory tree.
+Subschema (sub)entries are used for administering information about the directory schema.  A single subschema (sub)entry contains all schema definitions (see Section 4.1) used by entries in a particular part of the directory tree.
+<font color=blue>Subschema-(sub)entries/子模式(子)条目：用于管理有关directory-schema的信息。</font>
+<font color=green>单个 subschema (sub)entry  包含   目录树特定部分中的entry  使用的所有schema定义（参见第 4.1 节）。</font>
 
-   Servers that follow X.500(93) models SHOULD implement subschema using
-   the X.500 subschema mechanisms (as detailed in Section 12 of
-   [X.501]), so these are not ordinary object entries but subentries
-   (see Section 3.2).  LDAP clients SHOULD NOT assume that servers
-   implement any of the other aspects of X.500 subschema.
+Servers that follow X.500(93) models SHOULD implement subschema using the X.500 subschema mechanisms (as detailed in Section 12 of [X.501]), so these are not ordinary object entries but subentries (see Section 3.2).  LDAP clients SHOULD NOT assume that servers implement any of the other aspects of X.500 subschema.
+<font color=blue>遵循X.500(93)模型的server  应该使用 X.500-subschema机制  实现schema(详见[X.501]的第12节), 因此这些不是普通的object-entry而是subentry（参见第 3.2 节）。    LDAP-client不应该假设  server实现了X.500-subschema的任何其他方面。</font>
 
-   Servers MAY allow subschema modification.  Procedures for subschema
-   modification are discussed in Section 14.5 of [X.501].
+Servers MAY allow subschema modification.  Procedures for subschema modification are discussed in Section 14.5 of [X.501].
+<font color=green>server可以允许 subschema/子模式修改。 [X.501] 的第 14.5 节讨论了子模式修改的过程。</font>
 
-   A server that masters entries and permits clients to modify these
-   entries SHALL implement and provide access to these subschema
-   (sub)entries including providing a 'subschemaSubentry' attribute in
-   each modifiable entry.  This is so clients may discover the
-   attributes and object classes that are permitted to be present.  It
-   is strongly RECOMMENDED that all other servers implement this as
-   well.
+A server that masters entries and permits clients to modify these entries SHALL implement and provide access to these subschema (sub)entries including providing a 'subschemaSubentry' attribute in each modifiable entry.  This is so clients may discover the attributes and object classes that are permitted to be present.  It is strongly RECOMMENDED that all other servers implement this as well.
+<font color=blue>**server掌握了这些entry 并允许client修改这些entry，则必须实现并提供 对这些subschema (sub)entries的访问，包括在每个可修改的entry中提供一个'subschemaSubentry'-attribute。**</font>
+<font color=red>这样client就可以发现允许存在/出现的 attribute和object-class。**？？？**</font>
+<font color=blue>**强烈建议所有其他server也实现这一点**。</font>
 
-   The value of the 'subschemaSubentry' attribute is the name of the
-   subschema (sub)entry holding the subschema controlling the entry.
+The value of the 'subschemaSubentry' attribute is the name of the subschema (sub)entry holding the subschema controlling the entry.
+<font color=red>**'subschemaSubentry'-attribute的value 保存了 控制该entry的subschema的 subschema (sub)entry的名称。**</font>
 
-      ( 2.5.18.10 NAME 'subschemaSubentry'
-        EQUALITY distinguishedNameMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-        SINGLE-VALUE NO-USER-MODIFICATION
-        USAGE directoryOperation )
+```schema
+  ( 2.5.18.10 NAME 'subschemaSubentry'    --此attribute的名字是 subschemaSubentry   
+    EQUALITY distinguishedNameMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+    SINGLE-VALUE NO-USER-MODIFICATION     -- 4.1.2节  NO-USER-MODIFICATION 表示该attribute-type是用户/user不可修改的；
+    USAGE directoryOperation )
+```
 
-   The 'distinguishedNameMatch' matching rule and the DistinguishedName
-   (1.3.6.1.4.1.1466.115.121.1.12) syntax are defined in [RFC4517].
+The 'distinguishedNameMatch' matching rule and the DistinguishedName (1.3.6.1.4.1.1466.115.121.1.12) syntax are defined in [RFC4517].
+'distinguishedNameMatch'-match-rule 和 DistinguishedName(1.3.6.1.4.1.1466.115.121.1.12)-syntax  在 [RFC4517] 中定义。
 
-   Subschema is held in (sub)entries belonging to the subschema
-   auxiliary object class.
 
-      ( 2.5.20.1 NAME 'subschema' AUXILIARY
-        MAY ( dITStructureRules $ nameForms $ ditContentRules $
-          objectClasses $ attributeTypes $ matchingRules $
-          matchingRuleUse ) )
 
-   The 'ldapSyntaxes' operational attribute may also be present in
-   subschema entries.
+Subschema is held in (sub)entries belonging to the subschema auxiliary object class.
+<font color=red>**在属于subschema-auxiliary-object-class的  (sub)entries中 保存着subschema**。</font>
 
+```schema
+  ( 2.5.20.1 NAME 'subschema' AUXILIARY                     ;--subschema和是个辅助/auxiliary
+    MAY ( dITStructureRules $ nameForms $ ditContentRules $ ;可能包含的...
+      objectClasses $ attributeTypes $ matchingRules $
+      matchingRuleUse ) )
+```
 
+The 'ldapSyntaxes' operational attribute may also be present in subschema entries.
+<font color=red>'ldapSyntaxes'-operational-attribute  也可能出现在 subschema-entries  中。</font>
 
+Servers MAY provide additional attributes (described in other documents) in subschema (sub)entries.
+<font color=red>server可以在  子模式(子)条目/subschema (sub)entries  中提供附加attribute</font>（在其他文档中描述）。
 
+Servers SHOULD provide the attributes 'createTimestamp' and 'modifyTimestamp' in subschema (sub)entries, in order to allow clients to maintain their caches of schema information.
+<font color=red>**server应该在subschema (sub)entries中提供 attribute 'createTimestamp' and 'modifyTimestamp'，以允许client维护他们的schema信息缓存。**</font>
 
-Zeilenga                    Standards Track                    [Page 32]
-
-RFC 4512                      LDAP Models                      June 2006
+The following subsections provide attribute type definitions for each of schema definition attribute types.
+<font color=blue>以下小节  为每个  schema定义的attribute-type  提供attribute-type定义。</font>
 
 
-   Servers MAY provide additional attributes (described in other
-   documents) in subschema (sub)entries.
 
-   Servers SHOULD provide the attributes 'createTimestamp' and
-   'modifyTimestamp' in subschema (sub)entries, in order to allow
-   clients to maintain their caches of schema information.
+### 4.2.1.  'objectClasses'(object-classes的schema定义)
 
-   The following subsections provide attribute type definitions for each
-   of schema definition attribute types.
+This attribute holds definitions of object classes.
+<font color=red>这个attribute保存了object-classes的schema定义。</font>
 
-### 4.2.1.  'objectClasses'
+```schema
+  ( 2.5.21.6 NAME 'objectClasses'                  --此attribute的名字是  objectClasses
+    EQUALITY objectIdentifierFirstComponentMatch   --使用的"相等匹配规则"是... OID第一组件匹配
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.37           --语法的OID是
+    USAGE directoryOperation )                     --usage=directoryOperation 用法是：目录操作
+```
 
-   This attribute holds definitions of object classes.
+The 'objectIdentifierFirstComponentMatch' matching rule and the ObjectClassDescription (1.3.6.1.4.1.1466.115.121.1.37) syntax are defined in [RFC4517].
+'objectIdentifierFirstComponentMatch'-matching-rule和ObjectClassDescription(1.3.6.1.4.1.1466.115.121.1.37)-syntax，被定义在[RFC4517]中。
 
-      ( 2.5.21.6 NAME 'objectClasses'
-        EQUALITY objectIdentifierFirstComponentMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.37
-        USAGE directoryOperation )
 
-   The 'objectIdentifierFirstComponentMatch' matching rule and the
-   ObjectClassDescription (1.3.6.1.4.1.1466.115.121.1.37) syntax are
-   defined in [RFC4517].
 
-### 4.2.2.  'attributeTypes'
+### 4.2.2.  'attributeTypes'(attribute-types的schema定义)
 
-   This attribute holds definitions of attribute types.
+This attribute holds definitions of attribute types.
+<font color=red>这个attribute保存了attribute-types的schema定义。</font>
 
-      ( 2.5.21.5 NAME 'attributeTypes'
-        EQUALITY objectIdentifierFirstComponentMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.3
-        USAGE directoryOperation )
+```schema
+  ( 2.5.21.5 NAME 'attributeTypes'                 --此attribute的名字是attributeTypes
+    EQUALITY objectIdentifierFirstComponentMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.3
+    USAGE directoryOperation )
+```
 
-   The 'objectIdentifierFirstComponentMatch' matching rule and the
-   AttributeTypeDescription (1.3.6.1.4.1.1466.115.121.1.3) syntax are
-   defined in [RFC4517].
+The 'objectIdentifierFirstComponentMatch' matching rule and the AttributeTypeDescription (1.3.6.1.4.1.1466.115.121.1.3) syntax are defined in [RFC4517].
+'objectIdentifierFirstComponentMatch'-matching-rule和AttributeTypeDescription (1.3.6.1.4.1.1466.115.121.1.3)-syntax  ，被定义在[RFC4517]中。
 
-### 4.2.3.  'matchingRules'
 
-   This attribute holds definitions of matching rules.
 
-      ( 2.5.21.4 NAME 'matchingRules'
-        EQUALITY objectIdentifierFirstComponentMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.30
-        USAGE directoryOperation )
+### 4.2.3.  'matchingRules'(matching-rules的schema定义)
 
-   The 'objectIdentifierFirstComponentMatch' matching rule and the
-   MatchingRuleDescription (1.3.6.1.4.1.1466.115.121.1.30) syntax are
-   defined in [RFC4517].
+This attribute holds definitions of matching rules.
+<font color=red>这个attribute保存了matching-rules的schema定义。</font>
 
+```schema
+  ( 2.5.21.4 NAME 'matchingRules'                  --此attribute的名字是matchingRules
+    EQUALITY objectIdentifierFirstComponentMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.30
+    USAGE directoryOperation )
+```
 
+The 'objectIdentifierFirstComponentMatch' matching rule and the MatchingRuleDescription (1.3.6.1.4.1.1466.115.121.1.30) syntax are defined in [RFC4517].
+'objectIdentifierFirstComponentMatch'-matching-rule 和 MatchingRuleDescription (1.3.6.1.4.1.1466.115.121.1.30)-syntax  ，被定义在[RFC4517]中。
 
-Zeilenga                    Standards Track                    [Page 33]
-
-RFC 4512                      LDAP Models                      June 2006
 
-### 4.2.4 'matchingRuleUse'
 
-   This attribute holds definitions of matching rule uses.
+### 4.2.4 'matchingRuleUse'(matching-rule-uses的schema定义)
 
-      ( 2.5.21.8 NAME 'matchingRuleUse'
-        EQUALITY objectIdentifierFirstComponentMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.31
-        USAGE directoryOperation )
+This attribute holds definitions of matching rule uses.
+<font color=red>这个attribute保存了matching-rule-uses的schema定义。</font>
 
-   The 'objectIdentifierFirstComponentMatch' matching rule and the
-   MatchingRuleUseDescription (1.3.6.1.4.1.1466.115.121.1.31) syntax are
-   defined in [RFC4517].
+```schema
+  ( 2.5.21.8 NAME 'matchingRuleUse'                --此attribute的名字是matchingRuleUse
+    EQUALITY objectIdentifierFirstComponentMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.31
+    USAGE directoryOperation )
+```
+The 'objectIdentifierFirstComponentMatch' matching rule and the MatchingRuleUseDescription (1.3.6.1.4.1.1466.115.121.1.31) syntax are defined in [RFC4517].
+'objectIdentifierFirstComponentMatch'-matching-rule 和 MatchingRuleUseDescription (1.3.6.1.4.1.1466.115.121.1.31)-syntax  ，被定义在[RFC4517]中。
 
-### 4.2.5.  'ldapSyntaxes'
 
-   This attribute holds definitions of LDAP syntaxes.
 
-      ( 1.3.6.1.4.1.1466.101.120.16 NAME 'ldapSyntaxes'
-        EQUALITY objectIdentifierFirstComponentMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.54
-        USAGE directoryOperation )
+### 4.2.5.  'ldapSyntaxes'(LDAP-syntaxes的schema定义)
 
-   The 'objectIdentifierFirstComponentMatch' matching rule and the
-   SyntaxDescription (1.3.6.1.4.1.1466.115.121.1.54) syntax are defined
-   in [RFC4517].
+This attribute holds definitions of LDAP syntaxes.
+<font color=red>这个attribute保存了LDAP-syntaxes的schema定义。</font>
 
-### 4.2.6.  'dITContentRules'
+```schema
+  ( 1.3.6.1.4.1.1466.101.120.16 NAME 'ldapSyntaxes'   --此attribute的名字是ldapSyntaxes
+    EQUALITY objectIdentifierFirstComponentMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.54
+    USAGE directoryOperation )
+```
+The 'objectIdentifierFirstComponentMatch' matching rule and the SyntaxDescription (1.3.6.1.4.1.1466.115.121.1.54) syntax are defined in [RFC4517].
+'objectIdentifierFirstComponentMatch'-matching-rule 和 SyntaxDescription (1.3.6.1.4.1.1466.115.121.1.54)-syntax  ，被定义在[RFC4517]中。
 
-   This attribute lists DIT Content Rules that are present in the
-   subschema.
 
-      ( 2.5.21.2 NAME 'dITContentRules'
-        EQUALITY objectIdentifierFirstComponentMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.16
-        USAGE directoryOperation )
 
-   The 'objectIdentifierFirstComponentMatch' matching rule and the
-   DITContentRuleDescription (1.3.6.1.4.1.1466.115.121.1.16) syntax are
-   defined in [RFC4517].
+### 4.2.6.  'dITContentRules'(DIT-content-rule的schema定义)
 
+This attribute lists DIT Content Rules that are present in the subschema.
+<font color=red>这个attribute列出了 subscheam中出现的 DIT-content-rules的schema定义。</font>
 
+```schema
+  ( 2.5.21.2 NAME 'dITContentRules'                   --此attribute的名字是dITContentRules
+    EQUALITY objectIdentifierFirstComponentMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.16
+    USAGE directoryOperation )
+```
 
+The 'objectIdentifierFirstComponentMatch' matching rule and the DITContentRuleDescription (1.3.6.1.4.1.1466.115.121.1.16) syntax are defined in [RFC4517].
+'objectIdentifierFirstComponentMatch'-matching-rule 和 DITContentRuleDescription (1.3.6.1.4.1.1466.115.121.1.16)-syntax  ，被定义在[RFC4517]中。
 
 
 
+### 4.2.7.  'dITStructureRules'(DIT-structure-rules的schema定义)
 
+This attribute lists DIT Structure Rules that are present in the subschema.
+<font color=red>这个attribute列出了 subscheam中出现的 DIT-structure-rules的schema定义。</font>
 
+```schema
+  ( 2.5.21.1 NAME 'dITStructureRules'                 --此attribute的名字是dITStructureRules
+    EQUALITY integerFirstComponentMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.17
+    USAGE directoryOperation )
+```
 
+The 'integerFirstComponentMatch' matching rule and the DITStructureRuleDescription (1.3.6.1.4.1.1466.115.121.1.17) syntax are defined in [RFC4517].
+'integerFirstComponentMatch'-matching-rule 和 DITStructureRuleDescription (1.3.6.1.4.1.1466.115.121.1.17)-syntax  ，被定义在[RFC4517]中。
 
 
 
-Zeilenga                    Standards Track                    [Page 34]
-
-RFC 4512                      LDAP Models                      June 2006
+### 4.2.8 'nameForms'(name-forms的schema定义)
 
-### 4.2.7.  'dITStructureRules'
+This attribute lists Name Forms that are in force.
+<font color=red>这个attribute列出了 有效的 name-forms的schema定义。</font>
 
-   This attribute lists DIT Structure Rules that are present in the
-   subschema.
+```schema
+  ( 2.5.21.7 NAME 'nameForms'                         --此attribute的名字是nameForms
+    EQUALITY objectIdentifierFirstComponentMatch
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.35
+    USAGE directoryOperation )
+```
 
-      ( 2.5.21.1 NAME 'dITStructureRules'
-        EQUALITY integerFirstComponentMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.17
-        USAGE directoryOperation )
+The 'objectIdentifierFirstComponentMatch' matching rule and the NameFormDescription (1.3.6.1.4.1.1466.115.121.1.35) syntax are defined in [RFC4517].
+'objectIdentifierFirstComponentMatch'-matching-rule 和 NameFormDescription (1.3.6.1.4.1.1466.115.121.1.35)-syntax  ，被定义在[RFC4517]中。
 
-   The 'integerFirstComponentMatch' matching rule and the
-   DITStructureRuleDescription (1.3.6.1.4.1.1466.115.121.1.17) syntax
-   are defined in [RFC4517].
 
-### 4.2.8 'nameForms'
 
-   This attribute lists Name Forms that are in force.
+## 4.3.  'extensibleObject' object class(extensibleObject-object-class的schema定义)
 
-      ( 2.5.21.7 NAME 'nameForms'
-        EQUALITY objectIdentifierFirstComponentMatch
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.35
-        USAGE directoryOperation )
+The 'extensibleObject' auxiliary object class allows entries that belong to it to hold any user attribute.  The set of allowed attribute types of this object class is implicitly the set of all attribute types of userApplications usage.
+<font color=red>**'extensibleObject'-auxiliary-object-class 允许属于它的entry   保存  任何用户属性/user-attribute。** </font>
+<font color=blue>该object-class允许的attribute-type集合  隐式是 usage=userApplications的所有attribute-type的集合。</font>
 
-   The 'objectIdentifierFirstComponentMatch' matching rule and the
-   NameFormDescription (1.3.6.1.4.1.1466.115.121.1.35) syntax are
-   defined in [RFC4517].
+```schema
+  ( 1.3.6.1.4.1.1466.101.120.111 NAME 'extensibleObject'
+    SUP top AUXILIARY )
+```
 
-## 4.3.  'extensibleObject' object class
+The mandatory attributes of the other object classes of this entry are still required to be present, and any precluded attributes are still not allowed to be present.
+该entry的 其他object-class的必需属性仍然需要存在，并且仍然不允许存在任何  排除的属性。
+<font color=red>即，其他object-class要求必须存在的attribute则必须存在，不允许出现的attribute仍然不允许出现。</font>
 
-   The 'extensibleObject' auxiliary object class allows entries that
-   belong to it to hold any user attribute.  The set of allowed
-   attribute types of this object class is implicitly the set of all
-   attribute types of userApplications usage.
 
-      ( 1.3.6.1.4.1.1466.101.120.111 NAME 'extensibleObject'
-        SUP top AUXILIARY )
-
-   The mandatory attributes of the other object classes of this entry
-   are still required to be present, and any precluded attributes are
-   still not allowed to be present.
 
 ## 4.4.  Subschema Discovery
 
-   To discover the DN of the subschema (sub)entry holding the subschema
-   controlling a particular entry, a client reads that entry's
-   'subschemaSubentry' operational attribute.  To read schema attributes
-   from the subschema (sub)entry, clients MUST issue a Search operation
-   [RFC4511] where baseObject is the DN of the subschema (sub)entry,
+To discover the DN of the subschema (sub)entry holding the subschema controlling a particular entry, a client reads that entry's 'subschemaSubentry' operational attribute.  To read schema attributes from the subschema (sub)entry, clients MUST issue a Search operation [RFC4511] where baseObject is the DN of the subschema (sub)entry,scope is baseObject, filter is "(objectClass=subschema)" [RFC4515], and the attributes field lists the names of the desired schema attributes (as they are operational).  Note: the "(objectClass=subschema)" filter allows LDAP servers that gateway to X.500 to detect that subentry information is being requested.
+为了发现控制特定条目的子模式的子模式（子）条目的 DN，客户端读取该条目的“subschemaSubentry”操作属性。 要从子模式（子）条目中读取模式属性，客户端必须发出搜索操作 [RFC4511]，其中 baseObject 是子模式（子）条目的 DN，范围是 baseObject，过滤器是“（objectClass=subschema）”[RFC4515] ，属性字段列出了所需架构属性的名称（因为它们是可操作的）。 注意：“(objectClass=subschema)”过滤器允许连接到 X.500 的 LDAP 服务器检测正在请求的子条目信息。
+
+Clients SHOULD NOT assume that a published subschema is complete, that the server supports all of the schema elements it publishes, or that the server does not support an unpublished element.
+客户端不应该假设发布的子模式是完整的，服务器支持它发布的所有模式元素，或者服务器不支持未发布的元素。
 
 
 
-Zeilenga                    Standards Track                    [Page 35]
-
-RFC 4512                      LDAP Models                      June 2006
+# 5. DSA (Server) Informational Model(server端-DSA信息模型)
+
+The LDAP protocol assumes there are one or more servers that jointly provide access to a Directory Information Tree (DIT).  The server holding the original information is called the "master" (for that information).  Servers that hold copies of the original information are referred to as "shadowing" or "caching" servers.
+<font color=green>LDAP-protocol/协议  假设有1台或多台server共同提供对目录信息树 (DIT) 的访问/access。</font>
+<font color=green>保存原始信息的server称为"主/master"(对于该信息)。</font>
+<font color=green>保存原始信息副本的server称为"shadowing/镜像"或"caching/缓存"服务器。</font>
+
+As defined in [X.501]:
+如 [X.501] 中所定义：
+
+- context prefix: The sequence of RDNs leading from the Root of the DIT to the initial vertex of a naming context; corresponds to the distinguished name of that vertex.
+<font color=blue>context-prefix/上下文前缀：从  DIT的root/根  到命名上下文的初始顶点   的RDN序列； 对应于该顶点的  专有名称/DN。</font>
+- naming context: A subtree of entries held in a single master DSA.
+<font color=blue>naming-context/命名上下文：保存在   单个主DSA中的    entry的subtree。</font>
+
+That is, a naming context is the largest collection of entries, starting at an entry that is mastered by a particular server, and including all its subordinates and their subordinates, down to the entries that are mastered by different servers.  The context prefix is the name of the initial entry.
+<font color=red>**也就是说，naming-context/命名上下文： 是entry最大的集合，从  由特定server控制的entry  开始，包括其所有下属及其下属，一直到由不同server控制的entry。** </font>
+<font color=red>**context-prefix/上下文前缀：是初始entry的name。**</font>
+
+The root of the DIT is a DSA-specific Entry (DSE) and not part of any naming context (or any subtree); each server has different attribute values in the root DSE.
+<font color=blue>**DIT的根/root  是一个 DSA-specific Entry (DSE) ，而不是任何 naming-context/命名上下文(或任何subtree)的一部分； 每个服务器在根 DSE 中都有不同的attribute-value。**</font>
 
 
-   scope is baseObject, filter is "(objectClass=subschema)" [RFC4515],
-   and the attributes field lists the names of the desired schema
-   attributes (as they are operational).  Note: the
-   "(objectClass=subschema)" filter allows LDAP servers that gateway to
-   X.500 to detect that subentry information is being requested.
 
-   Clients SHOULD NOT assume that a published subschema is complete,
-   that the server supports all of the schema elements it publishes, or
-   that the server does not support an unpublished element.
+## 5.1.  Server-Specific Data Requirements(特定于server的数据请求)
 
+An LDAP server SHALL provide information about itself and other  information that is specific to each server.  This is represented as  a group of attributes located in the root DSE, which is named with  the DN with zero RDNs (whose [RFC4514] representation is as the  zero-length string).
 
-
-# 5. DSA (Server) Informational Model
-
-The LDAP protocol assumes there are one or more servers that jointly
-provide access to a Directory Information Tree (DIT).  The server
-holding the original information is called the "master" (for that
-information).  Servers that hold copies of the original information
-are referred to as "shadowing" or "caching" servers.
-
-
-   As defined in [X.501]:
-
-      context prefix: The sequence of RDNs leading from the Root of the
-          DIT to the initial vertex of a naming context; corresponds to
-          the distinguished name of that vertex.
-    
-      naming context: A subtree of entries held in a single master DSA.
-
-   That is, a naming context is the largest collection of entries,
-   starting at an entry that is mastered by a particular server, and
-   including all its subordinates and their subordinates, down to the
-   entries that are mastered by different servers.  The context prefix
-   is the name of the initial entry.
-
-   The root of the DIT is a DSA-specific Entry (DSE) and not part of any
-   naming context (or any subtree); each server has different attribute
-   values in the root DSE.
-
-## 5.1.  Server-Specific Data Requirements
-
-   An LDAP server SHALL provide information about itself and other
-   information that is specific to each server.  This is represented as
-   a group of attributes located in the root DSE, which is named with
-   the DN with zero RDNs (whose [RFC4514] representation is as the
-   zero-length string).
-
-   These attributes are retrievable, subject to access control and other
-   restrictions, if a client performs a Search operation [RFC4511] with
-   an empty baseObject, scope of baseObject, the filter
+These attributes are retrievable, subject to access control and other  restrictions, if a client performs a Search operation [RFC4511] with  an empty baseObject, scope of baseObject, the filter
 
 
 
@@ -1815,46 +1816,24 @@ Zeilenga                    Standards Track                    [Page 36]
 
 RFC 4512                      LDAP Models                      June 2006
 
+"(objectClass=*)" [RFC4515], and the attributes field listing the names of the desired attributes.  It is noted that root DSE attributes are operational and, like other operational attributes,  are not returned in search requests unless requested by name.
 
-   "(objectClass=*)" [RFC4515], and the attributes field listing the
-   names of the desired attributes.  It is noted that root DSE
-   attributes are operational and, like other operational attributes,
-   are not returned in search requests unless requested by name.
+The root DSE SHALL NOT be included if the client performs a subtree search starting from the root.
 
-   The root DSE SHALL NOT be included if the client performs a subtree
-   search starting from the root.
+Servers may allow clients to modify attributes of the root DSE, where appropriate.
 
-   Servers may allow clients to modify attributes of the root DSE, where
-   appropriate.
+The following attributes of the root DSE are defined below. Additional attributes may be defined in other documents.
+- altServer: alternative servers;
+- namingContexts: naming contexts;
+- supportedControl: recognized LDAP controls;
+- supportedExtension: recognized LDAP extended operations;
+- supportedFeatures: recognized LDAP features;
+- supportedLDAPVersion: LDAP versions supported; and
+- supportedSASLMechanisms: recognized Simple Authentication and Security Layers (SASL) [RFC4422] mechanisms.
 
-   The following attributes of the root DSE are defined below.
-   Additional attributes may be defined in other documents.
+The values provided for these attributes may depend on session-specific and other factors.  For example, a server supporting the SASL EXTERNAL mechanism might only list "EXTERNAL" when the client's identity has been established by a lower level.  See [RFC4513].
 
-      - altServer: alternative servers;
-    
-      - namingContexts: naming contexts;
-    
-      - supportedControl: recognized LDAP controls;
-    
-      - supportedExtension: recognized LDAP extended operations;
-    
-      - supportedFeatures: recognized LDAP features;
-    
-      - supportedLDAPVersion: LDAP versions supported; and
-    
-      - supportedSASLMechanisms: recognized Simple Authentication and
-        Security Layers (SASL) [RFC4422] mechanisms.
-
-   The values provided for these attributes may depend on session-
-   specific and other factors.  For example, a server supporting the
-   SASL EXTERNAL mechanism might only list "EXTERNAL" when the client's
-   identity has been established by a lower level.  See [RFC4513].
-
-   The root DSE may also include a 'subschemaSubentry' attribute.  If it
-   does, the attribute refers to the subschema (sub)entry holding the
-   schema controlling the root DSE.  Clients SHOULD NOT assume that this
-   subschema (sub)entry controls other entries held by the server.
-   General subschema discovery procedures are provided in Section 4.4.
+The root DSE may also include a 'subschemaSubentry' attribute.  If it does, the attribute refers to the subschema (sub)entry holding the schema controlling the root DSE.  Clients SHOULD NOT assume that this subschema (sub)entry controls other entries held by the server. General subschema discovery procedures are provided in Section 4.4.
 
 
 
@@ -1873,20 +1852,17 @@ RFC 4512                      LDAP Models                      June 2006
 
 ### 5.1.1.  'altServer'
 
-   The 'altServer' attribute lists URIs referring to alternative servers
-   that may be contacted when this server becomes unavailable.  URIs for
-   servers implementing the LDAP are written according to [RFC4516].
-   Other kinds of URIs may be provided.  If the server does not know of
-   any other servers that could be used, this attribute will be absent.
-   Clients may cache this information in case their preferred server
-   later becomes unavailable.
+The 'altServer' attribute lists URIs referring to alternative servers that may be contacted when this server becomes unavailable.  URIs for servers implementing the LDAP are written according to [RFC4516]. Other kinds of URIs may be provided.  If the server does not know of any other servers that could be used, this attribute will be absent. Clients may cache this information in case their preferred server later becomes unavailable.
 
-      ( 1.3.6.1.4.1.1466.101.120.6 NAME 'altServer'
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
-        USAGE dSAOperation )
+```ABNF
+  ( 1.3.6.1.4.1.1466.101.120.6 NAME 'altServer'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+    USAGE dSAOperation )
+```
 
-   The IA5String (1.3.6.1.4.1.1466.115.121.1.26) syntax is defined in
-   [RFC4517].
+   The IA5String (1.3.6.1.4.1.1466.115.121.1.26) syntax is defined in [RFC4517].
+
+
 
 ### 5.1.2.  'namingContexts'
 
