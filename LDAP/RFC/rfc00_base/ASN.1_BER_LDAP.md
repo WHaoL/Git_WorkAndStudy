@@ -2,11 +2,10 @@
 
 ​	LDAP is a binary protocol, which helps make it compact and efficient to parse. The particular binary encoding that it uses is based on ASN.1 (Abstract Syntax Notation One), which is a framework for representing structured data. ASN.1 is actually a family of encodings that each have their own pros and cons for different situations. For example, you might use the Packed Encoding Rules (PER) if you want to make sure that the encoded representation is as small as possible, or you might use the Octet Encoding Rules (OER) if you favor encode/decode performance over size. LDAP uses the Basic Encoding Rules (BER), which finds a good middle ground between the two.
 
-​		LDAP是一种二进制协议，有助于使其紧凑和高效地解析。它使用的特殊二进制编码是基于ASN.1(抽象语法表示法1)，这是一个表示结构化数据的框架。ASN.1实际上是一组编码，每种编码在不同的情况下都有各自的优缺点。例如，如果您希望确保编码的表示尽可能小，您可以使用打包编码规则(PER)，或者如果您希望编码/解码性能优于大小，您可以使用八位编码规则(OER)。LDAP使用基本编码规则(BER)，它在两者之间找到了一个很好的中间地带。
+​		LDAP是一种二进制协议，有助于使其紧凑和高效地解析。它使用的特殊二进制编码是基于<font color=red>ASN.1(抽象语法表示法1)</font>，这是一个表示结构化数据的框架。ASN.1实际上是一组编码，每种编码在不同的情况下都有各自的优缺点。例如，如果您希望确保编码的表示尽可能小，您可以使用打包编码规则(PER)，或者如果您希望编码/解码性能优于大小，您可以使用八位编码规则(OER)。LDAP使用<font color=red>基本编码规则(BER)</font>，它在两者之间找到了一个很好的中间地带。
 
 总结： 
-
-​	LDAP使用ASN.1-BER进行编码，这是一种二进制协议，能紧凑和高效的进行解析。
+​	<font color=red>LDAP使用ASN.1的BER进行编码，这是一种二进制协议，能紧凑和高效的进行解析。</font>
 
 ​	
 
@@ -20,36 +19,34 @@ Fortunately, LDAP uses a pretty well-defined subset of BER that has less ambigui
 
 In ASN.1 BER, each piece of data is called an element, and each BER element has three parts: a type, a length, and a value. Let’s take a closer look at each of these components.
 
-​	在ASN.1 BER中，每条数据称为一个元素，每个BER元素由三部分组成：类型、长度和值。 让我们仔细看看这些组件中的每一个。
+​	<font color=red>在ASN.1 BER中，每条数据称为一个元素</font>，每个BER元素由三部分组成：类型、长度和值。 让我们仔细看看这些组件中的每一个。
 
 总结： 
-
 ​	我们只需要了解 ASN.1的BER中(LDAP用到的那部分)
-
-​	每个BER elements由3部分构成：type/length/value
-
+​	<font color=red>每个BER elements由3部分构成：type/length/value</font>
 
 
-### 1. BER Types(数据类型)
+
+### 1. BER Types(BER-element's Types)
 
 A BER element’s type is used to indicate what kind of information that element can hold, not unlike declaring the data type (string, integer, boolean, etc.) for a variable in a computer program. There are a lot of different kinds of BER types, but if we’re just talking about LDAP’s use of BER, then there are really only seven basic data types that we need to know about:
 
-BER 元素的类型用于指示该元素可以保存的信息类型，这与在计算机程序中声明变量的数据类型（字符串、整数、布尔值等）不同。 BER 类型有很多种，但如果我们只是谈论 LDAP 对 BER 的使用，那么我们实际上只需要了解七种基本数据类型：
+BER 元素的类型用于指示该元素可以保存的信息类型，这与在计算机程序中声明变量的数据类型（字符串、整数、布尔值等）不同。 BER 类型有很多种，但如果我们只是谈论 LDAP 对 BER 的使用，那么我们实际上只需要了解<font color=red>七种基本数据类型：</font>
 
-- Null elements don’t have a value.
+- <font color=red>Null elements</font> don’t have a value.
   - Null elements 没有值
-- Boolean elements have a value that is either true or false.
+- <font color=red>Boolean elements</font> have a value that is either true or false.
   - Boolean elements 有一个为true或false的值
-- Integer elements have a value that is a whole number, with no fractional component.
+- <font color=red>Integer elements</font> have a value that is a whole number, with no fractional component.
   - Integer elements 有一个整数值，没有小数部分。
-- Octet string elements have a value that is a collection of zero or more bytes. An octet string’s value may represent a text string, but it could also just be a binary blob.
+- <font color=red>Octet string elements</font> have a value that is a collection of zero or more bytes. An octet string’s value may represent a text string, but it could also just be a binary blob.
   - Octet string elements 有一个值 是0个或多个字节的集合。 八位字节字符串 的值可能代表一个文本字符串，但它也可能只是一个二进制 blob。
-- Enumerated elements have a predefined set of values in which each value has a particular meaning.
+- <font color=red>Enumerated elements</font> have a predefined set of values in which each value has a particular meaning.
   - Enumerated elements 有一组预定义的值，其中每个值都有特定的含义。
-- Sequence elements encapsulate a collection of zero or more other elements in which the order of those elements is considered significant.
-  - Sequence elements 封装0个或多个其他元素的集合，其中这些元素的顺序被认为是重要的。
-- Set elements encapsulate a collection of zero or more other elements in which the order of those elements is not considered significant.
-  - Set elements 封装0个或多个其他元素的集合，其中这些元素的顺序不重要。
+- <font color=red>Sequence elements</font> encapsulate a collection of zero or more other elements in which the order of those elements is considered significant.
+  - Sequence elements 封装  0个或多个其他元素  的集合，其中这些元素的顺序被认为是重要的。
+- <font color=red>Set elements</font> encapsulate a collection of zero or more other elements in which the order of those elements is not considered significant.
+  - Set elements 封装  0个或多个其他元素  的集合，其中这些元素的顺序不重要。
 
 Using these seven types, we can construct any kind of LDAP request or response.
 
@@ -64,10 +61,8 @@ Because BER is a compact binary protocol, it uses a compact binary representatio
 | Purpose | Class |      | Primitive or Constructed? | Tag Number |      |      |      |      |
 
 总结： 
-
 ​	1. 七种基本数据类型：空值/布尔值/整数/字符串/枚举值/有序集合/无序集合
-
-	2. 多字节的类型： Class + Primitive or Constructed? + Tag Number
+​	2.<font color=red>多字节的类型(即BER元素的type跨越多个字节时)： Class + Primitive or Constructed? + Tag Number</font>
 
 
 
@@ -78,45 +73,32 @@ The two most significant bits in this byte (i.e., the two leftmost bits in the b
 该字节中的两个最高有效位（即该字节的 大端表示中 最左边的两个位）： 表示该type的class/类。 您也可以将其视为type的 scope/范围，它让您知道相同 BER 类型在两种不同设置中具有相同含义的可能性有多大。 由于class被编码为两位，因此有四种可能的值：
 
 - `00` — This is the universal class. BER types in the universal class always mean the same thing, regardless of where you see it. For example, if you see a BER element with a type of `00000010` binary (`0x02` hex, which means universal class, primitive, tag number two), then the value of that element will always be an integer.
-  - `00` — 这是通用类(universal class)。 通用类中的 BER type总是意味着相同的东西，无论您在哪里看到它。 例如，如果您看到一个 BER element的type为“00000010”二进制（“0x02”十六进制，表示universal-class、primitive、tag-number为2），则该element的value将始终是integer。
+  - <font color=red>`00` — 这是通用类(universal class)</font>。 通用类中的 BER type总是意味着相同的东西，无论您在哪里看到它。 例如，如果您看到一个 BER element的type为“00000010”二进制（“0x02”十六进制，表示universal-class、primitive、tag-number为2），则该element的value将始终是integer。
 - `01` — This is the application class. BER types in the application class always mean the same thing within one application but might mean something completely different in another application. And here “application” doesn’t necessarily mean a computer program; in the case of LDAP, it means the complete protocol specification. For example, if you see a BER element in an LDAP message with a type of `01100011` binary (`0x63` hex, which means application class, constructed, tag number three), then the value of that element will always be an LDAP search request protocol op.
-  - `01` — 这是应用程序类(application class)。 application class中的 BER type在一个应用程序中总是意味着相同的东西，但在另一个应用程序中可能意味着完全不同的东西。 这里的“应用程序”并不一定意味着计算机程序； 对于 LDAP，它意味着完整的协议规范。 例如，如果您在 LDAP message中看到一个 BER element，其type为“01100011”二进制（“0x63”十六进制，这意味着application-class、constructed、tag-number为3），则该元素的值将始终是 LDAP 搜索请求协议操作(LDAP search request protocol op).
+  - <font color=red>`01` — 这是应用程序类(application class)</font>。 application class中的 BER type在一个应用程序中总是意味着相同的东西，但在另一个应用程序中可能意味着完全不同的东西。 这里的“应用程序”并不一定意味着计算机程序； 对于 LDAP，它意味着完整的协议规范。 例如，如果您在 LDAP message中看到一个 BER element，其type为“01100011”二进制（“0x63”十六进制，这意味着application-class、constructed、tag-number为3），则该元素的值将始终是 LDAP 搜索请求协议操作(LDAP search request protocol op).
 - `10` — This is the context-specific class. BER types in the context-specific class can have different meanings from one element to another, and you need to have an understanding of how it’s being used to be able to determine what it means. For example, if you see a BER element in an LDAP message with a type of `10100011` binary (`0xa3` hex, which means context-specific class, constructed, tag number three), then it could represent a set of referral URLs if it appears in an `LDAPResult` sequence, or it could represent an equality filter component in a search request, or it could mean something completely different somewhere else in some other context.
-  - `10` — 这是特定于上下文的类。 特定于上下文类中的 BER type可以从一个element到另一个element具有不同的含义，您需要了解它的使用方式才能确定它的含义。 例如，如果您在 LDAP message中看到一个 BER element，其type为 `10100011` 二进制（`0xa3` 十六进制，这意味着context-specific-class，constructed，tagNumber为 3），如果它出现在“LDAPResult”sequence中 那么它可能代表一组引用 URL ，或者它可能代表search-request中的相等过滤器组件，或者在其他上下文中的其他地方 它可能意味着完全不同的含义。
+  - <font color=red>`10` — 这是特定于上下文的类(context-specific class)</font>。 特定于上下文类中的 BER type可以从一个element到另一个element具有不同的含义，您需要了解它的使用方式才能确定它的含义。 例如，如果您在 LDAP message中看到一个 BER element，其type为 `10100011` 二进制（`0xa3` 十六进制，这意味着context-specific-class，constructed，tagNumber为 3），如果它出现在“LDAPResult”sequence中 那么它可能代表一组引用 URL ，或者它可能代表search-request中的相等过滤器组件，或者在其他上下文中的其他地方 它可能意味着完全不同的含义。
 - `11` — This is the private class. It’s intended to be something in between the universal and application classes, where an organization could define its own set of types that have the same meaning across all of their applications, but the use of the private class is discouraged, and it’s highly unlikely that you’ll ever encounter it in LDAP.
-  - `11` — 这是私有类型(private class)。 它旨在介于universal-class和application-class之间，organization/组织 可以在他们的 application/应用程序 中定义一组自己的 具有相同含义的 type，但不鼓励使用私有类，而且您极可能 将永远 不会在 LDAP 中遇到它。
+  - <font color=red>`11` — 这是私有类型(private class)</font>。 它旨在介于universal-class和application-class之间，organization/组织 可以在他们的 application/应用程序 中定义一组自己的 具有相同含义的 type，但不鼓励使用私有类，而且您极可能 将永远 不会在 LDAP 中遇到它。
 
 总结： 
-
-​	BER-type's byte的前两个 最高有效位 是class(用于对 BER Type 划分范围/scope)(即 ：使用class对type进行划分)
-
-​	class占2位(前两个最高有效位)(大端表示的最左边两位)
+	<font color=red>BER-element's type 的前两个 最高有效位 是class(用于对 BER Type 划分范围/scope)(即 ：使用class对type进行划分)</font>
+	<font color=red>class占2位(前两个最高有效位)(大端表示的最左边两位)</font>
 
 
 
 #### 1.2 The BER Type Primitive/Constructed Bit(BER-type's byte的第三位)
 
 The third most significant bit in a BER type is used to indicate whether the element is primitive or constructed. If this bit is set to one, then it means that the element is constructed and that its value is comprised of a concatenation of zero or more encoded BER elements. Sequences and sets, which encapsulate elements, are constructed. On the other hand, if this third bit is set to zero, then it means that the element is primitive and that its value should not be assumed to be comprised of encoded elements. Null, Boolean, integer, octet string, and enumerated elements are all primitive.
-
 BER type中的第三个最高有效位 用于指示元素是 primitive/原始的 还是 constructed/构造的。 如果该位设置为 1，则表示该元素是constructed并且其值由0个或多个编码后的 BER element的串联组成。 sequence和set封装的元素是constructed/构造的。 另一方面，如果第三位设置为1，则意味着该元素是primitive/原始的，并且不应假定其值由(各种)编码元素组(合)成。 空值/null、布尔值/boolean、整数/integer、八位字节字符串/octet-string 和 枚举/enumerated 元素都是 primitive/原始的。
 
 总结: 
-
-​	BER type中的第三个最高有效位  用于指示 element是 primitive 还是 constructed。
-
-​	该位设置为1，表示该element是constructed/构造的 其值是 0个或多个 编码后的BER element的串联组成；
-
-​		sequence和set  元素(封装元素)是constructed。
-
-​	该位设置为0，表示element是primitive/原始的，其值不是由(各种)编码元素组(合)成；
-
-​		Null, Boolean, integer, octet string,  enumerated 元素/element，都是primitive
-
-​	关于 primitive和constructed： 
-
-​			primitive即表示       该元素/element是原始的，仅仅是本element-type自己
-
-​			constructed即表示 该元素/element是构造的，是由 其他元素/element 组合而成
+	<font color=red>BER-element's type中的第三个最高有效位  用于指示 element是 primitive 还是 constructed。</font>
+	<font color=red>该位设置为1，表示该element是constructed/构造的 其值是 0个或多个 编码后的BER element的串联组成；sequence和se元素是constructed。</font>
+	<font color=red>该位设置为0，表示element是primitive/原始的，其值不是由各种元素组合成: Null, Boolean, integer, octet string,  enumerated元素，都是primitive</font>
+	关于 primitive和constructed： 
+			<font color=red>primitive即表示       该元素/element是原始的，仅仅是本element-type自己</font>
+			<font color=red>constructed即表示 该元素/element是构造的，是由 其他元素/element 组合而成</font>
 
 
 
@@ -127,20 +109,15 @@ The remaining five bits in a BER type are used to encode the tag number, which i
 BER type中剩余的 5 位用于对标签号(tag number)进行编码，用于区分同一类中的不同类型元素。 标签编号使用该数字的二进制表示进行编码，因此“00000”表示标签编号为零，“00001”表示标签编号为 1，“00010”表示标签编号为 2，依此类推。 由于标签编号仅使用 5 位，因此单个字节中最多只能编码 30 位标签编号。 幸运的是，您在 LDAP 中遇到大于 30 的标签编号的可能性极小（我所知道的最高标签编号是 25，用于 LDAP 中间响应协议操作），因此您无需担心多字节类型。
 
 总结: 
-
-​	BER type的剩余5位，用于对 tag number进行编码，用于区分 同一class中的不同类型的element。
-
-​	tag number对数字的二进制进行编码
-
-​	tag number占，5位，最多表示30个编号
+	<font color=red>BER-element's type的剩余5位，用于对 tag number进行编码，用于区分 同一class中的不同类型的element。</font>
+	<font color=red>tag number对数字的二进制进行编码；tag number占，5位，最多表示30个编号。</font>
 
 
 
-#### 1.4 The Universal BER Types Used in LDAP
+#### 1.4 The Universal BER Types Used in LDAP(Universal BER Types)
 
 The following are the BER types in the universal class that you’re likely to encounter in LDAP:
-
-以下是您在 LDAP 中可能会遇到的 (universal class)通用类 中的 BER type：
+以下是您在 LDAP 中可能会遇到的    (universal class)通用类 中的 BER type：
 
 | Element Type | Binary Encoding | Hex Encoding |
 | ------------ | --------------- | ------------ |
@@ -153,26 +130,20 @@ The following are the BER types in the universal class that you’re likely to e
 | Set          | 00110001        | 0x31         |
 
 总结： 
-
-​	上表是在 universal-class 范围中的 BER-type
-
-​				sequence/set 是：universal-`constructed`-tagNumber
-
-​				其他的都是          ：universal-`prmitive`-tagNumber
-
-​				(大多数是 universal-primitive)
-
-​	Universal BER Types：即 被划分为Universal class的BER Types	
+	上表是在 universal-class 范围中的 BER-type
+				<font color=red>sequence/set 是：universal-`constructed`-tagNumber</font>
+				<font color=red>其他的都是          ：universal-`prmitive`-tagNumber</font>
+				<font color=red>(7种基本类型，大多数是 universal-primitive)</font>
+	Universal BER Types：即 被划分为Universal class的BER Types	
 
 
 
 
 
-#### 1.5 The Application BER Types Used in LDAP
+#### 1.5 The Application BER Types Used in LDAP(Application BER Types)
 
 The following are the BER types in the application class that are defined for LDAP:
-
-以下是为LDAP定义的(application class)应用程序类 中的 BER type：
+以下是为LDAP定义的   (application class)应用程序类 中的 BER type：
 
 | Element Type                        | Binary Encoding | Hex Encoding |
 | ----------------------------------- | --------------- | ------------ |
@@ -200,69 +171,51 @@ The following are the BER types in the application class that are defined for LD
 | Intermediate Response Protocol Op   | 01111001        | 0x79         |
 
 The unbind request, delete request, and abandon request protocol op types are primitive, while all the rest are constructed. This explains why their hexadecimal representations are so out-of-line with their neighboring values. The unbind request protocol op is a null element, the delete request protocol op is an octet string element, the abandon request protocol op is an integer element, and all other types are sequence elements.
-
-unbind request, delete request, abandon request协议操作类型是 primitive/原始的，而其余的都是 constructed/构造的。 这解释了为什么它们的十六进制表示与它们的相邻值如此不一致。 unbind request protocol op为null元素，delete request protocol op为octet string元素，abandon request protocol op为integer元素，其他类型均为sequence元素。
+<font color=red>unbind request, delete request, abandon request协议操作类型是 primitive/原始的，而其余的都是 constructed/构造的。 </font>
+这解释了为什么它们的十六进制表示与它们的相邻值如此不一致。 
+<font color=red>unbind request protocol op为null元素，delete request protocol op为octet string元素，abandon request protocol op为integer元素，其他类型均为sequence元素。</font>
 
 总结： 
-
 ​	上表是在 application-class 范围中的 BER-type
-
 ​			unbind-request/delete-request/abandon-request是：application-`primitive`-tagNumber		
-
 ​			其他的都是																		 ：application-`constructed`-tagNumber
-
 ​			(大多数是application-constructed)		
-
 ​	Application BER Types：即被划分为Application class的BER Types
-
 ​	其中的 3个BER-type 	
-
 ​		unbind request,     的protocol op是null element，             是primitive的
-
 ​		delete request,       的protocol op是octet string element，是primitive的
-
 ​		abandon request，的protocol op是integer element，       是primitive的
-
 ​	其他的BER type           的protocol op 都是`sequence` element，是constructed
 
 
 
 
 
-### 2.BER Lengths
+### 2.BER Lengths(BER-element's Length)
 
 A BER element’s length specifies the number of bytes in the value. There are two ways to encode the length: a single-byte representation for values of up to 127 bytes, and a multi-byte representation for values of any size.
-
-BER element的 length/长度 指定value的字节数。 有两种方法可以对长度进行编码：最多 127 个字节值的单字节表示，以及任意大小值的多字节表示。  
+<font color=red>BER element''s length 指定/指出：value占用的字节数。</font> 有两种方法可以对长度进行编码：最多 127 个字节值的单字节表示，以及任意大小值的多字节表示。  
 
 In the single-byte representation, the length is just encoded using the binary representation of the number of bytes in the value. For example, if the value is zero bytes long (which will be the case for a null element, for a zero-byte octet string, or an empty sequence or set), then the length is encoded as `00000000` binary or `0x00` hex. If the value is five bytes long, then the length is encoded as `00000101` binary or `0x05` hex. And a value that is 123 bytes long would be encoded as `01111011` binary or `0x7b` hex.
-
-在单字节表示中，长度只是使用值中字节数的二进制表示进行编码。 例如，如果值是零字节长（对于空元素、零字节八位字节字符串或空序列或空集合就是这种情况），则长度被编码为“00000000”二进制或“0x00” `十六进制。 如果该值是五个字节长，则该长度被编码为“00000101”二进制或“0x05”十六进制。 123 字节长的值将被编码为“01111011”二进制或“0x7b”十六进制。
+在<font color=red>单字节表示</font>中，<font color=red>长度只是使用value占用字节数的二进制表示进行编码</font>。 例如，如果值是零字节长（对于空元素、零字节八位字节字符串或空序列或空集合就是这种情况），则长度被编码为“00000000”二进制或“0x00” `十六进制。 如果该值是五个字节长，则该长度被编码为“00000101”二进制或“0x05”十六进制。 123 字节长的值将被编码为“01111011”二进制或“0x7b”十六进制。
 
 In the multi-byte representation, the first byte has its most significant bit set to one, and the lower seven bits are used to indicate how many bytes are required to represent the length. For example, let’s say that you want to encode the length for a value that is 1234 bytes long. The binary representation of 1234 is `10011010010` (`0x4d2` hex), which is large enough that it will require two bytes. And then we’ll need to precede those two bytes with a third byte that has its leftmost bit set to one and the right seven bits used to hold the binary representation of the number two. So the full binary representation of a BER length for a 1234-byte-long value is `100000100000010011010010` (`0x8204d2` hex).
-
-在多字节表示中，第一个字节的最高有效位设置为1，低七位用于表示需要多少字节来表示长度。 例如，假设您想对 1234 字节长的值的长度进行编码。 1234 的二进制表示是“10011010010”（“0x4d2”十六进制），它足够大，需要两个字节。 然后我们需要在这两个字节之前添加第三个字节，该字节的最左边的位设置为 1，右边的 7 位用于保存数字1234的二进制表示。 因此，1234 字节长值的 BER 长度的完整二进制表示为“100000100000010011010010”（“0x8204d2”十六进制）。
+在<font color=red>多字节表示</font>中，<font color=red>第一个字节的最高有效位设置为1，低七位用于表示(需要多少字节来表示)长度。</font> 例如，假设您想对 1234 字节长的值的长度进行编码。 1234 的二进制表示是“10011010010”（“0x4d2”十六进制），它足够大，需要两个字节。 然后我们需要在这两个字节之前添加第三个字节，该字节的最左边的位设置为 1，右边的 7 位用于保存数字1234的二进制表示。 因此，1234 字节长值的 BER 长度的完整二进制表示为“100000100000010011010010”（“0x8204d2”十六进制）。
 
 总结： 
-
-​	BER element的length 指出了value占用的字节数；
-
-​	有两种对length进行编码的方式：最多127字节的单字节表示，任意大小的多字节表示；
-
-​			单字节表示：直接对 value/值 所占字节数的二进制进行编码；
-
-​			多字节表示：第一个字节的最高位为1 第一个字节的低7位表示 value/值 所占用的字节数
-
-​					多字节表示：即 0x8n 1 2 .. n   （0x8n表示后面占用n字节，1 2 ... n  n个字节组成的数字即为value的字节数的length）     
+	BER element's length 指出了value占用的字节数；
+	有两种对length进行编码的方式：最多127字节的单字节表示，任意大小的多字节表示；
+		单字节表示：直接对 value/值 所占字节数的二进制进行编码；
+		多字节表示：第一个字节的最高位为1 第一个字节的低7位表示 value/值 所占用的字节数
+			多字节表示：即 0x8n 1 2 .. n   （0x8n表示后面占用n字节，1 2 ... n  n个字节组成的数字即为value的字节数的length）     
 
 
 
-#### 2.1 Note 1: Encoding BER Lengths with More Bytes than Necessary
+#### 2.1 Note 1: Encoding BER Lengths with More Bytes than Necessary(关于length的上限)
 
 使用多于必需的字节数对 BER length/长度 进行编码
 
 Although the above BER doesn’t require you to encode the length in the smallest possible number of bytes. You can use a multi-byte representation for lengths that could be encoded in just a single byte, and you can use more bytes than necessary in a multi-byte representation. For example, all of the following hexadecimal encodings are valid ways to represent a BER length of ten bytes:
-
 尽管上述 BER 不要求您以尽可能少的字节数对 length/长度进行编码。 对于可以仅用单个字节编码的长度，您可以使用多字节表示，并且您可以在多字节表示中使用比所需更多的字节。 例如，以下所有十六进制编码都是表示10字节 BER length的有效方式：
 
 - `0a`
@@ -272,30 +225,25 @@ Although the above BER doesn’t require you to encode the length in the smalles
 - `8a 00 00 00 00 00 00 00 00 00 0a`
 
 Some BER libraries choose to always use multi-byte encodings for certain types of elements (especially sequences and sets). When looking at encoded LDAP traffic, it’s relatively common to see encoded lengths that start with `0x84`, followed by four more bytes that actually hold the encoded length. This is usually done for efficiency, because it allows the library to just directly copy the bytes that make up the 32-bit integer representation of the length, and because it makes it possible for the library to go back and fill in the length for a sequence or set once it knows how many elements that sequence or set contains and how big those elements are.
-
 某些 BER libraries/库 选择始终对某些类型的元素（尤其是sequences/序列和sets/集合）使用多字节编码。 在查看编码的 LDAP 流量时，通常会看到以“0x84”开头的编码长度，然后是另外四个实际保存编码长度的字节。 这样做通常是为了提高效率，因为它允许库直接复制构成长度的 32 位整数表示的字节，并且因为它使库可以返回并填充长度 一旦知道sequence/序列或set/集合包含多少个元素以及这些元素有多大。
 
 Although it’s technically valid to use any number of bytes to encode a BER length, many libraries impose a limit on the number of bytes that they will support in multi-byte lengths. In most cases, that limit is four bytes, not counting the one extra byte used to indicate that it’s a multi-byte length, so it’s probably best to avoid generating multi-byte lengths that start with anything larger that `0x84`.
-
 尽管使用任意数量的字节对 BER 长度进行编码在技术上是有效的，但许多库对它们将支持的多字节长度的字节数施加了限制。 在大多数情况下，该限制是四个字节，不包括用于指示它是多字节长度的一个额外字节，因此最好避免生成以任何大于 0x84 开头的多字节长度。
 
 总结: 
-
-​	对于length的多字节表示，我们可以使用任意多字节，但一般推荐不大于4字节，即 最大为0x84
-
+​	<font color=red>对于length的多字节表示，我们可以使用任意多字节，但一般推荐不大于4字节，即 最大为0x84</font>
 
 
-#### 2.2 Note 2: Imposing Upper Bounds on BER Lengths for Safety
+
+#### 2.2 Note 2: Imposing Upper Bounds on BER Lengths for Safety(出于安全 对length施加上限)
 
 为安全起见对 BER length/长度施加上限
 
 Most BER libraries impose an upper limit on the size of the elements that they will accept. This is a safety feature that is intended to mitigate the risk of a malicious application claiming that it’s going to send a very large element in the hopes that it will cause the application to allocate enough memory to hold that element, which could cause the application to crash or the system to start swapping. If you’re thinking about writing a BER decoder, it’s a very good idea to ensure you have some way of rejecting elements that are unreasonably large.
-
 大多数 BER 库对它们接受的元素大小施加了上限。 这是一项安全功能，旨在降低恶意应用程序声称将发送一个非常大的元素以希望它会导致应用程序分配足够的内存来保存该元素的风险，这可能会导致应用程序 崩溃或系统开始交换。 如果您正在考虑编写 BER 解码器，最好确保您有某种方法来拒绝过大的元素。
 
 总结: 
-
-​	对接收元素的大小施加上限，这是为了防止被恶意占用内存。
+​	<font color=red>对接收元素的大小施加上限，这是为了防止被恶意占用内存。</font>
 
 
 
@@ -304,25 +252,21 @@ Most BER libraries impose an upper limit on the size of the elements that they w
 不定长形式
 
 BER actually offers a third way to represent the length of an element. This is called the indefinite form, and it uses a special token at the beginning to indicate the start of a value that uses the indefinite form, and then another special token after the end of the value. This is potentially useful for cases in which the size of the element may not be known in advance (for example, when starting a sequence without knowing how many elements will be added to that sequence). However, you won’t encounter the indefinite length form in LDAP because [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) section 5.1 explicitly forbids its use, so I won’t go into any more detail about it here.
-
 BER 实际上提供了第三种表示元素长度的方法。 这称为不定形式，它在开头使用一个特殊标记来指示使用不定形式的值的开始，然后在值的结尾之后使用另一个特殊标记。 这对于可能事先不知道元素大小的情况（例如，在不知道将向该序列添加多少元素的情况下启动序列时）可能很有用。 但是，您不会在 LDAP 中遇到不定长形式，因为 [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) 第 5.1 节明确禁止使用它，所以我不会讨论任何 关于它的更多细节在这里。
 
 总结： 
-
-​	第3种表示 element length的方法：不定长形式
-
-​	 [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) 第 5.1 节明确禁止使用 	不定长形式，所以我们不讨论它的细节！
+	第3种表示 element length的方法：不定长形式
+	[RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) 第 5.1 节明确禁止使用 	不定长形式，所以我们不讨论它的细节！
 
 
 
-### 3.BER Values
+### 3.BER Values(BER-element's Values)
 
 A BER element’s value holds an encoded representation of the data for that element. The way that the value is encoded depends on the type of element, so we’ll cover each kind of value separately.
-
-BER element的value/值保存了该元素数据的编码表示。 value的编码方式取决于element的type，因此我们将分别介绍每种值。
+<font color=red>BER element的value/值保存了该元素数据/data的编码表示。 </font>
+<font color=red>value的编码方式取决于element的type，因此我们将分别介绍每种值/value。</font>
 
 总结: 
-
 ​	对于不同的 BER type，它们的value的编码方式是不同的
 
 
@@ -330,11 +274,9 @@ BER element的value/值保存了该元素数据的编码表示。 value的编码
 #### 3.1 Null Values
 
 A null element is one that doesn’t have a value. Or, more accurately, it always has a value with a length of zero bytes. Null elements are typically used in cases where an element is needed, but the value for that element isn’t important. For example, the LDAP unbind request protocol op is a null element because an unbind request doesn’t have any parameters.
-
 (null element)/空元素 是没有值的元素。 或者，更准确地说，它总是有一个长度为零字节的值。 空元素通常用于需要元素的情况，但该元素的值并不重要。 例如，LDAP 解除绑定请求协议操作 是一个空元素，因为解除绑定请求没有任何参数。
 
 Null elements are always primitive, and the value is always empty, so the length is always zero bytes. The universal BER type for a null element is `0x05`, so the full hexadecimal encoding for a universal null element is:
-
 空元素始终是primitive/原始元素，值始终为empty/空，因此length/长度始终为零字节。 空元素的universal/通用 BER type为“0x05”，因此通用空元素的完整十六进制编码为：
 
 ```ASN.1
@@ -342,7 +284,6 @@ Null elements are always primitive, and the value is always empty, so the length
 ```
 
 In LDAP, the unbind request protocol op is encoded as a null element in the application class with a tag number of two (as per [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) section 4.3). The hexadecimal representation of that element is:
-
 在 LDAP 中，unbind request protocol op 被编码为 (application class)/应用程序类中的空元素，标签号为 2（根据 [RFC 4511] 部分 4.3）。 该元素的十六进制表示是：
 
 ```ASN.1
@@ -350,35 +291,25 @@ In LDAP, the unbind request protocol op is encoded as a null element in the appl
 ```
 
 总结: 
-
-​	null element总是有一个length为0的value(value 是empty/空的)；
-
-​		null element 通常用于 需要一个element但是 该element的value并不重；
-
-​			例如：unbind request 的protocol op 是一个 null element.
-
-​	null element始终是primitive ！！！；
-
-​		null element的 universal (class) BER type为0x05；值/value始终是empty 所以length始终是0字节；
-
-​			所以，universal null element的十六进制编码为 05 00
-
-​		unbind request protocol op 编码为： application class)中的null element，tagNumber为2 --> 01 0 00010
-
-​			例如： unbind request protocol op的 null element 十六进制编码为 42 00
+	null element总是有一个length为0的value(value 是empty/空的)；
+		<font color=red>null element 通常用于 需要一个element但是 该element的value并不重</font>；
+			例如：unbind request 的protocol op 是一个 null element.
+	<font color=red>null element是primitive </font>！！！；
+		<font color=red>null element的 universal (class) BER type为0x05</font>；值/value始终是empty 所以length始终是0字节；
+			所以，universal null element的十六进制编码为 05 00
+		unbind request protocol op 编码为： application class)中的null element，tagNumber为2 --> 01 0 00010
+			例如： unbind request protocol op的 null element 十六进制编码为 42 00
 
 
 
 #### 3.2 Boolean Values
 
 A Boolean element is one whose value represents the Boolean condition of either true or false. The value of a Boolean element is always encoded as a single byte, with `0xff` representing true and `0x00` representing false.
-
 (Boolean element)/布尔元素 是其值表示 布尔条件为true或false的元素。 布尔元素的值始终编码为单个字节，“0xff”表示真，“0x00”表示假。
 
 > LDAP is more restrictive than general-purpose BER is when it comes to encoding Boolean values of true. In general BER, a value of false is always as represented a single byte with all bits set to zero (hex `0x00`), while a value in which at least one bit is set to one represents true. But [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) section 5.1 states that LDAP messages should always encode true values with all bits set to one, which is `0xff` hex.
 
 Boolean elements are always primitive, and they always have a one-byte value. The universal BER type for a Boolean element is `0x01`, so the encoding for a universal Boolean element with a value of true is:
-
 布尔元素总是primitive/原始的，它们总是有一个一字节的值。 布尔元素的通用 BER 类型为“0x01”，因此值为 true 的通用布尔元素的编码为：
 
 ```ASN.1
@@ -392,27 +323,20 @@ And the encoding for a universal Boolean element with a value of false is:
 ```
 
 总结： 
-
-​	Boolean element的value 编码为 单个字节，0xff表示true，0x00表示false；
-
-​	Boolean element总是primitive！！！，有一个1字节的value,
-
-​	Boolean element的universal BER type是0x01；
-
-​		value为true的universal Boolean element 的十六进制编码为 01 01 ff
-
-​		value为false的universal Boolean element 的十六进制编码为 01 01 00
+	<font color=red>Boolean element的value 编码为 单个字节，0xff表示true，0x00表示false；</font>
+	Boolean element总是primitive！！！，有一个1字节的value,
+	Boolean element的universal BER type是0x01；
+		value为true的universal Boolean element 的十六进制编码为 01 01 ff
+		value为false的universal Boolean element 的十六进制编码为 01 01 00
 
 
 
 #### 3.3 Octet String Values
 
 An octet is a byte, and an octet string is simply zero or more bytes strung together. Those bytes can represent text (in LDAP, it’s usually the bytes that comprise the UTF-8 representation of that text), or they can just make up some arbitrary blob of binary data. LDAP uses octet strings all over the place, including for DNs, attribute names and values, diagnostic messages, and to hold the encoded values of controls, extended requests and responses, and SASL credentials.
-
-一个八位字节是一个字节，八位字节字符串只是0个或多个串在一起的字节。 这些字节可以表示文本（在 LDAP 中，通常是包含该文本的 UTF-8 表示的字节），或者它们可以组成一些任意的二进制数据 blob。 LDAP 到处使用八位字节字符串，包括用于 DN、属性名称和值、诊断消息，并保存控制、扩展请求和响应以及 SASL 凭证的编码值。
+<font color=red>一个八位字节是一个字节，八位字节字符串只是0个或多个串在一起的字节。 </font>这些字节可以表示文本（在 LDAP 中，通常是包含该文本的 UTF-8 表示的字节），或者它们可以组成一些任意的二进制数据 blob。 <font color=red>LDAP 到处使用八位字节字符串，包括用于 DN、属性名称和值、诊断消息，并保存 控件、扩展请求和响应以及 SASL凭证   的编码值。</font>
 
 In LDAP, octet strings are always primitive (BER allows for the possibility of constructed octet strings, but [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) section 5.1 forbids that use in LDAP). The universal BER type for an octet string element is `0x04`, and the hexadecimal bytes that correspond to the UTF-8-encoded text string “Hello!” are: `48 65 6c 6c 6f 21`, so the encoding for a universal octet string element meant to hold the text string “Hello!” is:
-
 在 LDAP 中，八位字节字符串始终是primitive/原始的（BER 允许八位字节字符串是 constructed/构造的，但 [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) 第 5.1 节禁止在 LDAP 中使用）。 八位字节字符串元素的通用 BER 类型是“0x04”，对应于 UTF-8 编码的文本字符串“Hello!”的十六进制字节。 是：`48 65 6c 6c 6f 21`，因此通用八位字节字符串元素的编码意味着保存文本字符串“Hello！” 是：
 
 ```ASN.1
@@ -421,36 +345,27 @@ In LDAP, octet strings are always primitive (BER allows for the possibility of c
 
 总结: 
 
-​	an octet 是一个字节
-
-​	octet string是0个/多个 字节 串在一起
-
+​	an octet 是一个字节，octet string是0个/多个 字节 串在一起
 ​	这些字节 用于表示文本/text，LDAP中通常是包含文本的UTF-8表示的字节；
-
-​	LDAP中到处使用 octet string：
-
+​	<font color=red>LDAP中到处使用 octet string：</font>
 ​		DN/attribute name/diagnostic messages/
-
 ​		controls的编码值/extended requests的编码值/responses的编码值/SASL credentials/证书 的编码值
+​	<font color=red>LDAP中 octet string 始终是promitive</font>！！！
+​	<font color=red>octet string的universal BER type是0x04</font>
 
-​	LDAP中 octet string 始终是promitive！！！
-
-​	octet string的universal BER type是0x04
+​	<font color=red>把 文本字符串 使用UTF-8编码 ，然后使用octet string表示出来：04 文本字符串的UTF-8编码值</font>
 
 
 
 #### 3.4 Integer Values
 
 An integer is a whole number, without any decimal point or fractional portion. Integer values can be positive, negative, or zero.
-
-整数是一个数字，没有任何小数点或小数部分。 整数值可以是正数、负数或零。
+整数是一个数字，没有任何小数点或小数部分。<font color=red> 整数值可以是正数、负数或零。</font>
 
 In BER, integer values are encoded using the two’s complement representation of the desired numeric value, using the smallest number of bytes that can hold the specified value. The process for coming up with the two’s complement representation varies a little based on whether the value is negative or not.
-
 在 BER 中，整数值 使用 所需数值的 二进制补码表示 进行编码，使用可以容纳指定值的最小字节数。 根据值是否为负，二进制补码表示的过程略有不同。
 
 An integer value of zero is always encoded as a single byte, and that byte is `00000000` binary or `00` hexadecimal. Integer elements are always primitive, and the BER type for universal integer elements is `0x02`, so the hexadecimal encoding for a universal integer element with a value of zero is:
-
 整数值0 始终编码为单个字节，该字节是“00000000”二进制或“00”十六进制。 整数元素始终是primitive/原始的，通用整数元素的 BER 类型为“0x02”，因此值为 0 的通用整数元素的十六进制编码为：
 
 ```ASN.1
@@ -458,11 +373,8 @@ An integer value of zero is always encoded as a single byte, and that byte is `0
 ```
 
 Positive integer values are encoded in the smallest number of bytes needed to hold the big-endian binary representation of that number, with the caveat that the most significant bit of the first byte cannot be set to one. If the binary representation of the desired integer value requires a multiple of eight bits, then you should prepend an extra byte with all bits set to zero. For example, the binary representation of the integer value 50 is `00110010` (`32` hex), so the hex encoding for a universal integer element with a value of 50 is:
-
 1)  正整数值以保持该数字的 big-endian/大端 二进制表示所需的最小字节数进行编码，
-
 2)  但需要注意的是，第一个字节的最高有效位不能设置为 1。 如果所需整数值的二进制表示需要 8 位的倍数，那么您应该预先添加一个所有位都设置为零的额外字节。 
-
 例如，整数值 50 的二进制表示是“00110010”（“32”十六进制），因此值为 50 的通用整数元素的十六进制编码为：
 
 ```ASN.1
@@ -470,7 +382,6 @@ Positive integer values are encoded in the smallest number of bytes needed to ho
 ```
 
 But the binary representation of the integer value 50,000 is `11000011 01010000` (`c3 50` hex), which does have its most significant bit set to one so we need to pad it with an extra byte of all zeros to get `00000000 11000011 01010000` binary (`00 c3 50` hex), and the hex encoding for a universal integer element with a value of 50,000 is:
-
 但是整数值 50,000 的二进制表示是 `11000011 01010000`（`c3 50` 十六进制），它的最高有效位设置为 1，所以我们需要用一个额外的全零字节填充它以获得 `00000000 11000011 01010000` 二进制（`00 c3 50` 十六进制），值为 50,000 的通用整数元素的十六进制编码为：
 
 ```ASN.1
@@ -478,7 +389,6 @@ But the binary representation of the integer value 50,000 is `11000011 01010000`
 ```
 
 Negative integer values are more difficult to understand in the two’s complement notation. If the most significant bit of the first byte is a one, then it indicates that the value is negative, but it’s not sufficient to just flip that bit from zero to one in order to turn a positive value into its negative equivalent. To compute the two’s complement representation for a negative integer, you need to use the following process:
-
 负整数值在二进制补码表示法中更难理解。 如果第一个字节的最高有效位是 1，则表示该值是负数，但仅将该位从 0 翻转到 1 以将正值转换为负值是不够的。 要计算负整数的二进制补码表示，您需要使用以下过程：
 
 1. Start with the big-endian binary representation of the absolute value for the desired negative number. For example, if you want to find the two’s complement representation for the number -12345, start by finding the big-endian binary representation of positive 12345, which is `00110000 00111001` (`30 39` hex).
@@ -489,7 +399,6 @@ Negative integer values are more difficult to understand in the two’s compleme
    1. 给结果值加 1，所以 `11001111 11000110` 二进制将变成 `11001111 11000111`（`cf c7` 十六进制）。
 
 So the hex encoding for a universal integer element with a value of -12,345 is:
-
 因此，值为 -12,345 的通用整数元素的十六进制编码为：
 
 ```ASN.1
@@ -501,43 +410,24 @@ So the hex encoding for a universal integer element with a value of -12,345 is:
 总结： 
 
 ​	integer value 是整数 可以是：正整数/0/负整数；对数值的二进制补码进行编码；使用最少的字节数；
-
 ​	integer element 始终是primitive/原始的；
-
 ​	universal integer element的BER type是0x02；
-
 ​		0：
-
 ​			始终编码为单字节，00000000 ==  0x00 
-
 ​			例子，值为0的universal integer element的十六进制编码为02 01 00
-
 ​		正整数：
-
 ​			以 保持数值的大端二进制补码所需的最小字节数 进行编码；
-
 ​			第一个字节的最高为不能为1，若是1则需 额外添加一个全0的字节；
-
 ​			例子，50==00110010==0x32 ，因此值为50的universal integer element的十六进制编码为02 01 32
-
 ​			例子，50000==00000000 11000011 01010000==00 c3 50，因此值为50000的...编码为02 03 00 c3 50
-
 ​		负整数： 
-
 ​			1.先求 对应的 正整数 的二进制补码
-
 ​			2.反转所有位
-
 ​			3.+1
-
 ​			例子： -12345
-
 ​				正整数: 12345==00110000 00111001==0x30 39
-
 ​				翻转    : 11001111 11000110==0xcf c6
-
 ​				+1       : 11001111 11000111==0xcf c7
-
 ​				-->> 02 02 cf c7
 
 ​	
@@ -545,11 +435,9 @@ So the hex encoding for a universal integer element with a value of -12,345 is:
 #### 3.5 Enumerated Values
 
 An enumerated element is like an integer in that its value is numeric, but each number is associated with a particular meaning. For example, LDAP result messages use an enumerated element to encode the result code (for example, a numeric value of 0 means that the operation completed successfully, 32 means that the operation targeted an entry that didn’t exist, 49 means that an authentication attempt failed because the user provided invalid credentials, etc.). LDAP also uses enumerated elements for things like modification types, search scopes, and alias dereferencing behaviors.
-
 枚举元素就像一个整数，因为它的值是数字，但每个数字都与特定的含义相关联。 例如，LDAP result message使用枚举元素对result code进行编码（例如，数值 0 表示操作成功完成，32 表示操作针对不存在的条目，49 表示身份验证 尝试失败，因为用户提供了无效的凭据/证书等）。 LDAP 还使用枚举元素来表示修改类型、搜索范围和别名解引用行为等内容。
 
 Enumerated elements are encoded in exactly the same way as integer elements. They’re always primitive, and the value is the two’s complement representation of the integer value that it holds. The universal BER type for an enumerated element is `0x0a`, so the hexadecimal encoding for a universal enumerated element that represents the LDAP “success” result code (integer value zero) is:
-
 枚举元素的编码方式与整数元素完全相同。 它们总是primitive/原始的，值是它所持有的整数值的二进制补码表示。 枚举元素的通用 BER 类型为“0x0a”，因此表示 LDAP“成功”结果代码（整数值零）的通用枚举元素的十六进制编码为：
 
 ```ASN.1
@@ -561,21 +449,13 @@ Enumerated elements are encoded in exactly the same way as integer elements. The
 > Enumerated elements should not have negative numeric values. However, values are still encoded using the two’s complement representation of the value, so that it may be necessary to add a leading byte in which all bits are set to zero if the binary representation of the numeric value would have otherwise caused the most significant bit in the first byte to be set to one.
 
 总结: 
-
 ​	enumerated element用来表示(使用整数值的二进制补码进行表示)：
-
 ​		result-code / 
-
 ​		modification-type /  
-
 ​		search scope / 
-
 ​		alias dereference behavior
-
 ​	enumerated element总是primitive ；
-
 ​	enumerated element的universal BER type是0x0a；
-
 ​		例子，LDAP “success” result code (integer value zero) 的 通用枚举元素的十六进制表示是 0a 01 00
 
 
