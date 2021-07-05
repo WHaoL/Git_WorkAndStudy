@@ -1770,13 +1770,15 @@ The mandatory attributes of the other object classes of this entry are still req
 
 
 
-## 4.4.  Subschema Discovery
+## 4.4.  Subschema Discovery(发现subschema)
 
 To discover the DN of the subschema (sub)entry holding the subschema controlling a particular entry, a client reads that entry's 'subschemaSubentry' operational attribute.  To read schema attributes from the subschema (sub)entry, clients MUST issue a Search operation [RFC4511] where baseObject is the DN of the subschema (sub)entry,scope is baseObject, filter is "(objectClass=subschema)" [RFC4515], and the attributes field lists the names of the desired schema attributes (as they are operational).  Note: the "(objectClass=subschema)" filter allows LDAP servers that gateway to X.500 to detect that subentry information is being requested.
-为了发现控制特定条目的子模式的子模式（子）条目的 DN，客户端读取该条目的“subschemaSubentry”操作属性。 要从子模式（子）条目中读取模式属性，客户端必须发出搜索操作 [RFC4511]，其中 baseObject 是子模式（子）条目的 DN，范围是 baseObject，过滤器是“（objectClass=subschema）”[RFC4515] ，属性字段列出了所需架构属性的名称（因为它们是可操作的）。 注意：“(objectClass=subschema)”过滤器允许连接到 X.500 的 LDAP 服务器检测正在请求的子条目信息。
+<font color=blue>为了发现   subschema (sub)entry的 DN(保存了：控制特定entry的subschema)，client读取该entry's 'subschemaSubentry' operational attribute。 </font>
+<font color=green>要从subschema (sub)entry中读取schema attributes，客户端必须发出search-operation [RFC4511]，其中 baseObject 是subschema (sub)entry的 DN，scope是 baseObject，filter是"(objectClass=subschema)" [RFC4515]，attributes字段列出了所需schema attributes的name（因为它们是可操作的）。 </font>
+注意："(objectClass=subschema)" filter  允许  连接到 X.500 的 LDAP-server  检测正在请求的subentry信息。
 
 Clients SHOULD NOT assume that a published subschema is complete, that the server supports all of the schema elements it publishes, or that the server does not support an unpublished element.
-客户端不应该假设发布的子模式是完整的，服务器支持它发布的所有模式元素，或者服务器不支持未发布的元素。
+client"不应该"假设发布的subschema是完整的，server支持它发布的所有schema elements，或者server不支持未发布的element。
 
 
 
@@ -1791,68 +1793,66 @@ As defined in [X.501]:
 如 [X.501] 中所定义：
 
 - context prefix: The sequence of RDNs leading from the Root of the DIT to the initial vertex of a naming context; corresponds to the distinguished name of that vertex.
-<font color=blue>context-prefix/上下文前缀：从  DIT的root/根  到命名上下文的初始顶点   的RDN序列； 对应于该顶点的  专有名称/DN。</font>
+<font color=blue>context-prefix/上下文前缀：从DIT的root/根  到命名上下文的初始顶点  的RDN序列； 对应于该顶点的  专有名称/DN。</font>
 - naming context: A subtree of entries held in a single master DSA.
-<font color=blue>naming-context/命名上下文：保存在   单个主DSA中的    entry的subtree。</font>
+<font color=blue>naming-context/命名上下文：保存在   单个主DSA中的    entry的  subtree。</font>
 
 That is, a naming context is the largest collection of entries, starting at an entry that is mastered by a particular server, and including all its subordinates and their subordinates, down to the entries that are mastered by different servers.  The context prefix is the name of the initial entry.
-<font color=red>**也就是说，naming-context/命名上下文： 是entry最大的集合，从  由特定server控制的entry  开始，包括其所有下属及其下属，一直到由不同server控制的entry。** </font>
+<font color=red>**也就是说，naming-context/命名上下文： 是entry最大的集合，从  由特定server控制的entry  开始，包括其所有下属及其下属，一直到由不同server控制的entry。** </font>
 <font color=red>**context-prefix/上下文前缀：是初始entry的name。**</font>
 
 The root of the DIT is a DSA-specific Entry (DSE) and not part of any naming context (or any subtree); each server has different attribute values in the root DSE.
-<font color=blue>**DIT的根/root  是一个 DSA-specific Entry (DSE) ，而不是任何 naming-context/命名上下文(或任何subtree)的一部分； 每个服务器在根 DSE 中都有不同的attribute-value。**</font>
+<font color=blue>**DIT的根/root  是一个 DSA-specific Entry (DSE) ，而不是任何 naming-context/命名上下文(或任何subtree)的一部分； 每个server在root-DSE 中都有不同的attribute-value。**</font>
 
 
 
 ## 5.1.  Server-Specific Data Requirements(特定于server的数据请求)
 
 An LDAP server SHALL provide information about itself and other  information that is specific to each server.  This is represented as  a group of attributes located in the root DSE, which is named with  the DN with zero RDNs (whose [RFC4514] representation is as the  zero-length string).
+<font color=red>LDAP-server"应该"提供：有关其自身的信息  以及  特定于每个server的其他信息。</font>
+<font color=red>这表示/表现为  位于root-DSE中的一组attribute，它以DN命名(具有0个RDN)（其在[RFC4514]中 表示为0长度字符串）</font>。
 
-These attributes are retrievable, subject to access control and other  restrictions, if a client performs a Search operation [RFC4511] with  an empty baseObject, scope of baseObject, the filter
-
-
-
-Zeilenga                    Standards Track                    [Page 36]
-
-RFC 4512                      LDAP Models                      June 2006
-
-"(objectClass=*)" [RFC4515], and the attributes field listing the names of the desired attributes.  It is noted that root DSE attributes are operational and, like other operational attributes,  are not returned in search requests unless requested by name.
+These attributes are retrievable, subject to access control and other  restrictions, if a client performs a Search operation [RFC4511] with  an empty baseObject, scope of baseObject, the filter "(objectClass=\*)" [RFC4515], and the attributes field listing the names of the desired attributes.  It is noted that root DSE attributes are operational and, like other operational attributes,  are not returned in search requests unless requested by name.
+<font color=red>这些attribute是可检索的，受访问控制和其他限制，</font>
+<font color=red>如果client使用 (baseObject值为空，对baseObject的scope，过滤器是"objcetClass=*"[RFC4515]，并且attribute字段中列出了所需atteibute的name) 来执行一个搜索操作/search-operation。</font>
+<font color=red>请注意，root-DSE 的attribute  是operational/可操作的，并且和其他operational-attribute一样，除非按照name请求，否则不会在搜索请求中返回。</font>
 
 The root DSE SHALL NOT be included if the client performs a subtree search starting from the root.
+<font color=red>如果client从root开始执行一个subtree-search，则不应包含root-DSE。</font>
 
 Servers may allow clients to modify attributes of the root DSE, where appropriate.
+<font color=red>在适当的情况下，server可以允许client端修改   root-DSE 的attrbute。</font>
 
 The following attributes of the root DSE are defined below. Additional attributes may be defined in other documents.
-- altServer: alternative servers;
-- namingContexts: naming contexts;
-- supportedControl: recognized LDAP controls;
-- supportedExtension: recognized LDAP extended operations;
-- supportedFeatures: recognized LDAP features;
-- supportedLDAPVersion: LDAP versions supported; and
-- supportedSASLMechanisms: recognized Simple Authentication and Security Layers (SASL) [RFC4422] mechanisms.
+下面定义了root-DSE 的以下属性。 附加属性可能在其他文档中定义。
+
+- altServer: alternative servers;                           --可选的server
+- namingContexts: naming contexts;                          --命名上下文
+- supportedControl: recognized LDAP controls;               --LDAP的控件
+- supportedExtension: recognized LDAP extended operations;  --LDAP的扩展操作
+- supportedFeatures: recognized LDAP features;              --LDAP的特性
+- supportedLDAPVersion: LDAP versions supported; and        --支持的LDAP版本
+- supportedSASLMechanisms: recognized Simple Authentication and Security Layers (SASL) [RFC4422] mechanisms. --支持simple和SASL 机制
 
 The values provided for these attributes may depend on session-specific and other factors.  For example, a server supporting the SASL EXTERNAL mechanism might only list "EXTERNAL" when the client's identity has been established by a lower level.  See [RFC4513].
+<font color=blue>为这些attribute提供的value可能取决于  特定于会话的因素 和 其他因素。 </font>
+例如，支持SASL-EXTERNAL机制的server 可能仅在client的身份已由 较低级别/lower-level 建立时  才列出"EXTERNAL"。 参见 [RFC4513]。
 
 The root DSE may also include a 'subschemaSubentry' attribute.  If it does, the attribute refers to the subschema (sub)entry holding the schema controlling the root DSE.  Clients SHOULD NOT assume that this subschema (sub)entry controls other entries held by the server. General subschema discovery procedures are provided in Section 4.4.
+<font color=blue>root-DSE 还可以包含一个 'subschemaSubentry'-attribute。 </font>
+<font color=blue>如果是，则该attribute指的是  保存了(用于)控制root-DSE 的schema的  subschema (sub)entry 。 </font>
+<font color=blue>client不应该假设 这个subschema-(sub)entry(能)控制server持有的其他entry。 </font>
+第 4.4 节提供了一般子模式/subschema的发现过程。
 
 
 
-
-
-
-
-
-
-
-
-
-Zeilenga                    Standards Track                    [Page 37]
-
-RFC 4512                      LDAP Models                      June 2006
-
-### 5.1.1.  'altServer'
+### 5.1.1.  'altServer'(此属性列出了其他server的URI)
 
 The 'altServer' attribute lists URIs referring to alternative servers that may be contacted when this server becomes unavailable.  URIs for servers implementing the LDAP are written according to [RFC4516]. Other kinds of URIs may be provided.  If the server does not know of any other servers that could be used, this attribute will be absent. Clients may cache this information in case their preferred server later becomes unavailable.
+<font color=red>'altServer'属性  列出了 URI，这些 URI 指的是当该server不可用时可以联系的替代服务器。 </font>
+实现 LDAP-server的 URI 是根据 [RFC4516] 编写的。 可以提供其他类型的 URI。 
+如果server不知道可以使用的任何其他server，则此属性将不存在。 
+<font color=red>客户端可能会缓存此信息，以防其首选server稍后不可用。</font>
 
 ```ABNF
   ( 1.3.6.1.4.1.1466.101.120.6 NAME 'altServer'
@@ -1860,278 +1860,238 @@ The 'altServer' attribute lists URIs referring to alternative servers that may b
     USAGE dSAOperation )
 ```
 
-   The IA5String (1.3.6.1.4.1.1466.115.121.1.26) syntax is defined in [RFC4517].
+The IA5String (1.3.6.1.4.1.1466.115.121.1.26) syntax is defined in [RFC4517].
+syntax-IA5String (1.3.6.1.4.1.1466.115.121.1.26)，被定义在[RFC4517]中。
 
 
 
-### 5.1.2.  'namingContexts'
+### 5.1.2.  'namingContexts'(此属性指出了(sub)tree的DN)
 
-   The 'namingContexts' attribute lists the context prefixes of the
-   naming contexts the server masters or shadows (in part or in whole).
-   If the server is a first-level DSA [X.501], it should list (in
-   addition) an empty string (indicating the root of the DIT).  If the
-   server does not master or shadow any information (e.g., it is an LDAP
-   gateway to a public X.500 directory) this attribute will be absent.
-   If the server believes it masters or shadows the entire directory,
-   the attribute will have a single value, and that value will be the
-   empty string (indicating the root of the DIT).
+The 'namingContexts' attribute lists the context prefixes of the naming contexts the server masters or shadows (in part or in whole).  If the server is a first-level DSA [X.501], it should list (in addition) an empty string (indicating the root of the DIT).  If the  server does not master or shadow any information (e.g., it is an LDAP  gateway to a public X.500 directory) this attribute will be absent.  If the server believes it masters or shadows the entire directory,  the attribute will have a single value, and that value will be the  empty string (indicating the root of the DIT).
+<font color=red>'namingContexts' 属性   列出了server   master或shadow的(部分或全部) 命名上下文/naming-contexts的上下文前缀/context-prefixes。 </font>
+如果server是一级 DSA [X.501]，它应该（另外）列出一个空字符串（指示 DIT 的根）。 
+如果服务器不master或shadow任何信息（例如，它是公共X.500目录的 LDAP 网关），则此attribute将不存在。 
+如果服务器认为它master或shadow整个目录，则该attribute将具有单个值，该值将是空字符串（指示 DIT 的根）。
 
-   This attribute may be used, for example, to select a suitable entry
-   name for subsequent operations with this server.
+This attribute may be used, for example, to select a suitable entry  name for subsequent operations with this server.
+<font color=red>例如，此attribute可用于选择一个合适的entry-name，以便与此server的后续操作。</font>
 
-      ( 1.3.6.1.4.1.1466.101.120.5 NAME 'namingContexts'
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-        USAGE dSAOperation )
+```ABNF
+  ( 1.3.6.1.4.1.1466.101.120.5 NAME 'namingContexts'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+    USAGE dSAOperation )
+```
 
-   The DistinguishedName (1.3.6.1.4.1.1466.115.121.1.12) syntax is
-   defined in [RFC4517].
+The DistinguishedName (1.3.6.1.4.1.1466.115.121.1.12) syntax is  defined in [RFC4517].
+syntax-DistinguishedName (1.3.6.1.4.1.1466.115.121.1.12) ，在 [RFC4517] 中定义。
 
-### 5.1.3.  'supportedControl'
 
-   The 'supportedControl' attribute lists object identifiers identifying
-   the request controls [RFC4511] the server supports.  If the server
-   does not support any request controls, this attribute will be absent.
-   Object identifiers identifying response controls need not be listed.
 
-   Procedures for registering object identifiers used to discovery of
-   protocol mechanisms are detailed in BCP 64, RFC 4520 [RFC4520].
+### 5.1.3.  'supportedControl'(此属性列出了server支持的request-control的OID)
 
+The 'supportedControl' attribute lists object identifiers identifying  the request controls [RFC4511] the server supports.  If the server does not support any request controls, this attribute will be absent.  Object identifiers identifying response controls need not be listed.
+<font color=red>'supportedControl' 属性：列出了server支持的request-controls [RFC4511] 的OID。 </font>
+<font color=green>如果server不支持任何request-controls ，则此属性将不存在。 </font>
+<font color=red>不需要列出response-request的OID。</font>
 
+Procedures for registering object identifiers used to discovery of  protocol mechanisms are detailed in BCP 64, RFC 4520 [RFC4520].
+BCP 64, RFC 4520 [RFC4520] 中详细介绍了：注册 用于发现协议机制的OID 的过程。
+```ABNF
+  ( 1.3.6.1.4.1.1466.101.120.13 NAME 'supportedControl'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.38
+    USAGE dSAOperation )
+```
 
-Zeilenga                    Standards Track                    [Page 38]
-
-RFC 4512                      LDAP Models                      June 2006
+The OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38) syntax is  defined in [RFC4517].
+syntax-OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38)，被定义在[RFC4517]。
 
 
-      ( 1.3.6.1.4.1.1466.101.120.13 NAME 'supportedControl'
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.38
-        USAGE dSAOperation )
 
-   The OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38) syntax is
-   defined in [RFC4517].
+### 5.1.4.  'supportedExtension'(此属性列出了server支持的extended-operation的OID)
 
-### 5.1.4.  'supportedExtension'
+The 'supportedExtension' attribute lists object identifiers  identifying the extended operations [RFC4511] that the server  supports.  If the server does not support any extended operations,  this attribute will be absent.
+<font color=red>' supportedextenation '属性列出了服务器支持的extended-operation的OID。</font>
+<font color=green>如果服务器不支持任何extended-operation，则该属性将不存在。</font>
 
-   The 'supportedExtension' attribute lists object identifiers
-   identifying the extended operations [RFC4511] that the server
-   supports.  If the server does not support any extended operations,
-   this attribute will be absent.
+An extended operation generally consists of an extended request and  an extended response but may also include other protocol data units  (such as intermediate responses).  The object identifier assigned to  the extended request is used to identify the extended operation.  Other object identifiers used in the extended operation need not be  listed as values of this attribute.
+<font color=red>extended-operation通常由extended-request和extended-response组成，但也可能包括其他协议数据单元/PDU(如中间响应)。</font>
+<font color=green>分配给extended-request的OID用于标识extended-operation。</font>
+extended-operation中使用的其他OID不需要作为此属性的值列出。
 
-   An extended operation generally consists of an extended request and
-   an extended response but may also include other protocol data units
-   (such as intermediate responses).  The object identifier assigned to
-   the extended request is used to identify the extended operation.
-   Other object identifiers used in the extended operation need not be
-   listed as values of this attribute.
+Procedures for registering object identifiers used to discovery of  protocol mechanisms are detailed in BCP 64, RFC 4520 [RFC4520].
+注册用于发现协议机制的OID的过程在BCP 64, RFC4520 [RFC4520]中有详细介绍。
 
-   Procedures for registering object identifiers used to discovery of
-   protocol mechanisms are detailed in BCP 64, RFC 4520 [RFC4520].
+```ABNF
+  ( 1.3.6.1.4.1.1466.101.120.7 NAME 'supportedExtension'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.38
+    USAGE dSAOperation )
+```
 
-      ( 1.3.6.1.4.1.1466.101.120.7 NAME 'supportedExtension'
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.38
-        USAGE dSAOperation )
+The OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38) syntax is  defined in [RFC4517].
+syntax-OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38)，被定义在[RFC4517]。
 
-   The OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38) syntax is
-   defined in [RFC4517].
 
-### 5.1.5.  'supportedFeatures'
 
-   The 'supportedFeatures' attribute lists object identifiers
-   identifying elective features that the server supports.  If the
-   server does not support any discoverable elective features, this
-   attribute will be absent.
+### 5.1.5.  'supportedFeatures'(此属性 列出了标识server支持的可选功能的OID)
 
-      ( 1.3.6.1.4.1.4203.1.3.5 NAME 'supportedFeatures'
-          EQUALITY objectIdentifierMatch
-          SYNTAX 1.3.6.1.4.1.1466.115.121.1.38
-          USAGE dSAOperation )
+The 'supportedFeatures' attribute lists object identifiers  identifying elective features that the server supports.  If the server does not support any discoverable elective features, this  attribute will be absent.
+<font color=red>'supportedFeatures'属性：列出了标识server支持的可选功能的OID。 </font>
+如果服务器不支持任何可发现的可选功能，则此属性将不存在。
 
-   Procedures for registering object identifiers used to discovery of
-   protocol mechanisms are detailed in BCP 64, RFC 4520 [RFC4520].
+```ABNF
+  ( 1.3.6.1.4.1.4203.1.3.5 NAME 'supportedFeatures'
+      EQUALITY objectIdentifierMatch
+      SYNTAX 1.3.6.1.4.1.1466.115.121.1.38
+      USAGE dSAOperation )
+```
 
-   The OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38) syntax and
-   objectIdentifierMatch matching rule are defined in [RFC4517].
+Procedures for registering object identifiers used to discovery of  protocol mechanisms are detailed in BCP 64, RFC 4520 [RFC4520].
+BCP 64, RFC 4520 [RFC4520] 中详细介绍了  注册用于发现协议机制的OID的过程。
 
+The OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38) syntax and  objectIdentifierMatch matching rule are defined in [RFC4517].
+syntax-OBJECT IDENTIFIER (1.3.6.1.4.1.1466.115.121.1.38)和 objectIdentifierMatch matching rule，被定义在[RFC4517]
 
 
-Zeilenga                    Standards Track                    [Page 39]
-
-RFC 4512                      LDAP Models                      June 2006
 
-### 5.1.6.  'supportedLDAPVersion'
+### 5.1.6.  'supportedLDAPVersion'(此属性 列出了server支持的LDAP version)
 
-   The 'supportedLDAPVersion' attribute lists the versions of LDAP that
-   the server supports.
+The 'supportedLDAPVersion' attribute lists the versions of LDAP that the server supports.
+<font color=red>supportedLDAPVersion' 属性：列出了server支持的 LDAP 版本/version。</font>
 
-      ( 1.3.6.1.4.1.1466.101.120.15 NAME 'supportedLDAPVersion'
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
-        USAGE dSAOperation )
+```ABNF
+  ( 1.3.6.1.4.1.1466.101.120.15 NAME 'supportedLDAPVersion'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.27
+    USAGE dSAOperation )
+```
 
-   The INTEGER (1.3.6.1.4.1.1466.115.121.1.27) syntax is defined in
-   [RFC4517].
+The INTEGER (1.3.6.1.4.1.1466.115.121.1.27) syntax is defined in  [RFC4517].
+syntax-INTEGER (1.3.6.1.4.1.1466.115.121.1.27) 被定义在[RFC4517]。
 
-### 5.1.7.  'supportedSASLMechanisms'
 
-   The 'supportedSASLMechanisms' attribute lists the SASL mechanisms
-   [RFC4422] that the server recognizes and/or supports [RFC4513].  The
-   contents of this attribute may depend on the current session state.
-   If the server does not support any SASL mechanisms, this attribute
-   will not be present.
 
-      ( 1.3.6.1.4.1.1466.101.120.14 NAME 'supportedSASLMechanisms'
-        SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-        USAGE dSAOperation )
+### 5.1.7.  'supportedSASLMechanisms'(此属性列出了server支持的SASL机制)
 
-   The Directory String (1.3.6.1.4.1.1466.115.121.1.15) syntax is
-   defined in [RFC4517].
+The 'supportedSASLMechanisms' attribute lists the SASL mechanisms  [RFC4422] that the server recognizes and/or supports [RFC4513].  The contents of this attribute may depend on the current session state.  If the server does not support any SASL mechanisms, this attribute will not be present.
+<font color=red>'supportedSASLMechanisms' 属性：列出了server识别和/或支持 [RFC4513] 的 SASL 机制 [RFC4422]。 </font>
+<font color=green>该属性的内容可能取决于当前会话状态。 </font>
+如果服务器不支持任何 SASL 机制，则此属性将不存在。
 
-# 6. Other Considerations
+```ABNF
+  ( 1.3.6.1.4.1.1466.101.120.14 NAME 'supportedSASLMechanisms'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+    USAGE dSAOperation )
+```
 
-## 6.1.  Preservation of User Information
+The Directory String (1.3.6.1.4.1.1466.115.121.1.15) syntax is defined in [RFC4517].
+syntax-Directory String (1.3.6.1.4.1.1466.115.121.1.15)，被定义在[RFC4517]中。
 
-   Syntaxes may be defined that have specific value and/or value form
-   (representation) preservation requirements.  For example, a syntax
-   containing digitally signed data can mandate that the server preserve
-   both the value and form of value presented to ensure that the
-   signature is not invalidated.
 
-   Where such requirements have not been explicitly stated, servers
-   SHOULD preserve the value of user information but MAY return the
-   value in a different form.  And where a server is unable (or
-   unwilling) to preserve the value of user information, the server
-   SHALL ensure that an equivalent value (per Section 2.3) is returned.
 
+# 6. Other Considerations(其他注意事项)
 
+## 6.1.  Preservation of User Information(保存user-information)
 
+Syntaxes may be defined that have specific value and/or value form (representation) preservation requirements.  For example, a syntax containing digitally signed data can mandate that the server preserve  both the value and form of value presented to ensure that the  signature is not invalidated.
+<font color=green>可以定义  具有特定值和/或值形式(表示) 的**保存** 语法。</font>
+例如，包含数字签名数据的语法   可以要求server保留所呈现的值和值的形式，以确保签名不会失效。
 
+Where such requirements have not been explicitly stated, servers  SHOULD preserve the value of user information but MAY return the value in a different form.  And where a server is unable (or  unwilling) to preserve the value of user information, the server SHALL ensure that an equivalent value (per Section 2.3) is returned.
+如果没有明确说明这些要求，服务器应该保留用户信息的值，但可以以不同的形式返回该值。
+如果服务器无法（或不愿意）保留用户信息的值，服务器应确保返回等效值（根据第 2.3 节）。
 
 
 
+## 6.2.  Short Names(短名称 是OID的别名 标识各种schema elements)
 
+Short names, also known as descriptors, are used as more readable aliases for object identifiers and are used to identify various schema elements.  However, it is not expected that LDAP implementations with human user interface would display these short names (or the object identifiers they refer to) to the user.  Instead, they would most likely be performing translations (such as expressing the short name in one of the local national languages). For example, the short name "st" (stateOrProvinceName) might be displayed to a German-speaking user as "Land".
+<font color=green>短名称，也称为描述符，用作OID的更具可读性的别名，并用于标识各种schema elements。</font>
+但是，具有人机界面的 LDAP 实现不会向用户显示这些短名称（或它们引用的OID）。
+相反，他们很可能会进行翻译（例如用当地的一种国家语言表达短名称）。
+例如，短名称“st”(stateOrProvinceName) 可能会显示给讲德语的用户作为“Land”。
 
-Zeilenga                    Standards Track                    [Page 40]
-
-RFC 4512                      LDAP Models                      June 2006
+The same short name might have different meaning in different subschemas, and, within a particular subschema, the same short name might refer to different object identifiers each identifying a different kind of schema element.
+<font color=red>相同的短名称在不同的subschemas中可能具有不同的含义，</font>
+<font color=red>并且在特定的subschema中，相同的短名称可能指代不同的OID，每个标识不同类型的schema element。</font>
 
-## 6.2.  Short Names
+Implementations MUST be prepared that the same short name might be used in a subschema to refer to the different kinds of schema elements.  That is, there might be an object class 'x-fubar' and an attribute type 'x-fubar' in a subschema.
+<font color=red>实现必须准备好在subschema中使用相同的短名称来引用不同类型的schema element。</font>
+<font color=red>也就是说，subschema中可能有一个object class 'x-fubar'和一个attribute type 'x-fubar'。</font>
 
-   Short names, also known as descriptors, are used as more readable
-   aliases for object identifiers and are used to identify various
-   schema elements.  However, it is not expected that LDAP
-   implementations with human user interface would display these short
-   names (or the object identifiers they refer to) to the user.
-   Instead, they would most likely be performing translations (such as
-   expressing the short name in one of the local national languages).
-   For example, the short name "st" (stateOrProvinceName) might be
-   displayed to a German-speaking user as "Land".
+Implementations MUST be prepared that the same short name might be used in the different subschemas to refer to the different schema elements.  That is, there might be two matching rules 'x-fubar', each in different subschemas.
+<font color=red>实现必须准备好在不同的subschema中使用相同的短名称来引用不同的schema element。</font>
+<font color=red>也就是说，可能有两个matching rules 'x-fubar'，每个都在不同的subschema中。</font>
 
-   The same short name might have different meaning in different
-   subschemas, and, within a particular subschema, the same short name
-   might refer to different object identifiers each identifying a
-   different kind of schema element.
+Procedures for registering short names (descriptors) are detailed in BCP 64, RFC 4520 [RFC4520].
+BCP 64, RFC 4520 [RFC4520] 中详细介绍了注册短名称（描述符）的过程。
 
-   Implementations MUST be prepared that the same short name might be
-   used in a subschema to refer to the different kinds of schema
-   elements.  That is, there might be an object class 'x-fubar' and an
-   attribute type 'x-fubar' in a subschema.
 
-   Implementations MUST be prepared that the same short name might be
-   used in the different subschemas to refer to the different schema
-   elements.  That is, there might be two matching rules 'x-fubar', each
-   in different subschemas.
 
-   Procedures for registering short names (descriptors) are detailed in
-   BCP 64, RFC 4520 [RFC4520].
+## 6.3.  Cache and Shadowing(缓存和镜像)
 
-6.3.  Cache and Shadowing
+Some servers may hold cache or shadow copies of entries, which can be used to answer search and comparison queries, but will return referrals or contact other servers if modification operations are requested.  Servers that perform shadowing or caching MUST ensure that they do not violate any access control constraints placed on the data by the originating server.
+<font color=red>一些server可能保存entry的缓存或影子副本，可用于回答  搜索和比较查询，但如果请求了 修改操作，将返回引用或联系其他服务器。</font>
+<font color=red>执行镜像或缓存的服务器  必须确保它们不会违反原始服务器   对数据施加的任何访问控制约束。</font>
 
-   Some servers may hold cache or shadow copies of entries, which can be
-   used to answer search and comparison queries, but will return
-   referrals or contact other servers if modification operations are
-   requested.  Servers that perform shadowing or caching MUST ensure
-   that they do not violate any access control constraints placed on the
-   data by the originating server.
 
 
+# 7. Implementation Guidelines(实现指南)
 
+## 7.1.  Server Guidelines(server实现指南)
 
+Servers MUST recognize all names of attribute types and object classes defined in this document but, unless stated otherwise, need not support the associated functionality.  Servers SHOULD recognize all the names of attribute types and object classes defined in Section 3 and 4, respectively, of [RFC4519].
+<font color=blue>服务器必须识别本文档中定义的attribute-type和object-class的所有name，但除非另有说明，否则不需要支持相关功能。</font>
+<font color=blue>服务器应该识别 [RFC4519] 的第 3 节和第 4 节中分别定义的attribute-type和object-class的所有name。</font>
 
+Servers MUST ensure that entries conform to user and system schema rules or other data model constraints.
+<font color=blue>服务器必须确保entry符合  user和system schema rule或其他数据模型约束。
 
+Servers MAY support DIT Content Rules.  Servers MAY support DIT Structure Rules and Name Forms.
+<font color=blue>服务器可以支持 DIT-conent-rule。</font>
+<font color=blue>服务器可以支持 DIT-structure-rule和name-form。</font>
 
+Servers MAY support alias entries.
+<font color=blue>服务器可以支持 alias-entry。</font>
 
+Servers MAY support the 'extensibleObject' object class.
+<font color=blue>服务器可以支持 'extensibleObject' object class。</font>
 
+Servers MAY support subentries.  If so, they MUST do so in accordance with [RFC3672].  Servers that do not support subentries SHOULD use object entries to mimic subentries as detailed in Section 3.2.
+<font color=blue>服务器可以支持subentry。</font>如果是这样，他们必须按照 [RFC3672] 这样做。
+<font color=blue>不支持subentry的服务器应该使用object-entry来模仿 3.2 节中详述的subentry。</font>
 
+Servers MAY implement additional schema elements.  Servers SHOULD provide definitions of all schema elements they support in subschema   (sub)entries.
+<font color=blue>服务器可以实现额外的 schema elements。</font>
+<font color=blue>服务器应该在subschema   (sub)entries中提供它们支持的所有schema elements的定义。</font>
 
 
 
-Zeilenga                    Standards Track                    [Page 41]
-
-RFC 4512                      LDAP Models                      June 2006
+## 7.2.  Client Guidelines(client实现指南)
 
-# 7. Implementation Guidelines
+In the absence of prior agreements with servers, clients SHOULD NOT assume that servers support any particular schema elements beyond those referenced in Section 7.1.  The client can retrieve subschema information as described in Section 4.4.
+<font color=green>在没有与服务器事先达成协议的情况下，客户端不应该假设服务器支持  除第 7.1 节中引用的那些元素之外的 任何特定schema elements。</font>
+<font color=blue>客户端可以检索子subschema信息，如第 4.4 节所述。</font>
 
-## 7.1.  Server Guidelines
+Clients MUST NOT display or attempt to decode a value as ASN.1 if the  value's syntax is not known.  Clients MUST NOT assume the LDAP-specific string encoding is restricted to a UTF-8 encoded string of Unicode characters or any particular subset of Unicode (such as a printable subset) unless such restriction is explicitly stated. Clients SHOULD NOT send attribute values in a request that are not valid according to the syntax defined for the attributes.
+<font color=blue>如果value的语法未知，客户端不得显示 或 尝试将value解码为 ASN.1。</font>
+客户端不得假定特定于 LDAP的字符串编码  仅限于 UTF-8编码的Unicode字符字符串或任何特定的 Unicode 子集（例如可打印子集），除非明确声明此类限制。<font color=blue>根据为attribute定义的语法，client不应该在请求/request中发送无效的属性值/attribute-value。</font>
 
-   Servers MUST recognize all names of attribute types and object
-   classes defined in this document but, unless stated otherwise, need
-   not support the associated functionality.  Servers SHOULD recognize
-   all the names of attribute types and object classes defined in
-   Section 3 and 4, respectively, of [RFC4519].
 
-   Servers MUST ensure that entries conform to user and system schema
-   rules or other data model constraints.
 
-   Servers MAY support DIT Content Rules.  Servers MAY support DIT
-   Structure Rules and Name Forms.
-
-   Servers MAY support alias entries.
-
-   Servers MAY support the 'extensibleObject' object class.
-
-   Servers MAY support subentries.  If so, they MUST do so in accordance
-   with [RFC3672].  Servers that do not support subentries SHOULD use
-   object entries to mimic subentries as detailed in Section 3.2.
-
-   Servers MAY implement additional schema elements.  Servers SHOULD
-   provide definitions of all schema elements they support in subschema
-   (sub)entries.
-
-## 7.2.  Client Guidelines
-
-   In the absence of prior agreements with servers, clients SHOULD NOT
-   assume that servers support any particular schema elements beyond
-   those referenced in Section 7.1.  The client can retrieve subschema
-   information as described in Section 4.4.
-
-   Clients MUST NOT display or attempt to decode a value as ASN.1 if the
-   value's syntax is not known.  Clients MUST NOT assume the LDAP-
-   specific string encoding is restricted to a UTF-8 encoded string of
-   Unicode characters or any particular subset of Unicode (such as a
-   printable subset) unless such restriction is explicitly stated.
-   Clients SHOULD NOT send attribute values in a request that are not
-   valid according to the syntax defined for the attributes.
-
-
-
-
-
-
-
-
-
-Zeilenga                    Standards Track                    [Page 42]
-
-RFC 4512                      LDAP Models                      June 2006
-
-# 8. Security Considerations
+# 8. Security Considerations(安全注意事项)
 
 Attributes of directory entries are used to provide descriptive information about the real-world objects they represent, which can be people, organizations, or devices.  Most countries have privacy laws regarding the publication of information about people.
+<font color=green>目录条目的属性   用于提供  有关它们所代表的   现实世界对象的描述信息，这些对象可以是人、组织或设备。 </font>
+大多数国家/地区都有关于发布有关人员的信息的隐私法。
 
 General security considerations for accessing directory information with LDAP are discussed in [RFC4511] and [RFC4513].
+[RFC4511] 和 [RFC4513] 中讨论了使用 LDAP 访问目录信息的一般安全注意事项。
+
+
 
 # 9. IANA Considerations(IANA分配号码)
 
 The Internet Assigned Numbers Authority (IANA) has updated the LDAP descriptors registry as indicated in the following template:
+Internet 编号分配机构 (IANA)   已更新 LDAP 描述符注册表，如以下模板所示：
 
 ```
    Subject: Request for LDAP Descriptor Registration Update
@@ -2145,7 +2105,9 @@ The Internet Assigned Numbers Authority (IANA) has updated the LDAP descriptors 
    Comments:
 ```
 
-   The following descriptors (short names) has been added to the registry.
+The following descriptors (short names) has been added to the registry.
+
+以下描述符(短名称)  已添加到注册表中。
 
 ```
         NAME                         Type OID
@@ -2155,7 +2117,9 @@ The Internet Assigned Numbers Authority (IANA) has updated the LDAP descriptors 
 
 ```
 
-   The following descriptors (short names) have been updated to refer to this RFC.
+The following descriptors (short names) have been updated to refer to this RFC.
+
+以下描述符(短名称)  已更新以引用此 RFC。
 
 ```
         NAME                         Type OID
@@ -2188,7 +2152,7 @@ The Internet Assigned Numbers Authority (IANA) has updated the LDAP descriptors 
         top 
 ```
 
-# 10. Acknowledgements(致谢)
+# 10. Acknowledgements(致谢.略)
 
    This document is based in part on RFC 2251 by M. Wahl, T. Howes, and
    S. Kille; RFC 2252 by M. Wahl, A. Coulbeck, T. Howes, S. Kille; and
