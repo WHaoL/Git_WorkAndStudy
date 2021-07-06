@@ -453,7 +453,7 @@ All structural object classes derive (directly or indirectly) from the 'top' abs
 The following is the object class definition (see Section 4.1.1) for  the 'top' object class:
 <font color=red>"top"Abstract-object-class的定义如下：</font>
 
-```ASN.1
+```ABNF
   ( 2.5.6.0 NAME 'top' ABSTRACT MUST objectClass )
 ```
 
@@ -721,7 +721,7 @@ An entry with the 'alias' object class must also belong to an object  class (or 
 
 Example:
 
-```ASN.1
+```ABNF
   dn: cn=bar,dc=example,dc=com
   objectClass: top
   objectClass: alias				--此entry，含有 alias object class
@@ -737,7 +737,7 @@ Example:
 
 Alias entries belong to the 'alias' object class.
 
-```ASN.1
+```ABNF
   ( 2.5.6.1 NAME 'alias'      	-- 名字是alias
     SUP top STRUCTURAL			-- 从属于 top 和 structural 
     MUST aliasedObjectName )	-- 必须包含 aliasedObjectName
@@ -751,7 +751,7 @@ The 'aliasedObjectName' attribute holds the name of the entry an alias points to
 <font color=DarkRed>'aliasedObjectName'-attribute包含了 本alias-entry  指向的entry的name。</font>
 aliasedObjectName' 在X.500中称为'aliasedEntryName'。
 
-```ASN.1
+```ABNF
   ( 2.5.4.1 NAME 'aliasedObjectName'
     EQUALITY distinguishedNameMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
@@ -1356,7 +1356,7 @@ Each LDAP syntax is identified by an object identifier (OID).
 LDAP syntax definitions are written according to the ABNF:
 <font color=red>LDAP-syntax 定义是根据 ABNF 编写的：</font>
 
-```ASN.1
+```ABNF
  SyntaxDescription = LPAREN WSP
      numericoid                 ; object identifier
      [ SP "DESC" SP qdstring ]  ; description
@@ -1624,7 +1624,7 @@ The following subsections provide attribute type definitions for each of schema 
 This attribute holds definitions of object classes.
 <font color=red>这个attribute保存了object-classes的schema定义。</font>
 
-```schema
+```ABNF
   ( 2.5.21.6 NAME 'objectClasses'                  --此attribute的名字是  objectClasses
     EQUALITY objectIdentifierFirstComponentMatch   --使用的"相等匹配规则"是... OID第一组件匹配
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.37           --语法的OID是
@@ -1641,7 +1641,7 @@ The 'objectIdentifierFirstComponentMatch' matching rule and the ObjectClassDescr
 This attribute holds definitions of attribute types.
 <font color=red>这个attribute保存了attribute-types的schema定义。</font>
 
-```schema
+```ABNF
   ( 2.5.21.5 NAME 'attributeTypes'                 --此attribute的名字是attributeTypes
     EQUALITY objectIdentifierFirstComponentMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.3
@@ -1658,7 +1658,7 @@ The 'objectIdentifierFirstComponentMatch' matching rule and the AttributeTypeDes
 This attribute holds definitions of matching rules.
 <font color=red>这个attribute保存了matching-rules的schema定义。</font>
 
-```schema
+```ABNF
   ( 2.5.21.4 NAME 'matchingRules'                  --此attribute的名字是matchingRules
     EQUALITY objectIdentifierFirstComponentMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.30
@@ -1675,7 +1675,7 @@ The 'objectIdentifierFirstComponentMatch' matching rule and the MatchingRuleDesc
 This attribute holds definitions of matching rule uses.
 <font color=red>这个attribute保存了matching-rule-uses的schema定义。</font>
 
-```schema
+```ABNF
   ( 2.5.21.8 NAME 'matchingRuleUse'                --此attribute的名字是matchingRuleUse
     EQUALITY objectIdentifierFirstComponentMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.31
@@ -1691,7 +1691,7 @@ The 'objectIdentifierFirstComponentMatch' matching rule and the MatchingRuleUseD
 This attribute holds definitions of LDAP syntaxes.
 <font color=red>这个attribute保存了LDAP-syntaxes的schema定义。</font>
 
-```schema
+```ABNF
   ( 1.3.6.1.4.1.1466.101.120.16 NAME 'ldapSyntaxes'   --此attribute的名字是ldapSyntaxes
     EQUALITY objectIdentifierFirstComponentMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.54
@@ -1707,7 +1707,7 @@ The 'objectIdentifierFirstComponentMatch' matching rule and the SyntaxDescriptio
 This attribute lists DIT Content Rules that are present in the subschema.
 <font color=red>这个attribute列出了 subscheam中出现的 DIT-content-rules的schema定义。</font>
 
-```schema
+```ABNF
   ( 2.5.21.2 NAME 'dITContentRules'                   --此attribute的名字是dITContentRules
     EQUALITY objectIdentifierFirstComponentMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.16
@@ -1724,7 +1724,7 @@ The 'objectIdentifierFirstComponentMatch' matching rule and the DITContentRuleDe
 This attribute lists DIT Structure Rules that are present in the subschema.
 <font color=red>这个attribute列出了 subscheam中出现的 DIT-structure-rules的schema定义。</font>
 
-```schema
+```ABNF
   ( 2.5.21.1 NAME 'dITStructureRules'                 --此attribute的名字是dITStructureRules
     EQUALITY integerFirstComponentMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.17
@@ -1741,7 +1741,7 @@ The 'integerFirstComponentMatch' matching rule and the DITStructureRuleDescripti
 This attribute lists Name Forms that are in force.
 <font color=red>这个attribute列出了 有效的 name-forms的schema定义。</font>
 
-```schema
+```ABNF
   ( 2.5.21.7 NAME 'nameForms'                         --此attribute的名字是nameForms
     EQUALITY objectIdentifierFirstComponentMatch
     SYNTAX 1.3.6.1.4.1.1466.115.121.1.35
@@ -1759,7 +1759,7 @@ The 'extensibleObject' auxiliary object class allows entries that belong to it t
 <font color=red>**'extensibleObject'-auxiliary-object-class 允许属于它的entry   保存  任何用户属性/user-attribute。** </font>
 <font color=blue>该object-class允许的attribute-type集合  隐式是 usage=userApplications的所有attribute-type的集合。</font>
 
-```schema
+```ABNF
   ( 1.3.6.1.4.1.1466.101.120.111 NAME 'extensibleObject'
     SUP top AUXILIARY )
 ```
