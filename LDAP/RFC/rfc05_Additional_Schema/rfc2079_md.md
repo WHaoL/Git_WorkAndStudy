@@ -8,7 +8,7 @@ Network Working Group                                          M. Smith
 Request for Comments: 2079                      Netscape Communications
 Category: Standards Track                                  January 1997
 
-# Definition of an X.500 Attribute Type and an Object Class to Hold Uniform Resource Identifiers (URIs)(定义X.500中的attribute-type和object-classs用于保存URLs)
+# Definition of an X.500 Attribute Type and an Object Class to Hold Uniform Resource Identifiers (URIs)(定义X.500中的attribute-type和object-classs用于保存URIs)
 
 ## Status of this Memo(略)
 
@@ -23,7 +23,7 @@ Category: Standards Track                                  January 1997
 ## Abstract(摘要)
 
 Uniform Resource Locators (URLs) are being widely used to specify the location of Internet resources.  There is an urgent need to be able to include URLs in directories that conform to the LDAP and X.500 information models, and a desire to include other types of Uniform Resource Identifiers (URIs) as they are defined.  A number of independent groups are already experimenting with the inclusion of URLs in LDAP and X.500 directories.  This document builds on the experimentation to date and defines a new attribute type and an auxiliary object class to allow URIs, including URLs, to be stored in directory entries in a standard way.
-<font color=red>统一资源定位符(URLs)  被广泛用于 指定Internet资源的位置。</font>
+<font color=red>统一资源定位器(URLs)  被广泛用于 指定Internet资源的位置。</font>
 <font color=green>迫切需要  能够在符合LDAP和X.500信息模型的  目录中包含URL，并且希望在定义时 包含其他类型的统一定义的资源标识符（URI）。</font>
 许多独立的团体已经在尝试在 LDAP 和 X.500 目录中包含 URL。
 <font color=blue>本文档以迄今为止的实验为基础，并定义了新的属性类型(attribute type)和辅助对象类(auxiliary object class)，以允许以标准方式将 URI（包括 URL）存储在目录条目/entry中。</font>
@@ -33,7 +33,7 @@ Uniform Resource Locators (URLs) are being widely used to specify the location o
 ## Background and Intended Usage(背景和预期用途)
 
 Uniform Resource Locators (URLs) as defined by [1] are the first of several types of Uniform Resource Identifiers (URIs) being defined by the IETF.  URIs are widely used on the Internet, most notably within Hypertext Markup Language [2] documents. This document defines an X.500 [3,4] attribute type called labeledURI and an auxiliary object class called labeledURIObject to hold all types of URIs, including URLs.  These definitions are designed for use in LDAP and X.500 directories, and may be used in other contexts as well.
-[1] 中定义的统一资源定位符 (URL) 是 IETF 定义的几种统一资源标识符 (URI) 类型中的第一个。
+[1] 中定义的统一资源定位器 (URL) 是 IETF 定义的几种统一资源标识符 (URI) 类型中的第一个。
 URIs在Internet上被广泛使用，尤其是在超文本标记语言 [2] 文档中。
 <font color=red>**本文档定义了     一个称为labeledURI的X.500 [3,4]属性类型(attribute type)，和一个称为labeledURIObject的辅助对象类(auxiliary object class)， 来保存所有类型的URIs，包括URLs。**</font>
 这些定义设计用于 LDAP 和 X.500 目录，也可用于其他上下文。
