@@ -56,13 +56,13 @@ URIs在Internet上被广泛使用，尤其是在超文本标记语言 [2] 文档
 
 The labeledURI attribute type has the caseExactString syntax (since URIs are case-sensitive) and it is multivalued.  Values placed in the attribute should consist of a URI (at the present time, a URL) optionally followed by one or more space characters and a label. Since space characters are not allowed to appear un-encoded in URIs, there is no ambiguity about where the label begins.  At the present time, the URI portion must comply with the URL specification [1]. Multiple labeledURI values will generally indicate different resources that are all related to the X.500 object, but may indicate different locations for the same resource.
 <font color=green>labeledURI属性类型 ：具有 caseExactString 语法(因为 URI 区分大小写)，并且它是多值的。</font>
-<font color=green>放置在属性中的值应由一个URI(目前为 URL)组成，可选地 后跟  1个或多个空格字符 和 1个label。</font>
+<font color=green>放置在属性中的值应由一个URI(目前为 一个URL)组成，可选地 后跟  1个或多个空格字符 和 1个label。</font>
 由于不允许在URI中出现 未编码的空格字符，因此label的开始位置没有歧义。
 目前，URI 部分必须符合 URL 规范 [1]。
 <font color=green>多个labeledURI-value通常表示与X.500-object相关的不同资源，但可能表示同一资源的不同位置。</font>
 
 The label is used to describe the resource to which the URI points, and is intended as a friendly name fit for human consumption.  This document does not propose any specific syntax for the label part.  In some cases it may be helpful to include in the label some indication of the kind and/or size of the resource referenced by the URI.
-label用于描述 URI 指向的资源，旨在作为适合人类消费的友好名称。
+<font color=blue>label用于描述 URI 指向的资源，旨在作为适合人类消费的友好名称。</font>
 本文档没有为label部分提出任何特定的语法。
 在某些情况下，在label中包含  由URI引用的   资源的种类和/或大小  的一些指示 可能会有所帮助。
 
@@ -109,7 +109,6 @@ Another example.  This one includes a hint in the label to help the user realize
    MustContain:
    MayContain:        labeledURI
 ```
-
 
 ## 2.1 Discussion of the labeledURIObject Object Class
 
