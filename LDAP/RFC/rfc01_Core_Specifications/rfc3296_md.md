@@ -449,8 +449,7 @@ Servers SHOULD NOT return referral result code if the bind name (or authenticati
 
 If the newSuperior is a referral object or is subordinate to a referral object, the server SHOULD return affectsMultipleDSAs.  If the newRDN already exists but is a referral object, the server SHOULD return affectsMultipleDSAs instead of entryAlreadyExists.
 如果 newSuperior 是一个referral-object或从属于一个referral-object，服务器应该返回 ImpactMultipleDSA。 
-如果 newRDN 已经存在但是是一个引用对象，服务器应该返回 ImpactMultipleDSA 而不是 entryAlreadyExists。
-
+如果 newRDN 已经存在但是是一个referral-object，服务器应该返回 ImpactMultipleDSA 而不是 entryAlreadyExists。
 
 # 6.Security Considerations
 
