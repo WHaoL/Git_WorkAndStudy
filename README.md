@@ -24,6 +24,8 @@ openLDAP学习
 
 
 ```bash
+git clone 
+
 
 git remote add originLDAP https://github.com/WHaoL/Git_WorkAndStudy.git
 
