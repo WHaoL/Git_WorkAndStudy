@@ -24,9 +24,12 @@ openLDAP学习
 
 
 ```bash
+
+git remote add originLDAP https://github.com/WHaoL/Git_WorkAndStudy.git
+
 git add ./*
 git commit -m "some change"
-git push -u origin main
+git push -u originLDAP main
 
 
 WHaoL
