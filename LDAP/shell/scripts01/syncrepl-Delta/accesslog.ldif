@@ -1,0 +1,44 @@
+dn: cn=module,cn=config
+changetype: add
+objectClass: olcModuleList
+cn: module
+olcModulepath: /usr/lib64/openldap
+olcModuleload: accesslog.la
+
+
+dn: olcOverlay=accesslog,olcDatabase={2}hdb,cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcConfig
+objectClass: top
+objectClass: olcAccessLogConfig
+olcOverlay: accesslog
+olcSpCheckpoint: 20 10
+olcSpSessionlog: 50
+# olcSpSessionLog: 10000
+# olcSpCheckpoint: 100 10
+olcSpNoPresent: TRUE
+olcSpReloadHint: TRUE
+
+logdb cn=accesslog
+logops writes
+# logops writes reads
+logsuccess TRUE
+# logold (objectclass=person)
+# scan the accesslog DB every day, and purge entries older than 7 days
+logpurge 07+00:00 01+00:00
+
+
+database hdb
+suffix cn=accesslog
+rootdn cn=accesslog
+# directory /usr/local/var/openldap-accesslog
+index default eq
+index entryCSN,objectClass,reqEnd,reqResult,reqStart,reqDN
+index reqStart eq
+access to *
+ by dn.base="cn=admin,dc=example,dc=com" read
+
+
+# 导入同步模块
+# ldapmodify -Y EXTERNAL -H ldapi:/// -f xxx.ldif

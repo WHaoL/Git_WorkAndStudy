@@ -1,0 +1,35 @@
+
+
+
+#当把accesslog overlay 用于delta-based syncrepl时，此项必须设置为true
+syncprov-reloadhint TRUE
+
+#仅当overlay 设置在log database的顶部时 才设置此项为true
+#仅对 log database(overlay accesslog管理的log database)上的syncprov实例，设置此项为true
+syncprov-nopresent TRUE
+
+#-------------------------------------------------下面的是关于Delta-syncrepl的知识点--------------------------------------------------------
+#syncrepl
+#    缺点: 更改条目的一个属性，却需要传输整个条目 以执行同步
+#Delta-syncrepl
+#    是syncrepl基于changelog的变体，使得可以增量同步/复制
+#    -->> 基于日志同步：
+#    你在master每更改1条记录，肯定会产生1条日志，那么slave会通过你的master日志进行相应的修改，这就克服了syncrepl的缺点
+#Delta-syncrepl
+#    在provider的单独数据库中维护了changelog，
+#        consumer在changelog中检查其所需的变更，
+#        并且只要changelog包含所需的变更，
+#        consumer就可以从changgelog中获取变更并将其应用于其数据库。
+#    但是，如果consumer一方太快超出同步速度（或完全耗尽），则使用常规 syncrepl 使它保持最新状态，然后进行复制，然后切换回 delta-syncrepl 模式。
+#        即：consumer太快，以至于changelog中没有更改，那么直接使用syncrepl保持同步，然后切换回 delta-syncrepl 模式
+#        
+#        总结： (!!!)
+#            Delta-syncrepl是对syncrepl的改进，使得可以增量同步
+#            provider把更改/更新 维护在changelog中 
+#            consumer可以从changelog中获取自己所需的变更
+#        总结：
+#            实际配置Delta-syncrepl provider时 是配置的accesslog 
+#            accesslog 是 changelog的变体
+#            所以实际的配置文件中见到的是accesslog 而不是changelog
+
+# accesslog   12.1.2. Access Logging Configuration

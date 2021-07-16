@@ -13,10 +13,15 @@
 #3 - ./XXX.sh          #然后在虚拟机里运行 slapdmodify 添加配置
 #------------------------------
 
-
-sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.133:/home/lwh
-# sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.251:/home/lwh
+sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.234:/home/lwh
+# sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.235:/home/lwh
+# sudo rsync -a /home/gos/workspace/Git_WorkAndStudy/LDAP/shell/*  root@192.168.122.151:/home/lwh
 
 #--------------------------------------------------------------
 
 
+# 234 url01
+# 230 url02
+# vim /etc/hosts
+# 192.168.122.9    url01
+# 192.168.122.238    url02

@@ -1,0 +1,81 @@
+dn: cn=module,cn=config
+changetype: add
+objectClass: olcModuleList
+cn: module
+olcModulepath: /usr/lib64/openldap
+olcModuleload: ppolicy.la
+
+dn: olcOverlay=ppolicy,olcDatabase={2}hdb,cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcPpolicyConfig
+olcOverlay: ppolicy
+
+
+# we need a container for the policy objects.
+dn: ou=policies,dc=testldap,dc=com
+changetype: add
+objectClass: organizationalUnit
+objectClass: top
+ou: policies
+
+
+# # 允许用户更改自己的密码
+# pwdAllowUserChange: TRUE
+# # 密码属性的名称为“userPassword”  请注意，这是OpenLDAP 对此属性唯一接受的值。
+# pwdAttribute: userPassword
+# # 服务器将检查密码的语法 服务器将检查密码的语法 它将返回错误，拒绝密码
+# pwdCheckQuality: 2
+# # 当客户端在绑定请求中包括密码策略请求控件时，如果服务器将在十分钟或更短时间内过期，则服务器将以密码过期警告进行响应;警告本身在“密码策略响应”控件中返回
+# pwdExpireWarning: 600
+# # DN的密码过期后，允许五次“宽限期”登录
+# pwdGraceAuthNLimit: 5
+# # 保留DN的最后五个密码的历史记录
+# pwdInHistory: 5
+# # 在超过最大失败绑定尝试次数之后，服务器将锁定该帐户
+# pwdLockout: TRUE
+# # 服务器将使其保持锁定状态，直到管理员将其解锁为止
+# pwdLockoutDuration: 0
+# # 30秒后，服务器将重置其失败的绑定计数
+# pwdFailureCountInterval: 30
+# # 密码不会过期
+# pwdMaxAge: 0
+# # 可以根据需要多次更改密码
+# pwdMinAge: 0
+# # 密码的长度必须至少为 5 个字符
+# pwdMinLength: 5
+# # 第一次绑定时或管理员重置密码时，无需更改密码
+# pwdMustChange: FALSE
+# # 当前的密码不需要包含在密码更改请求中
+# pwdSafeModify: FALSE
+# # 对于特定的 DN，服务器仅允许连续五个失败的绑定
+# pwdMaxFailure: 5
+
+# a policy object
+dn: cn=default,ou=policies,dc=testldap,dc=com
+changetype: add
+cn: default
+objectClass: pwdPolicy
+objectClass: person
+objectClass: top
+pwdAllowUserChange: TRUE
+pwdAttribute: userPassword
+pwdCheckQuality: 2
+pwdExpireWarning: 600
+pwdFailureCountInterval: 30
+pwdGraceAuthNLimit: 5
+pwdInHistory: 5
+pwdLockout: TRUE
+pwdLockoutDuration: 0
+pwdMaxAge: 0
+pwdMaxFailure: 5
+pwdMinAge: 0
+pwdMinLength: 5
+pwdMustChange: FALSE
+pwdSafeModify: FALSE
+sn: dummy value
+#可以指定 此 policy object 应用在哪个DN上
+# pwdPolicySubEntry: DN
+
+
+# ldapmodify -Y EXTERNAL -H ldapi:/// -f xxx.ldif

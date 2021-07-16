@@ -1,0 +1,215 @@
+#---------------------------------------------------------------------------------------
+#---------------------------
+    Structural -- 结构类型
+        organization
+        organizationUnit
+        domain
+    Abstract   -- 抽象类型
+    Auxiliary  -- 辅助类型
+        labeledURIObject 
+            MayContain:        labeledURI
+        dcObject
+            dc
+            通常和 结构对象类 结合使用 (如：organization 或 organizationUnit)
+#---------------------------
+#---------------------------------------------------------------------------------------
+#----------------------------------------RFC 2079-----------------------------------------------
+rfc2079.txt X.500 Attribute Type and an Object Class to Hold URIs (PS)
+RFC 2079          URI Attribute Type and Object Class       January 1997
+
+
+    Attribute Type: labeledURI
+        用于保存URI
+
+    Schema Definition of the labeledURI Attribute Type（）
+        Name:             labeledURI
+        ShortName:        None
+        Description:      Uniform Resource Identifier with optional label
+        OID:              umichAttributeType.57 (1.3.6.1.4.1.250.1.57)
+        Syntax:           caseExactString
+        SizeRestriction:  None
+        SingleValued:     False
+    
+    示例：
+        labeledURI: ftp://ds.internic.net/rfc/rfc822.txt
+    注意：
+        不要盲目地将labeledURI attribute value的label部分盲目的插入HTML中，有危险！！！
+
+
+    Object Class: labeledURIObject
+        是top的subcalss
+        可能包含labeledURI attribue，这样就允许该条目包含URI
+        同样允许在适当的情况下直接在其他object class中包含labeledURI attribute type 
+    
+    Schema Definition of the labeledURIObject Object Class
+        Name:              labeledURIObject
+        Description:       object that contains the URI attribute type
+        OID:               umichObjectClass.15 (1.3.6.1.4.1.250.3.15)
+        SubclassOf:        top
+        MustContain:
+        MayContain:        labeledURI
+
+
+    示例：
+        objectClass: labeledURIObject
+        labeledURI: ftp://ds.internic.net/rfc/rfc822.txt
+
+    labeledURIObject 是个辅助类
+
+#---------------------------------------------------------------------------------------
+#-----------------------------------------RFC 2247----------------------------------------------
+rfc2247.txt Using Domains in LDAP DNs (PS)
+RFC 2247              Using Domains in LDAP/X.500           January 1998
+
+    domainComponent -->> dc  域名组成部分
+    使用 一个或多个RDN(仅包含attribute type: DC)组成的DN 映射 域名
+
+    Attribute Type: DC
+    定义如下：
+        ( 0.9.2342.19200300.100.1.25 NAME 'dc' EQUALITY caseIgnoreIA5Match
+        SUBSTR caseIgnoreIA5SubstringsMatch
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE )
+    DC的attribute value
+        是个字符串，不区分大小写
+        
+    
+    objectClass: dcObject
+        ( 1.3.6.1.4.1.1466.344 NAME 'dcObject' SUP top AUXILIARY MUST dc )
+
+        dn: dc=critical-angle,dc=com
+        objectClass: top
+        objectClass: organization
+        objectClass: dcObject
+        dc: critical-angle
+        o: Critical Angle Inc.
+
+    dcObject 通常和 结构对象类 结合使用 (如：organization 或 organizationUnit)
+
+
+    ----------------------------
+
+
+    如果条目中  没有定义结构对象类 organization/organizationalUnit，
+        那么就可以使用 'domain' object class
+    domain
+        必须存在 dc 属性
+        拥有domain的条目，将会将domain作为它的 结构对象类
+
+    objectClass: domain
+    domain
+        ( 0.9.2342.19200300.100.4.13 NAME 'domain' SUP top STRUCTURAL
+        MUST dc
+        MAY ( userPassword $ searchGuide $ seeAlso $ businessCategory $
+        x121Address $ registeredAddress $ destinationIndicator $
+        preferredDeliveryMethod $ telexNumber $ teletexTerminalIdentifier $
+        telephoneNumber $ internationaliSDNNumber $ facsimileTelephoneNumber $
+        street $ postOfficeBox $ postalCode $ postalAddress $
+        physicalDeliveryOfficeName $ st $ l $ description $ o $
+        associatedName ) )
+
+            dn: dc=tcp,dc=critical-angle,dc=com
+            objectClass: top
+            objectClass: domain
+            dc: tcp
+            description: a placeholder entry used with SRV records
+        
+    ( 1.3.6.1.4.1.1466.345 NAME 'domainNameForm' OC domain MUST ( dc ) )
+#---------------------------------------------------------------------------------------
+#-----------------------------------------RFC 2293----------------------------------------------
+rfc2293.txt Tables and Subtrees in the X.500 Directory (PS)
+RFC 2293            Table and Subtrees in the X.500           March 1998
+
+tableEntry 如何定义 树根和树上的信息
+subtree    如何定义 树根和树上的信息
+
+
+#---------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------
+      Lightweight Directory Access Protocol (LDAP): The Protocol
+RFC 4511                         LDAPv3                        June 2006
+
+
+#---------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------
+
+
+
+
+
+#---------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------
+此部分参看：
+    https://blog.51cto.com/407711169/1439623 
+    https://www.cnblogs.com/linuxws/p/9085641.html
+#---------------------------
+objectClass
+
+    objectClass
+        must/required -- 必须的属性
+        may/optional  -- 可选的属性 扩展信息
+    entry可以继承多个objectClass
+        此entry的属性是 它们属性的 并集
+    这样就可以通过 objectClass方便的定义entry
+
+    结构类型（Structural）
+　  抽象类型(Abstract)
+　  辅助类型（Auxiliary）
+        结构类型是最基本的类型，它规定了对象实体的基本属性，
+            每个条目至少有一个结构性对象类。
+            每个条目属于且仅属于一个结构型对象类。
+        抽象类型可以是结构类型或其他抽象类型父类，它将对象属性中共性的部分组织在一起，称为其他类的模板，
+            条目不能直接集成抽象型对象类。
+        辅助类型规定了对象实体的扩展属性。
+            每个条目可以同时属于多个辅助型对象类。
+
+    objectClass本身是可以相互继承的，所以对象类的根类是top抽象型对象类。
+                                                top(抽象类)
+                                                    |
+                                                person(结构类) 
+                                                    |
+            —————————————————————————————————————————————————————————————————————————————
+            |                                       |                                   |
+            |                                       |                                   |
+organizationalPreson(结构类)               residentialPerson(结构类)                ePerson(辅助类)
+            |
+            |
+    inetOrgPerson(结构类)
+#---------------------------
+#---------------------------
+Schema
+
+    objectClass     约定了  entry/条目 
+    attributeType   约定了  attribute/属性
+    syntax          约定了  value/值
+    这些构成了schema/模式 -- 对象类的集合
+
+    schema中的术语: 
+        SUP  --  后跟父类
+        MAY  --  可选属性 
+        MUST --  必要属性 
+        
+        -- 继承自父类的：must还是must，may还是may
+
+    条目数据在导入时通常需要接受schema检查，它确保了目录中所有的条目数据结构都是一致的。
+    schema（一般在/etc/ldap/schema/目录）在导入时要注意前后顺序。
+
+    各种 attribute/属性 的 数据格式，synax/语法 在 schema中的attributetype中定义
+#---------------------------
+backend & database
+
+    ldap的后台进程slapd接收、响应请求，但实际存储数据、获取数据的操作是由Backends做的，
+    而数据是存放在database中，所以你可以看到往往你可以看到backend和database指令是一样的。
+        一个 backend 可以有多个 database instance，
+        但每个 database 的 suffix 和 rootdn 不一样。
+        openldap 2.4版本的模块是动态加载的，所以在使用backend时需要moduleload xxx指令。
+
+    另外config是特殊的backend，
+        用来在运行时管理slapd的配置，
+        它只能有一个实例，甚至无需显式在slapd.conf中配置。
+    
+    frontend也是个特殊的backend
+        它的配置应用到所有的database上，但会被database的配置覆盖
+        和config一样，无需显式配置 就会默认创建一个实例。
+#---------------------------
+#---------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------

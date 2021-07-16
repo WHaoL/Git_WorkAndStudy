@@ -57,12 +57,12 @@ sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 # sudo systemctl enable rsyncd.service
 # netstat -lnp|grep 873 #检查是否启动
 
-# echo "10 - 安装httpd phpldapadmin 并启动"
-# sudo yum install -y epel-release 
-# sudo yum clean all && yum makecache
-# sudo yum install -y httpd phpldapadmin 
-# sudo systemctl start httpd
-# sudo systemctl enable httpd
+echo "10 - 安装httpd phpldapadmin 并启动"
+sudo yum install -y epel-release 
+sudo yum clean all && yum makecache
+sudo yum install -y httpd phpldapadmin 
+sudo systemctl start httpd
+sudo systemctl enable httpd
 # 备份配置文件
 #     cp /etc/httpd/conf.d/phpldapadmin.conf /etc/httpd/conf.d/phpldapadmin.conf.bak01
 #     cp /etc/phpldapadmin/config.php /etc/phpldapadmin/config.php.bak01
@@ -87,10 +87,15 @@ sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 # mkdir -p /var/lib/mdb
 
 
-# echo "重启centos7"
-# sudo reboot
+echo "重启centos7"
+sudo reboot
 
 
 #client
 # yum install -y openldap-clients nss-pam-ldapd
 # authconfig-tui
+
+
+#解压tar.bz2
+# yum install -y bzip2
+# tar -jxvf x.tar.bz2 -C Path

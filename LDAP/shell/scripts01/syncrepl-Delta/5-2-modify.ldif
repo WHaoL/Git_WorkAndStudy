@@ -1,0 +1,5 @@
+dn: cn=fang.huang,ou=HR,ou=People,dc=testldap,dc=com
+changetype: modify
+replace:sn
+sn: Huang52
+# ldapmodify -x -D "cn=admin,dc=testldap,dc=com" -w admin -f 5-2-modify.ldif

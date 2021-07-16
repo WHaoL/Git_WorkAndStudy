@@ -1,0 +1,16 @@
+dn: cn=module,cn=config
+changetype: add
+objectClass: olcModuleList
+cn: module
+olcModulepath: /usr/lib64/openldap
+olcModuleload: auditlog.la
+
+dn: olcOverlay=auditlog,olcDatabase={2}hdb,cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcAuditLogConfig
+olcOverlay: auditlog
+olcAuditlogFile: /tmp/auditlog.ldif
+# 将更改记录到 /tmp/auditlog.ldif 文件中
+
+# ldapmodify -Y EXTERNAL -H ldapi:/// -f xxx.ldif
