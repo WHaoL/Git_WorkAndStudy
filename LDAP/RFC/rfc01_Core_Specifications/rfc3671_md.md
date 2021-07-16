@@ -162,34 +162,34 @@ RFC 3671             Collective Attributes in LDAP         December 2003
 
    The c-l attribute type specifies a locality name for a collection of
    entries.
-
+```
       ( 2.5.4.7.1 NAME 'c-l'
         SUP l COLLECTIVE )
-
+```
 ## 3.2.  Collective State or Province Name
 
    The c-st attribute type specifies a state or province name for a
    collection of entries.
-
+```
       ( 2.5.4.8.1 NAME 'c-st'
         SUP st COLLECTIVE )
-
+```
 ## 3.3.  Collective Street Address
 
    The c-street attribute type specifies a street address for a
    collection of entries.
-
+```
       ( 2.5.4.9.1 NAME 'c-street'
         SUP street COLLECTIVE )
-
+```
 ## 3.4.  Collective Organization Name
 
    The c-o attribute type specifies an organization name for a
    collection of entries.
-
+```
       ( 2.5.4.10.1 NAME 'c-o'
         SUP o COLLECTIVE )
-
+```
 
 
 
@@ -203,50 +203,50 @@ RFC 3671             Collective Attributes in LDAP         December 2003
 
    The c-ou attribute type specifies an organizational unit name for a
    collection of entries.
-
+```
       ( 2.5.4.11.1 NAME 'c-ou'
         SUP ou COLLECTIVE )
-
+```
 ## 3.6.  Collective Postal Address
 
    The c-PostalAddress attribute type specifies a postal address for a
    collection of entries.
-
+```
       ( 2.5.4.16.1 NAME 'c-PostalAddress'
         SUP postalAddress COLLECTIVE )
-
+```
 ## 3.7.  Collective Postal Code
 
    The c-PostalCode attribute type specifies a postal code for a
    collection of entries.
-
+```
       ( 2.5.4.17.1 NAME 'c-PostalCode'
         SUP postalCode COLLECTIVE )
-
+```
 ## 3.8.  Collective Post Office Box
 
    The c-PostOfficeBox attribute type specifies a post office box for a
    collection of entries.
-
+```
       ( 2.5.4.18.1 NAME 'c-PostOfficeBox'
         SUP postOfficeBox COLLECTIVE )
-
+```
 ## 3.9.  Collective Physical Delivery Office Name
 
    The c-PhysicalDeliveryOfficeName attribute type specifies a physical
    delivery office name for a collection of entries.
-
+```
       ( 2.5.4.19.1 NAME 'c-PhysicalDeliveryOfficeName'
         SUP physicalDeliveryOfficeName COLLECTIVE )
-
+```
 ## 3.10.  Collective Telephone Number
 
    The c-TelephoneNumber attribute type specifies a telephone number for
    a collection of entries.
-
+```
       ( 2.5.4.20.1 NAME 'c-TelephoneNumber'
         SUP telephoneNumber COLLECTIVE )
-
+```
 
 
 
@@ -258,27 +258,27 @@ RFC 3671             Collective Attributes in LDAP         December 2003
 
    The c-TelexNumber attribute type specifies a telex number for a
    collection of entries.
-
+```
       ( 2.5.4.21.1 NAME 'c-TelexNumber'
         SUP telexNumber COLLECTIVE )
-
+```
 3.13.  Collective Facsimile Telephone Number
 
    The c-FacsimileTelephoneNumber attribute type specifies a facsimile
    telephone number for a collection of entries.
-
+```
       ( 2.5.4.23.1 NAME 'c-FacsimileTelephoneNumber'
-
+```
    SUP facsimileTelephoneNumber COLLECTIVE )
 
 3.14.  Collective International ISDN Number
 
    The c-InternationalISDNNumber attribute type specifies an
    international ISDN number for a collection of entries.
-
+```
       ( 2.5.4.25.1 NAME 'c-InternationalISDNNumber'
         SUP internationalISDNNumber COLLECTIVE )
-
+```
 # 4. Security Considerations
 
 Collective attributes, like other attributes, are subject to access
@@ -314,39 +314,38 @@ RFC 3671             Collective Attributes in LDAP         December 2003
 The IANA has registered the LDAP descriptors [RFC3383] defined in
 this technical specification.  The following registration template is
 suggested:
-
-   Subject: Request for LDAP Descriptor Registration
-   Descriptor see comments
-   Object Identifier: see comment
-   Person & email address to contact for further information:
-        Kurt Zeilenga <kurt@OpenLDAP.org>
-   Usage: see comment
-   Specification: RFC3671
-   Author/Change Controller: IESG
-   Comments:
-
 ```
-  NAME                           Type OID
-  ------------------------       ---- -----------------
-  c-FacsimileTelephoneNumber     A    2.5.4.23.1
-  c-InternationalISDNNumber      A    2.5.4.25.1
-  c-PhysicalDeliveryOffice       A    2.5.4.19.1
-  c-PostOfficeBox                A    2.5.4.18.1
-  c-PostalAddress                A    2.5.4.16.1
-  c-PostalCode                   A    2.5.4.17.1
-  c-TelephoneNumber              A    2.5.4.20.1
-  c-TelexNumber                  A    2.5.4.21.1
-  c-l                            A    2.5.4.7.1
-  c-o                            A    2.5.4.10.1
-  c-ou                           A    2.5.4.11.1
-  c-st                           A    2.5.4.8.1
-  c-street                       A    2.5.4.9.1
-  collectiveAttributeSubentries  A    2.5.18.12
-  collectiveAttributeSubentry    O    2.5.17.2
-  collectiveExclusions           A    2.5.18.7
-```
+      Subject: Request for LDAP Descriptor Registration
+      Descriptor see comments
+      Object Identifier: see comment
+      Person & email address to contact for further information:
+           Kurt Zeilenga <kurt@OpenLDAP.org>
+      Usage: see comment
+      Specification: RFC3671
+      Author/Change Controller: IESG
+      Comments:
 
-   where Type A is Attribute and Type O is ObjectClass.
+         NAME                           Type OID
+         ------------------------       ---- -----------------
+         c-FacsimileTelephoneNumber     A    2.5.4.23.1
+         c-InternationalISDNNumber      A    2.5.4.25.1
+         c-PhysicalDeliveryOffice       A    2.5.4.19.1
+         c-PostOfficeBox                A    2.5.4.18.1
+         c-PostalAddress                A    2.5.4.16.1
+         c-PostalCode                   A    2.5.4.17.1
+         c-TelephoneNumber              A    2.5.4.20.1
+         c-TelexNumber                  A    2.5.4.21.1
+         c-l                            A    2.5.4.7.1
+         c-o                            A    2.5.4.10.1
+         c-ou                           A    2.5.4.11.1
+         c-st                           A    2.5.4.8.1
+         c-street                       A    2.5.4.9.1
+         collectiveAttributeSubentries  A    2.5.18.12
+         collectiveAttributeSubentry    O    2.5.17.2
+         collectiveExclusions           A    2.5.18.7
+
+      where Type A is Attribute and Type O is ObjectClass.
+```
 
 The Object Identifiers used in this document were assigned by the
 ISO/IEC Joint Technical Committee 1 - Subcommittee 6 to identify
