@@ -24,78 +24,78 @@ Copyright (C) The Internet Society (2003).  All Rights Reserved.
 # Abstract(摘要)
 
 X.500 collective attributes allow common characteristics to be shared between collections of entries.  This document summarizes the X.500 information model for collective attributes and describes use of collective attributes in LDAP (Lightweight Directory Access Protocol).  This document provides schema definitions for collective attributes for use in LDAP.
-X.500 <font color=red>集合属性/collective-attribute：允许在条目集合/collective-of-entry之间   共享共同特征。 </font>
+X.500 <font color=red>集合属性/collective-attribute：允许在条目集合/entry-collective之间   共享共同特征。 </font>
 本文档总结了<font color=red>集合属性的 X.500信息模型</font>，并描述了  <font color=red>集合属性在 LDAP中的使用。</font> 
 本文档提供了    在 LDAP 中使用的     <font color=red>集合属性的模式定义。</font>
 
 # 1. Introduction
 
 In X.500 [X.500], a collective attribute is "a user attribute whose values are the same for each member of an entry collection" [X.501]. This document details their use in the Lightweight Directory Access Protocol (LDAP) [RFC3377].
-在 X.500 [X.500] 中，<font color=red>**集合属性/collective-attribute**  是一个用户属性user-attribute，其值对于**条目集合/entry-collection**的每个成员都相同”[X.501]。</font>
+在 X.500 [X.500] 中，<font color=red>**集合属性/collective-attribute**  是一个用户属性/user-attribute，其值对于**条目集合/entry-collection**的每个成员都相同”[X.501]。</font>
 本文档详细介绍了它们在LDAP[RFC3377] 中的使用。
 
-## 1.1.  Entry Collections
+## 1.1.  Entry Collections(条目集合)
 
 A collection of entries is a grouping of object and alias entries based upon common properties or shared relationship between the corresponding entries which share certain attributes.  An entry collection consists of all entries within scope of a collective attributes subentry [RFC3672].  An entry can belong to several entry collections.
-<font color=red>条目集合    是基于 共享某些属性的相应条目之间的  共同属性或共享关系的   对象和别名条目的分组。</font>
-条目集合  由 集合属性子条目 [RFC3672] 范围/scope内的所有条目组成。
-一个条目可以属于多个条目集合。
+<font color=red>条目集合是 (基于 公共属性 或 在相应条目之间有共享关系的某些共享属性) 对象和别名条目 的分组。</font>
+<font color=red>条目集合  由 集合属性子条目/collective-attribute-subentry [RFC3672]   范围/scope内的   所有条目/entry组成。</font>
+<font color=red>一个entry可以属于多个entry-collection。</font>
 
 
 
-## 1.2.  Collective Attributes
+## 1.2.  Collective Attributes(集合属性)
 
 Attributes shared by the entries comprising an entry collection are called collective attributes.  Values of collective attributes are visible but not updateable to clients accessing entries within the collection.  Collective attributes are updated (i.e., modified) via their associated collective attributes subentry.
-组成条目集合的  条目共享的属性  称为集合属性。
-集合属性的值  对于访问集合内的条目的客户端   是可见的但不可更新。
-集体属性通过其关联的集体属性子条目进行更新（即修改）。
+<font color=red>组成条目集合/entry-collection的条目/entry (之间)共享的属性/attribute 称为集合属性/collective-attribute。</font>
+<font color=red>集合属性/collective-attribute的值value，  对于访问 集合/collection内的条目/entry 的客户端/client，   是可见的但不可更新。</font>
+<font color=red>集合属性/collective-attribute  通过其 关联的集合属性子条目/collective-attribute-subentry 进行更新(即修改)。</font>
 
 When an entry belongs to multiple entry collections, the entry's values of each collective attribute are combined such that independent sources of these values are not manifested to clients.
-当一个条目属于多个条目集合时，每个集合属性的条目值被组合起来，这样这些值的独立来源就不会向客户端显示。
+<font color=red>当一个条目/entry属于多个条目集合/entry-collection时，每个集合属性/collective-attribute中的entry's value被组合起来，这样这些值/value的独立来源就不会向 客户端/client 展示。</font>
 
 Entries can specifically exclude a particular collective attribute by listing the attribute as a value of the collectiveExclusions attribute.  Like other user attributes, collective attributes are subject to a variety of controls including access, administrative,  and content controls.
-条目可以通过将属性列为collectiveExclusions 属性的值来明确排除特定的集合属性。
-与其他用户属性一样，集体属性受各种控制的约束，包括访问、管理和内容控制。
+<font color=red>条目/entry，可以通过在Attribute: collectiveExclusions 的值/value中，列出属性/attribute，来 明确排除 特定的集合属性/collective-attribute。</font>
+<font color=red>与其他用户属性/user-attribute一样，集合属性/collective-attribute 受各种控件/control的约束，包括访问/access、管理/administrative和内容控制/conttent-control。</font>
 
 
 
 ## 1.3.  Conventions
 
 Schema definitions are provided using LDAPv3 [RFC2251] description formats [RFC2252].  Definitions provided here are formatted (line wrapped) for readability.
-使用 LDAPv3 [RFC2251] 描述格式 [RFC2252] 提供模式定义。
-此处提供的定义已格式化（换行）以提高可读性。
+使用 LDAPv3 [RFC2251]描述格式[RFC2252] 提供   模式定义/schema-definition。
+此处提供的定义   已格式化(换行)以提高可读性。
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC2119].
-本文档中的关键词“必须”、“不得”、“需要”、“应该”、“不应”、“应该”、“不应该”、“推荐”、“可以”和“可选”是按照 BCP 14 [RFC2119] 中的描述进行解释。
+本文档中的关键词"MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"是按照 BCP 14 [RFC2119] 中的描述进行解释。
 
-
-
-# 2. System Schema for Collective Attributes
+# 2. System Schema for Collective Attributes(collective-attribute的system-schema定义)
 
 The following operational attributes are used to manage Collective Attributes.  LDAP servers [RFC3377] MUST act in accordance with the X.500 Directory Models [X.501] when providing this service.
-以下操作属性用于管理集合属性。 
-LDAP 服务器 [RFC3377] 在提供此服务时必须按照 X.500 目录模型 [X.501] 进行操作。
+<font color=red>以下operational-attribute用于管理Collective-Attribute。 </font>
+LDAP-server[RFC3377]在提供此服务时   必须按照X.500目录模型 [X.501] 进行操作。
 
 ## 2.1.  collectiveAttributeSubentry
 
 Subentries of this object class are used to administer collective  attributes and are referred to as collective attribute subentries.
-此对象类的子条目用于管理集体属性，称为集体属性子条目。
+<font color=red>此对象类/object-class的子条目/subentry，用于管理/administer 集合属性/collective-attribute，称为：集合属性子条目/collective-attribute-subentry。</font>
+
 ```ABNF
   ( 2.5.17.2 NAME 'collectiveAttributeSubentry' AUXILIARY )
 ```
 
 A collective attribute subentry SHOULD contain at least one collective attribute.  The collective attributes contained within a collective attribute subentry are available for finding, searching, and comparison at every entry within the scope of the subentry.  The collective attributes, however, are administered (e.g., modified) via the subentry.
-一个集合属性子条目应该至少包含一个集合属性。
-集合属性子条目中包含的集合属性可用于在子条目范围内的每个条目处查找、搜索和比较。
-然而，集体属性通过子条目进行管理（例如，修改）。
+<font color=red>一个集合属性子条目/collective-attribute-subentry ，"应该"至少包含一个集合属性/collective-attribute。</font>
+<font color=red>集合属性子条目/collective-attribute-subentry中，包含的集合属性/collective-attribute，可用于在子条目/subentry范围/scope内的每个条目/entry处查找/find、搜索/search和比较/compare。</font>
+<font color=red>然而，集合属性/collective-attribute通过子条目/subentry进行管理/administer(例如，修改)。</font>
 
 Implementations of this specification SHOULD support collective attribute subentries in both collectiveAttributeSpecificArea (2.5.23.5) and collectiveAttributeInnerArea (2.5.23.6) administrative areas [RFC3672][X.501].
-本规范的实现应该支持collectiveAttributeSpecificArea（2.5.23.5）和collectiveAttributeInnerArea（2.5.23.6）管理区域[RFC3672][X.501]中的集合属性子条目。
+<font color=green>本规范的实现"应该"支持 : collectiveAttributeSpecificArea (2.5.23.5) 和 collectiveAttributeInnerArea (2.5.23.6)管理区域[RFC3672][X.501]中的集合属性子条目/collective-attribute-subentry。</font>
 
 ## 2.2.  collectiveAttributeSubentries
 
 The collectiveAttributeSubentries operational attribute identifies all collective attribute subentries that affect the entry.
-collectAttributeSubentries 操作属性标识影响条目的所有集体属性子条目。
+<font color=red>operational attribute：collectAttributeSubentries，标识影响条目/entry的所有集合属性子条目/collective-attribute-subentry。</font>
+
 ```ABNF
   ( 2.5.18.12 NAME 'collectiveAttributeSubentries'
     EQUALITY distinguishedNameMatch
@@ -106,7 +106,9 @@ collectAttributeSubentries 操作属性标识影响条目的所有集体属性�
 ## 2.3.  collectiveExclusions
 
 The collectiveExclusions operational attribute allows particular collective attributes to be excluded from an entry.  It MAY appear in any entry and MAY have multiple values.
-collectExclusions 操作属性允许从条目中排除特定的集合属性。它可以出现在任何条目中并且可以有多个值。
+<font color=red>operational attribute：collectExclusions，允许从 一个条目/entry中排除特定的集合属性/collective-attribute。</font>
+<font color=red>它可以出现在任何条目/entry中，并且可以有多个值/value。</font>
+
 ```
       ( 2.5.18.7 NAME 'collectiveExclusions'
         EQUALITY objectIdentifierMatch
@@ -114,206 +116,166 @@ collectExclusions 操作属性允许从条目中排除特定的集合属性。�
         USAGE directoryOperation )
 ```
 The descriptor excludeAllCollectiveAttributes is associated with the OID 2.5.18.0.  When this descriptor or OID is present as a value of the collectiveExclusions attribute, all collective attributes are excluded from an entry.
-描述符 excludeAllCollectiveAttributes 与 OID 2.5.18.0 相关联。
-当此描述符或 OID 作为collectiveExclusions 属性的值存在时，所有集合属性都从条目中排除。
-
-
+<font color=red>descr：excludeAllCollectiveAttributes 与 OID 2.5.18.0 相关联。</font>
+<font color=red>当此descr或OID作为attribute：collectiveExclusions的值/value存在时，所有集合属性/collective-attribute都从条目/entry中排除。</font>
 
 # 3. Collective Attribute Types
 
-A userApplications attribute type can be defined to be COLLECTIVE
-[RFC2252].  This indicates that the same attribute values will appear
-in the entries of an entry collection subject to the use of the
-collectiveExclusions attribute and other administrative controls.
-These administrative controls MAY include DIT Content Rules, if
-implemented.
+A userApplications attribute type can be defined to be COLLECTIVE [RFC2252].  This indicates that the same attribute values will appear in the entries of an entry collection subject to the use of the collectiveExclusions attribute and other administrative controls. These administrative controls MAY include DIT Content Rules, if implemented.
+<font color=red>可以将 attribute-type：userApplications定义为 COLLECTIVE/collective [RFC2252]。</font>
+<font color=red>这表明，在使用attribute: collectExclusions和其他管理控件/control的情况下，相同的属性值将出现在一个条目集合/entry-collection的entry中 。</font>
+<font color=red>如果实施，这些管理控件/control可能包括 DIT-Content-Rules。</font>
 
-Collective attribute types are commonly defined as subtypes of non-
-collective attribute types.  By convention, collective attributes are
-named by prefixing the name of their non-collective supertype with
-"c-".  For example, the collective telephone attribute is named
-c-TelephoneNumber after its non-collective supertype telephoneNumber.
+Collective attribute types are commonly defined as subtypes of non-collective attribute types.  By convention, collective attributes are named by prefixing the name of their non-collective supertype with "c-".  For example, the collective telephone attribute is named c-TelephoneNumber after its non-collective supertype telephoneNumber.
+<font color=red>attribute-type: collective，通常被定义为attribute-type: non-collective的子类型/subtype。</font>
+<font color=red>按照惯例，集合属性/collective-attribute的命名方式是  在其 非集合超类型/non-collective supertype  的名称前加上"c-"。</font>
+<font color=green>例如，集合电话属性/collective-telephone-attribute  在其 非集合超类型/non-collective supertype  phoneNumber 之后被命名为 c-TelephoneNumber。</font>
 
-Non-collective attributes types SHALL NOT subtype collective
-attributes.
+Non-collective attributes types SHALL NOT subtype collective attributes.
+<font color=red>attribute-type：non-collective，不应是 collective-attribute的子类型/subtype。</font>
+
+Collective attributes SHALL NOT be SINGLE-VALUED.  Collective attribute types SHALL NOT appear in the attribute types of an object class definition.
+<font color=red>attribute：collective，"不应"是单值(即 应该是多值的)。</font>
+<font color=red>attribute-type：collective，"不应"出现在object-class定义的attribute-type中。</font>
+
+Operational attributes SHALL NOT be defined to be collective.
+<font color=red>operational-attribute，"不应"被定义为collective。</font>
+
+The remainder of section provides a summary of collective attributes derived from those defined in [X.520].  The SUPerior attribute types are described in [RFC 2256] for use with LDAP.
+<font color=green>本节的其余部分 提供了：从 [X.520] 中定义的那些派生的attribute: collective的摘要。 </font>
+<font color=green>attribute-type：SUPerior在 [RFC 2256] 中描述，用于 LDAP。</font>
+
+Implementations of this specification SHOULD support the following collective attributes and MAY support additional collective attributes.
+<font color=green>本规范的实现应该支持以下集合属性/collective-attribute，并且可以支持附加的集合属性/collective-attribute。</font>
 
 
 
-Zeilenga                    Standards Track                     [Page 3]
-
-RFC 3671             Collective Attributes in LDAP         December 2003
-
-
-   Collective attributes SHALL NOT be SINGLE-VALUED.  Collective
-   attribute types SHALL NOT appear in the attribute types of an object
-   class definition.
-
-   Operational attributes SHALL NOT be defined to be collective.
-
-   The remainder of section provides a summary of collective attributes
-   derived from those defined in [X.520].  The SUPerior attribute types
-   are described in [RFC 2256] for use with LDAP.
-
-   Implementations of this specification SHOULD support the following
-   collective attributes and MAY support additional collective
-   attributes.
-
-## 3.1.  Collective Locality Name
-
-   The c-l attribute type specifies a locality name for a collection of
-   entries.
+## 3.1.  Collective Locality Name(collective的位置名)
+The c-l attribute type specifies a locality name for a collection of entries.
+attribute type：c-l ，指定条目集合/entry-collection的位置名。
 ```
       ( 2.5.4.7.1 NAME 'c-l'
         SUP l COLLECTIVE )
 ```
-## 3.2.  Collective State or Province Name
 
-   The c-st attribute type specifies a state or province name for a
-   collection of entries.
+## 3.2.  Collective State or Province Name(collective的州名或省名)
+The c-st attribute type specifies a state or province name for a collection of entries.
+attribute type：c-st，指定/entry-collection的州名或省名。
 ```
       ( 2.5.4.8.1 NAME 'c-st'
         SUP st COLLECTIVE )
 ```
-## 3.3.  Collective Street Address
 
-   The c-street attribute type specifies a street address for a
-   collection of entries.
+## 3.3.  Collective Street Address
+The c-street attribute type specifies a street address for a collection of entries.
+attribute type：c-street ，指定条目集合/entry-collection的街道地址。
+
 ```
       ( 2.5.4.9.1 NAME 'c-street'
         SUP street COLLECTIVE )
 ```
-## 3.4.  Collective Organization Name
 
-   The c-o attribute type specifies an organization name for a
-   collection of entries.
+## 3.4.  Collective Organization Name
+The c-o attribute type specifies an organization name for a collection of entries.
+attribute type：c-o ，指定条目集合/entry-collection的组织名/organization-name。
+
 ```
       ( 2.5.4.10.1 NAME 'c-o'
         SUP o COLLECTIVE )
 ```
 
-
-
-
-
-Zeilenga                    Standards Track                     [Page 4]
-
-RFC 3671             Collective Attributes in LDAP         December 2003
-
 ## 3.5.  Collective Organizational Unit Name
-
-   The c-ou attribute type specifies an organizational unit name for a
-   collection of entries.
+The c-ou attribute type specifies an organizational unit name for a collection of entries.
+attribute type：c-ou ，指定条目集合/entry-collection的组织单位名/organization-unit-name。
 ```
       ( 2.5.4.11.1 NAME 'c-ou'
         SUP ou COLLECTIVE )
 ```
-## 3.6.  Collective Postal Address
 
-   The c-PostalAddress attribute type specifies a postal address for a
-   collection of entries.
+## 3.6.  Collective Postal Address
+The c-PostalAddress attribute type specifies a postal address for a collection of entries.
+attribute type：c-PostalAddress ，指定条目集合/entry-collection的邮政地址。
 ```
       ( 2.5.4.16.1 NAME 'c-PostalAddress'
         SUP postalAddress COLLECTIVE )
 ```
-## 3.7.  Collective Postal Code
 
-   The c-PostalCode attribute type specifies a postal code for a
-   collection of entries.
+## 3.7.  Collective Postal Code
+The c-PostalCode attribute type specifies a postal code for a collection of entries.
+attribute type：c-PostalCode ，指定条目集合/entry-collection的邮政编码。
 ```
       ( 2.5.4.17.1 NAME 'c-PostalCode'
         SUP postalCode COLLECTIVE )
 ```
-## 3.8.  Collective Post Office Box
 
-   The c-PostOfficeBox attribute type specifies a post office box for a
-   collection of entries.
+## 3.8.  Collective Post Office Box
+The c-PostOfficeBox attribute type specifies a post office box for a collection of entries.
+attribute type：c-PostOfficeBox ，指定条目集合/entry-collection的邮政信箱。
 ```
       ( 2.5.4.18.1 NAME 'c-PostOfficeBox'
         SUP postOfficeBox COLLECTIVE )
 ```
-## 3.9.  Collective Physical Delivery Office Name
 
-   The c-PhysicalDeliveryOfficeName attribute type specifies a physical
-   delivery office name for a collection of entries.
+## 3.9.  Collective Physical Delivery Office Name
+The c-PhysicalDeliveryOfficeName attribute type specifies a physical delivery office name for a collection of entries.
+attribute type：c-PhysicalDeliveryOfficeName ，指定条目集合/entry-collection的物理交付办公室名。
 ```
       ( 2.5.4.19.1 NAME 'c-PhysicalDeliveryOfficeName'
         SUP physicalDeliveryOfficeName COLLECTIVE )
 ```
-## 3.10.  Collective Telephone Number
 
-   The c-TelephoneNumber attribute type specifies a telephone number for
-   a collection of entries.
+## 3.10.  Collective Telephone Number
+The c-TelephoneNumber attribute type specifies a telephone number for a collection of entries.
+attribute type：c-TelephoneNumber ，指定条目集合/entry-collection的电话号码。
 ```
       ( 2.5.4.20.1 NAME 'c-TelephoneNumber'
         SUP telephoneNumber COLLECTIVE )
 ```
 
-
-
-Zeilenga                    Standards Track                     [Page 5]
-
-RFC 3671             Collective Attributes in LDAP         December 2003
-
 ## 3.11.  Collective Telex Number
-
-   The c-TelexNumber attribute type specifies a telex number for a
-   collection of entries.
+The c-TelexNumber attribute type specifies a telex number for a collection of entries.
+attribute type：c-TelexNumber ，指定条目集合/entry-collection的电传号码。
 ```
       ( 2.5.4.21.1 NAME 'c-TelexNumber'
         SUP telexNumber COLLECTIVE )
 ```
-3.13.  Collective Facsimile Telephone Number
 
-   The c-FacsimileTelephoneNumber attribute type specifies a facsimile
-   telephone number for a collection of entries.
+### 3.13.  Collective Facsimile Telephone Number
+The c-FacsimileTelephoneNumber attribute type specifies a facsimile telephone number for a collection of entries.
+attribute type：c-FacsimileTelephoneNumber ，指定条目集合/entry-collection的传真电话号码。
 ```
       ( 2.5.4.23.1 NAME 'c-FacsimileTelephoneNumber'
+        SUP facsimileTelephoneNumber COLLECTIVE )
 ```
-   SUP facsimileTelephoneNumber COLLECTIVE )
 
-3.14.  Collective International ISDN Number
-
-   The c-InternationalISDNNumber attribute type specifies an
-   international ISDN number for a collection of entries.
+### 3.14.  Collective International ISDN Number
+The c-InternationalISDNNumber attribute type specifies an international ISDN number for a collection of entries.
+attribute type：c-InternationalISDNNumber ，指定条目集合/entry-collection的国际ISDN号码。
 ```
       ( 2.5.4.25.1 NAME 'c-InternationalISDNNumber'
         SUP internationalISDNNumber COLLECTIVE )
 ```
+
+
+
 # 4. Security Considerations
 
-Collective attributes, like other attributes, are subject to access
-control restrictions and other administrative policy.  Generally
-speaking, collective attributes accessed via an entry in a collection
-are governed by rules restricting access to attributes of that entry.
-And collective attributes access via a subentry are governed by rules
-restricting access to attributes of that subentry.  However, as LDAP
-does not have a standard access model, the particulars of each
-server's access control system may differ.
+Collective attributes, like other attributes, are subject to access control restrictions and other administrative policy.  Generally speaking, collective attributes accessed via an entry in a collection are governed by rules restricting access to attributes of that entry. And collective attributes access via a subentry are governed by rules restricting access to attributes of that subentry.  However, as LDAP does not have a standard access model, the particulars of each server's access control system may differ.
+<font color=red>与其他属性一样，attribute：collective，受访问控制限制和其他管理策略的约束。 </font>
+一般而言，通过集合中的条目访问的集合属性，受限制访问该条目的属性的规则控制。 
+并且，通过子条目的集合属性访问，受限制访问该子条目的属性的规则控制。
+ 但是，由于 LDAP 没有标准的访问模型，每个服务器的访问控制系统的细节可能会有所不同。
 
 General LDAP security considerations [RFC3377] also apply.
+一般 LDAP 安全注意事项 [RFC3377] 也适用。
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Zeilenga                    Standards Track                     [Page 6]
-
-RFC 3671             Collective Attributes in LDAP         December 2003
 
 # 5. IANA Considerations
 
-The IANA has registered the LDAP descriptors [RFC3383] defined in
-this technical specification.  The following registration template is
-suggested:
+The IANA has registered the LDAP descriptors [RFC3383] defined in this technical specification.  The following registration template is suggested:
+IANA 已注册了本技术规范中定义的 LDAP 描述符 [RFC3383]。
+建议使用以下注册模板：
 ```
       Subject: Request for LDAP Descriptor Registration
       Descriptor see comments
@@ -347,23 +309,12 @@ suggested:
       where Type A is Attribute and Type O is ObjectClass.
 ```
 
-The Object Identifiers used in this document were assigned by the
-ISO/IEC Joint Technical Committee 1 - Subcommittee 6 to identify
-elements of X.500 schema [X.520].  This document make no OID
-assignments, it only provides LDAP schema descriptions with existing
-elements of X.500 schema.
+The Object Identifiers used in this document were assigned by the ISO/IEC Joint Technical Committee 1 - Subcommittee 6 to identify elements of X.500 schema [X.520].  This document make no OID assignments, it only provides LDAP schema descriptions with existing elements of X.500 schema.
+本文档中使用的OID由 ISO/IEC 联合技术委员会 1 - 小组委员会 6 指定，以识别 X.500 schema [X.520] 的元素。
+本文档不进行 OID 分配，它仅提供具有 X.500 模式的现有元素的 LDAP 模式描述。
 
 
 
-
-
-
-
-
-
-Zeilenga                    Standards Track                     [Page 7]
-
-RFC 3671             Collective Attributes in LDAP         December 2003
 
 # 6. Intellectual Property Statement(略)
 
