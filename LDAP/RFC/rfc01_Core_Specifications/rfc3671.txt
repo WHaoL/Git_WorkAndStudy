@@ -298,8 +298,7 @@ RFC 3671             Collective Attributes in LDAP         December 2003
    telephone number for a collection of entries.
 
       ( 2.5.4.23.1 NAME 'c-FacsimileTelephoneNumber'
-
-   SUP facsimileTelephoneNumber COLLECTIVE )
+         SUP facsimileTelephoneNumber COLLECTIVE )
 
 3.14.  Collective International ISDN Number
 
