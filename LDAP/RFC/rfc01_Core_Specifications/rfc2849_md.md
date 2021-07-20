@@ -23,9 +23,9 @@ Copyright (C) The Internet Society (2000).  All Rights Reserved.
 # 0. Abstract
 
 This document describes a file format suitable for describing directory information or modifications made to directory information. The file format, known as LDIF, for LDAP Data Interchange Format, is typically used to import and export directory information between LDAP-based directory servers, or to describe a set of changes which are to be applied to a directory.
-<font color=red>本文档描述了 一种适用于 描述目录信息或对目录信息进行修改  的文件格式。 </font>
+<font color=red>本文档描述了 一种文件格式：适用于 描述目录信息 或 对目录信息进行修改  。 </font>
 <font color=blue>LDAP-Data-Interchange-Format/**LDAP数据交换格式**  的 文件格式称为 LDIF，</font>
-<font color=red>通常用于   在基于LDAP的目录服务器之间导入和导出目录信息，或  描述了一组将要应用于目录的更改。</font>
+<font color=red>通常用于 1)在基于LDAP的目录服务器之间导入和导出目录信息，或 2)描述了一组将要应用于目录的更改。</font>
 
 
 
@@ -221,7 +221,7 @@ BASE64-STRING            = [*(BASE64-CHAR)]							;base64编码的字符
   <font color=blue>LDIF 文件中的  任何非空行，包括注释行，可以通过插入 行分隔符 (SEP) 和 空格 来折叠。</font>
   折叠不得出现在该行的第一个字符之前。换句话说，不允许将一行折叠成两行(其中第一行是空的)。
   <font color=blue>任何以单个空格开头的行都必须被视为前一个（非空）行的延续。</font>连接折叠线时，必须丢弃每条连续线开头的一个空格字符。
-  实现不应在多字节 UTF-8 字符的中间折叠行。
+  <font color=blue>实现不应在 "多字节UTF-8字符"  的中间折叠行。</font>
   
 - 3)  Any line that begins with a pound-sign ("#", ASCII 35) is a  comment line, and MUST be ignored when parsing an LDIF file.
 <font color=green>任何以井号（“#”，ASCII 35）开头的行都是注释行，在解析 LDIF 文件时必须忽略。</font>
@@ -272,7 +272,7 @@ b) [5] 中的 Base64 字符串可能包含 BASE64-CHAR 中定义的字符以外�
 Example 1: An simple LDAP file with two entries
 示例 1：具有两个条目/entry的简单 LDAP文件
 
-```
+```LDIF
 version: 1
 dn: cn=Barbara Jensen, ou=Product Development, dc=airius, dc=com
 objectclass: top
@@ -300,7 +300,7 @@ telephonenumber: +1 408 555 1212
 Example 2: A file containing an entry with a folded attribute value
 示例 2：包含  具有折叠属性值-的条目/entry   的文件
 
-```
+```LDIF
 version: 1
 dn:cn=Barbara Jensen, ou=Product Development, dc=airius, dc=com
 objectclass:top
@@ -322,7 +322,7 @@ title:Product Manager, Rod and Reel Division
 Example 3: A file containing a base-64-encoded value
 示例 3：包含 base-64编码值   的文件
 
-```
+```LDIF
 version: 1
 dn: cn=Gern Jensen, ou=Product Testing, dc=airius, dc=com
 objectclass: top
@@ -345,7 +345,7 @@ Example 4: A file containing an entries with UTF-8-encoded attribute values, inc
 示例 4：包含  具有UTF-8编码的属性值(包括语言标签)-的条目/entry   的文件。 
 注释指示了   UTF-8 编码的attribute和DN的内容。
 
-```
+```LDIF
 version: 1
 dn:: b3U95Za25qWt6YOoLG89QWlyaXVz
 # dn:: ou=<JapaneseOU>,o=Airius
@@ -404,9 +404,9 @@ title;lang-en: Sales, Director
 
 
 
-
 Example 5: A file containing a reference to an external file
 示例 5：包含  对外部文件的引用  的文件
+
 ```
 version: 1
 dn: cn=Horatio Jensen, ou=Product Testing, dc=airius, dc=com
@@ -426,6 +426,7 @@ jpegphoto:< file:///usr/local/directory/photos/hjensen.jpg
 
 Example 6: A file containing a series of change records and comments
 示例 6：包含 一系列更改记录和注释  的文件
+
 ```
 version: 1
 # Add a new entry
@@ -495,6 +496,7 @@ delete: description
 
 Example 7: An LDIF file containing a change record with a control
 示例 7：包含  带有-控件/control-的更改记录  的LDIF文件
+
 ```
 version: 1
 # Delete an entry. The operation will attach the LDAPv3
