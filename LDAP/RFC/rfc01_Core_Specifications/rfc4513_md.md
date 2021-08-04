@@ -10,10 +10,10 @@ Obsoletes: 2251, 2829, 2830                                    June 2006
 Category: Standards Track
 
 
-             Lightweight Directory Access Protocol (LDAP):
-             Authentication Methods and Security Mechanisms
+Lightweight Directory Access Protocol (LDAP): Authentication Methods and Security Mechanisms
+# LDAP身份认证方法和安全机制
 
-Status of This Memo
+Status of This Memo(略)
 
    This document specifies an Internet standards track protocol for the
    Internet community, and requests discussion and suggestions for
@@ -21,45 +21,35 @@ Status of This Memo
    Official Protocol Standards" (STD 1) for the standardization state
    and status of this protocol.  Distribution of this memo is unlimited.
 
-Copyright Notice
+Copyright Notice(略)
 
    Copyright (C) The Internet Society (2006).
 
-Abstract
-
-   This document describes authentication methods and security
-   mechanisms of the Lightweight Directory Access Protocol (LDAP).  This
-   document details establishment of Transport Layer Security (TLS)
-   using the StartTLS operation.
-
-   This document details the simple Bind authentication method including
-   anonymous, unauthenticated, and name/password mechanisms and the
-   Simple Authentication and Security Layer (SASL) Bind authentication
-   method including the EXTERNAL mechanism.
-
-   This document discusses various authentication and authorization
-   states through which a session to an LDAP server may pass and the
-   actions that trigger these state changes.
-
-   This document, together with other documents in the LDAP Technical
-   Specification (see Section 1 of the specification's road map),
-   obsoletes RFC 2251, RFC 2829, and RFC 2830.
 
 
+## Abstract(摘要)
 
+This document describes authentication methods and security mechanisms of the Lightweight Directory Access Protocol (LDAP).  This document details establishment of Transport Layer Security (TLS) using the StartTLS operation.
+<font color=red>本文档描述了LDAP的身份认证方法和安全机制。 </font>
+本文档详细说明了<font color=red>使用StartTLS operation建立 传输层安全(TLS)。</font>
+
+This document details the simple Bind authentication method including anonymous, unauthenticated, and name/password mechanisms and the Simple Authentication and Security Layer (SASL) Bind authentication method including the EXTERNAL mechanism.
+本文档详细介绍了 <font color=red>简单绑定身份认证方法，包括匿名、未经身份认证 和 名称/密码机制，</font>
+以及 
+<font color=red>简单身份验证和安全层(SASL)绑定身份认证方法，包括 EXTERNAL 机制。</font>
+
+This document discusses various authentication and authorization states through which a session to an LDAP server may pass and the actions that trigger these state changes.
+<font color=red>本文档讨论到：</font>
+   <font color=red>LDAP服务器的会话  可能通过的 各种身份认证和授权状态 </font>
+   <font color=red>以及   触发这些状态更改的操作。</font>
+
+This document, together with other documents in the LDAP Technical Specification (see Section 1 of the specification's road map), obsoletes RFC 2251, RFC 2829, and RFC 2830.
+本文档与 LDAP 技术规范中的其他文档(请参阅规范路线图的第 1 部分)一起废弃了 RFC 2251、RFC 2829 和 RFC 2830。
 
 
 
-
-
-
-
-
-Harrison                    Standards Track                     [Page 1]
-
-RFC 4513              LDAP Authentication Methods              June 2006
-
-
+## 目录
+```bash
 Table of Contents
 
    1. Introduction ....................................................4
@@ -108,14 +98,6 @@ Table of Contents
       6.2. StartTLS Security Considerations ..........................22
       6.3. Bind Operation Security Considerations ....................23
            6.3.1. Unauthenticated Mechanism Security Considerations ..23
-
-
-
-Harrison                    Standards Track                     [Page 2]
-
-RFC 4513              LDAP Authentication Methods              June 2006
-
-
            6.3.2. Name/Password Mechanism Security Considerations ....23
            6.3.3. Password-Related Security Considerations ...........23
            6.3.4. Hashed Password Security Considerations ............24
@@ -157,514 +139,343 @@ RFC 4513              LDAP Authentication Methods              June 2006
            B.3.3. Section 5 ("Effects of TLS on a Client's
                   Authorization Identity") ...........................33
            B.3.4. Section 5.2 ("TLS Connection Closure Effects") .....33
+```
 
 
 
+# 1. Introduction
 
+The Lightweight Directory Access Protocol (LDAP) [RFC4510] is a  powerful protocol for accessing directories.  It offers means of  searching, retrieving, and manipulating directory content and ways to  access a rich set of security functions.
+LDAP [RFC4510] 是用于访问目录的强大协议。
+它  <font color=red>提供了搜索、检索和操作目录内容的方法，**以及  访问一组丰富的安全函数的方法。**</font>
 
+It is vital that these security functions be interoperable among all  LDAP clients and servers on the Internet; therefore there has to be a minimum subset of security functions that is common to all  implementations that claim LDAP conformance.
+这些安全功能必须在 Internet上的所有LDAP客户端和服务器之间互操作；
+因此，必须有一个最小的安全功能子集，这些功能对于所有声称符合 LDAP 的实现都是通用的。
 
+Basic threats to an LDAP directory service include (but are not limited to):
+<font color=red>对LDAP目录服务的基本威胁包括(但不限于)：</font>
 
+   (1) Unauthorized access to directory data via data-retrieval operations.
+   通过 数据检索操作 未经授权访问 目录数据。
 
+   (2) Unauthorized access to directory data by monitoring access of others.
+   通过监控他人的访问，对目录数据 进行 未经授权的访问。
 
-
-Harrison                    Standards Track                     [Page 3]
-
-RFC 4513              LDAP Authentication Methods              June 2006
-
-
-1.  Introduction
-
-   The Lightweight Directory Access Protocol (LDAP) [RFC4510] is a
-   powerful protocol for accessing directories.  It offers means of
-   searching, retrieving, and manipulating directory content and ways to
-   access a rich set of security functions.
-
-   It is vital that these security functions be interoperable among all
-   LDAP clients and servers on the Internet; therefore there has to be a
-   minimum subset of security functions that is common to all
-   implementations that claim LDAP conformance.
-
-   Basic threats to an LDAP directory service include (but are not
-   limited to):
-
-   (1) Unauthorized access to directory data via data-retrieval
-       operations.
-
-   (2) Unauthorized access to directory data by monitoring access of
-       others.
-
-   (3) Unauthorized access to reusable client authentication information
-       by monitoring access of others.
+   (3) Unauthorized access to reusable client authentication information by monitoring access of others.
+   通过监控他人的访问，对可复用的客户端认证信息 进行 未经授权的访问。
 
    (4) Unauthorized modification of directory data.
+   未经授权修改 目录数据。
 
    (5) Unauthorized modification of configuration information.
+   未经授权修改 配置信息。
 
-   (6) Denial of Service: Use of resources (commonly in excess) in a
-       manner intended to deny service to others.
+   (6) Denial of Service: Use of resources (commonly in excess) in a manner intended to deny service to others.
+   拒绝服务：以拒绝为他人服务的方式 使用资源(通常是过量的)。
 
-   (7) Spoofing: Tricking a user or client into believing that
-       information came from the directory when in fact it did not,
-       either by modifying data in transit or misdirecting the client's
-       transport connection.  Tricking a user or client into sending
-       privileged information to a hostile entity that appears to be the
-       directory server but is not.  Tricking a directory server into
-       believing that information came from a particular client when in
-       fact it came from a hostile entity.
+   (7) Spoofing: Tricking a user or client into believing that information came from the directory when in fact it did not, either by modifying data in transit or misdirecting the client's transport connection.  Tricking a user or client into sending privileged information to a hostile entity that appears to be the directory server but is not.  Tricking a directory server into believing that information came from a particular client when in fact it came from a hostile entity.
+   欺骗：通过修改传输中的数据或误导客户端的传输连接，诱使用户或客户端相信信息来自目录，而实际上并非如此。
+   欺骗用户或客户端将特权信息发送到看似是目录服务器但实际上不是的敌对实体。
+   诱使目录服务器相信信息来自特定客户端，而实际上它来自敌对实体。
 
-   (8) Hijacking: An attacker seizes control of an established protocol
-       session.
+   (8) Hijacking: An attacker seizes control of an established protocol session.
+   劫持：攻击者控制 已建立的协议会话。
 
-   Threats (1), (4), (5), (6), (7), and (8) are active attacks.  Threats
-   (2) and (3) are passive attacks.
+Threats (1), (4), (5), (6), (7), and (8) are active attacks.  Threats (2) and (3) are passive attacks.
+威胁 (1)、(4)、(5)、(6)、(7) 和 (8) 是主动攻击。
+威胁 (2) 和 (3) 是被动攻击。
 
+Threats (1), (4), (5), and (6) are due to hostile clients.  Threats (2), (3), (7), and (8) are due to hostile agents on the path between client and server or hostile agents posing as a server, e.g., IP spoofing.
+威胁 (1)、(4)、(5) 和 (6) 来自敌对客户端。
+威胁 (2)、(3)、(7) 和 (8) 是由于客户端和服务器之间路径上的恶意代理或伪装成服务器的恶意代理，例如 IP 欺骗。
 
+LDAP offers the following security mechanisms:
+<font color=red>LDAP 提供以下安全机制：</font>
 
+   (1) Authentication by means of the Bind operation.  The Bind operation provides a simple method that supports anonymous,  unauthenticated, and name/password mechanisms, and the Simple Authentication and Security Layer (SASL) method, which supports a  wide variety of authentication mechanisms.
+   通过 绑定操作 进行身份认证。
+   绑定操作 提供了
+         一种 支持匿名、未经身份认证和名称/密码机制的 简单方法，
+         以及 支持多种身份认证机制的  简单身份验证和安全层 (SASL) 方法。
 
+   (2) Mechanisms to support vendor-specific access control facilities (LDAP does not offer a standard access control facility).
+   支持 特定供应商 访问control设施的机制(LDAP不提供标准的 访问control设施)。
 
+   (3) Data integrity service by means of security layers in Transport Layer Security (TLS) or SASL mechanisms.
+   通过 传输层安全(TLS)或SASL机制中的安全层 提供 数据完整性服务。
 
-Harrison                    Standards Track                     [Page 4]
-
-RFC 4513              LDAP Authentication Methods              June 2006
+   (4) Data confidentiality service by means of security layers in TLS or SASL mechanisms.
+   通过TLS或SASL机制中的安全层 提供 数据保密服务。
 
+   (5) Server resource usage limitation by means of administrative limits configured on the server.
+   通过在服务器上配置的管理限制 来限制服务器资源使用。
 
-   Threats (1), (4), (5), and (6) are due to hostile clients.  Threats
-   (2), (3), (7), and (8) are due to hostile agents on the path between
-   client and server or hostile agents posing as a server, e.g., IP
-   spoofing.
+   (6) Server authentication by means of the TLS protocol or SASL mechanisms.
+   通过 TLS协议或SASL机制 进行服务器身份认证。
 
-   LDAP offers the following security mechanisms:
+   LDAP may also be protected by means outside the LDAP protocol, e.g., with IP layer security [RFC4301].
+   LDAP 也可以通过 LDAP 协议之外的方式来保护，例如，使用 IP 层安全层 [RFC4301]。
 
-   (1) Authentication by means of the Bind operation.  The Bind
-       operation provides a simple method that supports anonymous,
-       unauthenticated, and name/password mechanisms, and the Simple
-       Authentication and Security Layer (SASL) method, which supports a
-       wide variety of authentication mechanisms.
+Experience has shown that simply allowing implementations to pick and choose the security mechanisms that will be implemented is not a   strategy that leads to interoperability.  In the absence of mandates, clients will continue to be written that do not support any security function supported by the server, or worse, they will only support mechanisms that provide inadequate security for most circumstances.
+经验表明，简单地 允许实现选择要实现的安全机制 并不是导致互操作性的策略。
+在没有授权的情况下，客户端将继续编写 不支持 被服务器支持的 任何安全功能，或者更糟的是，它们将仅支持在大多数情况下提供不充分的安全机制。
 
-   (2) Mechanisms to support vendor-specific access control facilities
-       (LDAP does not offer a standard access control facility).
+It is desirable to allow clients to authenticate using a variety of mechanisms including mechanisms where identities are represented as distinguished names [X.501][RFC4512], in string form [RFC4514], or as used in different systems (e.g., simple user names [RFC4013]). Because some authentication mechanisms transmit credentials in plain text form, and/or do not provide data security services and/or are subject to passive attacks, it is necessary to ensure secure interoperability by identifying a mandatory-to-implement mechanism for establishing transport-layer security services.
+<font color=green>希望允许客户端使用各种机制进行身份验证，包括将身份表示为 专有名称/DN [X.501][RFC4512]、字符串形式 [RFC4514] 或在不同系统中使用的机制(例如，简单的用户名/user-name) [RFC4013])。</font>
+由于<font color=green>某些身份验证机制 以纯文本形式传输凭据，和/或 不提供数据安全服务 和/或 受到被动攻击，因此有必要通过识别建立传输层的强制实施机制来确保安全互操作性安全服务。</font>
 
-   (3) Data integrity service by means of security layers in Transport
-       Layer Security (TLS) or SASL mechanisms.
+The set of security mechanisms provided in LDAP and described in this document is intended to meet the security needs for a wide range of deployment scenarios and still provide a high degree of interoperability among various LDAP implementations and deployments.
+<font color=red>LDAP中提供并在本文档中描述的 一组安全机制 旨在满足广泛部署场景的安全需求，并且仍然提供各种 LDAP 实现和部署之间的高度互操作性。</font>
 
-   (4) Data confidentiality service by means of security layers in TLS
-       or SASL mechanisms.
 
-   (5) Server resource usage limitation by means of administrative
-       limits configured on the server.
 
-   (6) Server authentication by means of the TLS protocol or SASL
-       mechanisms.
+## 1.1.  Relationship to Other Documents(与其他文件的关系)(略)
 
-   LDAP may also be protected by means outside the LDAP protocol, e.g.,
-   with IP layer security [RFC4301].
+This document is an integral part of the LDAP Technical Specification [RFC4510].
+本文档是LDAP技术规范[RFC4510]的组成部分。
 
-   Experience has shown that simply allowing implementations to pick and
-   choose the security mechanisms that will be implemented is not a
-   strategy that leads to interoperability.  In the absence of mandates,
-   clients will continue to be written that do not support any security
-   function supported by the server, or worse, they will only support
-   mechanisms that provide inadequate security for most circumstances.
+This document, together with [RFC4510], [RFC4511], and [RFC4512], obsoletes RFC 2251 in its entirety.  Sections 4.2.1 (portions) and 4.2.2 of RFC 2251 are obsoleted by this document.  Appendix B.1 summarizes the substantive changes made to RFC 2251 by this document.
+本文档连同[RFC4510]、[RFC4511]和[RFC4512]一起废止了整个rfc2251。
+RFC 2251第4.2.1节(部分)和4.2.2节在本文件中被废止。
+附录B.1总结了本文档对RFC 2251所做的实质性修改。
 
-   It is desirable to allow clients to authenticate using a variety of
-   mechanisms including mechanisms where identities are represented as
-   distinguished names [X.501][RFC4512], in string form [RFC4514], or as
-   used in different systems (e.g., simple user names [RFC4013]).
-   Because some authentication mechanisms transmit credentials in plain
-   text form, and/or do not provide data security services and/or are
-   subject to passive attacks, it is necessary to ensure secure
-   interoperability by identifying a mandatory-to-implement mechanism
-   for establishing transport-layer security services.
+This document obsoletes RFC 2829 in its entirety.  Appendix B.2 summarizes the substantive changes made to RFC 2829 by this document.
+本文档将全部废止RFC 2829。
+附录B.2总结了本文档对RFC 2829所做的实质性修改。
 
+Sections 2 and 4 of RFC 2830 are obsoleted by [RFC4511].  The remainder of RFC 2830 is obsoleted by this document.  Appendix B.3 summarizes the substantive changes made to RFC 2830 by this document.
+rfc2830的第2节和第4节已被[RFC4511]废止。
+RFC 2830的剩余部分在本文档中报废。
+附录B.3总结了本文档对RFC 2830所做的实质性修改。
 
+## 1.2. Conventions(约定)
 
+The key words "MUST", "MUST NOT", "SHALL", "SHOULD", "SHOULD NOT", "MAY", and "OPTIONAL" in this document are to be interpreted as described in RFC 2119 [RFC2119].
+本文档中的关键词"MUST", "MUST NOT", "SHALL", "SHOULD", "SHOULD NOT", "MAY", and "OPTIONAL"应按照RFC2119 [RFC2119]中的描述进行解释。
 
-Harrison                    Standards Track                     [Page 5]
-
-RFC 4513              LDAP Authentication Methods              June 2006
+The term "user" represents any human or application entity that is accessing the directory using a directory client.  A directory client (or client) is also known as a directory user agent (DUA).
+<font color=red>术语"user" 表示任何使用directory-client访问directory的人/human或应用程序实体。</font>
+<font color=red>directory-client(或client)也称为目录用户代理(DUA)。</font>
 
+The term "transport connection" refers to the underlying transport services used to carry the protocol exchange, as well as associations established by these services.
+<font color=red>术语"transport connection"指的是 用于进行协议交换的 底层传输服务，以及这些服务建立的关联。</font>
 
-   The set of security mechanisms provided in LDAP and described in this
-   document is intended to meet the security needs for a wide range of
-   deployment scenarios and still provide a high degree of
-   interoperability among various LDAP implementations and deployments.
+The term "TLS layer" refers to TLS services used in providing security services, as well as associations established by these services.
+<font color=red>术语"TLS layer"指的是 用于提供安全服务的 TLS服务，以及由这些服务建立的关联。</font>
 
-1.1.  Relationship to Other Documents
+The term "SASL layer" refers to SASL services used in providing security services, as well as associations established by these services.
+<font color=red>术语"SASL layer"指的是 用于提供安全服务的 SASL服务，以及由这些服务建立的关联。</font>
 
-   This document is an integral part of the LDAP Technical Specification
-   [RFC4510].
+The term "LDAP message layer" refers to the LDAP Message (PDU) services used in providing directory services, as well as associations established by these services.
+<font color=red>术语"LDAP message layer"指的是 用于提供目录服务的 LDAP消息(PDU)服务，以及由这些服务建立的关联。</font>
 
-   This document, together with [RFC4510], [RFC4511], and [RFC4512],
-   obsoletes RFC 2251 in its entirety.  Sections 4.2.1 (portions) and
-   4.2.2 of RFC 2251 are obsoleted by this document.  Appendix B.1
-   summarizes the substantive changes made to RFC 2251 by this document.
+The term "LDAP session" refers to combined services (transport connection, TLS layer, SASL layer, LDAP message layer) and their associations.
+<font color=red>术语"LDAP session"指的是 组合服务 (transport connection, TLS layer, SASL layer, LDAP message layer)及其关联。</font>
 
-   This document obsoletes RFC 2829 in its entirety.  Appendix B.2
-   summarizes the substantive changes made to RFC 2829 by this document.
+In general, security terms in this document are used consistently with the definitions provided in [RFC2828].  In addition, several terms and concepts relating to security, authentication, and authorization are presented in Appendix A of this document.  While the formal definition of these terms and concepts is outside the scope of this document, an understanding of them is prerequisite to understanding much of the material in this document.  Readers who are unfamiliar with security-related concepts are encouraged to review Appendix A before reading the remainder of this document.
+总的来说，本文档中安全术语的使用与[RFC2828]中的定义一致。
+此外，与安全、认证和授权相关的一些术语和概念在本文档的附录A中给出。
+虽然这些<font color=red>术语和概念的正式定义</font>超出了本文档的范围，但<font color=red>理解它们是理解本文档中的大部分材料的先决条件。</font>
+<font color=red>建议不熟悉安全相关概念的读者在阅读本文档的其余部分之前先阅读附录A。</font>
 
-   Sections 2 and 4 of RFC 2830 are obsoleted by [RFC4511].  The
-   remainder of RFC 2830 is obsoleted by this document.  Appendix B.3
-   summarizes the substantive changes made to RFC 2830 by this document.
 
-1.2.  Conventions
 
-   The key words "MUST", "MUST NOT", "SHALL", "SHOULD", "SHOULD NOT",
-   "MAY", and "OPTIONAL" in this document are to be interpreted as
-   described in RFC 2119 [RFC2119].
+# 2.  Implementation Requirements(实现需求)
 
-   The term "user" represents any human or application entity that is
-   accessing the directory using a directory client.  A directory client
-   (or client) is also known as a directory user agent (DUA).
+LDAP server implementations MUST support the anonymous authentication mechanism of the simple Bind method (Section 5.1.1).
+LDAP服务器实现 <font color=red>必须支持 简单Bind方法的 匿名认证机制</font>(章节5.1.1)。
 
-   The term "transport connection" refers to the underlying transport
-   services used to carry the protocol exchange, as well as associations
-   established by these services.
+LDAP implementations that support any authentication mechanism other than the anonymous authentication mechanism of the simple Bind method MUST support the name/password authentication mechanism of the simple Bind method (Section 5.1.3) and MUST be capable of protecting this name/password authentication using TLS as established by the StartTLS operation (Section 3).
+(除了 简单Bind方法的匿名身份认证机制 之外的 任何身份认证机制) LDAP实现<font color=red>必须支持 简单Bind方法的name/password身份认证机制</font>，
+<font color=red>并且 必须能够使用StartTLS-operation建立的TLS 保护这个name/password身份认证。</font>
 
-   The term "TLS layer" refers to TLS services used in providing
-   security services, as well as associations established by these
-   services.
+Implementations SHOULD disallow the use of the name/password authentication mechanism by default when suitable data security services are not in place, and they MAY provide other suitable data security services for use with this authentication mechanism.
+<font color=green>当合适的数据安全服务没有就位时，实现应该默认禁止使用name/password身份认证机制，并且它们可能提供 其他适合使用此身份认证机制的数据安全服务。</font>
 
-   The term "SASL layer" refers to SASL services used in providing
-   security services, as well as associations established by these
-   services.
+Implementations MAY support additional authentication mechanisms. Some of these mechanisms are discussed below.
+实现<font color=red>可能支持 额外的身份认证机制</font>。下面将讨论其中的一些机制。
 
-   The term "LDAP message layer" refers to the LDAP Message (PDU)
-   services used in providing directory services, as well as
-   associations established by these services.
+LDAP server implementations SHOULD support client assertion of authorization identity via the SASL EXTERNAL mechanism (Section 5.2.3).
+LDAP<font color=red>服务器实现 应该支持客户端通过SASL EXTERNAL机制 声明认证身份</font>(章节5.2.3)。
 
+LDAP server implementations that support no authentication mechanism other than the anonymous mechanism of the simple bind method SHOULD support use of TLS as established by the StartTLS operation (Section 3).  (Other servers MUST support TLS per the second paragraph of this section.)
+<font color=red>除了 简单Bind方法的匿名机制 外，不支持任何身份认证机制的LDAP服务器实现 应该支持 使用由StartTLS-operation建立的TLS(其他服务器必须支持TLS)。</font>
 
+Implementations supporting TLS MUST support the TLS_RSA_WITH_3DES_EDE_CBC_SHA ciphersuite and SHOULD support the TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA ciphersuite.  Support for the latter ciphersuite is recommended to encourage interoperability with implementations conforming to earlier LDAP StartTLS specifications.
+支持TLS的实现必须支持TLS_RSA_WITH_3DES_EDE_CBC_SHA加密套件，并且应该支持TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA加密套件。
+建议支持后一种加密套件，以鼓励与符合早期LDAP StartTLS规范的实现进行互操作性。
 
 
-Harrison                    Standards Track                     [Page 6]
-
-RFC 4513              LDAP Authentication Methods              June 2006
 
+# 3.  StartTLS Operation
 
-   The term "LDAP session" refers to combined services (transport
-   connection, TLS layer, SASL layer, LDAP message layer) and their
-   associations.
+The Start Transport Layer Security (StartTLS) operation defined in Section 4.14 of [RFC4511] provides the ability to establish TLS [RFC4346] in an LDAP session.
+[RFC4511] 的第 4.14 节中定义的  <font color=red>启动传输层安全性操作(StartTLS-operation)  提供了在 LDAP会话/session中建立TLS[RFC4346] 的能力。</font>
 
-   In general, security terms in this document are used consistently
-   with the definitions provided in [RFC2828].  In addition, several
-   terms and concepts relating to security, authentication, and
-   authorization are presented in Appendix A of this document.  While
-   the formal definition of these terms and concepts is outside the
-   scope of this document, an understanding of them is prerequisite to
-   understanding much of the material in this document.  Readers who are
-   unfamiliar with security-related concepts are encouraged to review
-   Appendix A before reading the remainder of this document.
+The goals of using the TLS protocol with LDAP are to ensure data confidentiality and integrity, and to optionally provide for authentication.  TLS expressly provides these capabilities, although the authentication services of TLS are available to LDAP only in combination with the SASL EXTERNAL authentication method (see Section 5.2.3), and then only if the SASL EXTERNAL implementation chooses to make use of the TLS credentials.
+<font color=red>将 TLS协议与LDAP一起使用的目的是 确保数据的机密性和完整性，并可选地提供身份认证。 </font>
+TLS 明确提供了这些功能，
+      <font color=green>TLS的身份认证服务仅在结合SASL EXTERNAL身份认证方法时才可用于LDAP(第 5.2.3 节)，</font>
+      <font color=green>并且仅当SASL EXTERNAL实现选择使用 TLS证书时才可用。</font>
 
-2.  Implementation Requirements
 
-   LDAP server implementations MUST support the anonymous authentication
-   mechanism of the simple Bind method (Section 5.1.1).
 
-   LDAP implementations that support any authentication mechanism other
-   than the anonymous authentication mechanism of the simple Bind method
-   MUST support the name/password authentication mechanism of the simple
-   Bind method (Section 5.1.3) and MUST be capable of protecting this
-   name/password authentication using TLS as established by the StartTLS
-   operation (Section 3).
+## 3.1.  TLS Establishment Procedures(TLS建立程序)
 
-   Implementations SHOULD disallow the use of the name/password
-   authentication mechanism by default when suitable data security
-   services are not in place, and they MAY provide other suitable data
-   security services for use with this authentication mechanism.
+This section describes the overall procedures clients and servers must follow for TLS establishment.  These procedures take into consideration various aspects of the TLS layer including discovery of resultant security level and assertion of the client's authorization identity.
+<font color=red>本节描述  客户端和服务器在建立TLS时  必须遵循的总体过程。</font>
+这些过程考虑到TLS层的各个方面，<font color=red>包括  发现最终的安全级别 和 客户端授权身份的断言。</font>
 
-   Implementations MAY support additional authentication mechanisms.
-   Some of these mechanisms are discussed below.
 
-   LDAP server implementations SHOULD support client assertion of
-   authorization identity via the SASL EXTERNAL mechanism (Section
-   5.2.3).
 
-   LDAP server implementations that support no authentication mechanism
-   other than the anonymous mechanism of the simple bind method SHOULD
-   support use of TLS as established by the StartTLS operation (Section
-   3).  (Other servers MUST support TLS per the second paragraph of this
-   section.)
+### 3.1.1.  StartTLS Request Sequencing(StartTLS-request顺序)
 
+A client may send the StartTLS extended request at any time after establishing an LDAP session, except:
+<font color=red>在建立LDAP-session后，client可以**随时**发送StartTLS-extended-request，但以下情况除外：</font>
+   - when TLS is currently established on the session,
+   当在会话上建立 TLS 时，
 
+   - when a multi-stage SASL negotiation is in progress on the session, or
+   当会话中正在进行 多阶段SASL协商时，或
 
+   - when there are outstanding responses for operation requests previously issued on the session.
+   当先前在会话上发出的操作请求 有未完成的响应时。
 
+As described in [RFC4511], Section 4.14.1, a (detected) violation of any of these requirements results in a return of the operationsError resultCode.
+<font color=green>如[RFC4511]第4.14.1节所述，(检测到的)违反任何这些要求 会导致返回resultCode: operationsError。</font>
 
+Client implementers should ensure that they strictly follow these operation sequencing requirements to prevent interoperability issues. Operational experience has shown that violating these requirements causes interoperability issues because there are race conditions that prevent servers from detecting some violations of these requirements due to factors such as server hardware speed and network latencies.
+客户端实施者 应确保他们严格遵循这些操作顺序要求，以防止出现互操作性问题。
+运营经验表明，<font color=red>违反这些要求会导致互操作性问题，因为存在竞争条件，因为服务器硬件速度和网络延迟等因素会阻止服务器检测到某些违反这些要求的行为。</font>
 
+There is no general requirement that the client have or have not already performed a Bind operation (Section 5) before sending a StartTLS operation request; however, where a client intends to perform both a Bind operation and a StartTLS operation, it SHOULD first perform the StartTLS operation so that the Bind request and response messages are protected by the data security services established by the StartTLS operation.
+<font color=green>一般情况下 没有要求客户端在发送 StartTLS-operation请求之前 已经或尚未执行Bind-operation(第5节)；</font>
+<font color=red>然而，当客户端 既要执行Bind-operation又要执行StartTLS-operation时，它应该首先执行StartTLS-operation，</font>
+<font color=red>以便 Bind请求和响应消息 受到由 StartTLS-operation建立的数据安全服务的保护。</font>
 
 
-Harrison                    Standards Track                     [Page 7]
-
-RFC 4513              LDAP Authentication Methods              June 2006
 
+### 3.1.2.  Client Certificate(客户端证书)
 
-   Implementations supporting TLS MUST support the
-   TLS_RSA_WITH_3DES_EDE_CBC_SHA ciphersuite and SHOULD support the
-   TLS_DHE_DSS_WITH_3DES_EDE_CBC_SHA ciphersuite.  Support for the
-   latter ciphersuite is recommended to encourage interoperability with
-   implementations conforming to earlier LDAP StartTLS specifications.
+If an LDAP server requests or demands that a client provide a user certificate during TLS negotiation and the client does not present a suitable user certificate (e.g., one that can be validated), the server may use a local security policy to determine whether to successfully complete TLS negotiation.
+如果 LDAP-server 请求或要求client  在TLS协商期间 提供用户证书，
+而客户端没有提供合适的用户证书(例如，可以验证的)，
+则服务器可以使用<font color=red>**本地安全策略**</font>来确定是否成功完成 TLS 协商。
 
-3.  StartTLS Operation
+If a client that has provided a suitable certificate subsequently performs a Bind operation using the SASL EXTERNAL authentication mechanism (Section 5.2.3), information in the certificate may be used by the server to identify and authenticate the client.
+<font color=green>如果已经提供了合适证书的客户端 随后使用SASL EXTERNAL身份认证机制(第5.2.3节)执行Bind-operation，</font>
+<font color=green>则服务器可以使用证书中的信息 来识别和验证/认证客户端。</font>
 
-   The Start Transport Layer Security (StartTLS) operation defined in
-   Section 4.14 of [RFC4511] provides the ability to establish TLS
-   [RFC4346] in an LDAP session.
 
-   The goals of using the TLS protocol with LDAP are to ensure data
-   confidentiality and integrity, and to optionally provide for
-   authentication.  TLS expressly provides these capabilities, although
-   the authentication services of TLS are available to LDAP only in
-   combination with the SASL EXTERNAL authentication method (see Section
-   5.2.3), and then only if the SASL EXTERNAL implementation chooses to
-   make use of the TLS credentials.
 
-3.1.  TLS Establishment Procedures
+### 3.1.3.  Server Identity Check(检查server的身份)
 
-   This section describes the overall procedures clients and servers
-   must follow for TLS establishment.  These procedures take into
-   consideration various aspects of the TLS layer including discovery of
-   resultant security level and assertion of the client's authorization
-   identity.
+In order to prevent man-in-the-middle attacks, the client MUST verify the server's identity (as presented in the server's Certificate message).  In this section, the client's understanding of the server's identity (typically the identity used to establish the transport connection) is called the "reference identity".
+为了防止中间人攻击，客户端必须验证服务器的身份(如服务器的证书信息中所示)。
+在本节中，客户端对服务器身份(通常是用于建立传输连接的身份)的理解称为"reference identity"/参考身份。
 
-3.1.1.  StartTLS Request Sequencing
+The client determines the type (e.g., DNS name or IP address) of the reference identity and performs a comparison between the reference identity and each subjectAltName value of the corresponding type until a match is produced.  Once a match is produced, the server's identity has been verified, and the server identity check is complete.  Different subjectAltName types are matched in different ways.  Sections 3.1.3.1 - 3.1.3.3 explain how to compare values of various subjectAltName types.
+客户端确定reference-identity的type(例如，DNS-name或 IP-address)，
+      并在reference-identity和对应type的每个subjectAltName-value之间执行比较，直到产生匹配。
+一旦产生匹配，服务器的身份就已经得到验证，服务器身份检查就完成了。
+不同的 subjectAltName-type以不同的方式匹配。
+第 3.1.3.1 - 3.1.3.3 节解释了如何比较各种 subjectAltName-type的value。
 
-   A client may send the StartTLS extended request at any time after
-   establishing an LDAP session, except:
+The client may map the reference identity to a different type prior to performing a comparison.  Mappings may be performed for all available subjectAltName types to which the reference identity can be mapped; however, the reference identity should only be mapped to types for which the mapping is either inherently secure (e.g., extracting the DNS name from a URI to compare with a subjectAltName of type dNSName) or for which the mapping is performed in a secure manner (e.g., using DNSSEC, or using user- or admin-configured host-to-address/address-to-host lookup tables).
+客户端可以在执行比较之前将reference-identity映射到不同的type。
+可以对reference-identity可以映射到的所有可用的subjectAltNametype执行映射;
+但是，reference-identity应该只被映射到
+   要么 映射本身是安全的类型(例如，从URI中提取DNS-name 与 type为dNSName的subjectAltName 进行比较)
+   要么 以安全方式执行映射(例如，使用 DNSSEC，或使用用户配置的/user- 或管理员admin- 配置的 host-to-address/address-to-host 查找表)。
 
-      - when TLS is currently established on the session,
-      - when a multi-stage SASL negotiation is in progress on the
-        session, or
-      - when there are outstanding responses for operation requests
-        previously issued on the session.
+The server's identity may also be verified by comparing the reference identity to the Common Name (CN) [RFC4519] value in the leaf Relative Distinguished Name (RDN) of the subjectName field of the server's certificate.  This comparison is performed using the rules for comparison of DNS names in Section 3.1.3.1, below, with the exception that no wildcard matching is allowed.  Although the use of the Common Name value is existing practice, it is deprecated, and Certification Authorities are encouraged to provide subjectAltName values instead. Note that the TLS implementation may represent DNs in certificates according to X.500 or other conventions.  For example, some X.500 implementations order the RDNs in a DN using a left-to-right (most significant to least significant) convention instead of LDAP's right-to-left convention.
+服务器的身份 也可以通过 将reference-identity与服务器证书的subjectName字段的RDN中的CN[RFC4519]的值  进行比较来验证。
+此比较是使用 下面第3.1.3.1节中的DNS-name比较规则执行的，但不允许通配符匹配。
+尽管使用 Common-Name/CN的value 是现有的做法，但它已被弃用，并且鼓励使用 证书颁发机构提供的subjectAltName值。
+请注意，根据X.500或其他约定，TLS实现可能在证书中表示DN。
+例如，某些X.500实现 使用从左到右(最重要到最不重要)的约定，而不是LDAP的从右到左约定 对 DN中的RDN进行排序。
 
-   As described in [RFC4511], Section 4.14.1, a (detected) violation of
-   any of these requirements results in a return of the operationsError
-   resultCode.
+If the server identity check fails, user-oriented clients SHOULD either notify the user (clients may give the user the opportunity to continue with the LDAP session in this case) or close the transport connection and indicate that the server's identity is suspect. Automated clients SHOULD close the transport connection and then return or log an error indicating that the server's identity is  suspect or both.
+如果服务器身份检查失败，
+   面向用户的客户端"应该" 
+      要么  通知用户(在这种情况下，客户端可能会给用户继续 LDAP 会话的机会)
+      要么  关闭传输连接并指出服务器的身份是可疑的。
+   自动客户端"应该"
+      关闭传输连接，然后返回 或 记录一个错误，指示服务器的身份是可疑的，或两者兼而有之。
 
-   Client implementers should ensure that they strictly follow these
-   operation sequencing requirements to prevent interoperability issues.
-   Operational experience has shown that violating these requirements
+Beyond the server identity check described in this section, clients should be prepared to do further checking to ensure that the server is authorized to provide the service it is requested to provide.  The client may need to make use of local policy information in making this determination.
+除了本节中描述的 服务器身份检查之外，客户端应该准备做进一步的检查,以确保  服务器被授权提供它被请求提供的服务。
+客户端可能需要使用本地策略信息来进行此确定。
 
 
 
+#### 3.1.3.1.  Comparison of DNS Names
 
+If the reference identity is an internationalized domain name, conforming implementations MUST convert it to the ASCII Compatible Encoding (ACE) format as specified in Section 4 of RFC 3490 [RFC3490] before comparison with subjectAltName values of type dNSName. Specifically, conforming implementations MUST perform the conversion operation specified in Section 4 of RFC 3490 as follows:
+如果参考标识是国际化域名，则在与 dNSName 类型的 subjectAltName 值进行比较之前，符合标准的实现必须将其转换为 RFC 3490 [RFC3490] 第 4 节中指定的 ASCII 兼容编码 (ACE) 格式。
+具体来说，符合要求的实现必须执行 RFC 3490 第 4 节中指定的转换操作，如下所示：
 
-Harrison                    Standards Track                     [Page 8]
-
-RFC 4513              LDAP Authentication Methods              June 2006
+   * in step 1, the domain name SHALL be considered a "stored string";
+   * in step 3, set the flag called "UseSTD3ASCIIRules";
+   * in step 4, process each label with the "ToASCII" operation; and
+   * in step 5, change all label separators to U+002E (full stop).
+   在第 1 步中，域名应被视为“存储字符串”；
+   在第 3 步中，设置名为“UseSTD3ASCIIRules”的标志；
+   第四步，对每个标签进行“ToASCII”操作；和
+   在步骤 5 中，将所有标签分隔符更改为 U+002E(句号)。
 
+After performing the "to-ASCII" conversion, the DNS labels and names MUST be compared for equality according to the rules specified in Section 3 of RFC3490.
+执行“to-ASCII”转换后，必须根据 RFC3490 第 3 节中指定的规则比较 DNS 标签和名称是否相等。
 
-   causes interoperability issues because there are race conditions that
-   prevent servers from detecting some violations of these requirements
-   due to factors such as server hardware speed and network latencies.
+The '*' (ASCII 42) wildcard character is allowed in subjectAltName values of type dNSName, and then only as the left-most (least significant) DNS label in that value.  This wildcard matches any left-most DNS label in the server name.  That is, the subject *.example.com matches the server names a.example.com and b.example.com, but does not match example.com or a.b.example.com.
+在 dNSName 类型的 subjectAltName 值中允许使用“*”(ASCII 42)通配符，然后仅作为该值中最左侧(最不重要)的 DNS 标签。
+此通配符匹配服务器名称中最左侧的任何 DNS 标签。
+也就是说，主题 *.example.com 匹配服务器名称 a.example.com 和 b.example.com，但不匹配 example.com 或 a.b.example.com。
 
-   There is no general requirement that the client have or have not
-   already performed a Bind operation (Section 5) before sending a
-   StartTLS operation request; however, where a client intends to
-   perform both a Bind operation and a StartTLS operation, it SHOULD
-   first perform the StartTLS operation so that the Bind request and
-   response messages are protected by the data security services
-   established by the StartTLS operation.
 
-3.1.2.  Client Certificate
 
-   If an LDAP server requests or demands that a client provide a user
-   certificate during TLS negotiation and the client does not present a
-   suitable user certificate (e.g., one that can be validated), the
-   server may use a local security policy to determine whether to
-   successfully complete TLS negotiation.
+#### 3.1.3.2.  Comparison of IP Addresses
 
-   If a client that has provided a suitable certificate subsequently
-   performs a Bind operation using the SASL EXTERNAL authentication
-   mechanism (Section 5.2.3), information in the certificate may be used
-   by the server to identify and authenticate the client.
+When the reference identity is an IP address, the identity MUST be converted to the "network byte order" octet string representation [RFC791][RFC2460].  For IP Version 4, as specified in RFC 791, the octet string will contain exactly four octets.  For IP Version 6, as specified in RFC 2460, the octet string will contain exactly sixteen octets.  This octet string is then compared against subjectAltName values of type iPAddress.  A match occurs if the reference identity octet string and value octet strings are identical.
 
-3.1.3.  Server Identity Check
+#### 3.1.3.3.  Comparison of Other subjectName Types
 
-   In order to prevent man-in-the-middle attacks, the client MUST verify
-   the server's identity (as presented in the server's Certificate
-   message).  In this section, the client's understanding of the
-   server's identity (typically the identity used to establish the
-   transport connection) is called the "reference identity".
+Client implementations MAY support matching against subjectAltName values of other types as described in other documents.
 
-   The client determines the type (e.g., DNS name or IP address) of the
-   reference identity and performs a comparison between the reference
-   identity and each subjectAltName value of the corresponding type
-   until a match is produced.  Once a match is produced, the server's
-   identity has been verified, and the server identity check is
-   complete.  Different subjectAltName types are matched in different
-   ways.  Sections 3.1.3.1 - 3.1.3.3 explain how to compare values of
-   various subjectAltName types.
 
-   The client may map the reference identity to a different type prior
-   to performing a comparison.  Mappings may be performed for all
-   available subjectAltName types to which the reference identity can be
-   mapped; however, the reference identity should only be mapped to
-   types for which the mapping is either inherently secure (e.g.,
-   extracting the DNS name from a URI to compare with a subjectAltName
 
+### 3.1.4.  Discovery of Resultant Security Level
 
+After a TLS layer is established in an LDAP session, both parties are to each independently decide whether or not to continue based on local policy and the security level achieved.  If either party decides that the security level is inadequate for it to continue, it SHOULD remove the TLS layer immediately after the TLS (re)negotiation has completed (see [RFC4511], Section 4.14.3, and Section 3.2 below). Implementations may reevaluate the security level at any time and, upon finding it inadequate, should remove the TLS layer.
 
-Harrison                    Standards Track                     [Page 9]
-
-RFC 4513              LDAP Authentication Methods              June 2006
 
 
-   of type dNSName) or for which the mapping is performed in a secure
-   manner (e.g., using DNSSEC, or using user- or admin-configured host-
-   to-address/address-to-host lookup tables).
+### 3.1.5.  Refresh of Server Capabilities Information
 
-   The server's identity may also be verified by comparing the reference
-   identity to the Common Name (CN) [RFC4519] value in the leaf Relative
-   Distinguished Name (RDN) of the subjectName field of the server's
-   certificate.  This comparison is performed using the rules for
-   comparison of DNS names in Section 3.1.3.1, below, with the exception
-   that no wildcard matching is allowed.  Although the use of the Common
-   Name value is existing practice, it is deprecated, and Certification
-   Authorities are encouraged to provide subjectAltName values instead.
-   Note that the TLS implementation may represent DNs in certificates
-   according to X.500 or other conventions.  For example, some X.500
-   implementations order the RDNs in a DN using a left-to-right (most
-   significant to least significant) convention instead of LDAP's
-   right-to-left convention.
+After a TLS layer is established in an LDAP session, the client SHOULD discard or refresh all information about the server that it obtained prior to the initiation of the TLS negotiation and that it did not obtain through secure mechanisms.  This protects against man-in-the-middle attacks that may have altered any server capabilities information retrieved prior to TLS layer installation.
 
-   If the server identity check fails, user-oriented clients SHOULD
-   either notify the user (clients may give the user the opportunity to
-   continue with the LDAP session in this case) or close the transport
-   connection and indicate that the server's identity is suspect.
-   Automated clients SHOULD close the transport connection and then
-   return or log an error indicating that the server's identity is
-   suspect or both.
+The server may advertise different capabilities after installing a TLS layer.  In particular, the value of 'supportedSASLMechanisms' may be different after a TLS layer has been installed (specifically, the EXTERNAL and PLAIN [PLAIN] mechanisms are likely to be listed only after a TLS layer has been installed).
 
-   Beyond the server identity check described in this section, clients
-   should be prepared to do further checking to ensure that the server
-   is authorized to provide the service it is requested to provide.  The
-   client may need to make use of local policy information in making
-   this determination.
 
-3.1.3.1.  Comparison of DNS Names
 
-   If the reference identity is an internationalized domain name,
-   conforming implementations MUST convert it to the ASCII Compatible
-   Encoding (ACE) format as specified in Section 4 of RFC 3490 [RFC3490]
-   before comparison with subjectAltName values of type dNSName.
-   Specifically, conforming implementations MUST perform the conversion
-   operation specified in Section 4 of RFC 3490 as follows:
+## 3.2.  Effect of TLS on Authorization State
 
-      * in step 1, the domain name SHALL be considered a "stored
-        string";
-      * in step 3, set the flag called "UseSTD3ASCIIRules";
-      * in step 4, process each label with the "ToASCII" operation; and
-      * in step 5, change all label separators to U+002E (full stop).
+The establishment, change, and/or closure of TLS may cause the authorization state to move to a new state.  This is discussed further in Section 4.
 
 
 
+## 3.3.  TLS Ciphersuites
 
+Several issues should be considered when selecting TLS ciphersuites that are appropriate for use in a given circumstance.  These issues include the following:
 
-Harrison                    Standards Track                    [Page 10]
-
-RFC 4513              LDAP Authentication Methods              June 2006
-
-
-   After performing the "to-ASCII" conversion, the DNS labels and names
-   MUST be compared for equality according to the rules specified in
-   Section 3 of RFC3490.
-
-   The '*' (ASCII 42) wildcard character is allowed in subjectAltName
-   values of type dNSName, and then only as the left-most (least
-   significant) DNS label in that value.  This wildcard matches any
-   left-most DNS label in the server name.  That is, the subject
-   *.example.com matches the server names a.example.com and
-   b.example.com, but does not match example.com or a.b.example.com.
-
-3.1.3.2.  Comparison of IP Addresses
-
-   When the reference identity is an IP address, the identity MUST be
-   converted to the "network byte order" octet string representation
-   [RFC791][RFC2460].  For IP Version 4, as specified in RFC 791, the
-   octet string will contain exactly four octets.  For IP Version 6, as
-   specified in RFC 2460, the octet string will contain exactly sixteen
-   octets.  This octet string is then compared against subjectAltName
-   values of type iPAddress.  A match occurs if the reference identity
-   octet string and value octet strings are identical.
-
-3.1.3.3.  Comparison of Other subjectName Types
-
-   Client implementations MAY support matching against subjectAltName
-   values of other types as described in other documents.
-
-3.1.4.  Discovery of Resultant Security Level
-
-   After a TLS layer is established in an LDAP session, both parties are
-   to each independently decide whether or not to continue based on
-   local policy and the security level achieved.  If either party
-   decides that the security level is inadequate for it to continue, it
-   SHOULD remove the TLS layer immediately after the TLS (re)negotiation
-   has completed (see [RFC4511], Section 4.14.3, and Section 3.2 below).
-   Implementations may reevaluate the security level at any time and,
-   upon finding it inadequate, should remove the TLS layer.
-
-3.1.5.  Refresh of Server Capabilities Information
-
-   After a TLS layer is established in an LDAP session, the client
-   SHOULD discard or refresh all information about the server that it
-   obtained prior to the initiation of the TLS negotiation and that it
-   did not obtain through secure mechanisms.  This protects against
-   man-in-the-middle attacks that may have altered any server
-   capabilities information retrieved prior to TLS layer installation.
-
-
-
-
-
-Harrison                    Standards Track                    [Page 11]
-
-RFC 4513              LDAP Authentication Methods              June 2006
-
-
-   The server may advertise different capabilities after installing a
-   TLS layer.  In particular, the value of 'supportedSASLMechanisms' may
-   be different after a TLS layer has been installed (specifically, the
-   EXTERNAL and PLAIN [PLAIN] mechanisms are likely to be listed only
-   after a TLS layer has been installed).
-
-3.2.  Effect of TLS on Authorization State
-
-   The establishment, change, and/or closure of TLS may cause the
-   authorization state to move to a new state.  This is discussed
-   further in Section 4.
-
-3.3.  TLS Ciphersuites
-
-   Several issues should be considered when selecting TLS ciphersuites
-   that are appropriate for use in a given circumstance.  These issues
-   include the following:
-
-      - The ciphersuite's ability to provide adequate confidentiality
-        protection for passwords and other data sent over the transport
-        connection.  Client and server implementers should recognize
-        that some TLS ciphersuites provide no confidentiality
-        protection, while other ciphersuites that do provide
-        confidentiality protection may be vulnerable to being cracked
-        using brute force methods, especially in light of ever-
-        increasing CPU speeds that reduce the time needed to
-        successfully mount such attacks.
-
-      - Client and server implementers should carefully consider the
-        value of the password or data being protected versus the level
-        of confidentiality protection provided by the ciphersuite to
-        ensure that the level of protection afforded by the ciphersuite
-        is appropriate.
-
-      - The ciphersuite's vulnerability (or lack thereof) to man-in-the-
-        middle attacks.  Ciphersuites vulnerable to man-in-the-middle
-        attacks SHOULD NOT be used to protect passwords or sensitive
-        data, unless the network configuration is such that the danger
-        of a man-in-the-middle attack is negligible.
-
-      - After a TLS negotiation (either initial or subsequent) is
-        completed, both protocol peers should independently verify that
-        the security services provided by the negotiated ciphersuite are
-        adequate for the intended use of the LDAP session.  If they are
-        not, the TLS layer should be closed.
+   - The ciphersuite's ability to provide adequate confidentiality protection for passwords and other data sent over the transport connection.  Client and server implementers should recognize that some TLS ciphersuites provide no confidentiality protection, while other ciphersuites that do provide confidentiality protection may be vulnerable to being cracked using brute force methods, especially in light of ever-increasing CPU speeds that reduce the time needed to successfully mount such attacks.
+    
+   - Client and server implementers should carefully consider the value of the password or data being protected versus the level of confidentiality protection provided by the ciphersuite to ensure that the level of protection afforded by the ciphersuite is appropriate.
+    
+   - The ciphersuite's vulnerability (or lack thereof) to man-in-the-middle attacks.  Ciphersuites vulnerable to man-in-the-middle attacks SHOULD NOT be used to protect passwords or sensitive data, unless the network configuration is such that the danger of a man-in-the-middle attack is negligible.
+    
+   - After a TLS negotiation (either initial or subsequent) is completed, both protocol peers should independently verify that the security services provided by the negotiated ciphersuite are adequate for the intended use of the LDAP session.  If they are not, the TLS layer should be closed.
 
 
 
@@ -676,7 +487,7 @@ Harrison                    Standards Track                    [Page 12]
 RFC 4513              LDAP Authentication Methods              June 2006
 
 
-4.  Authorization State
+# 4.  Authorization State
 
    Every LDAP session has an associated authorization state.  This state
    is comprised of numerous factors such as what (if any) authentication
@@ -732,7 +543,7 @@ Harrison                    Standards Track                    [Page 13]
 RFC 4513              LDAP Authentication Methods              June 2006
 
 
-5.  Bind Operation
+# 5.  Bind Operation
 
    The Bind operation ([RFC4511], Section 4.2) allows authentication
    information to be exchanged between the client and server to
@@ -750,15 +561,15 @@ RFC 4513              LDAP Authentication Methods              June 2006
    MUST reject the Bind operation with an invalidCredentials resultCode
    in the Bind response if the client is not so authorized.
 
-5.1.  Simple Authentication Method
+## 5.1.  Simple Authentication Method
 
    The simple authentication method of the Bind Operation provides three
    authentication mechanisms:
 
       - An anonymous authentication mechanism (Section 5.1.1).
-
+    
       - An unauthenticated authentication mechanism (Section 5.1.2).
-
+    
       - A name/password authentication mechanism using credentials
         consisting of a name (in the form of an LDAP distinguished name
         [RFC4514]) and a password (Section 5.1.3).
@@ -848,13 +659,13 @@ RFC 4513              LDAP Authentication Methods              June 2006
    is not suitable for authentication in environments without
    confidentiality protection.
 
-5.2.  SASL Authentication Method
+## 5.2.  SASL Authentication Method
 
    The sasl authentication method of the Bind Operation provides
    facilities for using any SASL mechanism including authentication
    mechanisms and other services (e.g., data security services).
 
-5.2.1.  SASL Protocol Profile
+### 5.2.1.  SASL Protocol Profile
 
    LDAP allows authentication via any SASL mechanism [RFC4422].  As LDAP
    includes native anonymous and name/password (plain text)
@@ -1042,10 +853,10 @@ RFC 4513              LDAP Authentication Methods              June 2006
    Backus-Naur Form (ABNF) [RFC4234] grammar:
 
       authzId = dnAuthzId / uAuthzId
-
+    
       ; distinguished-name-based authz id
       dnAuthzId =  "dn:" distinguishedName
-
+    
       ; unspecified authorization id, UTF-8 encoded
       uAuthzId = "u:" userid
       userid = *UTF8 ; syntax unspecified
@@ -1084,7 +895,7 @@ RFC 4513              LDAP Authentication Methods              June 2006
    distinguished by its unique prefix (see Section 3.12 of [RFC4520] for
    registration requirements).
 
-5.2.2.  SASL Semantics within LDAP
+### 5.2.2.  SASL Semantics within LDAP
 
    Implementers must take care to maintain the semantics of SASL
    specifications when handling data that has different semantics in the
@@ -1096,7 +907,7 @@ RFC 4513              LDAP Authentication Methods              June 2006
    [RFC4013] and realm values.  These values are not LDAP DNs, and there
    is no requirement that they be represented or treated as such.
 
-5.2.3.  SASL EXTERNAL Authentication Mechanism
+### 5.2.3.  SASL EXTERNAL Authentication Mechanism
 
    A client can use the SASL EXTERNAL ([RFC4422], Appendix A) mechanism
    to request the LDAP server to authenticate and establish a resulting
@@ -1124,7 +935,7 @@ Harrison                    Standards Track                    [Page 20]
 RFC 4513              LDAP Authentication Methods              June 2006
 
 
-5.2.3.1.  Implicit Assertion
+#### 5.2.3.1.  Implicit Assertion
 
    An implicit authorization identity assertion is performed by invoking
    a Bind request of the SASL form using the EXTERNAL mechanism name
@@ -1136,7 +947,7 @@ RFC 4513              LDAP Authentication Methods              June 2006
    underlying mechanics of how this is accomplished are implementation
    specific.
 
-5.2.3.2.  Explicit Assertion
+#### 5.2.3.2.  Explicit Assertion
 
    An explicit authorization identity assertion is performed by invoking
    a Bind request of the SASL form using the EXTERNAL mechanism name
@@ -1145,14 +956,14 @@ RFC 4513              LDAP Authentication Methods              June 2006
    OCTET STRING) is the asserted authorization identity and MUST be
    constructed as documented in Section 5.2.1.8.
 
-6.  Security Considerations
+# 6.  Security Considerations
 
    Security issues are discussed throughout this document.  The
    unsurprising conclusion is that security is an integral and necessary
    part of LDAP.  This section discusses a number of LDAP-related
    security considerations.
 
-6.1.  General LDAP Security Considerations
+## 6.1.  General LDAP Security Considerations
 
    LDAP itself provides no security or protection from accessing or
    updating the directory by means other than through the LDAP protocol,
@@ -1193,7 +1004,7 @@ RFC 4513              LDAP Authentication Methods              June 2006
    operation.  Implementations should be robust in the handling of
    changing security factors.
 
-6.2.  StartTLS Security Considerations
+## 6.2.  StartTLS Security Considerations
 
    All security gained via use of the StartTLS operation is gained by
    the use of TLS itself.  The StartTLS operation, on its own, does not
@@ -1236,12 +1047,12 @@ Harrison                    Standards Track                    [Page 22]
 RFC 4513              LDAP Authentication Methods              June 2006
 
 
-6.3.  Bind Operation Security Considerations
+## 6.3.  Bind Operation Security Considerations
 
    This section discusses several security considerations relevant to
    LDAP authentication via the Bind operation.
 
-6.3.1.  Unauthenticated Mechanism Security Considerations
+### 6.3.1.  Unauthenticated Mechanism Security Considerations
 
    Operational experience shows that clients can (and frequently do)
    misuse the unauthenticated authentication mechanism of the simple
@@ -1258,14 +1069,14 @@ RFC 4513              LDAP Authentication Methods              June 2006
    verifying that the supplied password is not empty) and react
    appropriately.
 
-6.3.2.  Name/Password Mechanism Security Considerations
+### 6.3.2.  Name/Password Mechanism Security Considerations
 
    The name/password authentication mechanism of the simple Bind method
    discloses the password to the server, which is an inherent security
    risk.  There are other mechanisms, such as SASL DIGEST-MD5
    [DIGEST-MD5], that do not disclose the password to the server.
 
-6.3.3.  Password-Related Security Considerations
+### 6.3.3.  Password-Related Security Considerations
 
    LDAP allows multi-valued password attributes.  In systems where
    entries are expected to have one and only one password,
@@ -1303,14 +1114,14 @@ RFC 4513              LDAP Authentication Methods              June 2006
    password modification, requires that:
 
          A TLS layer has been successfully installed.
-
+    
          OR
-
+    
          Some other data confidentiality mechanism that protects the
          password value from eavesdropping has been provided.
-
+    
          OR
-
+    
          The server returns a resultCode of confidentialityRequired for
          the operation (i.e., name/password Bind with password value,
          SASL Bind transmitting a password value in the clear, add or
@@ -1322,7 +1133,7 @@ RFC 4513              LDAP Authentication Methods              June 2006
    detects that a password for an account has been transmitted in the
    clear.
 
-6.3.4.  Hashed Password Security Considerations
+### 6.3.4.  Hashed Password Security Considerations
 
    Some authentication mechanisms (e.g., DIGEST-MD5) transmit a hash of
    the password value that may be vulnerable to offline dictionary
@@ -1330,7 +1141,7 @@ RFC 4513              LDAP Authentication Methods              June 2006
    password values during transmission using TLS or other
    confidentiality mechanisms.
 
-6.4.  SASL Security Considerations
+## 6.4.  SASL Security Considerations
 
    Until data integrity service is installed on an LDAP session, an
    attacker can modify the transmitted values of the
@@ -1355,14 +1166,14 @@ RFC 4513              LDAP Authentication Methods              June 2006
    close the underlying transport connection and then reconnect to
    reestablish the session.
 
-6.5.  Related Security Considerations
+## 6.5.  Related Security Considerations
 
    Additional security considerations relating to the various
    authentication methods and mechanisms discussed in this document
    apply and can be found in [RFC4422], [RFC4013], [RFC3454], and
    [RFC3629].
 
-7.  IANA Considerations
+# 7.  IANA Considerations
 
    The IANA has updated the LDAP Protocol Mechanism registry to indicate
    that this document and [RFC4511] provide the definitive technical
@@ -1383,7 +1194,11 @@ RFC 4513              LDAP Authentication Methods              June 2006
    that this document provides the definitive technical specification
    for the dnAuthzId (dn:) and uAuthzId (u:) authzid prefixes.
 
-8.  Acknowledgements
+
+
+
+
+8.  Acknowledgements(略)
 
    This document combines information originally contained in RFC 2251,
    RFC 2829, and RFC 2830.  RFC 2251 was a product of the Access,
@@ -1403,8 +1218,7 @@ Harrison                    Standards Track                    [Page 25]
 
 RFC 4513              LDAP Authentication Methods              June 2006
 
-
-9.  Normative References
+9.  Normative References(略)
 
    [RFC791]     Postel, J., "Internet Protocol", STD 5, RFC 791,
                 September 1981.
@@ -1454,7 +1268,6 @@ RFC 4513              LDAP Authentication Methods              June 2006
 
 
 
-
 Harrison                    Standards Track                    [Page 26]
 
 RFC 4513              LDAP Authentication Methods              June 2006
@@ -1486,7 +1299,11 @@ RFC 4513              LDAP Authentication Methods              June 2006
 
    [X.501]      ITU-T Rec. X.501, "The Directory: Models", 1993.
 
-10.  Informative References
+
+
+
+
+10.  Informative References(略)
 
    [DIGEST-MD5] Leach, P., Newman, C., and A. Melnikov, "Using Digest
                 Authentication as a SASL Mechanism", Work in Progress,
@@ -1516,88 +1333,75 @@ Harrison                    Standards Track                    [Page 27]
 RFC 4513              LDAP Authentication Methods              June 2006
 
 
-Appendix A.  Authentication and Authorization Concepts
 
-   This appendix is non-normative.
+# Appendix A.  Authentication and Authorization Concepts(认证和授权的概念)
 
-   This appendix defines basic terms, concepts, and interrelationships
-   regarding authentication, authorization, credentials, and identity.
-   These concepts are used in describing how various security approaches
-   are utilized in client authentication and authorization.
+This appendix is non-normative.
+本附录不规范。
 
-A.1.  Access Control Policy
-
-   An access control policy is a set of rules defining the protection of
-   resources, generally in terms of the capabilities of persons or other
-   entities accessing those resources.  Security objects and mechanisms,
-   such as those described here, enable the expression of access control
-   policies and their enforcement.
-
-A.2.  Access Control Factors
-
-   A request, when it is being processed by a server, may be associated
-   with a wide variety of security-related factors.  The server uses
-   these factors to determine whether and how to process the request.
-   These are called access control factors (ACFs).  They might include
-   source IP address, encryption strength, the type of operation being
-   requested, time of day, etc..  Some factors may be specific to the
-   request itself; others may be associated with the transport
-   connection via which the request is transmitted; and others (e.g.,
-   time of day) may be "environmental".
-
-   Access control policies are expressed in terms of access control
-   factors; for example, "a request having ACFs i,j,k can perform
-   operation Y on resource Z".  The set of ACFs that a server makes
-   available for such expressions is implementation specific.
-
-A.3.  Authentication, Credentials, Identity
-
-   Authentication credentials are the evidence supplied by one party to
-   another, asserting the identity of the supplying party (e.g., a user)
-   who is attempting to establish a new authorization state with the
-   other party (typically a server).  Authentication is the process of
-   generating, transmitting, and verifying these credentials and thus
-   the identity they assert.  An authentication identity is the name
-   presented in a credential.
-
-   There are many forms of authentication credentials.  The form used
-   depends upon the particular authentication mechanism negotiated by
-   the parties.  X.509 certificates, Kerberos tickets, and simple
-   identity and password pairs are all examples of authentication
+This appendix defines basic terms, concepts, and interrelationships regarding authentication, authorization, credentials, and identity. These concepts are used in describing how various security approaches are utilized in client authentication and authorization.
+本附录定义了  关于身份认证、授权、证书和身份的  基本术语、概念和相互关系。
+这些概念用于描述  如何在客户端身份认证和授权中使用各种安全方法。
 
 
 
-Harrison                    Standards Track                    [Page 28]
-
-RFC 4513              LDAP Authentication Methods              June 2006
+## A.1.  Access Control Policy(访问控制的策略)
+
+An access control policy is a set of rules defining the protection of resources, generally in terms of the capabilities of persons or other entities accessing those resources.  Security objects and mechanisms, such as those described here, enable the expression of access control policies and their enforcement.
+访问控制策略是一组定义资源保护的规则，通常  根据访问这些资源的人员或其他实体的能力 来定义。
+安全对象和机制(如这里描述的)  支持  访问控制策略的表达及其实施。
 
 
-   credential forms.  Note that an authentication mechanism may
-   constrain the form of authentication identities used with it.
 
-A.4.  Authorization Identity
+## A.2.  Access Control Factors(访问控制的因素)
 
-   An authorization identity is one kind of access control factor.  It
-   is the name of the user or other entity that requests that operations
-   be performed.  Access control policies are often expressed in terms
-   of authorization identities; for example, "entity X can perform
-   operation Y on resource Z".
+A request, when it is being processed by a server, may be associated with a wide variety of security-related factors.  The server uses these factors to determine whether and how to process the request. These are called access control factors (ACFs).  They might include source IP address, encryption strength, the type of operation being requested, time of day, etc..  Some factors may be specific to the request itself; others may be associated with the transport connection via which the request is transmitted; and others (e.g., time of day) may be "environmental".
+一个请求，当它被服务器处理时，可能会与各种各样的安全相关因素相关联。
+服务器使用这些因素来决定是否以及如何处理请求。
+这些被称为访问控制因素(ACFs)。
+它们可能包括源IP地址、加密强度、被请求的操作类型、一天中的时间等。
+一些因素可能特定于请求本身; 其他可能与传输请求所通过的传输连接相关联; 其他的(例如，一天中的时间)可能是“环境的”。
 
-   The authorization identity of an LDAP session is often semantically
-   the same as the authentication identity presented by the client, but
-   it may be different.  SASL allows clients to specify an authorization
-   identity distinct from the authentication identity asserted by the
-   client's credentials.  This permits agents such as proxy servers to
-   authenticate using their own credentials, yet request the access
-   privileges of the identity for which they are proxying [RFC4422].
-   Also, the form of authentication identity supplied by a service like
-   TLS may not correspond to the authorization identities used to
-   express a server's access control policy, thus requiring a server-
-   specific mapping to be done.  The method by which a server composes
-   and validates an authorization identity from the authentication
-   credentials supplied by a client is implementation specific.
+Access control policies are expressed in terms of access control factors; for example, "a request having ACFs i,j,k can perform operation Y on resource Z".  The set of ACFs that a server makes available for such expressions is implementation specific.
+访问控制策略  由访问控制因素表示;例如，“具有ACFs i,j,k的请求可以在资源Z上执行操作Y”。
+服务器为此类表达式提供的ACFs集合 是特定于实现的。
 
-Appendix B.  Summary of Changes
+
+
+## A.3.  Authentication, Credentials, Identity(认证/证书/身份)
+
+Authentication credentials are the evidence supplied by one party to another, asserting the identity of the supplying party (e.g., a user) who is attempting to establish a new authorization state with the other party (typically a server).  Authentication is the process of generating, transmitting, and verifying these credentials and thus the identity they assert.  An authentication identity is the name presented in a credential.
+身份认证证书 是由一方提供给另一方的证据，它声明了 试图与另一方(通常是服务器) 建立新的授权状态  的供应方(例如，用户)的身份。
+身份认证 是生成、传输和验证这些证书以及它们所声明的身份的过程。
+身份认证 标识/身份 是证书中显示的名称。
+
+There are many forms of authentication credentials.  The form used depends upon the particular authentication mechanism negotiated by the parties.  X.509 certificates, Kerberos tickets, and simple identity and password pairs are all examples of authentication credential forms.  Note that an authentication mechanism may constrain the form of authentication identities used with it.
+有多种形式的身份认证证书。
+所使用的形式取决于 双方协商的 特定身份认证机制。
+X.509证书、Kerberos票据以及简单的身份和密码对都是身份认证证书的例子。
+请注意，身份验证机制可能会约束与其一起使用的 认证身份的形式。
+
+
+
+## A.4.  Authorization Identity(认证身份)
+
+An authorization identity is one kind of access control factor.  It is the name of the user or other entity that requests that operations be performed.  Access control policies are often expressed in terms of authorization identities; for example, "entity X can perform operation Y on resource Z".
+授权身份 是一种访问控制因素。
+它是 请求执行操作的 用户或其他实体的名称。
+访问控制策略 通常表示为授权身份;例如，“实体X可以对资源Z执行操作Y”。
+
+The authorization identity of an LDAP session is often semantically the same as the authentication identity presented by the client, but it may be different.  SASL allows clients to specify an authorization identity distinct from the authentication identity asserted by the client's credentials.  This permits agents such as proxy servers to authenticate using their own credentials, yet request the access privileges of the identity for which they are proxying [RFC4422]. Also, the form of authentication identity supplied by a service like TLS may not correspond to the authorization identities used to express a server's access control policy, thus requiring a server-specific mapping to be done.  The method by which a server composes and validates an authorization identity from the authentication credentials supplied by a client is implementation specific.
+LDAP会话的授权身份 在语义上通常与客户机提供的 认证身份 相同，但也可能不同。
+
+SASL 允许客户端指定 与客户端证书声明的认证身份 不同的认证身份。
+这允许代理服务器 使用它们自己的证书进行身份验证，同时请求它们所代理的身份的访问权限[RFC4422]。
+
+此外，服务(如TLS)提供的认证身份的形式 可能与用于 表示服务器访问控制策略的认证身份 不对应，因此需要进行特定于服务器的映射。
+服务器 根据客户机提供的身份认证证书 组合和验证 认证身份的方法 是特定于实现的。
+
+
+
+# Appendix B.  Summary of Changes
 
    This appendix is non-normative.
 
@@ -1819,7 +1623,11 @@ B.3.4.  Section 5.2 ("TLS Connection Closure Effects")
 
    - Replaced references to RFC 2401 with RFC 4301.
 
-Author's Address
+
+
+
+
+Author's Address(略)
 
    Roger Harrison
    Novell, Inc.
@@ -1846,13 +1654,13 @@ Author's Address
 
 
 
-
 Harrison                    Standards Track                    [Page 33]
 
 RFC 4513              LDAP Authentication Methods              June 2006
 
 
-Full Copyright Statement
+
+Full Copyright Statement(略)
 
    Copyright (C) The Internet Society (2006).
 
@@ -1868,7 +1676,11 @@ Full Copyright Statement
    INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
    WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 
-Intellectual Property
+
+
+
+
+Intellectual Property(略)
 
    The IETF takes no position regarding the validity or scope of any
    Intellectual Property Rights or other rights that might be claimed to
@@ -1892,7 +1704,11 @@ Intellectual Property
    this standard.  Please address the information to the IETF at
    ietf-ipr@ietf.org.
 
-Acknowledgement
+
+
+
+
+Acknowledgement(略)
 
    Funding for the RFC Editor function is provided by the IETF
    Administrative Support Activity (IASA).
