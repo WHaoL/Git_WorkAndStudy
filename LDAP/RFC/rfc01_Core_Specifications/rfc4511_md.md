@@ -574,7 +574,7 @@ The diagnosticMessage field of this construct may, at the server's option, be us
 
 For certain result codes (typically, but not restricted to  noSuchObject, aliasProblem, invalidDNSyntax, and  aliasDereferencingProblem), the matchedDN field is set (subject to access controls) to the name of the last entry (object or alias) used in finding the target (or base) object.  This will be a truncated   form of the provided name or, if an alias was dereferenced while attempting to locate the entry, of the resulting name.  Otherwise, the matchedDN field is empty.
 1) 对于某些结果代码（通常但不限于 noSuchObject、aliasProblem、invalidDNSyntax 和 aliasDereferencingProblem），matchedDN 字段被设置（受访问控制）为用于 查找目标(或基础)对象的 最后一个条目(对象或别名)的名称。 2) 如果在尝试定位条目时解引用别名，结果名称将是所提供名称的截断形式。 3) 否则，matchedDN 字段为空。 
-总结： 
+   总结： 
     LDAPResult中的 matchedDN 字段
         1) 对于结果代码/resultCode 为 noSuchObject、aliasProblem、invalidDNSyntax、aliasDereferencingProblem的消息/message，
             服务器返回 在DIT中 可以为此操作找到的 最深的条目的DN
@@ -1416,7 +1416,7 @@ There are three special cases that may appear in the attributes selection list:
 - 1)An empty list with no attributes requests the return of all user attributes.
   - 没有属性的空列表-请求  返回 所有用户属性/user-attributes。
 - 2)A list containing "*" (with zero or more attribute descriptions) requests the return of all user attributes in addition to other listed (operational) attributes.
-  - 包含“*”(具有0个或多个attribute-description)的列表-请求  返回  除其他列出的(可操作的)属性之外的所有 用户属性/user-attributes。
+  - 包含“*”(具有0个或多个attribute-description)的列表-请求  返回  除其他列出的(operational) attributes之外的  所有 用户属性/user-attributes。
   - 1)A list containing only the OID "1.1" indicates that no attributes are to be returned.  If "1.1" is provided with other attributeSelector values, the "1.1" attributeSelector is ignored.  This OID was chosen because it does not (and can not) correspond to any attribute in use.
     - 仅包含 OID "1.1" 的列表 表示不返回任何属性。 如果"1.1"与其他attributeSelector 值一起提供，则忽略"1.1" attributeSelector。 选择此 OID 是因为它不（也不能）对应于任何使用中的属性。
 
@@ -1613,12 +1613,12 @@ Fields of the Modify Request are:
 修改请求的各个字段如下：
 
 - 1) object: The value of this field contains the name of the entry to be modified.  The server SHALL NOT perform any alias dereferencing in determining the object to be modified.
-    该字段的值 包含了 要修改的entry的 名称/DN。 服务器 "不应 " 在确定要修改的对象时 执行 任何别名解引用。
-    
+      该字段的值 包含了 要修改的entry的 名称/DN。 服务器 "不应 " 在确定要修改的对象时 执行 任何别名解引用。
+  
 - 2) changes: A list of modifications to be performed on the entry.  The entire list of modifications MUST be performed in the order they are listed as a single atomic operation.  While individual modifications may violate certain aspects of the directory schema (such as the object class definition and Directory Information Tree (DIT) content rule), the resulting entry after the entire list of modifications is performed MUST conform to the requirements of the directory model and controlling schema [RFC4512].
-    (该字段的值，是个list/列表，包含了)要对entry执行的 修改列表。 作为一个单原子操作 整个修改列表 "必须" 按照它们  列出的顺序执行。 
-    虽然个别修改 可能违反  目录模式/schema的某些方面(例如对象类定义和目录信息树(DIT)内容规则），
-    但 执行整个修改列表后的 结果条目 必须符合 目录模型 和控制模式/schema 的要求[RFC4512]。
+      (该字段的值，是个list/列表，包含了)要对entry执行的 修改列表。 作为一个单原子操作 整个修改列表 "必须" 按照它们  列出的顺序执行。 
+      虽然个别修改 可能违反  目录模式/schema的某些方面(例如对象类定义和目录信息树(DIT)内容规则），
+      但 执行整个修改列表后的 结果条目 必须符合 目录模型 和控制模式/schema 的要求[RFC4512]。
     - 2.1) operation: Used to specify the type of modification being performed.  Each operation type acts on the following modification.  The values of this field have the following semantics, respectively:
       (该字段的值)用于指定 将要被执行的 修改类型。每个操作类型 都作用于 以下修改。 该字段的值分别具有以下语义：
      - 2.1.1) add: add values listed to the modification attribute, creating the attribute if necessary.
