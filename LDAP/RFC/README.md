@@ -1,6 +1,6 @@
 
 ```bash
-说明： 
+注意： 
   先前 /LDAP/rfc-OPENLDAP_REL_ENG_2_4/目录下的文档，均已经整合到 /LDAP/RFC/目录下，并进行了良好的分类
 ```
 
@@ -98,6 +98,7 @@ RFCs Defining the LDAP Protocol and Other Core Specifications
 RFCs Containing Informational Documents, Recommendations, and Best Practices
 
 - [RFC 1823](https://docs.ldap.com/specs/rfc1823.txt): The LDAP Application Program Interface
+  - LDAP应用程序编程接口
 
 - [RFC 2377](https://docs.ldap.com/specs/rfc2377.txt): Naming Plan for Internet Directory-Enabled Applications
   Updated By: [RFC 4519](https://docs.ldap.com/specs/rfc4519.txt)
