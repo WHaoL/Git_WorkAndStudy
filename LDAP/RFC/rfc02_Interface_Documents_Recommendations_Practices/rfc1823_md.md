@@ -46,7 +46,7 @@ The LDAP information model is based on the entry, which contains information abo
 
 Entries are organized in a tree structure, usually based on political, geographical, and organizational boundaries. Each entry is uniquely named relative to its sibling entries by its relative distinguished name (RDN) consisting of one or more distinguished attribute values from the entry.  At most one value from each attribute may be used in the RDN.  For example, the entry for the
 **条目以树状结构组织，通常基于政治、地理和组织边界。**
-**每个条目相对于它的兄弟条目通过它的相对区别名(RDN)进行唯一命名，RDN由条目中的一个或多个区别属性值组成。**
+**每个条目相对于它的兄弟条目通过它的相对辨别名(RDN)进行唯一命名，RDN由条目中的一个或多个区别属性值组成。**
 **每个属性最多可以在RDN中使用一个值。**例如，
 
 person Babs Jensen might be named with the "Barbara Jensen" value from the commonName attribute. A globally unique name for an entry, called a distinguished name or DN, is constructed by concatenating the sequence of RDNs from the root of the tree down to the entry. For example, if Babs worked for the University of Michigan, the DN of her U-M entry might be "cn=Barbara Jensen, o=University of Michigan, c=US". The DN format used by LDAP is defined in [4].
@@ -611,7 +611,7 @@ ldap_abandon()放弃message-id 为 msgid 的操作。
 # 6.  Calls for obtaining results(获取结果)
 
 ldap_result() is used to obtain the result of a previous asynchronously initiated operation. ldap_msgfree() frees the results obtained from a previous call to ldap_result(), or a synchronous search routine.
-ldap_result() 用于获取先前异步启动的操作的结果。 
+ldap_result() 用于获取 先前发起的异步操作的结果。 
 ldap_msgfree() 释放从先前调用 ldap_result() 或同步搜索例程中获得的结果。
 
 ```c
@@ -633,50 +633,57 @@ ldap_msgfree() 释放从先前调用 ldap_result() 或同步搜索例程中获�
 
    msgid    
         The message id of the operation whose results are to be returned, or the constant LDAP_RES_ANY if any result is desired;
-        要返回其结果的 操作的message-id，如果需要任何结果，则为常量 LDAP_RES_ANY；
+        message-id是msgid的操作 返回其操作结果，
+        如果需要 任何/所有 结果，则为常量 LDAP_RES_ANY；
 
    all      
         A boolean parameter that only has meaning for search results. If non-zero it indicates that all results of a search should be retrieved before any are returned. If zero, search results (entries) will be returned one at a time as they arrive;
+        一个只对搜索结果有意义的布尔参数。
+        如果非零，则表示 应该在返回任何结果之前 检索所有搜索结果。
+        如果为零，搜索结果(条目) 将在到达时 一次返回一个；
 
    timeout  
         A timeout specifying how long to wait for results to be returned.  A NULL value causes ldap_result() to block until results are available.  A timeout value of zero second specifies a polling behavior;
+        指定 等待结果返回的超时时间。
+                NULL值会导致ldap_result()阻塞，直到结果可用为止。
+                超时值为0秒指定轮询行为;
+
 
    res      
         For ldap_result(), a result parameter that will contain the result(s) of the operation. For ldap_msgfree(), the result chain to be freed, obtained from a previous call to ldap_result() or ldap_search_s() or ldap_search_st().
+        对于ldap_result()，结果参数将包含操作的结果。
+        对于ldap_msgfree()，要释放的结果链，从先前对ldap_result()或ldap_search_s()或ldap_search_st()的调用中获得。
+
 */
 ```
 Upon successful completion, ldap_result() returns the type of the result returned in the res parameter. This will be one of the following constants.
+成功完成后，ldap_result()返回 res参数中返回的 结果的类型。
+这将是下列常数之一。
 ```c
-             LDAP_RES_BIND
-             LDAP_RES_SEARCH_ENTRY
-             LDAP_RES_SEARCH_RESULT
-             LDAP_RES_MODIFY
-             LDAP_RES_ADD
-             LDAP_RES_DELETE
-             LDAP_RES_MODRDN
-             LDAP_RES_COMPARE
+             LDAP_RES_BIND              //Bind
+             LDAP_RES_SEARCH_ENTRY      //search-entry
+             LDAP_RES_SEARCH_RESULT     //search-result
+             LDAP_RES_MODIFY            //modify
+             LDAP_RES_ADD               //add
+             LDAP_RES_DELETE            //delete
+             LDAP_RES_MODRDN            //modRDN
+             LDAP_RES_COMPARE           //compare
 ```
 ldap_result() returns 0 if the timeout expired and -1 if an error occurs, in which case the ld_errno field of the ld structure will be set accordingly.
+如果超时过期，ldap_result()返回0，
+如果发生错误，返回-1，在这种情况下，ld结构的ld_errno字段将被相应地设置。
+
 
 ldap_msgfree() frees the result structure pointed to be res and returns the type of the message it freed.
+ldap_msgfree()  释放被res指向的结果结构体 并返回它释放的消息的类型。
 
 
 
+# 7.  Calls for error handling(处理error)
 
-
-
-
-
-Howes & Smith                Informational                     [Page 12]
-
-RFC 1823                        LDAP API                     August 1995
-
-
-# 7.  Calls for error handling
-
-   The following calls are used to interpret errors returned by other
-   LDAP API routines.
-
+The following calls are used to interpret errors returned by other LDAP API routines.
+下面的调用用于解释 其他LDAP-API例程  返回的错误/error。
+```c
            int ldap_result2error(
                    LDAP            *ld,
                    LDAPMessage     *res,
@@ -687,46 +694,53 @@ RFC 1823                        LDAP API                     August 1995
     
            void ldap_perror( LDAP *ld, char *msg );
 
+/*
    Parameters are:
 
-   ld       The connection handle;
+   ld       
+        The connection handle;
 
-   res      The result of an LDAP operation as returned by ldap_result()
-            or one of the synchronous API operation calls;
+   res  
+        The result of an LDAP operation as returned by ldap_result() or one of the synchronous API operation calls;
+        由ldap_result()或一个同步API操作调用  返回的 一个LDAP操作结果;
 
-   freeit   A boolean parameter indicating whether the res parameter
-            should be freed (non-zero) or not (zero);
+   freeit   
+        A boolean parameter indicating whether the res parameter should be freed (non-zero) or not (zero);
+        一个布尔参数，指示res参数是否应该被 释放(非零) 或 不被释放(零);
 
-   err      An LDAP error code, as returned by ldap_result2error() or
-            one of the synchronous API operation calls;
+   err      
+        An LDAP error code, as returned by ldap_result2error() or one of the synchronous API operation calls;
+        一个LDAP错误代码，由ldap_result2error()或一个同步API操作调用返回;
 
-   msg      A message to be displayed before the LDAP error message.
+   msg      
+        A message to be displayed before the LDAP error message.
+        在 出现 LDAP错误信息 前 显示/打印 的消息。
 
-   ldap_result2error() is used to convert the LDAP result message
-   obtained from ldap_result(), or the res parameter returned by one of
-   the synchronous API operation calls, into a numeric LDAP error code.
-   It also parses the ld_matched and ld_error portions of the result
-   message and puts them into the connection handle information. All the
-   synchronous operation routines call ldap_result2error() before
-   returning, ensuring that these fields are set correctly. The relevant
-   fields in the connection structue are:
+*/
+```
+- ldap_result2error()
 
-   ld_matched In the event of an LDAP_NO_SUCH_OBJECT error return, this
-              parameter contains the extent of the DN matched;
+ldap_result2error() is used to convert the LDAP result message obtained from ldap_result(), or the res parameter returned by one of the synchronous API operation calls, into a numeric LDAP error code. It also parses the ld_matched and ld_error portions of the result message and puts them into the connection handle information. All the synchronous operation routines call ldap_result2error() before returning, ensuring that these fields are set correctly. The relevant fields in the connection structue are:
+ldap_result2error()用于将 
+        从ldap_result()获得的LDAP-result-message 或 从其中一个同步API操作返回的res参数
+        转换为 数字 LDAP-error-code/错误码。
+它还解析result-message的ld_matched和ld_error部分，并将它们放入连接句柄信息中。
+所有同步操作例程在返回之前都会调用ldap_result2error()，以确保正确设置这些字段。
+连接结构体中的相关字段为:
 
-   ld_error   This parameter contains the error message sent in the
-              result by the LDAP server.
+```c
+   ld_matched 
+        In the event of an LDAP_NO_SUCH_OBJECT error return, this parameter contains the extent of the DN matched;
+        如果返回 LDAP_NO_SUCH_OBJECT错误，该参数包含 匹配DN的范围/长度；
 
-   ld_errno   The LDAP error code indicating the outcome of the
-              operation. It is one of the following constants:
+   ld_error   
+        This parameter contains the error message sent in the result by the LDAP server.
+        此参数包含 LDAP-server 在结果中发送的error-message。
 
-
-
-
-Howes & Smith                Informational                     [Page 13]
-
-RFC 1823                        LDAP API                     August 1995
-
+   ld_errno   
+        The LDAP error code indicating the outcome of the operation. It is one of the following constants:
+        指示/表示 操作结果的LDAP-error-code。
+        它是下列常量之一:
 
            LDAP_SUCCESS
            LDAP_OPERATIONS_ERROR
@@ -773,81 +787,79 @@ RFC 1823                        LDAP API                     August 1995
            LDAP_USER_CANCELLED
            LDAP_PARAM_ERROR
            LDAP_NO_MEMORY
+```
+- ldap_err2string()
+
+ldap_err2string() is used to convert a numeric LDAP error code, as returned by ldap_result2error() or one of the synchronous API operation calls, into an informative NULL-terminated character string message describing the error.  It returns a pointer to static data.
+ldap_err2string()用于将 
+        由ldap_result2error()或一个同步API操作返回的 LDAP-error-code数字 
+        转换为 描述错误的 以null字符结尾的字符串消息。
+它返回一个指向静态数据的指针。
+
+- ldap_perror()
+
+ldap_perror() is used to print the message supplied in msg, followed by an indication of the error contained in the ld_errno field of the ld connection handle, to standard error.
+ldap_perror()用于将msg中提供的message打印为标准错误
+(后跟 ld连接句柄的ld_errno字段中 包含的错误指示)。
 
 
 
 
 
+# 8.  Calls for parsing search entries(解析-搜索到的entry)
 
-Howes & Smith                Informational                     [Page 14]
-
-RFC 1823                        LDAP API                     August 1995
+The following calls are used to parse the entries returned by ldap_search() and friends. These entries are returned in an opaque structure that should only be accessed by calling the routines described below. Routines are provided to step through the entries returned, step through the attributes of an entry, retrieve the name of an entry, and retrieve the values associated with a given attribute in an entry.
+以下调用用于解析 ldap_search()系列函数 返回的条目/entry。
+这些条目在一个不透明的结构体中返回，并且 只能通过调用下面描述的例程来访问。
+提供了例程来 **逐步遍历返回的条目/entry、逐步遍历条目/entry的属性/attribute、检索条目的名称/name以及检索与条目中的给定属性相关联的值。**
 
 
-   ldap_err2string() is used to convert a numeric LDAP error code, as
-   returned by ldap_result2error() or one of the synchronous API
-   operation calls, into an informative NULL-terminated character string
-   message describing the error.  It returns a pointer to static data.
+## 8.1.  Stepping through a set of entries(遍历entry)
 
-   ldap_perror() is used to print the message supplied in msg, followed
-   by an indication of the error contained in the ld_errno field of the
-   ld connection handle, to standard error.
-
-# 8.  Calls for parsing search entries
-
-   The following calls are used to parse the entries returned by
-   ldap_search() and friends. These entries are returned in an opaque
-   structure that should only be accessed by calling the routines
-   described below. Routines are provided to step through the entries
-   returned, step through the attributes of an entry, retrieve the name
-   of an entry, and retrieve the values associated with a given
-   attribute in an entry.
-
-8.1.  Stepping through a set of entries
-
-   The ldap_first_entry() and ldap_next_entry() routines are used to
-   step through a set of entries in a search result.
-   ldap_count_entries() is used to count the number of entries returned.
-
+The ldap_first_entry() and ldap_next_entry() routines are used to step through a set of entries in a search result. ldap_count_entries() is used to count the number of entries returned.
+ldap_first_entry()和ldap_next_entry()例程用于遍历搜索结果中的一组条目。
+ldap_count_entries()用于计算返回的条目数。
+```c
            LDAPMesage *ldap_first_entry( LDAP *ld, LDAPMessage *res );
     
            LDAPMesage *ldap_next_entry( LDAP *ld, LDAPMessage *entry );
     
            int ldap_count_entries( LDAP *ld, LDAPMessage *res );
 
+/*
    Parameters are:
 
-   ld     The connection handle;
+   ld     
+        The connection handle;
 
-   res    The search result, as obtained by a call to one of the syn-
-          chronous search routines or ldap_result();
+   res    
+        The search result, as obtained by a call to one of the syn-chronous search routines or ldap_result();
+        通过调用一个同步搜索例程或ldap_result()获得的搜索结果;
 
-   entry  The entry returned by a previous call to ldap_first_entry() or
-          ldap_next_entry().
+   entry  
+        The entry returned by a previous call to ldap_first_entry() or ldap_next_entry().
+        先前调用ldap_first_entry()或ldap_next_entry()返回的条目。
 
-   ldap_first_entry() and ldap_next_entry() will return NULL when no
-   more entries exist to be returned. NULL is also returned if an error
-   occurs while stepping through the entries, in which case the ld_errno
-   field of the ld connection handle will be set to indicate the error.
-
-   ldap_count_entries() returns the number of entries contained in a
-   chain of entries. It can also be used to count the number of entries
-
-
-
-Howes & Smith                Informational                     [Page 15]
-
-RFC 1823                        LDAP API                     August 1995
+*/
+```
+ldap_first_entry() and ldap_next_entry() will return NULL when no more entries exist to be returned. NULL is also returned if an error occurs while stepping through the entries, in which case the ld_errno field of the ld connection handle will be set to indicate the error.
+当不存在需要返回的条目时，ldap_first_entry()和ldap_next_entry()将返回NULL。
+如果在遍历条目时发生错误，也会返回NULL，在这种情况下，为指示错误，ld连接句柄的ld_errno字段将被设置。
 
 
-   that remain in a chain if called with an entry returned by
-   ldap_first_entry() or ldap_next_entry().
+ldap_count_entries() returns the number of entries contained in a chain of entries. It can also be used to count the number of entries that remain in a chain if called with an entry returned by ldap_first_entry() or ldap_next_entry().
+ldap_count_entries()返回条目链中包含的条目数。
+如果使用ldap_first_entry()或ldap_next_entry()返回的条目/entry调用ldap_count_entries()，它还可以用来计算链中保留的条目的数量。
 
-8.2.  Stepping through the attributes of an entry
 
-   The ldap_first_attribute() and ldap_next_attribute() calls are used
-   to step through the list of attribute types returned with an entry.
 
+
+
+## 8.2.  Stepping through the attributes of an entry(遍历entry的attribute)
+
+The ldap_first_attribute() and ldap_next_attribute() calls are used to step through the list of attribute types returned with an entry.
+ldap_first_attribute()和ldap_next_attribute()调用 用于遍历 随条目返回的属性类型/attribute-type列表。
+```c
            char *ldap_first_attribute(
                    LDAP            *ld,
                    LDAPMessage     *entry,
@@ -859,51 +871,49 @@ RFC 1823                        LDAP API                     August 1995
                    void            *ptr
            );
 
+/*
    Parameters are:
 
-   ld     The connection handle;
+   ld     
+        The connection handle;
 
-   entry  The entry whose attributes are to be stepped through, as
-          returned by ldap_first_entry() or ldap_next_entry();
+   entry  
+        The entry whose attributes are to be stepped through, as returned by ldap_first_entry() or ldap_next_entry();
+        该entry的attribute将被遍历，
+        该entry由ldap_first_entry()或ldap_next_entry()返回。
 
-   ptr    In ldap_first_attribute(), the address of a pointer used
-          internally to keep track of the current position in the entry.
-          In ldap_next_attribute(), the pointer returned by a previous
-          call to ldap_first_attribute().
+   ptr    
+        In ldap_first_attribute(), the address of a pointer used internally to keep track of the current position in the entry. 
+        In ldap_next_attribute(), the pointer returned by a previous call to ldap_first_attribute().
+        在 ldap_first_attribute() 中，内部使用的指针地址 用于跟踪条目中的当前位置。
+        在 ldap_next_attribute() 中，前一次调用 ldap_first_attribute() 返回的指针。
 
-   ldap_first_attribute() and ldap_next_attribute() will return NULL
-   when the end of the attributes is reached, or if there is an error,
-   in which case the ld_errno field in the ld connection handle will be
-   set to indicate the error.
+*/
+```
+ldap_first_attribute() and ldap_next_attribute() will return NULL when the end of the attributes is reached, or if there is an error, in which case the ld_errno field in the ld connection handle will be set to indicate the error.
+当到达attribute的末尾或出错时，ldap_first_attribute()和ldap_next_attribute()将返回NULL，
+在这种情况下，ld连接句柄中的ld_errno字段将被设置，以指示错误。
 
-   Both routines return a pointer to a per-connection buffer containing
-   the current attribute name. This should be treated like static data.
-   ldap_first_attribute() will allocate and return in ptr a pointer to a
-   BerElement used to keep track of the current position. This pointer
-   should be passed in subsequent calls to ldap_next_attribute() to step
-   through the entry's attributes.
+Both routines return a pointer to a per-connection buffer containing the current attribute name. This should be treated like static data. ldap_first_attribute() will allocate and return in ptr a pointer to a BerElement used to keep track of the current position. This pointer should be passed in subsequent calls to ldap_next_attribute() to step through the entry's attributes.
+这两个例程都返回一个  指向每个连接缓冲区的指针，该缓冲区包含当前属性名/attribute-name。
+这应该像静态数据一样处理。
+ldap_first_attribute()将分配并在ptr中返回一个指向BerElement的指针，该BerElement用于跟踪当前位置。
+该指针应该在对ldap_next_attribute()的后续调用中传递，以逐步遍历条目的属性。
 
-   The attribute names returned are suitable for passing in a call to
-   ldap_get_values() and friends to retrieve the associated values.
-
-
-
-
-
-
-Howes & Smith                Informational                     [Page 16]
-
-RFC 1823                        LDAP API                     August 1995
+The attribute names returned are suitable for passing in a call to ldap_get_values() and friends to retrieve the associated values.
+返回的属性名/attribute-name 适合传递给ldap_get_values()系列调用，以检索相关的值。
 
 
-8.3.  Retrieving the values of an attribute
 
-   ldap_get_values() and ldap_get_values_len() are used to retrieve the
-   values of a given attribute from an entry. ldap_count_values() and
-   ldap_count_values_len() are used to count the returned values.
-   ldap_value_free() and ldap_value_free_len() are used to free the
-   values.
 
+## 8.3.  Retrieving the values of an attribute(遍历attribute的value)
+
+ldap_get_values() and ldap_get_values_len() are used to retrieve the values of a given attribute from an entry. ldap_count_values() and ldap_count_values_len() are used to count the returned values. ldap_value_free() and ldap_value_free_len() are used to free the values.
+ldap_get_values()和ldap_get_values_len()用于 从条目/entry中检索给定属性/attribute的值/value。
+ldap_count_values()和ldap_count_values_len()用于对返回值进行计数。
+ldap_value_free()和ldap_value_free_len()用于释放值/value。
+
+```c
            typedef struct berval {
                    unsigned long   bv_len;
                    char            *bv_val;
@@ -922,102 +932,106 @@ RFC 1823                        LDAP API                     August 1995
            );
     
            int ldap_count_values( char **vals );
-    
            int ldap_count_values_len( struct berval **vals );
     
            int ldap_value_free( char **vals );
-    
            int ldap_value_free_len( struct berval **vals );
 
+/*
    Parameters are:
 
-   ld     The connection handle;
+   ld     
+        The connection handle;
 
-   entry  The entry from which to retrieve values, as returned by
-          ldap_first_entry() or ldap_next_entry();
+   entry  
+        The entry from which to retrieve values, as returned by ldap_first_entry() or ldap_next_entry();
+        检索该entry的value，
+        该entry由ldap_first_entry()或ldap_next_entry()返回。
 
-   attr   The attribute whose values are to be retrieved, as returned by
-          ldap_first_attribute() or ldap_next_attribute(), or a caller-
-          supplied string (e.g., "mail");
+   attr   
+        The attribute whose values are to be retrieved, as returned by ldap_first_attribute() or ldap_next_attribute(), or a caller-supplied string (e.g., "mail");
+        检索该attribute的value，
+        该attribute由ldap_first_attribute()或ldap_next_attribute()返回，或者 是一个由调用者提供的字符串(如，"email")。
 
-   vals   The values returned by a previous call to ldap_get_values() or
-          ldap_get_values_len().
+   vals   
+        The values returned by a previous call to ldap_get_values() or ldap_get_values_len().
+        先前调用ldap_get_values()或ldap_get_values_len()返回的值/value。
+
+*/
+```
+Two forms of the various calls are provided. The first form is only suitable for use with non-binary character string data only. The second _len form is used with any kind of data.
+提供了两种形式的调用。
+第一种形式只使用于 非二进制字符串数据。
+第二种 _len形式 用于任何种类的数据
+
+Note that the values returned are malloc'ed and should be freed by calling either ldap_value_free() or ldap_value_free_len() when no longer in use.
+注意：返回的value/值 是malloc的，当不再使用时应该通过调用dap_value_free()或ldap_value_free_len()来释放。
 
 
 
+## 8.4.  Retrieving the name of an entry(检索entry的name)
 
+ldap_get_dn() is used to retrieve the name of an entry. ldap_explode_dn() is used to break up the name into its component parts. ldap_dn2ufn() is used to convert the name into a more "user friendly" format.
+ldap_get_dn()用于检索条目的名称。
+ldap_explode_dn()用于将名称分解/分隔 为其组件部分。
+ldap_dn2ufn()用于将名称/name(DN)转换为更“用户友好”的格式。
 
-Howes & Smith                Informational                     [Page 17]
-
-RFC 1823                        LDAP API                     August 1995
-
-
-   Two forms of the various calls are provided. The first form is only
-   suitable for use with non-binary character string data only. The
-   second _len form is used with any kind of data.
-
-   Note that the values returned are malloc'ed and should be freed by
-   calling either ldap_value_free() or ldap_value_free_len() when no
-   longer in use.
-
-8.4.  Retrieving the name of an entry
-
-   ldap_get_dn() is used to retrieve the name of an entry.
-   ldap_explode_dn() is used to break up the name into its component
-   parts. ldap_dn2ufn() is used to convert the name into a more "user
-   friendly" format.
-
+```c
            char *ldap_get_dn( LDAP *ld, LDAPMessage *entry );
     
            char **ldap_explode_dn( char *dn, int notypes );
     
            char *ldap_dn2ufn( char *dn );
-
+/*
    Parameters are:
 
-   ld      The connection handle;
+   ld      
+        The connection handle;
 
-   entry   The entry whose name is to be retrieved, as returned by
-           ldap_first_entry() or ldap_next_entry();
+   entry   
+        The entry whose name is to be retrieved, as returned by ldap_first_entry() or ldap_next_entry();
+        该entry的name将被检索，
+        该entry由ldap_first_entry()或ldap_next_entry()返回;
 
-   dn      The dn to explode, as returned by ldap_get_dn();
+   dn      
+        The dn to explode, as returned by ldap_get_dn();
+        (要 分隔/分解的) dn，由ldap_get_dn()返回;
 
-   notypes A boolean parameter, if non-zero indicating that the dn com-
-           ponents should have their type information stripped off
-           (i.e., "cn=Babs" would become "Babs").
+   notypes 
+        A boolean parameter, if non-zero indicating that the dn com-ponents should have their type information stripped off (i.e., "cn=Babs" would become "Babs").
+        一个布尔参数，
+        如果不为零，则指示 dn组件的类型信息 应该被剥离(例如，“cn=Babs”将变成“Babs”)。
+*/
+```
+ldap_get_dn() will return NULL if there is some error parsing the dn, setting ld_errno in the ld connection handle to indicate the error. 
+It returns a pointer to malloc'ed space that the caller should free by calling free() when it is no longer in use.  
+Note the format of the DNs returned is given by [4].
+如果 解析dn时有错误，ldap_get_dn()将返回NULL，并 在ld连接句柄中设置ld_errno来指示错误。
+它返回一个指向malloc的空间的指针，当不再使用时，调用者应该通过调用free()来释放该空间。
+注意，返回的DNs的格式是由[4]给出的。
 
-   ldap_get_dn() will return NULL if there is some error parsing the dn,
-   setting ld_errno in the ld connection handle to indicate the error.
-   It returns a pointer to malloc'ed space that the caller should free
-   by calling free() when it is no longer in use.  Note the format of
-   the DNs returned is given by [4].
+ldap_explode_dn() returns a char * array containing the RDN components of the DN supplied, with or without types as indicated by the notypes parameter. The array returned should be freed when it is no longer in use by calling ldap_value_free().
+ldap_explode_dn()返回一个char *数组，该数组包含所提供DN的RDN组件，如notypes参数所指示的带或不带类型。当数组不再使用时，应该通过调用ldap_value_free()释放返回的数组。
 
-   ldap_explode_dn() returns a char * array containing the RDN
-   components of the DN supplied, with or without types as indicated by
-   the notypes parameter. The array returned should be freed when it is
-   no longer in use by calling ldap_value_free().
-
-   ldap_dn2ufn() converts the DN into the user friendly format described
-   in [5]. The UFN returned is malloc'ed space that should be freed by a
-   call to free() when no longer in use.
-
-
-
-Howes & Smith                Informational                     [Page 18]
-
-RFC 1823                        LDAP API                     August 1995
+ldap_dn2ufn() converts the DN into the user friendly format described in [5]. The UFN returned is malloc'ed space that should be freed by a call to free() when no longer in use.
+ldap_dn2ufn()将DN转换为[5]中描述的用户友好格式。
+返回的UFN是malloc的空间，当不再使用时，应该通过调用free()释放该空间。
 
 
 # 9.  Security Considerations
 
    LDAP supports minimal security during connection authentication.
+   LDAP在连接身份验证时支持最低的安全性。
 
-# 10.  Acknowledgements
 
+
+# 10.  Acknowledgements(略)
    This material is based upon work supported by the National Science
    Foundation under Grant No. NCR-9416667.
 
-# 11.  Bibliography
+
+
+# 11.  Bibliography(略)
 
    [1] The Directory: Selected Attribute Syntaxes.  CCITT,
        Recommendation X.520.
@@ -1045,7 +1059,8 @@ RFC 1823                        LDAP API                     August 1995
        University of Michigan, ISODE Consortium, March 1995.
 
 
-# 12.  Authors' Addresses
+
+# 12.  Authors' Addresses(略)
 
        Tim Howes
        University of Michigan
