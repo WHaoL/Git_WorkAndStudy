@@ -89,7 +89,7 @@ Operations can be performed either synchronously or asynchronously. Synchronous 
         同步搜索可以通过调用ldap_search_s()来完成。
         异步搜索可以通过调用ldap_search()来启动。
 **所有同步例程都返回操作结果的指示(例如常量LDAP_SUCCESS或其他错误代码)。
-异步例程返回初始化操作的message-id。**
+异步例程返回 初始化/发起 操作的message-id。**
         **这个id可以在对ldap_result()的后续调用中使用，以获得操作的结果。
         可以通过调用ldap_abandon()来放弃异步操作。**
 
@@ -115,6 +115,7 @@ This section describes each LDAP operation API call in detail. All calls take a 
 
 ldap_open() opens a connection to the LDAP server.
 ldap_open() 打开到 LDAP服务器 的连接。
+
 ```c
               typedef struct ldap {
                       /* ... opaque parameters ... */
@@ -150,6 +151,7 @@ ldap_open() 返回一个"connection handle/连接句柄"，
         一个指向 LDAP结构体的指针，
         
         
+
         该结构体应该传递给与连接相关的后续调用。 
 如果无法打开连接，则返回 NULL。 
 必须先完成下面描述的 ldap_bind 调用之一，然后才能对连接执行其他操作。
@@ -165,17 +167,15 @@ The calling program should assume nothing about the order of the fields in the L
 
 ldap_bind() and friends are used to authenticate to the directory.
 ldap_bind()系列函数，用于对目录进行身份验证。
+
 ```c
         int ldap_bind( LDAP *ld, char *dn, char *cred, int method );
-
         int ldap_bind_s( LDAP *ld, char *dn, char *cred, int method );
 
         int ldap_simple_bind( LDAP *ld, char *dn, char *passwd );
-
         int ldap_simple_bind_s( LDAP *ld, char *dn, char *passwd );
 
         int ldap_kerberos_bind( LDAP *ld, char *dn );
-
         int ldap_kerberos_bind_s( LDAP *ld, char *dn );
 /*
    Parameters are:
@@ -229,6 +229,7 @@ Note that no other operations over the connection should be attempted before a b
 
 ldap_unbind() is used to unbind from the directory and close the connection.
 ldap_unbind()用于 从目录中解除绑定 并关闭连接。
+
 ```c
         int ldap_unbind( LDAP *ld );
 
@@ -252,6 +253,7 @@ ldap_unbind() 返回 LDAP_SUCCESS（如果请求无法发送到 LDAP服务器，
 ldap_search() and friends are used to search the LDAP directory, returning a requested set of attributes for each entry matched. There are three variations.
 ldap_search()系列函数，用于搜索LDAP目录，为每个匹配的条目/entry 返回一组请求的属性/attribute。
 有三种变体。
+
 ```c
            struct timeval {
                    long    tv_sec;
@@ -374,7 +376,7 @@ LDAP不支持 直接读取操作。
     将base设置为要读取的条目的DN、
     scope设置为LDAP_SCOPE_BASE 
     并将filter设置为“(objectclass=*)” 的搜索 来模拟的。 
-attrs 包含要返回的属性列表。
+	attrs 包含要返回的属性列表。
 
 
 
@@ -386,7 +388,7 @@ LDAP 不直接支持list操作。
     将base设置为要列出的条目的DN、
     scope设置为 LDAP_SCOPE_ONELEVEL 
     并将filter设置为“(objectclass=*)” 的搜索 来模拟的。 
-attrs 包含 要为每个子条目返回的属性列表。
+	attrs 包含 要为每个子条目返回的属性列表。
 
 
 
@@ -394,6 +396,7 @@ attrs 包含 要为每个子条目返回的属性列表。
 
 The ldap_modify() and ldap_modify_s() routines are used to modify an existing LDAP entry.
 ldap_modify()和ldap_modify_s()例程 用于修改现有的 LDAP条目。
+
 ```c
            typedef struct ldapmod {
                    int             mod_op;
@@ -460,7 +463,7 @@ For LDAP_MOD_ADD modifications, the given values are added to the entry, creatin
 
 ldap_modify_s() returns the LDAP error code  resulting  from the modify  operation.   This  code  can  be interpreted by ldap_perror() and friends.
 ldap_modify_s() 返回 由修改操作产生的 LDAP 错误代码。 
-这段代码可以被 ldap_perror()系列函数 解释。
+这段code可以被 ldap_perror()系列函数 解析。
 
 ldap_modify() returns the message id of the request it initiates, or -1 on error.  The result of the operation can be obtained by calling ldap_result().
 ldap_modify() 返回 它发起的请求的message-id，或 出错时返回-1。 
@@ -472,6 +475,7 @@ ldap_modify() 返回 它发起的请求的message-id，或 出错时返回-1。
 
 The ldap_modrdn() and ldap_modrdn_s() routines are used to change the name of an LDAP entry.
 ldap_modrdn()和ldap_modrdn_s()例程 用于更改 LDAP entry的name。
+
 ```c
            int ldap_modrdn(
                    LDAP    *ld,
@@ -498,7 +502,7 @@ ldap_modrdn()和ldap_modrdn_s()例程 用于更改 LDAP entry的name。
 
    newrdn        
         The new RDN to give the entry;
-        给entry的 新的RDN
+        给entry的 新RDN
 
    deleteoldrdn  
         A boolean value, if non-zero indicating that the old RDN value(s) should be removed, if zero indicating that the old RDN value(s) should be retained as non- distinguished values of the entry.
@@ -521,6 +525,7 @@ ldap_modrdn() 例程是异步的，返回 发起操作的message-id，如果出�
 
 ldap_add() and ldap_add_s() are used to add entries to the LDAP directory.
 ldap_add()和ldap_add_s() 用于向LDAP目录添加entry。
+
 ```c
            int ldap_add( LDAP *ld, char *dn, LDAPMod *attrs[] );
     
@@ -562,6 +567,7 @@ ldap_add() 是异步的，返回 发起操作的message-id，或 出错时返回
 
 ldap_delete() and ldap_delete_s() are used to delete entries from the LDAP directory.
 ldap_delete() 和 ldap_delete_s() 用于从 LDAP 目录中删除条目/entry。
+
 ```c
            int ldap_delete( LDAP *ld, char *dn );
     
@@ -591,11 +597,11 @@ ldap_delete() 是异步的，返回 发起操作的message-id，或 出错返回
 
 
 
-
 # 5.  Calls for abandoning an operation(放弃一个操作)
 
 ldap_abandon() is used to abandon an operation in progress.
 ldap_abandon() 用于放弃正在进行的操作。
+
 ```c
            int ldap_abandon( LDAP *ld, int msgid );
 ```
@@ -659,6 +665,7 @@ ldap_msgfree() 释放从先前调用 ldap_result() 或同步搜索例程中获�
 Upon successful completion, ldap_result() returns the type of the result returned in the res parameter. This will be one of the following constants.
 成功完成后，ldap_result()返回 res参数中返回的 结果的类型。
 这将是下列常数之一。
+
 ```c
              LDAP_RES_BIND              //Bind
              LDAP_RES_SEARCH_ENTRY      //search-entry
@@ -672,7 +679,6 @@ Upon successful completion, ldap_result() returns the type of the result returne
 ldap_result() returns 0 if the timeout expired and -1 if an error occurs, in which case the ld_errno field of the ld structure will be set accordingly.
 如果超时过期，ldap_result()返回0，
 如果发生错误，返回-1，在这种情况下，ld结构的ld_errno字段将被相应地设置。
-
 
 ldap_msgfree() frees the result structure pointed to be res and returns the type of the message it freed.
 ldap_msgfree()  释放被res指向的结果结构体 并返回它释放的消息的类型。
@@ -813,12 +819,12 @@ The following calls are used to parse the entries returned by ldap_search() and 
 这些条目在一个不透明的结构体中返回，并且 只能通过调用下面描述的例程来访问。
 提供了例程来 **逐步遍历返回的条目/entry、逐步遍历条目/entry的属性/attribute、检索条目的名称/name以及检索与条目中的给定属性相关联的值。**
 
-
 ## 8.1.  Stepping through a set of entries(遍历entry)
 
 The ldap_first_entry() and ldap_next_entry() routines are used to step through a set of entries in a search result. ldap_count_entries() is used to count the number of entries returned.
 ldap_first_entry()和ldap_next_entry()例程用于遍历搜索结果中的一组条目。
 ldap_count_entries()用于计算返回的条目数。
+
 ```c
            LDAPMesage *ldap_first_entry( LDAP *ld, LDAPMessage *res );
     
@@ -846,7 +852,6 @@ ldap_first_entry() and ldap_next_entry() will return NULL when no more entries e
 当不存在需要返回的条目时，ldap_first_entry()和ldap_next_entry()将返回NULL。
 如果在遍历条目时发生错误，也会返回NULL，在这种情况下，为指示错误，ld连接句柄的ld_errno字段将被设置。
 
-
 ldap_count_entries() returns the number of entries contained in a chain of entries. It can also be used to count the number of entries that remain in a chain if called with an entry returned by ldap_first_entry() or ldap_next_entry().
 ldap_count_entries()返回条目链中包含的条目数。
 如果使用ldap_first_entry()或ldap_next_entry()返回的条目/entry调用ldap_count_entries()，它还可以用来计算链中保留的条目的数量。
@@ -859,6 +864,7 @@ ldap_count_entries()返回条目链中包含的条目数。
 
 The ldap_first_attribute() and ldap_next_attribute() calls are used to step through the list of attribute types returned with an entry.
 ldap_first_attribute()和ldap_next_attribute()调用 用于遍历 随条目返回的属性类型/attribute-type列表。
+
 ```c
            char *ldap_first_attribute(
                    LDAP            *ld,
@@ -902,7 +908,6 @@ ldap_first_attribute()将分配并在ptr中返回一个指向BerElement的指针
 
 The attribute names returned are suitable for passing in a call to ldap_get_values() and friends to retrieve the associated values.
 返回的属性名/attribute-name 适合传递给ldap_get_values()系列调用，以检索相关的值。
-
 
 
 
@@ -1016,7 +1021,6 @@ ldap_explode_dn()返回一个char *数组，该数组包含所提供DN的RDN组�
 ldap_dn2ufn() converts the DN into the user friendly format described in [5]. The UFN returned is malloc'ed space that should be freed by a call to free() when no longer in use.
 ldap_dn2ufn()将DN转换为[5]中描述的用户友好格式。
 返回的UFN是malloc的空间，当不再使用时，应该通过调用free()释放该空间。
-
 
 # 9.  Security Considerations
 
