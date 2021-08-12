@@ -125,7 +125,7 @@ Table of Contents
 # 1.  Introduction(介绍)
 
 Each attribute stored in a Lightweight Directory Access Protocol (LDAP) directory [RFC4510], whose values may be transferred in the LDAP protocol [RFC4511], has a defined syntax (i.e., data type) that constrains the structure and format of its values.  The comparison semantics for values of a syntax are not part of the syntax definition but are instead provided through separately defined matching rules.  Matching rules specify an argument, an assertion value, which also has a defined syntax.  This document defines a base set of syntaxes and matching rules for use in defining attributes for LDAP directories.
-存储在LDAP目录 [RFC4510] 中的每个attribute，其value可以在 LDAP 协议 [RFC4511] 中传输，都具有定义好的语法(即，数据类型)来约束其 值/value 的结构/structure和格式/format。
+存储在LDAP目录 [RFC4510] 中的每个attribute，其value可以在 LDAP协议 [RFC4511] 中传输，都具有定义好的语法(即，数据类型)来约束其 值/value 的结构/structure和格式/format。
 值的比较语义语法 不是语法定义的一部分，而是通过单独定义的匹配规则提供的。
 匹配规则指定一个参数，一个断言值，它也有一个定义好的语法。
 本文档定义了一组基本的语法和匹配规则，用于定义 LDAP目录的attribute。
@@ -174,10 +174,10 @@ Syntax definitions constrain the structure of attribute values stored in an LDAP
 语法定义约束存储在 LDAP 目录中的属性值的结构，并确定在 LDAP 协议中传输的属性和断言值的表示。
 
 Syntaxes that are required for directory operation, or that are in common use, are specified in this section.  Servers SHOULD recognize all the syntaxes listed in this document, but are not required to otherwise support them, and MAY recognise or support other syntaxes. However, the definition of additional arbitrary syntaxes is discouraged since it will hinder interoperability.  Client and server implementations typically do not have the ability to dynamically recognize new syntaxes.
-本节指定了目录操作所需的或常用的语法。 
-服务器应该识别本文档中列出的所有语法，但不需要以其他方式支持它们，并且可以识别或支持其他语法。 
+本节指定了 目录操作  所需的或常用的语法。 
+服务器 应该识别本文档中列出的所有语法，但不需要以其他方式支持它们，并且可以识别或支持其他语法。 
 但是，不鼓励定义额外的任意语法，因为它会妨碍互操作性。 
-客户端和服务器实现通常没有动态识别新语法的能力。
+客户端和服务器实现 通常没有动态识别新语法的能力。
 
 
 
@@ -189,7 +189,7 @@ The description of each syntax specifies how attribute or assertion values confo
 这种表示被称为 LDAP特定编码，以区别于其他编码属性值的方法（例如，X.500 [X.500] 目录使用的基本编码规则 (BER) 编码 [BER]）。
 
 The LDAP-specific encoding of a given attribute syntax always produces octet-aligned values.  To the greatest extent possible, encoding rules for LDAP syntaxes should produce character strings that can be displayed with little or no translation by clients implementing LDAP.  However, clients MUST NOT assume that the LDAP-specific encoding of a value of an unrecognized syntax is a human-readable character string.  There are a few cases (e.g., the JPEG syntax) when it is not reasonable to produce a human-readable representation.
-给定属性语法的 LDAP特定编码 始终生成 八位字节对齐的值。
+给定属性语法的 <font color=red>LDAP特定编码 始终生成 八位字节对齐的值。</font>
 在最大程度上，LDAP语法的编码规则 应该生成字符串 (可以由 实现LDAP的客户端 在很少或无需翻译的情况下 显示这些字符串。)
 但是，客户端不能假设 一个无法识别的语法的值的LDAP特定编码 是人类可读的字符串。
 在某些情况下（例如，JPEG语法）生成人类可读的表示是不合理的。
@@ -200,167 +200,161 @@ Each LDAP syntax is uniquely identified with an object identifier [ASN.1] repres
 本文档中定义的 语法的对象标识符/OID  在附录 A 中进行了总结。
 
 A suggested minimum upper bound on the number of characters in an attribute value with a string-based syntax, or the number of octets in a value for all other syntaxes, MAY be indicated by appending the bound inside of curly braces following the syntax's OBJECT IDENTIFIER in an attribute type definition (see the <noidlen> rule in [RFC4512]).  Such a bound is not considered part of the syntax identifier.
-建议 基于字符串的 语法的属性值中 字符个数的最小上限，或 所有其他语法的值中的八位字节个数，可以通过在语法的 OBJECT IDENTIFIER 后面附加大括号内的边界来表示在属性类型定义中（参见 [RFC4512] 中的 <noidlen> 规则）。
-这样的界限不被视为语法标识符的一部分。
+<font color=red>可以通过 在语法的OBJECT IDENTIFIER后面 附加大括号(如 {number} )（参见 [RFC4512] 中的 <noidlen> 规则），</font>
+   <font color=red>来建议 基于字符串的 语法的属性值中 字符个数的最小上限，或 所有其他语法的值中的八位字节个数。</font>
+   这样的界限不被视为语法标识符的一部分。
 
 For example, "1.3.6.1.4.1.1466.115.121.1.15{64}" in an attribute definition suggests that the directory server will allow a value of the attribute to be up to 64 characters long, although it may allow longer character strings.  Note that a single character of the Directory String syntax can be encoded in more than one octet, since UTF-8 [RFC3629] is a variable-length encoding.  Therefore, a 64- character string may be more than 64 octets in length.
-例如，属性定义中的“1.3.6.1.4.1.1466.115.121.1.15{64}”表明目录服务器将允许属性值最长为 64 个字符，尽管它可能允许更长的字符串。
-请注意，目录字符串语法的单个字符可以用多个八位字节进行编码，因为 UTF-8 [RFC3629] 是一种可变长度编码。
-因此，一个 64 个字符的字符串的长度可能超过 64 个八位字节。
+<font color=red>例如，属性定义中的"1.3.6.1.4.1.1466.115.121.1.15{64}"表明目录服务器将允许属性值最长为 64 个字符，尽管它可能允许更长的字符串。</font>
+请注意，目录字符串语法的  <font color=red>单个字符可以用多个八位字节进行编码，因为 UTF-8[RFC3629] 是一种可变长度编码。</font>
+因此，一个64个字符的字符串的长度可能超过 64 个八位字节。
 
 
 
 
 ## 3.2.  Common Definitions
 
-   The following ABNF rules are used in a number of the syntax
-   definitions in Section 3.3.
+The following ABNF rules are used in a number of the syntax definitions in Section 3.3.
+下面的ABNF规则 在3.3节的许多语法定义中使用。
 
-      PrintableCharacter = ALPHA / DIGIT / SQUOTE / LPAREN / RPAREN /
-                           PLUS / COMMA / HYPHEN / DOT / EQUALS /
-
-
-
-Legg                        Standards Track                     [Page 5]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
-
-
-                           SLASH / COLON / QUESTION / SPACE
-      PrintableString    = 1*PrintableCharacter
+```ABNF
+      PrintableCharacter = ALPHA(a-zA-z) / DIGIT(0-9) / SQUOTE(') / LPAREN( ( ) / RPAREN( ) ) /   ;可打印的-字符
+                           PLUS(+) / COMMA(,) / HYPHEN(-) / DOT(.) / EQUALS(=) /
+                           SLASH("/") / COLON(没找到) / QUESTION(没找到，推测是"?") / SPACE(" ")
+      PrintableString    = 1*PrintableCharacter                         ;可打印的-字符串
       IA5String          = *(%x00-7F)
       SLASH              = %x2F  ; forward slash ("/")
       COLON              = %x3A  ; colon (":")
       QUESTION           = %x3F  ; question mark ("?")
+```
+The <ALPHA>, <DIGIT>, <SQUOTE>, <LPAREN>, <RPAREN>, <PLUS>, <COMMA>, <HYPHEN>, <DOT>, <EQUALS>, and <SPACE> rules are defined in [RFC4512].
+这些rule/规则，在[RFC4512]中定义
+## 3.3.  Syntax Definitions(语法定义)
 
-   The <ALPHA>, <DIGIT>, <SQUOTE>, <LPAREN>, <RPAREN>, <PLUS>, <COMMA>,
-   <HYPHEN>, <DOT>, <EQUALS>, and <SPACE> rules are defined in
-   [RFC4512].
+### 3.3.1.  Attribute Type Description
 
-3.3.  Syntax Definitions
+A value of the Attribute Type Description syntax is the definition of an attribute type.  The LDAP-specific encoding of a value of this syntax is defined by the <AttributeTypeDescription> rule in [RFC4512].
+属性类型描述语法的值 是属性类型的定义。( Attribute Type Description syntax的value,是attribute type的定义。)
+该语法中值的LDAP特定编码 由[RFC4512]中的规则定义。
 
-3.3.1.  Attribute Type Description
-
-   A value of the Attribute Type Description syntax is the definition of
-   an attribute type.  The LDAP-specific encoding of a value of this
-   syntax is defined by the <AttributeTypeDescription> rule in
-   [RFC4512].
-
-      For example, the following definition of the createTimestamp
-      attribute type from [RFC4512] is also a value of the Attribute
-      Type Description syntax.  (Note: Line breaks have been added for
-      readability; they are not part of the value when transferred in
-      protocol.)
-    
+For example, the following definition of the createTimestamp attribute type from [RFC4512] is also a value of the Attribute Type Description syntax.  (Note: Line breaks have been added for readability; they are not part of the value when transferred in protocol.)
+例如，[RFC4512] 中 attribute-type:createTimestamp的以下定义,也是 Attribute Type Description 语法的值。 
+（注意：为了可读性添加了换行符；在协议中传输时，它们不是值的一部分。）
+```ASN.1    
          ( 2.5.18.1 NAME 'createTimestamp'
             EQUALITY generalizedTimeMatch
             ORDERING generalizedTimeOrderingMatch
             SYNTAX 1.3.6.1.4.1.1466.115.121.1.24
             SINGLE-VALUE NO-USER-MODIFICATION
             USAGE directoryOperation )
+```
 
-   The LDAP definition for the Attribute Type Description syntax is:
-
+The LDAP definition for the Attribute Type Description syntax is:
+Attribute Type Description syntax的LDAP定义。
+```ASN.1
       ( 1.3.6.1.4.1.1466.115.121.1.3 DESC 'Attribute Type Description' )
-
-   This syntax corresponds to the AttributeTypeDescription ASN.1 type
-   from [X.501].
-
-3.3.2.  Bit String
-
-   A value of the Bit String syntax is a sequence of binary digits.  The
-   LDAP-specific encoding of a value of this syntax is defined by the
-   following ABNF:
-
-      BitString    = SQUOTE *binary-digit SQUOTE "B"
-      binary-digit = "0" / "1"
+```
+This syntax corresponds to the AttributeTypeDescription ASN.1 type from [X.501].
+该语法，对应于[X.501]中的AttributeTypeDescription ASN.1类型。
 
 
 
-Legg                        Standards Track                     [Page 6]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
+### 3.3.2.  Bit String(Bit流)
 
-
-   The <SQUOTE> rule is defined in [RFC4512].
-
+A value of the Bit String syntax is a sequence of binary digits.  The LDAP-specific encoding of a value of this syntax is defined by the following ABNF:
+Bit String语法的值, 是一个二进制数字序列。
+该语法的值的LDAP特定编码由以下ABNF定义:
+```ABNF
+      BitString    = SQUOTE *binary-digit SQUOTE "B"     ; '二进制数字序列' + "B"
+      binary-digit = "0" / "1"                           ; 二进制数字是 0或1
+```
+The <SQUOTE> rule is defined in [RFC4512].
+```
       Example:
          '0101111101'B
+```
 
-   The LDAP definition for the Bit String syntax is:
-
+The LDAP definition for the Bit String syntax is:
+Bit String语法的LDAP定义是：
+```
       ( 1.3.6.1.4.1.1466.115.121.1.6 DESC 'Bit String' )
+```
+This syntax corresponds to the BIT STRING ASN.1 type from [ASN.1].
+该语法，对应于[ASN.1]中的BIT STRING ASN.1类型。
 
-   This syntax corresponds to the BIT STRING ASN.1 type from [ASN.1].
 
-3.3.3.  Boolean
-
-   A value of the Boolean syntax is one of the Boolean values, true or
-   false.  The LDAP-specific encoding of a value of this syntax is
-   defined by the following ABNF:
-
+### 3.3.3.  Boolean(布尔)
+A value of the Boolean syntax is one of the Boolean values, true or false.  The LDAP-specific encoding of a value of this syntax is defined by the following ABNF:
+```ABNF
       Boolean = "TRUE" / "FALSE"
-
-   The LDAP definition for the Boolean syntax is:
-
+```
+The LDAP definition for the Boolean syntax is:
+Boolean语法的LDAP定义是：
+```
       ( 1.3.6.1.4.1.1466.115.121.1.7 DESC 'Boolean' )
+```
+This syntax corresponds to the BOOLEAN ASN.1 type from [ASN.1].
+该语法, 对应于[ASN.1]中的BIT STRING ASN.1类型。
 
-   This syntax corresponds to the BOOLEAN ASN.1 type from [ASN.1].
 
-3.3.4.  Country String
+### 3.3.4.  Country String
 
-   A value of the Country String syntax is one of the two-character
-   codes from ISO 3166 [ISO3166] for representing a country.  The LDAP-
-   specific encoding of a value of this syntax is defined by the
-   following ABNF:
-
-      CountryString  = 2(PrintableCharacter)
-
-   The <PrintableCharacter> rule is defined in Section 3.2.
-
+A value of the Country String syntax is one of the two-character codes from ISO 3166 [ISO3166] for representing a country.  The LDAP- specific encoding of a value of this syntax is defined by the following ABNF:
+Country String语法的值，是来自ISO 3166 [ISO3166]的 两个字符码 之一，用于表示一个国家。
+该语法，值的LDAP特定编码由以下ABNF定义：
+```ABNF
+      CountryString  = 2(PrintableCharacter)    ;两个可打印字符
+```
+The <PrintableCharacter> rule is defined in Section 3.2.
+可打印字符的rule，被定义在3.2节。
+```
       Examples:
-    
          US
          AU
-
-   The LDAP definition for the Country String syntax is:
-
+```
+The LDAP definition for the Country String syntax is:
+Country String语法的LDAP定义：
+```
       ( 1.3.6.1.4.1.1466.115.121.1.11 DESC 'Country String' )
-
-   This syntax corresponds to the following ASN.1 type from [X.520]:
-
+```
+This syntax corresponds to the following ASN.1 type from [X.520]:
+该语法，对应于[X.520]中的以下ASN.1类型:
+```ASN.1
       PrintableString (SIZE (2)) -- ISO 3166 codes only
+```
 
 
 
-Legg                        Standards Track                     [Page 7]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
+### 3.3.5.  Delivery Method(交付方式)
 
-
-3.3.5.  Delivery Method
-
-   A value of the Delivery Method syntax is a sequence of items that
-   indicate, in preference order, the service(s) by which an entity is
-   willing and/or capable of receiving messages.  The LDAP-specific
-   encoding of a value of this syntax is defined by the following ABNF:
-
-      DeliveryMethod = pdm *( WSP DOLLAR WSP pdm )
+A value of the Delivery Method syntax is a sequence of items that indicate, in preference order, the service(s) by which an entity is willing and/or capable of receiving messages.  The LDAP-specific encoding of a value of this syntax is defined by the following ABNF:
+Delivery Method语法的值，是一个item组成的序列，这些item按照优先顺序 指示实体 愿意或能够 接收信息的服务。
+该语法，值的LDAP特定编码由以下ABNF定义：
+```ABNF
+      DeliveryMethod = pdm *( WSP DOLLAR WSP pdm )  
     
       pdm = "any" / "mhs" / "physical" / "telex" / "teletex" /
             "g3fax" / "g4fax" / "ia5" / "videotex" / "telephone"
+      
+      WSP = 空格或Tab
+      DOLLAR = "$"
+```
 
-   The <WSP> and <DOLLAR> rules are defined in [RFC4512].
-
+The <WSP> and <DOLLAR> rules are defined in [RFC4512].
+```
       Example:
          telephone $ videotex
+```
 
-   The LDAP definition for the Delivery Method syntax is:
-
+The LDAP definition for the Delivery Method syntax is:
+Delivery Method语法的 LDAP定义：
+```
       ( 1.3.6.1.4.1.1466.115.121.1.14 DESC 'Delivery Method' )
+```
 
-   This syntax corresponds to the following ASN.1 type from [X.520]:
-
+This syntax corresponds to the following ASN.1 type from [X.520]:
+该语法，对应于[X.520]中的以下ASN.1类型:
+```ASN.1 
       SEQUENCE OF INTEGER {
           any-delivery-method     (0),
           mhs-delivery            (1),
@@ -372,117 +366,110 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
           ia5-terminal-delivery   (7),
           videotex-delivery       (8),
           telephone-delivery      (9) }
-
-3.3.6.  Directory String
-
-   A value of the Directory String syntax is a string of one or more
-   arbitrary characters from the Universal Character Set (UCS) [UCS].  A
-   zero-length character string is not permitted.  The LDAP-specific
-   encoding of a value of this syntax is the UTF-8 encoding [RFC3629] of
-   the character string.  Such encodings conform to the following ABNF:
-
-      DirectoryString = 1*UTF8
-
-   The <UTF8> rule is defined in [RFC4512].
+```
 
 
 
+### 3.3.6.  Directory String(目录-字符串)
 
-
-Legg                        Standards Track                     [Page 8]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
-
-
+A value of the Directory String syntax is a string of one or more arbitrary characters from the Universal Character Set (UCS) [UCS].  A zero-length character string is not permitted.  The LDAP-specific encoding of a value of this syntax is the UTF-8 encoding [RFC3629] of the character string.  Such encodings conform to the following ABNF:
+Directory String语法的值，是 由通用字符集(UCS)[UCS]的一个或多个任意字符 组成的字符串。
+不允许使用0长度字符串。
+此语法 值的 LDAP特定编码 是字符串的UTF-8编码[RFC3629]。
+此类编码符合以下ABNF：
+```ABNF
+      DirectoryString = 1*UTF8   ;一个或多个UTF8编码字符
+```
+The <UTF8> rule is defined in [RFC4512].
+<UTF8>规则，被定义在[RFC4512].
+```
       Example:
          This is a value of Directory String containing #!%#@.
+         这是一个目录字符串的值：#!%#@.
+```
+Servers and clients MUST be prepared to receive arbitrary UCS code points, including code points outside the range of printable ASCII and code points not presently assigned to any character.
+服务器和客户端必须准备好接收任意的[UCS]码点，
+包括可打印ASCII范围之外的码点，
+以及目前未分配给任何字符的码点。
 
-   Servers and clients MUST be prepared to receive arbitrary UCS code
-   points, including code points outside the range of printable ASCII
-   and code points not presently assigned to any character.
+Attribute type definitions using the Directory String syntax should not restrict the format of Directory String values, e.g., by requiring that the character string conforms to specific patterns described by ABNF.  A new syntax should be defined in such cases.
+使用Directory String语法的Attribute type定义 不应该限制Directory String值的格式，
+例如，要求字符串符合ABNF描述的特定模式。
+在这种情况下，应该定义新的语法。
 
-   Attribute type definitions using the Directory String syntax should
-   not restrict the format of Directory String values, e.g., by
-   requiring that the character string conforms to specific patterns
-   described by ABNF.  A new syntax should be defined in such cases.
-
-   The LDAP definition for the Directory String syntax is:
-
+The LDAP definition for the Directory String syntax is:
+Directory String语法的 LDAP定义：
+```
       ( 1.3.6.1.4.1.1466.115.121.1.15 DESC 'Directory String' )
+```
+This syntax corresponds to the DirectoryString parameterized ASN.1 type from [X.520].
+该语法，对应于[X.520]中的 DirectoryString 参数化 ASN.1 类型。
 
-   This syntax corresponds to the DirectoryString parameterized ASN.1
-   type from [X.520].
+The DirectoryString ASN.1 type allows a choice between the TeletexString, PrintableString, or UniversalString ASN.1 types from [ASN.1].  However, note that the chosen alternative is not indicated in the LDAP-specific encoding of a Directory String value.
+DirectoryString ASN.1类型 允许在[ASN.1]中的TeletexString、PrintableString或UniversalString ASN.1类型之间进行选择。
+但是，请注意，在 Directory String值的LDAP特定编码中 没有指示/指明所选的替代方案。
 
-   The DirectoryString ASN.1 type allows a choice between the
-   TeletexString, PrintableString, or UniversalString ASN.1 types from
-   [ASN.1].  However, note that the chosen alternative is not indicated
-   in the LDAP-specific encoding of a Directory String value.
+Implementations that convert Directory String values from the LDAP-specific encoding to the BER encoding used by X.500 must choose an alternative that permits the particular characters in the string and must convert the characters from the UTF-8 encoding into the character encoding of the chosen alternative.  When converting Directory String values from the BER encoding to the LDAP-specific encoding, the characters must be converted from the character encoding of the chosen alternative into the UTF-8 encoding.  These conversions SHOULD be done in a manner consistent with the Transcode step of the string preparation algorithms [RFC4518] for LDAP.
+将 Directory String的值 从LDAP特定编码 转换为 X.500使用的BER编码 的实现，
+      必须选择一个替代方案 以允许字符串中的特定字符，
+      并且 必须 将字符 从UTF-8编码 转换为 所选替代方案的字符编码。
+当 将Directory String的值 从BER编码 转换为 LDAP特定编码时，
+   必须 将字符 从所选替代方案的字符编码 转换为 UTF-8编码。
+这些转换 应该 以与 LDAP的字符串准备算法[RFC4518] 的转码步骤一致的方式完成。
 
-   Implementations that convert Directory String values from the LDAP-
-   specific encoding to the BER encoding used by X.500 must choose an
-   alternative that permits the particular characters in the string and
-   must convert the characters from the UTF-8 encoding into the
-   character encoding of the chosen alternative.  When converting
-   Directory String values from the BER encoding to the LDAP-specific
-   encoding, the characters must be converted from the character
-   encoding of the chosen alternative into the UTF-8 encoding.  These
-   conversions SHOULD be done in a manner consistent with the Transcode
-   step of the string preparation algorithms [RFC4518] for LDAP.
 
-3.3.7.  DIT Content Rule Description
 
-   A value of the DIT Content Rule Description syntax is the definition
-   of a DIT (Directory Information Tree) content rule.  The LDAP-
-   specific encoding of a value of this syntax is defined by the
-   <DITContentRuleDescription> rule in [RFC4512].
+### 3.3.7.  DIT Content Rule Description
 
+A value of the DIT Content Rule Description syntax is the definition of a DIT (Directory Information Tree) content rule.  The LDAP-specific encoding of a value of this syntax is defined by the <DITContentRuleDescription> rule in [RFC4512].
+DIT Content Rule Description语法的值是 DIT(Directory Information Tree)content rule的定义。
+此语法 值的 LDAP特定编码由[RFC4512]中的 <DITContentRuleDescription>规则定义。
+```
       Example:
          ( 2.5.6.4 DESC 'content rule for organization'
             NOT ( x121Address $ telexNumber ) )
-    
-      Note: A line break has been added for readability; it is not part
-      of the value.
+```  
+Note: A line break has been added for readability; it is not part of the value.
+注意：为了可读性，添加了换行符；它不是值的一部分。
 
-
-
-Legg                        Standards Track                     [Page 9]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
-
-
-   The LDAP definition for the DIT Content Rule Description syntax is:
-
+The LDAP definition for the DIT Content Rule Description syntax is:
+DIT Content Rule Description 语法的 LDAP定义是：
+```
       ( 1.3.6.1.4.1.1466.115.121.1.16
          DESC 'DIT Content Rule Description' )
+```
+This syntax corresponds to the DITContentRuleDescription ASN.1 type from [X.501].
+此语法，对应于 [X.501]中的DITContentRuleDescription ASN.1 类型。
 
-   This syntax corresponds to the DITContentRuleDescription ASN.1 type
-   from [X.501].
 
-3.3.8.  DIT Structure Rule Description
 
-   A value of the DIT Structure Rule Description syntax is the
-   definition of a DIT structure rule.  The LDAP-specific encoding of a
-   value of this syntax is defined by the <DITStructureRuleDescription>
-   rule in [RFC4512].
+### 3.3.8.  DIT Structure Rule Description
 
+A value of the DIT Structure Rule Description syntax is the definition of a DIT structure rule.  The LDAP-specific encoding of a value of this syntax is defined by the <DITStructureRuleDescription> rule in [RFC4512].
+DIT Structure Rule Description语法的值，是DIT structure rule的定义。
+该语法，值的 LDAP特定编码 由 [RFC4512]中的<DITStructureRuleDescription>规则定义。
+```
       Example:
          ( 2 DESC 'organization structure rule' FORM 2.5.15.3 )
-
-   The LDAP definition for the DIT Structure Rule Description syntax is:
-
+```
+The LDAP definition for the DIT Structure Rule Description syntax is:
+DIT Structure Rule Description语法的 LDAP定义是：
+```
       ( 1.3.6.1.4.1.1466.115.121.1.17
          DESC 'DIT Structure Rule Description' )
+```
+This syntax corresponds to the DITStructureRuleDescription ASN.1 type from [X.501].
+此语法，对应于 [X.501]中的DITStructureRuleDescription ASN.1类型。
 
-   This syntax corresponds to the DITStructureRuleDescription ASN.1 type
-   from [X.501].
 
-3.3.9.  DN
 
-   A value of the DN syntax is the (purported) distinguished name (DN)
-   of an entry [RFC4512].  The LDAP-specific encoding of a value of this
-   syntax is defined by the <distinguishedName> rule from the string
-   representation of distinguished names [RFC4514].
+### 3.3.9.  DN
 
+A value of the DN syntax is the (purported) distinguished name (DN) of an entry [RFC4512].  The LDAP-specific encoding of a value of this syntax is defined by the <distinguishedName> rule from the string representation of distinguished names [RFC4514].
+DN 语法的值 是条目[RFC4512]的（声称的）专有名称(DN)。
+此语法，值的 LDAP特定编码 由 来自 可分辨名称[RFC4514]的字符串表示的<distinguishedName>规则定义。
+
+```
       Examples (from [RFC4514]):
          UID=jsmith,DC=example,DC=net
          OU=Sales+CN=J. Smith,DC=example,DC=net
@@ -490,38 +477,28 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
          CN=Before\0dAfter,DC=example,DC=net
          1.3.6.1.4.1.1466.0=#04024869,DC=example,DC=com
          CN=Lu\C4\8Di\C4\87
-
-   The LDAP definition for the DN syntax is:
-
+```
+The LDAP definition for the DN syntax is:
+DN 语法的 LDAP定义是：
+```
       ( 1.3.6.1.4.1.1466.115.121.1.12 DESC 'DN' )
-
-   The DN syntax corresponds to the DistinguishedName ASN.1 type from
-   [X.501].  Note that a BER encoded distinguished name (as used by
-   X.500) re-encoded into the LDAP-specific encoding is not necessarily
-
-
-
-Legg                        Standards Track                    [Page 10]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
+```
+The DN syntax corresponds to the DistinguishedName ASN.1 type from [X.501].  Note that a BER encoded distinguished name (as used by X.500) re-encoded into the LDAP-specific encoding is not necessarily reversible to the original BER encoding since the chosen string type in any DirectoryString components of the distinguished name is not indicated in the LDAP-specific encoding of the distinguished name (see Section 3.3.6).
+DN 语法对应于 [X.501] 中的 DistinguishedName ASN.1 类型。
+请注意，BER编码DN（如X.500所用） 重新编码为 LDAP特定编码 不一定可逆为原始BER编码，
+因为在DN的任何 DirectoryString组件中选择的字符串类型 并不表示 DN的LDAP特定编码（请参阅第 3.3.6 节）。
 
 
-   reversible to the original BER encoding since the chosen string type
-   in any DirectoryString components of the distinguished name is not
-   indicated in the LDAP-specific encoding of the distinguished name
-   (see Section 3.3.6).
 
-3.3.10.  Enhanced Guide
+### 3.3.10.  Enhanced Guide(增强型指南)
 
-   A value of the Enhanced Guide syntax suggests criteria, which consist
-   of combinations of attribute types and filter operators, to be used
-   in constructing filters to search for entries of particular object
-   classes.  The Enhanced Guide syntax improves upon the Guide syntax by
-   allowing the recommended depth of the search to be specified.
+A value of the Enhanced Guide syntax suggests criteria, which consist of combinations of attribute types and filter operators, to be used in constructing filters to search for entries of particular object classes.  The Enhanced Guide syntax improves upon the Guide syntax by allowing the recommended depth of the search to be specified.
+Enhanced Guide语法的值 建议了标准，其中包含 属性类型和过滤器运算符的组合，用于构建过滤器 以搜索特定对象类的条目。
+Enhanced Guide语法改进了Guide语法，允许指定 搜索深度。
 
-   The LDAP-specific encoding of a value of this syntax is defined by
-   the following ABNF:
-
+The LDAP-specific encoding of a value of this syntax is defined by the following ABNF:
+此语法 值的 LDAP特定编码由以下ABNF定义：
+```ABNF
       EnhancedGuide = object-class SHARP WSP criteria WSP
                          SHARP WSP subset
       object-class  = WSP oid WSP
@@ -540,39 +517,23 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
       BAR        = %x7C  ; vertical bar ("|")
       AMPERSAND  = %x26  ; ampersand ("&")
       EXCLAIM    = %x21  ; exclamation mark ("!")
-
+```
    The <SHARP>, <WSP>, <oid>, <LPAREN>, <RPAREN>, <attributetype>, and
    <DOLLAR> rules are defined in [RFC4512].
 
    The LDAP definition for the Enhanced Guide syntax is:
-
+```
       ( 1.3.6.1.4.1.1466.115.121.1.21 DESC 'Enhanced Guide' )
-    
+
       Example:
          person#(sn$EQ)#oneLevel
+```
+The Enhanced Guide syntax corresponds to the EnhancedGuide ASN.1 type from [X.520].  The EnhancedGuide type references the Criteria ASN.1 type, also from [X.520].  The <true> rule, above, represents an empty "and" expression in a value of the Criteria type.  The <false> rule, above, represents an empty "or" expression in a value of the Criteria type.
 
-   The Enhanced Guide syntax corresponds to the EnhancedGuide ASN.1 type
-   from [X.520].  The EnhancedGuide type references the Criteria ASN.1
-   type, also from [X.520].  The <true> rule, above, represents an empty
+### 3.3.11.  Facsimile Telephone Number
 
-
-
-Legg                        Standards Track                    [Page 11]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
-
-
-   "and" expression in a value of the Criteria type.  The <false> rule,
-   above, represents an empty "or" expression in a value of the Criteria
-   type.
-
-3.3.11.  Facsimile Telephone Number
-
-   A value of the Facsimile Telephone Number syntax is a subscriber
-   number of a facsimile device on the public switched telephone
-   network.  The LDAP-specific encoding of a value of this syntax is
-   defined by the following ABNF:
-
+A value of the Facsimile Telephone Number syntax is a subscriber number of a facsimile device on the public switched telephone network.  The LDAP-specific encoding of a value of this syntax is defined by the following ABNF:
+```ABNF
       fax-number       = telephone-number *( DOLLAR fax-parameter )
       telephone-number = PrintableString
       fax-parameter    = "twoDimensional" /
@@ -582,21 +543,19 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
                          "a3Width" /
                          "b4Width" /
                          "uncompressed"
+```
+The <telephone-number> is a string of printable characters that complies with the internationally agreed format for representing international telephone numbers [E.123].  The <PrintableString> rule is defined in Section 3.2.  The <DOLLAR> rule is defined in [RFC4512].
 
-   The <telephone-number> is a string of printable characters that
-   complies with the internationally agreed format for representing
-   international telephone numbers [E.123].  The <PrintableString> rule
-   is defined in Section 3.2.  The <DOLLAR> rule is defined in
-   [RFC4512].
-
-   The LDAP definition for the Facsimile Telephone Number syntax is:
-
+The LDAP definition for the Facsimile Telephone Number syntax is:
+```
       ( 1.3.6.1.4.1.1466.115.121.1.22 DESC 'Facsimile Telephone Number')
+```
+The Facsimile Telephone Number syntax corresponds to the FacsimileTelephoneNumber ASN.1 type from [X.520].
 
-   The Facsimile Telephone Number syntax corresponds to the
-   FacsimileTelephoneNumber ASN.1 type from [X.520].
 
-3.3.12.  Fax
+
+
+### 3.3.12.  Fax
 
    A value of the Fax syntax is an image that is produced using the
    Group 3 facsimile process [FAX] to duplicate an object, such as a
