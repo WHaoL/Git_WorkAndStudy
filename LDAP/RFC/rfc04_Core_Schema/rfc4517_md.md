@@ -11,8 +11,7 @@ Updates: 3698
 Category: Standards Track
 
 
-             Lightweight Directory Access Protocol (LDAP):
-                      Syntaxes and Matching Rules
+# Lightweight Directory Access Protocol (LDAP): Syntaxes and Matching Rules
 
 
 Status of This Memo
@@ -27,18 +26,16 @@ Copyright Notice
 
    Copyright (C) The Internet Society (2006).
 
-Abstract
+## Abstract(摘要)
 
-   Each attribute stored in a Lightweight Directory Access Protocol
-   (LDAP) directory, whose values may be transferred in the LDAP
-   protocol, has a defined syntax that constrains the structure and
-   format of its values.  The comparison semantics for values of a
-   syntax are not part of the syntax definition but are instead provided
-   through separately defined matching rules.  Matching rules specify an
-   argument, an assertion value, which also has a defined syntax.  This
-   document defines a base set of syntaxes and matching rules for use in
-   defining attributes for LDAP directories.
+Each attribute stored in a Lightweight Directory Access Protocol (LDAP) directory, whose values may be transferred in the LDAP protocol, has a defined syntax that constrains the structure and format of its values.  The comparison semantics for values of a syntax are not part of the syntax definition but are instead provided through separately defined matching rules.  Matching rules specify an argument, an assertion value, which also has a defined syntax.  This document defines a base set of syntaxes and matching rules for use in defining attributes for LDAP directories.
+存储在LDAP目录中的每个attribute（其value可以在 LDAP 协议中传输）都有一个定义好的语法来约束其值/value的结构/structure和格式/format。 
+值的比较语义语法 不是语法定义的一部分，而是通过单独定义的匹配规则/match-rule提供的。 
+匹配规则 指定一个参数，一个断言值，它也有一个定义好的语法。 
+本文档定义了一组基本的语法和匹配规则，用于定义 LDAP目录的属性。
 
+
+```bash
 Table of Contents
 
    1. Introduction ....................................................3
@@ -52,14 +49,6 @@ Table of Contents
            3.3.3. Boolean .............................................7
            3.3.4. Country String ......................................7
            3.3.5. Delivery Method .....................................8
-
-
-
-Legg                        Standards Track                     [Page 1]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
-
-
            3.3.6. Directory String ....................................8
            3.3.7. DIT Content Rule Description ........................9
            3.3.8. DIT Structure Rule Description .....................10
@@ -108,14 +97,6 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
            4.2.14. directoryStringFirstComponentMatch ................34
            4.2.15. distinguishedNameMatch ............................35
            4.2.16. generalizedTimeMatch ..............................36
-
-
-
-Legg                        Standards Track                     [Page 2]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
-
-
            4.2.17. generalizedTimeOrderingMatch ......................36
            4.2.18. integerFirstComponentMatch ........................36
            4.2.19. integerMatch ......................................37
@@ -140,136 +121,97 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
       8.2. Informative References ....................................48
    Appendix A. Summary of Syntax Object Identifiers ..................49
    Appendix B. Changes from RFC 2252 .................................49
+```
+# 1.  Introduction(介绍)
 
-1.  Introduction
+Each attribute stored in a Lightweight Directory Access Protocol (LDAP) directory [RFC4510], whose values may be transferred in the LDAP protocol [RFC4511], has a defined syntax (i.e., data type) that constrains the structure and format of its values.  The comparison semantics for values of a syntax are not part of the syntax definition but are instead provided through separately defined matching rules.  Matching rules specify an argument, an assertion value, which also has a defined syntax.  This document defines a base set of syntaxes and matching rules for use in defining attributes for LDAP directories.
+存储在LDAP目录 [RFC4510] 中的每个attribute，其value可以在 LDAP 协议 [RFC4511] 中传输，都具有定义好的语法(即，数据类型)来约束其 值/value 的结构/structure和格式/format。
+值的比较语义语法 不是语法定义的一部分，而是通过单独定义的匹配规则提供的。
+匹配规则指定一个参数，一个断言值，它也有一个定义好的语法。
+本文档定义了一组基本的语法和匹配规则，用于定义 LDAP目录的attribute。
 
-   Each attribute stored in a Lightweight Directory Access Protocol
-   (LDAP) directory [RFC4510], whose values may be transferred in the
-   LDAP protocol [RFC4511], has a defined syntax (i.e., data type) that
-   constrains the structure and format of its values.  The comparison
-   semantics for values of a syntax are not part of the syntax
-   definition but are instead provided through separately defined
-   matching rules.  Matching rules specify an argument, an assertion
-   value, which also has a defined syntax.  This document defines a base
-   set of syntaxes and matching rules for use in defining attributes for
-   LDAP directories.
+Readers are advised to familiarize themselves with the Directory Information Models [RFC4512] before reading the rest of this document.  Section 3 provides definitions for the base set of LDAP syntaxes.  Section 4 provides definitions for the base set of matching rules for LDAP.
+建议读者在阅读本文档的其余部分之前熟悉  目录信息模型[RFC4512]。
+第 3 节提供了LDAP语法-基本集的定义。
+第 4 节提供了 LDAP匹配规则-基本集的定义。
 
-   Readers are advised to familiarize themselves with the Directory
-   Information Models [RFC4512] before reading the rest of this
-   document.  Section 3 provides definitions for the base set of LDAP
-   syntaxes.  Section 4 provides definitions for the base set of
-   matching rules for LDAP.
+This document is an integral part of the LDAP technical specification [RFC4510], which obsoletes the previously defined LDAP technical specification, RFC 3377, in its entirety.
+本文档是LDAP技术规范[RFC4510]的组成部分，它完全废弃了先前定义的 LDAP技术规范 RFC 3377。
 
-   This document is an integral part of the LDAP technical specification
-   [RFC4510], which obsoletes the previously defined LDAP technical
-   specification, RFC 3377, in its entirety.
+Sections 4, 5, and 7 of RFC 2252 are obsoleted by [RFC4512].  The remainder of RFC 2252 is obsoleted by this document.  Sections 6 and 8 of RFC 2256 are obsoleted by this document.  The remainder of RFC 2256 is obsoleted by [RFC4519] and [RFC4512].  All but Section 2.11 of RFC 3698 is obsoleted by this document.
+RFC 2252 的第 4、5 和 7 节已被 [RFC4512] 废弃。 
+RFC 2252 的其余部分已被本文档废弃。 
+RFC 2256 的第 6 节和第 8 节已被本文档废弃。 
+RFC 2256 的其余部分已被 [RFC4519] 和 [RFC4512] 废弃。
+除 RFC 3698 的第 2.11 节外，本文档已废弃所有内容。
 
+A number of schema elements that were included in the previous revision of the LDAP technical specification are not included in this revision of LDAP.  Public Key Infrastructure schema elements are now specified in [RFC4523].  Unless reintroduced in future technical specifications, the remainder are to be considered Historic.
+LDAP技术规范的先前修订版中包含的许多模式元素/schema elements 未包含在LDAP的此修订版中。
+公钥-基础设施-模式元素/schema elements 现在在[RFC4523]中指定。
+除非在未来的技术规范中重新引入，否则其余部分将被视为历史性的。
 
-
-
-Legg                        Standards Track                     [Page 3]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
+The changes with respect to RFC 2252 are described in Appendix B of this document.
+本文档的附录B中描述了与RFC2252相关的更改。
 
 
-   Sections 4, 5, and 7 of RFC 2252 are obsoleted by [RFC4512].  The
-   remainder of RFC 2252 is obsoleted by this document.  Sections 6 and
-   8 of RFC 2256 are obsoleted by this document.  The remainder of RFC
-   2256 is obsoleted by [RFC4519] and [RFC4512].  All but Section 2.11
-   of RFC 3698 is obsoleted by this document.
 
-   A number of schema elements that were included in the previous
-   revision of the LDAP technical specification are not included in this
-   revision of LDAP.  Public Key Infrastructure schema elements are now
-   specified in [RFC4523].  Unless reintroduced in future technical
-   specifications, the remainder are to be considered Historic.
+# 2.  Conventions
 
-   The changes with respect to RFC 2252 are described in Appendix B of
-   this document.
+In this document, the key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" are to be interpreted as described in BCP 14, RFC 2119 [RFC2119].
+在本文档中，关键字"MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL"应按照BCP 14、RFC2119 [RFC2119]的描述进行解释。
 
-2.  Conventions
+Syntax definitions are written according to the <SyntaxDescription> ABNF [RFC4234] rule specified in [RFC4512], and matching rule definitions are written according to the <MatchingRuleDescription> ABNF rule specified in [RFC4512], except that the syntax and matching rule definitions provided in this document are line-wrapped for readability.  When such definitions are transferred as attribute values in the LDAP protocol (e.g., as values of the ldapSyntaxes and matchingRules attributes [RFC4512], respectively), then those values would not contain line breaks.
+语法定义按照[RFC4512]中规定的<SyntaxDescription>ABNF[RFC4234]规则编写，
+匹配规则定义按照[RFC4512]中规定的<MatchingRuleDescription>ABNF规则编写，
+但为了可读性，本文提供的语法和匹配规则定义是换行的。
+ 当这些定义作为属性值 在LDAP协议中 传输时（例如，分别作为 ldapSyntaxes 和 matchingRules 属性[RFC4512]的值），那么这些值将不包含换行符。
 
-   In this document, the key words "MUST", "MUST NOT", "REQUIRED",
-   "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY",
-   and "OPTIONAL" are to be interpreted as described in BCP 14, RFC 2119
-   [RFC2119].
 
-   Syntax definitions are written according to the <SyntaxDescription>
-   ABNF [RFC4234] rule specified in [RFC4512], and matching rule
-   definitions are written according to the <MatchingRuleDescription>
-   ABNF rule specified in [RFC4512], except that the syntax and matching
-   rule definitions provided in this document are line-wrapped for
-   readability.  When such definitions are transferred as attribute
-   values in the LDAP protocol (e.g., as values of the ldapSyntaxes and
-   matchingRules attributes [RFC4512], respectively), then those values
-   would not contain line breaks.
 
-3.  Syntaxes
+# 3.  Syntaxes
 
-   Syntax definitions constrain the structure of attribute values stored
-   in an LDAP directory, and determine the representation of attribute
-   and assertion values transferred in the LDAP protocol.
+Syntax definitions constrain the structure of attribute values stored in an LDAP directory, and determine the representation of attribute and assertion values transferred in the LDAP protocol.
+语法定义约束存储在 LDAP 目录中的属性值的结构，并确定在 LDAP 协议中传输的属性和断言值的表示。
 
-   Syntaxes that are required for directory operation, or that are in
-   common use, are specified in this section.  Servers SHOULD recognize
-   all the syntaxes listed in this document, but are not required to
-   otherwise support them, and MAY recognise or support other syntaxes.
-   However, the definition of additional arbitrary syntaxes is
-   discouraged since it will hinder interoperability.  Client and server
-   implementations typically do not have the ability to dynamically
-   recognize new syntaxes.
+Syntaxes that are required for directory operation, or that are in common use, are specified in this section.  Servers SHOULD recognize all the syntaxes listed in this document, but are not required to otherwise support them, and MAY recognise or support other syntaxes. However, the definition of additional arbitrary syntaxes is discouraged since it will hinder interoperability.  Client and server implementations typically do not have the ability to dynamically recognize new syntaxes.
+本节指定了目录操作所需的或常用的语法。 
+服务器应该识别本文档中列出的所有语法，但不需要以其他方式支持它们，并且可以识别或支持其他语法。 
+但是，不鼓励定义额外的任意语法，因为它会妨碍互操作性。 
+客户端和服务器实现通常没有动态识别新语法的能力。
 
 
 
 
+## 3.1.  General Considerations
 
-Legg                        Standards Track                     [Page 4]
-
-RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
+The description of each syntax specifies how attribute or assertion values conforming to the syntax are to be represented when transferred in the LDAP protocol [RFC4511].  This representation is referred to as the LDAP-specific encoding to distinguish it from other methods of encoding attribute values (e.g., the Basic Encoding Rules (BER) encoding [BER] used by X.500 [X.500] directories).
+每个语法的描述, 指定了在LDAP协议[RFC4511]中传输时 如何表示符合语法的属性或断言值。
+这种表示被称为 LDAP特定编码，以区别于其他编码属性值的方法（例如，X.500 [X.500] 目录使用的基本编码规则 (BER) 编码 [BER]）。
+
+The LDAP-specific encoding of a given attribute syntax always produces octet-aligned values.  To the greatest extent possible, encoding rules for LDAP syntaxes should produce character strings that can be displayed with little or no translation by clients implementing LDAP.  However, clients MUST NOT assume that the LDAP-specific encoding of a value of an unrecognized syntax is a human-readable character string.  There are a few cases (e.g., the JPEG syntax) when it is not reasonable to produce a human-readable representation.
+给定属性语法的 LDAP特定编码 始终生成 八位字节对齐的值。
+在最大程度上，LDAP语法的编码规则 应该生成字符串 (可以由 实现LDAP的客户端 在很少或无需翻译的情况下 显示这些字符串。)
+但是，客户端不能假设 一个无法识别的语法的值的LDAP特定编码 是人类可读的字符串。
+在某些情况下（例如，JPEG语法）生成人类可读的表示是不合理的。
+
+Each LDAP syntax is uniquely identified with an object identifier [ASN.1] represented in the dotted-decimal format (short descriptive names are not defined for syntaxes).  These object identifiers are not intended to be displayed to users.  The object identifiers for the syntaxes defined in this document are summarized in Appendix A.
+<font color=red>每个LDAP语法 都由一个 以点分十进制格式表示的对象标识符/OID[ASN.1]唯一标识（没有为语法定义简短的描述性名称）。</font>
+这些 对象标识符/OID 不打算向用户显示。
+本文档中定义的 语法的对象标识符/OID  在附录 A 中进行了总结。
+
+A suggested minimum upper bound on the number of characters in an attribute value with a string-based syntax, or the number of octets in a value for all other syntaxes, MAY be indicated by appending the bound inside of curly braces following the syntax's OBJECT IDENTIFIER in an attribute type definition (see the <noidlen> rule in [RFC4512]).  Such a bound is not considered part of the syntax identifier.
+建议 基于字符串的 语法的属性值中 字符个数的最小上限，或 所有其他语法的值中的八位字节个数，可以通过在语法的 OBJECT IDENTIFIER 后面附加大括号内的边界来表示在属性类型定义中（参见 [RFC4512] 中的 <noidlen> 规则）。
+这样的界限不被视为语法标识符的一部分。
+
+For example, "1.3.6.1.4.1.1466.115.121.1.15{64}" in an attribute definition suggests that the directory server will allow a value of the attribute to be up to 64 characters long, although it may allow longer character strings.  Note that a single character of the Directory String syntax can be encoded in more than one octet, since UTF-8 [RFC3629] is a variable-length encoding.  Therefore, a 64- character string may be more than 64 octets in length.
+例如，属性定义中的“1.3.6.1.4.1.1466.115.121.1.15{64}”表明目录服务器将允许属性值最长为 64 个字符，尽管它可能允许更长的字符串。
+请注意，目录字符串语法的单个字符可以用多个八位字节进行编码，因为 UTF-8 [RFC3629] 是一种可变长度编码。
+因此，一个 64 个字符的字符串的长度可能超过 64 个八位字节。
 
 
-3.1.  General Considerations
 
-   The description of each syntax specifies how attribute or assertion
-   values conforming to the syntax are to be represented when
-   transferred in the LDAP protocol [RFC4511].  This representation is
-   referred to as the LDAP-specific encoding to distinguish it from
-   other methods of encoding attribute values (e.g., the Basic Encoding
-   Rules (BER) encoding [BER] used by X.500 [X.500] directories).
 
-   The LDAP-specific encoding of a given attribute syntax always
-   produces octet-aligned values.  To the greatest extent possible,
-   encoding rules for LDAP syntaxes should produce character strings
-   that can be displayed with little or no translation by clients
-   implementing LDAP.  However, clients MUST NOT assume that the LDAP-
-   specific encoding of a value of an unrecognized syntax is a human-
-   readable character string.  There are a few cases (e.g., the JPEG
-   syntax) when it is not reasonable to produce a human-readable
-   representation.
-
-   Each LDAP syntax is uniquely identified with an object identifier
-   [ASN.1] represented in the dotted-decimal format (short descriptive
-   names are not defined for syntaxes).  These object identifiers are
-   not intended to be displayed to users.  The object identifiers for
-   the syntaxes defined in this document are summarized in Appendix A.
-
-   A suggested minimum upper bound on the number of characters in an
-   attribute value with a string-based syntax, or the number of octets
-   in a value for all other syntaxes, MAY be indicated by appending the
-   bound inside of curly braces following the syntax's OBJECT IDENTIFIER
-   in an attribute type definition (see the <noidlen> rule in
-   [RFC4512]).  Such a bound is not considered part of the syntax
-   identifier.
-
-   For example, "1.3.6.1.4.1.1466.115.121.1.15{64}" in an attribute
-   definition suggests that the directory server will allow a value of
-   the attribute to be up to 64 characters long, although it may allow
-   longer character strings.  Note that a single character of the
-   Directory String syntax can be encoded in more than one octet, since
-   UTF-8 [RFC3629] is a variable-length encoding.  Therefore, a 64-
-   character string may be more than 64 octets in length.
-
-3.2.  Common Definitions
+## 3.2.  Common Definitions
 
    The following ABNF rules are used in a number of the syntax
    definitions in Section 3.3.
@@ -309,7 +251,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
       Type Description syntax.  (Note: Line breaks have been added for
       readability; they are not part of the value when transferred in
       protocol.)
-
+    
          ( 2.5.18.1 NAME 'createTimestamp'
             EQUALITY generalizedTimeMatch
             ORDERING generalizedTimeOrderingMatch
@@ -377,7 +319,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
    The <PrintableCharacter> rule is defined in Section 3.2.
 
       Examples:
-
+    
          US
          AU
 
@@ -404,7 +346,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
    encoding of a value of this syntax is defined by the following ABNF:
 
       DeliveryMethod = pdm *( WSP DOLLAR WSP pdm )
-
+    
       pdm = "any" / "mhs" / "physical" / "telex" / "teletex" /
             "g3fax" / "g4fax" / "ia5" / "videotex" / "telephone"
 
@@ -497,7 +439,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
       Example:
          ( 2.5.6.4 DESC 'content rule for organization'
             NOT ( x121Address $ telexNumber ) )
-
+    
       Note: A line break has been added for readability; it is not part
       of the value.
 
@@ -584,7 +526,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
                          SHARP WSP subset
       object-class  = WSP oid WSP
       subset        = "baseobject" / "oneLevel" / "wholeSubtree"
-
+    
       criteria   = and-term *( BAR and-term )
       and-term   = term *( AMPERSAND term )
       term       = EXCLAIM term /
@@ -605,7 +547,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
    The LDAP definition for the Enhanced Guide syntax is:
 
       ( 1.3.6.1.4.1.1466.115.121.1.21 DESC 'Enhanced Guide' )
-
+    
       Example:
          person#(sn$EQ)#oneLevel
 
@@ -693,7 +635,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
                            [ minute [ second / leap-second ] ]
                            [ fraction ]
                            g-time-zone
-
+    
       century = 2(%x30-39) ; "00" to "99"
       year    = 2(%x30-39) ; "00" to "99"
       month   =   ( %x30 %x31-39 ) ; "01" (January) to "09"
@@ -703,10 +645,10 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
                 / ( %x33 %x30-31 )    ; "30" to "31"
       hour    = ( %x30-31 %x30-39 ) / ( %x32 %x30-33 ) ; "00" to "23"
       minute  = %x30-35 %x30-39                        ; "00" to "59"
-
+    
       second      = ( %x30-35 %x30-39 ) ; "00" to "59"
       leap-second = ( %x36 %x30 )       ; "60"
-
+    
       fraction        = ( DOT / COMMA ) 1*(%x30-39)
       g-time-zone     = %x5A  ; "Z"
                         / g-differential
@@ -1200,12 +1142,12 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
    the following ABNF:
 
       SubstringAssertion = [ initial ] any [ final ]
-
+    
       initial  = substring
       any      = ASTERISK *(substring ASTERISK)
       final    = substring
       ASTERISK = %x2A  ; asterisk ("*")
-
+    
       substring           = 1*substring-character
       substring-character = %x00-29
                             / (%x5C "2A")  ; escaped "*"
@@ -1279,7 +1221,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
       ttx-param  = ttx-key COLON ttx-value  ; parameter
       ttx-key    = "graphic" / "control" / "misc" / "page" / "private"
       ttx-value  = *ttx-value-octet
-
+    
       ttx-value-octet = %x00-23
                         / (%x5C "24")  ; escaped "$"
                         / %x25-5B
@@ -1376,7 +1318,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
    The UTC Time syntax corresponds to the UTCTime ASN.1 type from
    [ASN.1].
 
-4.  Matching Rules
+# 4.  Matching Rules
 
    Matching rules are used by directory implementations to compare
    attribute values against assertion values when performing Search and
@@ -2428,7 +2370,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
       ( 2.5.13.32 NAME 'wordMatch'
          SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
-5.  Security Considerations
+# 5.  Security Considerations
 
    In general, the LDAP-specific encodings for syntaxes defined in this
    document do not define canonical encodings.  That is, a
@@ -2453,7 +2395,7 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
    matching rule comparisons are done on the underlying abstract value,
    regardless of the particular encoding used.
 
-6.  Acknowledgements
+# 6.  Acknowledgements
 
    This document is primarily a revision of RFC 2252 by M. Wahl, A.
    Coulbeck, T. Howes, and S. Kille.  RFC 2252 was a product of the IETF
@@ -2473,11 +2415,11 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
    drafts of this document, and Jim Sermersheim and Kurt Zeilenga for
    their significant contributions to this revision.
 
-7.  IANA Considerations
+# 7.  IANA Considerations
 
    The Internet Assigned Numbers Authority (IANA) has updated the LDAP
    descriptors registry [BCP64] as indicated by the following templates:
-
+```bash
       Subject: Request for LDAP Descriptor Registration Update
       Descriptor (short name): see comment
       Object Identifier: see comment
@@ -2545,8 +2487,8 @@ RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
       Usage: other (M)
       Specification: RFC 4517
       Author/Change Controller: IESG
-
-8.  References
+```
+# 8.  References
 
 8.1.  Normative References
 
@@ -2692,11 +2634,11 @@ Legg                        Standards Track                    [Page 48]
 RFC 4517           LDAP: Syntaxes and Matching Rules           June 2006
 
 
-Appendix A. Summary of Syntax Object Identifiers
+# Appendix A. Summary of Syntax Object Identifiers
 
    The following list summarizes the object identifiers assigned to the
    syntaxes defined in this document.
-
+```
       Syntax                           OBJECT IDENTIFIER
       ==============================================================
       Attribute Type Description       1.3.6.1.4.1.1466.115.121.1.3
@@ -2733,8 +2675,11 @@ Appendix A. Summary of Syntax Object Identifiers
       Teletex Terminal Identifier      1.3.6.1.4.1.1466.115.121.1.51
       Telex Number                     1.3.6.1.4.1.1466.115.121.1.52
       UTC Time                         1.3.6.1.4.1.1466.115.121.1.53
+```
 
-Appendix B. Changes from RFC 2252
+
+
+# Appendix B. Changes from RFC 2252
 
    This annex lists the significant differences between this
    specification and RFC 2252.
