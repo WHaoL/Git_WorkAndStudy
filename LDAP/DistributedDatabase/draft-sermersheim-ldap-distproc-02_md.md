@@ -5,11 +5,10 @@ Expires: August 26, 2005                               February 22, 2005
 
 
 
-               Distributed Procedures for LDAP Operations
-                 draft-sermersheim-ldap-distproc-02.txt
+# Distributed Procedures for LDAP Operations draft-sermersheim-ldap-distproc-02.txt
 
 
-Status of this Memo
+Status of this Memo(略)
 
 
    This document is an Internet-Draft and is subject to all provisions
@@ -43,41 +42,30 @@ Status of this Memo
    This Internet-Draft will expire on August 26, 2005.
 
 
-Copyright Notice
+Copyright Notice(略)
 
 
    Copyright (C) The Internet Society (2005).
 
 
-Abstract
+## Abstract
 
-
-   This document provides the data types and procedures used while
-   servicing Lightweight Directory Access Protocol (LDAP) user
-   operations in order to participate in a distributed directory.  In
-   particular, it describes the way in which an LDAP user operation in a
-   distributed directory environment finds its way to the proper DSA(s)
-   for servicing.
+This document provides the data types and procedures used while servicing Lightweight Directory Access Protocol (LDAP) user operations in order to participate in a distributed directory.  In particular, it describes the way in which an LDAP user operation in a distributed directory environment finds its way to the proper DSA(s) for servicing.
+本文档提供了  在为轻量级目录访问协议(LDAP) 用户操作提供服务以参与分布式目录时使用的数据类型和过程。
+特别是，它描述了分布式目录环境中的 LDAP 用户操作找到合适的 DSA 进行服务的方式。
 
 
 
-
-
-Sermersheim              Expires August 26, 2005                [Page 1]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
-
-
-
-Discussion Forum
-
+Discussion Forum(略)
 
    Technical discussion of this document will take place on the IETF
    LDAP Extensions mailing list <ldapext@ietf.org>.  Please send
    editorial comments directly to the author.
 
 
-Table of Contents
 
+```bash
+Table of Contents
 
    1.   Distributed Operations Overview  . . . . . . . . . . . . . .   3
    2.   Conventions  . . . . . . . . . . . . . . . . . . . . . . . .   4
@@ -109,173 +97,52 @@ Table of Contents
    A.4  LDAP Result Code Registrations . . . . . . . . . . . . . . .  38
         Intellectual Property and Copyright Statements . . . . . . .  39
 
+```
 
 
 
+# 1.  Distributed Operations Overview
 
 
+One characteristic of X.500-based directory systems [X500] is that, given a distributed Directory Information Tree (DIT), a user should potentially be able to have any service request satisfied (subject to security, access control, and administrative policies) irrespective of the Directory Service Agent (DSA) to which the request was sent. To accommodate this requirement, it is necessary that any DSA involved in satisfying a particular service request have some knowledge (as specified in {TODO: Link to future Distributed Data Model doc}) of where the requested information is located and either return this knowledge to the requester or attempt to satisfy the request satisfied on the behalf of the requester (the requester may either be a Directory User Agent (DUA) or another DSA).
 
 
+Two modes of operation distribution are defined to meet these requirements, namely "chaining" and "returning referrals". "Chaining" refers to the attempt by a DSA to satisfy a request by sending one or more chained operations to other DSAs.  "Returning referrals", is the act of returning distributed knowledge information to the requester, which may then itself interact with the DSA(s) identified by the distributed knowledge information.  It is a goal of this document to provide the same level of service whether the chaining or referral mechanism is used to distribute an operation.
 
 
+The processing of an operation is talked about in two major phases, namely "name resolution", and "operation evaluation".  Name resolution is the act of locating a local DSE held on a DSA given a distinguished name (DN).  Operation evaluation is the act of performing the operation after the name resolution phase is complete.
 
 
+While distributing an operation, a request operation may be decomposed into several sub-operations.
 
 
+The distributed directory operation procedures described in this document assume the absense of the ManageDsaIT control defined in [RFC3296] and described in Section 4.13.
 
-Sermersheim              Expires August 26, 2005                [Page 2]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
 
 
+# 2.  Conventions
 
-1.  Distributed Operations Overview
 
+Imperative keywords defined in [RFC2119] are used in this document, and carry the meanings described there.
 
-   One characteristic of X.500-based directory systems [X500] is that,
-   given a distributed Directory Information Tree (DIT), a user should
-   potentially be able to have any service request satisfied (subject to
-   security, access control, and administrative policies) irrespective
-   of the Directory Service Agent (DSA) to which the request was sent.
-   To accommodate this requirement, it is necessary that any DSA
-   involved in satisfying a particular service request have some
-   knowledge (as specified in {TODO: Link to future Distributed Data
-   Model doc}) of where the requested information is located and either
-   return this knowledge to the requester or attempt to satisfy the
-   request satisfied on the behalf of the requester (the requester may
-   either be a Directory User Agent (DUA) or another DSA).
 
+All Basic Encoding Rules (BER) [X690] encodings follow the conventions found in Section 5.1 of [RFC2251].
 
-   Two modes of operation distribution are defined to meet these
-   requirements, namely "chaining" and "returning referrals".
-   "Chaining" refers to the attempt by a DSA to satisfy a request by
-   sending one or more chained operations to other DSAs.  "Returning
-   referrals", is the act of returning distributed knowledge information
-   to the requester, which may then itself interact with the DSA(s)
-   identified by the distributed knowledge information.  It is a goal of
-   this document to provide the same level of service whether the
-   chaining or referral mechanism is used to distribute an operation.
 
 
-   The processing of an operation is talked about in two major phases,
-   namely "name resolution", and "operation evaluation".  Name
-   resolution is the act of locating a local DSE held on a DSA given a
-   distinguished name (DN).  Operation evaluation is the act of
-   performing the operation after the name resolution phase is complete.
+# 3.  Distributed Operation Data Types
 
+The data types in this section are used by the chaining and referral distributed operation mechanisms described in Section 4
 
-   While distributing an operation, a request operation may be
-   decomposed into several sub-operations.
 
+## 3.1  ContinuationReference
 
-   The distributed directory operation procedures described in this
-   document assume the absense of the ManageDsaIT control defined in
-   [RFC3296] and described in Section 4.13.
 
+As an operation is being processed by a DSA, it is useful to group the information passed between various procedures as a collection of data.  The ContinuationReference data type is introduced for this purpose.  This data type is populated and consumed by various procedures discussed in various sections of this document.  In general, a ContinuationReference is used when indicating that directory information being acted on is not present locally, but may be present elsewhere.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Sermersheim              Expires August 26, 2005                [Page 3]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
-
-
-
-2.  Conventions
-
-
-   Imperative keywords defined in [RFC2119] are used in this document,
-   and carry the meanings described there.
-
-
-   All Basic Encoding Rules (BER) [X690] encodings follow the
-   conventions found in Section 5.1 of [RFC2251].
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Sermersheim              Expires August 26, 2005                [Page 4]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
-
-
-
-3.  Distributed Operation Data Types
-
-
-   The data types in this section are used by the chaining and referral
-   distributed operation mechanisms described in Section 4
-
-
-3.1  ContinuationReference
-
-
-   As an operation is being processed by a DSA, it is useful to group
-   the information passed between various procedures as a collection of
-   data.  The ContinuationReference data type is introduced for this
-   purpose.  This data type is populated and consumed by various
-   procedures discussed in various sections of this document.  In
-   general, a ContinuationReference is used when indicating that
-   directory information being acted on is not present locally, but may
-   be present elsewhere.
-
-
-   A ContinuationReference consists of one or more addresses which
-   identify remote DSAs along with other information pertaining both to
-   the distributed knowledge information held on the local DSA as well
-   as information relevant to the operation.  This data type is
-   expressed here in Abstract Syntax Notation One (ASN.1) [X680].
-
-
+A ContinuationReference consists of one or more addresses which identify remote DSAs along with other information pertaining both to the distributed knowledge information held on the local DSA as well as information relevant to the operation.  This data type is expressed here in Abstract Syntax Notation One (ASN.1) [X680].
+```ASN.1
       ContinuationReference ::= SET {
          referralURI      [0] SET SIZE (1..MAX) OF URI,
          localReference   [2] LDAPDN,
@@ -285,16 +152,11 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
          searchedSubtrees [6] SearchedSubtrees OPTIONAL,
          failedName       [7] LDAPDN OPTIONAL,
          ...  }
+```
 
+< Editor's Note: Planned for addition is a searchCriteria field which is used both for assuring that the remote object is in fact the object originally pointed to (this mechanism provides a security measure), and also to allow moved or renamed remote entries to be found.  Typically the search criteria would have a filter value of (entryUUID=<something>) >
 
-   <Editor's Note: Planned for addition is a searchCriteria field which
-   is used both for assuring that the remote object is in fact the
-   object originally pointed to (this mechanism provides a security
-   measure), and also to allow moved or renamed remote entries to be
-   found.  Typically the search criteria would have a filter value of
-   (entryUUID=<something>)>
-
-
+```
    URI ::= LDAPString     -- limited to characters permitted in URIs
    [RFC2396].
 
@@ -304,16 +166,6 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
          subordinate            (1),
          cross                  (2),
          nonSpecificSubordinate (3),
-
-
-
-
-
-Sermersheim              Expires August 26, 2005                [Page 5]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
-
-
-
          suplier                (4),
          master                 (5),
          immediateSuperior      (6),
@@ -328,19 +180,14 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
 
 
    SearchedSubtrees ::= SET OF RelativeLDAPDN
+```
+LDAPDN, RelativeLDAPDN, and LDAPString, are defined in [RFC2251].
+
+The following subsections introduce the fields of the ContinuationReference data type, but do not provide in-depth semantics or instructions on the population and consumption of the fields.  These topics are discussed as part of the procedural instructions.
 
 
-   LDAPDN, RelativeLDAPDN, and LDAPString, are defined in [RFC2251].
 
-
-   The following subsections introduce the fields of the
-   ContinuationReference data type, but do not provide in-depth
-   semantics or instructions on the population and consumption of the
-   fields.  These topics are discussed as part of the procedural
-   instructions.
-
-
-3.1.1  ContinuationReference.referralURI
+### 3.1.1  ContinuationReference.referralURI
 
 
    The list of referralURI values is used by the receiver to progress
@@ -842,7 +689,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
 
 
 
-4.  Distributed Procedures
+# 4.  Distributed Procedures
 
 
    For the purposes of describing a distributed operation, operations
@@ -2092,7 +1939,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
 
 
 
-5.  Security Considerations
+# 5.  Security Considerations
 
 
    This document introduces a mechanism (chaining) which can be used to
@@ -2227,7 +2074,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
 
 
 
-Appendix A.  IANA Considerations
+# Appendix A.  IANA Considerations
 
 
    Registration of the following values is requested [RFC3383].
