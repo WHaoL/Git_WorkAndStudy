@@ -48,11 +48,11 @@ Copyright Notice(略)
    Copyright (C) The Internet Society (2005).
 
 
-## Abstract
+## Abstract(摘要)
 
 This document provides the data types and procedures used while servicing Lightweight Directory Access Protocol (LDAP) user operations in order to participate in a distributed directory.  In particular, it describes the way in which an LDAP user operation in a distributed directory environment finds its way to the proper DSA(s) for servicing.
-本文档提供了  在为轻量级目录访问协议(LDAP) 用户操作提供服务以参与分布式目录时使用的数据类型和过程。
-特别是，它描述了分布式目录环境中的 LDAP 用户操作找到合适的 DSA 进行服务的方式。
+本文档提供了  在 为LDAP-用户操作 提供服务以参与分布式目录时 使用的数据类型和过程。
+特别是，它描述了 分布式目录环境中的 LDAP用户操作 找到合适的DSA进行服务的方式。
 
 
 
@@ -101,47 +101,59 @@ Table of Contents
 
 
 
-# 1.  Distributed Operations Overview
+# 1.  Distributed Operations Overview(分布式操作概述)
 
 
 One characteristic of X.500-based directory systems [X500] is that, given a distributed Directory Information Tree (DIT), a user should potentially be able to have any service request satisfied (subject to security, access control, and administrative policies) irrespective of the Directory Service Agent (DSA) to which the request was sent. To accommodate this requirement, it is necessary that any DSA involved in satisfying a particular service request have some knowledge (as specified in {TODO: Link to future Distributed Data Model doc}) of where the requested information is located and either return this knowledge to the requester or attempt to satisfy the request satisfied on the behalf of the requester (the requester may either be a Directory User Agent (DUA) or another DSA).
-
+基于X.500的目录系统[X500]的一个特征是：给定分布式目录信息树 (DIT)，应该能够满足用户的任何服务请求（受安全性、访问控制和管理策略的约束）与请求被发送到的目录服务代理(DSA) 无关。
+为满足此要求，任何参与满足特定服务请求的DSA 都必须了解/知道（如 {TODO: Link to future Distributed Data Model doc} 中所述）所请求信息所在的位置，并将此信息返回给 请求者 或 试图满足 代表请求者的请求（请求者可以是目录用户代理(DUA)或另一个DSA）。
 
 Two modes of operation distribution are defined to meet these requirements, namely "chaining" and "returning referrals". "Chaining" refers to the attempt by a DSA to satisfy a request by sending one or more chained operations to other DSAs.  "Returning referrals", is the act of returning distributed knowledge information to the requester, which may then itself interact with the DSA(s) identified by the distributed knowledge information.  It is a goal of this document to provide the same level of service whether the chaining or referral mechanism is used to distribute an operation.
-
+定义了两种操作分发模式来满足这些要求，即"chaining"和"returning referrals"。
+"Chaining"是指 DSA尝试通过向其他DSA发送一个或多个链接操作/chain-operation来满足请求。
+"Returning referrals"是将分布式知识信息返回给请求者的行为，然后请求者本身可以与分布式知识信息标识的DSA交互。
+本文档的目标是提供相同级别的服务，无论是使用chaining机制还是referral机制来分发操作。
 
 The processing of an operation is talked about in two major phases, namely "name resolution", and "operation evaluation".  Name resolution is the act of locating a local DSE held on a DSA given a distinguished name (DN).  Operation evaluation is the act of performing the operation after the name resolution phase is complete.
-
+操作的处理分为两个主要阶段，即"name resolution/名称解析"和"operation evaluation/操作评估"。
+"name resolution"是 在给定DN的DSA上定位 本地DSE 的行为。
+"operation evaluation"是 在名称解析阶段完成后 执行操作 的行为。
 
 While distributing an operation, a request operation may be decomposed into several sub-operations.
-
+在分发一个操作时，一个请求操作可能会被分解成几个子操作。
 
 The distributed directory operation procedures described in this document assume the absense of the ManageDsaIT control defined in [RFC3296] and described in Section 4.13.
+本文档中描述的分布式目录操作过程 假定没有在[RFC3296]中定义并在第4.13节中描述的 ManageDsaIT控件。
 
 
 
-# 2.  Conventions
+# 2.  Conventions(关键字/约定)
 
 
 Imperative keywords defined in [RFC2119] are used in this document, and carry the meanings described there.
-
+本文档使用[RFC2119]中定义的关键字
 
 All Basic Encoding Rules (BER) [X690] encodings follow the conventions found in Section 5.1 of [RFC2251].
+所有的 BER[X690]编码 遵循[RFC2251]的5.1中的约定。
 
 
-
-# 3.  Distributed Operation Data Types
+# 3.  Distributed Operation Data Types(分布式操作的Data-Type)
 
 The data types in this section are used by the chaining and referral distributed operation mechanisms described in Section 4
-
+本节中的数据类型 由第4节中描述的chaining和referral 分布式操作机制使用。
 
 ## 3.1  ContinuationReference
 
 
 As an operation is being processed by a DSA, it is useful to group the information passed between various procedures as a collection of data.  The ContinuationReference data type is introduced for this purpose.  This data type is populated and consumed by various procedures discussed in various sections of this document.  In general, a ContinuationReference is used when indicating that directory information being acted on is not present locally, but may be present elsewhere.
-
+当 DSA正在处理操作 时，将 在不同过程之间传递的信息 分组为数据集合 是很有用的。
+为此目的引入了 ContinuationReference 数据类型。
+此数据类型 由本文档各个部分中讨论的各种过程 填充和使用。
+通常，当指示正在处理/操作的目录信息在本地不存在，但可能存在于其他地方时，将使用 ContinuationReference。
 
 A ContinuationReference consists of one or more addresses which identify remote DSAs along with other information pertaining both to the distributed knowledge information held on the local DSA as well as information relevant to the operation.  This data type is expressed here in Abstract Syntax Notation One (ASN.1) [X680].
+ContinuationReference 由一个或多个地址组成，这些地址 标识 远程DSA以及与本地DSA上保存的 分布式知识信息 以及 与操作相关的信息有关的其他信息。
+这种数据类型在ASN.1[X680]中表示。
 ```ASN.1
       ContinuationReference ::= SET {
          referralURI      [0] SET SIZE (1..MAX) OF URI,
@@ -155,10 +167,15 @@ A ContinuationReference consists of one or more addresses which identify remote 
 ```
 
 < Editor's Note: Planned for addition is a searchCriteria field which is used both for assuring that the remote object is in fact the object originally pointed to (this mechanism provides a security measure), and also to allow moved or renamed remote entries to be found.  Typically the search criteria would have a filter value of (entryUUID=<something>) >
+< 编者注：
+   计划添加一个 searchCriteria 字段，
+      用于确保远程对象实际上是最初指向的对象（此机制提供了安全措施），
+      也允许找到移动或重命名的远程条目. 
+   通常，搜索条件的过滤器值为 (entryUUID=<something>) >
 
-```
-   URI ::= LDAPString     -- limited to characters permitted in URIs
-   [RFC2396].
+```ASN.1
+   URI ::= LDAPString     -- limited to characters permitted in URIs [RFC2396].
+                             受限于 URI中允许的字符
 
 
       ReferenceType ::= ENUMERATED {
@@ -182,83 +199,79 @@ A ContinuationReference consists of one or more addresses which identify remote 
    SearchedSubtrees ::= SET OF RelativeLDAPDN
 ```
 LDAPDN, RelativeLDAPDN, and LDAPString, are defined in [RFC2251].
+LDAPDN、RelativeLDAPDN 和 LDAPString 在 [RFC2251] 中定义。
 
 The following subsections introduce the fields of the ContinuationReference data type, but do not provide in-depth semantics or instructions on the population and consumption of the fields.  These topics are discussed as part of the procedural instructions.
+以下小节介绍了 ContinuationReference 数据类型的字段，
+   但不提供字段的填充和使用 的深入 语义或说明。
+这些主题作为程序说明的一部分进行讨论。
 
 
 
 ### 3.1.1  ContinuationReference.referralURI
 
 
-   The list of referralURI values is used by the receiver to progress
-   the operation.  Each value specifies (at minimum) the protocol and
-   address of one or more remote DSA(s) holding the data sought after.
-   URI values which are placed in ContinuationReference.referralURI must
-   allow for certain elements of data to be conveyed.  Section 3.1.1.1
-   describes these data elements.  Furthermore, a mapping must exist
-   which relates the parts of a specified URI to these data elements.
-   This document provides such a mapping for the LDAP URL [RFC2255] in
-   Section 4.12.
+The list of referralURI values is used by the receiver to progress the operation.  Each value specifies (at minimum) the protocol and address of one or more remote DSA(s) holding the data sought after. URI values which are placed in ContinuationReference.referralURI must allow for certain elements of data to be conveyed.  Section 3.1.1.1 describes these data elements.  Furthermore, a mapping must exist which relates the parts of a specified URI to these data elements. This document provides such a mapping for the LDAP URL [RFC2255] in Section 4.12.
+接收者使用  referralURI的value-list  来执行操作。
+每个值/value   指定(至少)一个或多个远程DSA(该DSA保存了所寻求的数据) 的协议和地址。
+放在 ContinuationReference.referralURI中的 URI-values 必须允许传输某些数据元素。
+第 3.1.1.1 节描述了这些数据元素。
+此外，必须存在将指定 URI 的部分与这些数据元素相关联的映射。
+本文档为第 4.12 节中的 LDAP URL [RFC2255] 提供了这样的映射。
 
 
-   In some cases, a referralURI will contain data which has a
-   counterpart in the fields of the ContinuationReference (an example is
-   where the referralURI is an LDAP URL, holds a <scope> value, and the
-   ContinuationReference.searchScope field is also present).  In these
-   cases, the data held on the referralURI overrides the field in the
-   ContinuationReference.  Specific examples of this are highlighted in
-   other sections.  Providing a means for these values to exist as
-   fields of the ContinuationReference allows one value to be applied to
-   all values of referralURI (as opposed to populating duplicate data on
-   all referralURI values).
+In some cases, a referralURI will contain data which has a counterpart in the fields of the ContinuationReference (an example is where the referralURI is an LDAP URL, holds a <scope> value, and the ContinuationReference.searchScope field is also present).  In these cases, the data held on the referralURI overrides the field in the ContinuationReference.  Specific examples of this are highlighted in other sections.  Providing a means for these values to exist as fields of the ContinuationReference allows one value to be applied to all values of referralURI (as opposed to populating duplicate data on all referralURI values).
+在某些情况下，referralURI 将包含在 ContinuationReference 字段中具有对应项的数据（例如，referralURI 是一个 LDAP URL，包含一个 <scope> 值，并且 ContinuationReference.searchScope 字段也存在）。
+在这些情况下，referralURI 上保存的数据会覆盖 ContinuationReference 中的字段。
+其他部分重点介绍了这方面的具体示例。
+为这些值提供一种作为 ContinuationReference 字段存在的方法，允许将一个值应用到referralURI 的所有值（而不是在所有referralURI 值上填充重复数据）。
 
 
-   If a referralURI value identifies an LDAP-enabled DSA [RFC3377], the
-   LDAP URL form is used.
+If a referralURI value identifies an LDAP-enabled DSA [RFC3377], the LDAP URL form is used.
+如果referralURI 值标识启用LDAP 的DSA [RFC3377]，则使用LDAP URL 形式。
 
 
 
 
-
-Sermersheim              Expires August 26, 2005                [Page 6]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
+#### 3.1.1.1  Elements of referralURI Values
 
 
+The following data elements must be allowed and identified for a specified URI type to be used to convey referral information.  Each element is given a name which begins with 'referralURI.' for clarity when referencing the elements conceptually in other parts of this document.
+对于 用于传递引用信息/referral-information的特定URI类型，必须允许和标识以下 数据元素。
+为了清楚起见，每个元素都有一个以'referralURI.'开头的名称。
 
-3.1.1.1  Elements of referralURI Values
+- referralURI.protocolIdentifier.  
+  There must be an indication of the protocol to be used to contact the DSA identified by the URI.
+  必须指明用于联系 由URI标识的DSA  的协议。
+
+- referralURI.accessPoint.  
+  The URI must identify a DSA in a manner that can be used to contact it using the protocol specified in protocolIdentifier.
+  URI 必须以一种可用于使用 protocolIdentifier 中指定的协议与它联系的方式来标识 DSA。
+
+- referralURI.targetObject.  
+  Holds the name to be used as the base DN of the operation being progressed.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
+  保存要用作正在进行的操作的基本 DN 的名称。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+
+- referralURI.localReference.  
+  See Section 3.1.2.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
+  见第 3.1.2 节。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+
+- referralURI.searchScope.  
+  See Section 3.1.5.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
+  见第 3.1.5 节。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+
+- referralURI.searchedSubtrees.  
+  See Section 3.1.6.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
+  见第 3.1.6 节。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+
+- referralURI.failedName.  
+  See Section 3.1.7.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
+  见第 3.1.7 节。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
 
 
-   The following data elements must be allowed and identified for a
-   specified URI type to be used to convey referral information.  Each
-   element is given a name which begins with 'referralURI.' for clarity
-   when referencing the elements conceptually in other parts of this
-   document.
 
 
-   o  referralURI.protocolIdentifier.  There must be an indication of
-      the protocol to be used to contact the DSA identified by the URI.
-   o  referralURI.accessPoint.  The URI must identify a DSA in a manner
-      that can be used to contact it using the protocol specified in
-      protocolIdentifier.
-   o  referralURI.targetObject.  Holds the name to be used as the base
-      DN of the operation being progressed.  This field must be allowed
-      by the URI specification, but may be omitted in URI instances for
-      various reasons.
-   o  referralURI.localReference.  See Section 3.1.2.  This field must
-      be allowed by the URI specification, but may be omitted in URI
-      instances for various reasons.
-   o  referralURI.searchScope.  See Section 3.1.5.  This field must be
-      allowed by the URI specification, but may be omitted in URI
-      instances for various reasons.
-   o  referralURI.searchedSubtrees.  See Section 3.1.6.  This field must
-      be allowed by the URI specification, but may be omitted in URI
-      instances for various reasons.
-   o  referralURI.failedName.  See Section 3.1.7.  This field must be
-      allowed by the URI specification, but may be omitted in URI
-      instances for various reasons.
-
-
-3.1.2  ContinuationReference.localReference
+### 3.1.2  ContinuationReference.localReference
 
 
    This names the DSE which was found to hold distributed knowledge
@@ -270,7 +283,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
    populated with an empty DN.
 
 
-3.1.3  ContinuationReference.referenceType
+### 3.1.3  ContinuationReference.referenceType
 
 
    Indicates the DSE Type of the ContinuationReference.localReference.
@@ -288,7 +301,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
 
 
 
-3.1.4  ContinuationReference.remainingName
+### 3.1.4  ContinuationReference.remainingName
 
 
    In certain scenarios, the localReference does not completely name the
@@ -306,7 +319,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
       distributed knowledge information.
 
 
-3.1.5  ContinuationReference.searchScope
+### 3.1.5  ContinuationReference.searchScope
 
 
    Under certain circumstances, when progressing a search operation, a
@@ -326,7 +339,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
    while that referralURI is being operated upon.
 
 
-3.1.6  ContinuationReference.searchedSubtrees
+### 3.1.6  ContinuationReference.searchedSubtrees
 
 
    For ContinuationReferences generated while processing a search
@@ -341,7 +354,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
    while that referralURI is being operated upon.
 
 
-3.1.7  ContinuationReference.failedName
+### 3.1.7  ContinuationReference.failedName
 
 
    When an operation requires that multiple names be resolved (as is the
@@ -360,14 +373,13 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
    that referralURI is being operated upon.
 
 
-3.2  ChainedRequest
+## 3.2  ChainedRequest
 
 
    The Chained Request is sent as an LDAP extended operation.  The
    requestName is IANA-ASSIGNED-OID.1.  The requestValue is the BER
    encoding of the following ChainedRequestValue ASN.1 definition:
-
-
+```ASN.1
       ChainedRequestValue ::= SEQUENCE {
 
 
@@ -404,14 +416,13 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
             extendedReq    ExtendedRequest,
             ...  },
          controls       [0] Controls COPTIONAL }
-
-
+```
    BindRequest, SearchRequest, ModifyRequest, AddRequest, DelRequest,
    ModifyDNRequest, CompareRequest, ExtendedRequest and Controls are
    defined in [RFC2251].
 
 
-3.2.1  ChainedRequestValue.chainingArguments
+### 3.2.1  ChainedRequestValue.chainingArguments
 
 
    In general, these fields assist in refining the original operation as
@@ -518,7 +529,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
       that of the incoming ChainedRequestValue.operationRequest.
 
 
-3.3  Chained Response
+## 3.3  Chained Response
 
 
    The Chained Response is sent as an LDAP IntermediateResponse
@@ -529,8 +540,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
    ChainedIntermediateResponseValue ASN.1 definition.  For completed
    operations, the ExtendedResponse.value is the BER encoding of the
    ChainedFinalResponseValue ASN.1 definition.
-
-
+```ASN.1
       ChainedIntermediateResponseValue ::= SEQUENCE {
 
 
@@ -590,7 +600,7 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
             extendedResp    ExtendedResponse,
             ...  },
          controls [0] Controls COPTIONAL }
-
+```
 
    BindResponse, SearchResultEntry, SearchResultDone,
    SearchResultReference, ModifyResponse, AddResponse, DelResponse,
@@ -637,52 +647,6 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
 
    This holds the directory operation response message tied to the
    ChainedRequestValue.operationRequest.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Sermersheim              Expires August 26, 2005               [Page 13]
 Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
