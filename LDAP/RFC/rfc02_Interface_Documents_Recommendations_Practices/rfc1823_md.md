@@ -1122,7 +1122,8 @@ ldap_dn2ufn()将DN转换为[5]中描述的用户友好格式。
 
            /* step through each entry returned */
            for ( e = ldap_first_entry( ld, res ); e != NULL;
-               e = ldap_next_entry( ld, e ) ) {
+               e = ldap_next_entry( ld, e ) ) 
+           {
                    /* print its name */
                    dn = ldap_get_dn( ld, e );
                    printf( "dn: %s0, dn );
@@ -1131,12 +1132,14 @@ ldap_dn2ufn()将DN转换为[5]中描述的用户友好格式。
                    /* print each attribute */
                    for ( a = ldap_first_attribute( ld, e, &ptr );
                            a != NULL;
-                       a = ldap_next_attribute( ld, e, ptr ) ) {
+                       a = ldap_next_attribute( ld, e, ptr ) ) 
+                   {
                            printf( "attribute: %s0, a );
 
                            /* print each value */
                            vals = ldap_get_values( ld, e, a );
-                           for ( i = 0; vals[i] != NULL; i++ ) {
+                           for ( i = 0; vals[i] != NULL; i++ ) 
+                           {
                                    printf( "value: %s0, vals[i] );
                            }
                            ldap_value_free( vals );
