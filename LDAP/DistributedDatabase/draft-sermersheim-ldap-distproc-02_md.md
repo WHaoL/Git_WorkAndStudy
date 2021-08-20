@@ -221,191 +221,165 @@ The list of referralURI values is used by the receiver to progress the operation
 
 
 In some cases, a referralURI will contain data which has a counterpart in the fields of the ContinuationReference (an example is where the referralURI is an LDAP URL, holds a <scope> value, and the ContinuationReference.searchScope field is also present).  In these cases, the data held on the referralURI overrides the field in the ContinuationReference.  Specific examples of this are highlighted in other sections.  Providing a means for these values to exist as fields of the ContinuationReference allows one value to be applied to all values of referralURI (as opposed to populating duplicate data on all referralURI values).
-在某些情况下，referralURI 将包含在 ContinuationReference 字段中具有对应项的数据（例如，referralURI 是一个 LDAP URL，包含一个 <scope> 值，并且 ContinuationReference.searchScope 字段也存在）。
-在这些情况下，referralURI 上保存的数据会覆盖 ContinuationReference 中的字段。
-其他部分重点介绍了这方面的具体示例。
-为这些值提供一种作为 ContinuationReference 字段存在的方法，允许将一个值应用到referralURI 的所有值（而不是在所有referralURI 值上填充重复数据）。
-
+在某些情况下，referralURI将会包含 ContinuationReference的某些字段对应的副本
+（例如，referralURI是一个LDAP URL，包含一个<scope>值，并且 ContinuationReference.searchScope 字段也存在）。
+在这些情况下，referralURI上保存的数据会覆盖ContinuationReference中的字段(的值)。
+其他部分 重点介绍了 这方面的具体示例。
+为这些值 提供了一种作为ContinuationReference字段存在的方法，允许将一个值应用到referralURI的所有值（而不是在所有referralURI值上填充重复数据）。
 
 If a referralURI value identifies an LDAP-enabled DSA [RFC3377], the LDAP URL form is used.
-如果referralURI 值标识启用LDAP 的DSA [RFC3377]，则使用LDAP URL 形式。
+如果 referralURI值 标识启用LDAP的DSA [RFC3377]，则使用LDAP URL 形式。
 
 
 
 
 #### 3.1.1.1  Elements of referralURI Values
 
-
 The following data elements must be allowed and identified for a specified URI type to be used to convey referral information.  Each element is given a name which begins with 'referralURI.' for clarity when referencing the elements conceptually in other parts of this document.
-对于 用于传递引用信息/referral-information的特定URI类型，必须允许和标识以下 数据元素。
+对于一个用于传递referral-information的特定URI-type，必须允许和标识  以下data-elements。
 为了清楚起见，每个元素都有一个以'referralURI.'开头的名称。
 
 - referralURI.protocolIdentifier.  
   There must be an indication of the protocol to be used to contact the DSA identified by the URI.
-  必须指明用于联系 由URI标识的DSA  的协议。
+  必须指定一个protocol，用于联系 被URI标识的DSA。
 
 - referralURI.accessPoint.  
   The URI must identify a DSA in a manner that can be used to contact it using the protocol specified in protocolIdentifier.
-  URI 必须以一种可用于使用 protocolIdentifier 中指定的协议与它联系的方式来标识 DSA。
+  URI必须  以一种可以使用protocolIdentifier中指定的协议 与DSA联系的方式  来标识DSA。
 
 - referralURI.targetObject.  
   Holds the name to be used as the base DN of the operation being progressed.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
-  保存要用作正在进行的操作的基本 DN 的名称。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+  保存 要用作正在进行的操作的 base-DN的名称。
+  URI规范必须允许此字段，但由于各种原因可能会在URI实例中省略。
 
 - referralURI.localReference.  
   See Section 3.1.2.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
-  见第 3.1.2 节。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+  见第 3.1.2 节。
+  URI规范必须允许此字段，但由于各种原因可能会在URI实例中省略。
 
 - referralURI.searchScope.  
   See Section 3.1.5.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
-  见第 3.1.5 节。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+  见第 3.1.5 节。
+  URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
 
 - referralURI.searchedSubtrees.  
   See Section 3.1.6.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
-  见第 3.1.6 节。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+  见第 3.1.6 节。
+  URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
 
 - referralURI.failedName.  
   See Section 3.1.7.  This field must be allowed by the URI specification, but may be omitted in URI instances for various reasons.
-  见第 3.1.7 节。URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
+  见第 3.1.7 节。
+  URI 规范必须允许此字段，但由于各种原因可能会在 URI 实例中省略。
 
 
 
 
 ### 3.1.2  ContinuationReference.localReference
 
-
-   This names the DSE which was found to hold distributed knowledge
-   information, and thus which caused the ContinuationReference to be
-   formed.  This field is primarily used to help convey the new target
-   object name, but may also be used for purposes referential integrity
-   (not discussed here).  In the event that the root object holds the
-   distributed knowledge information, this field is present and is
-   populated with an empty DN.
-
+This names the DSE which was found to hold distributed knowledge information, and thus which caused the ContinuationReference to be formed.  This field is primarily used to help convey the new target object name, but may also be used for purposes referential integrity (not discussed here).  In the event that the root object holds the distributed knowledge information, this field is present and is populated with an empty DN.
+这命名了 被发现保存分布式知识信息的DSE，从而导致形成ContinuationReference。
+该字段主要用于帮助传达  新的target-object-name，但也可用于引用完整性（此处未讨论）的目的。
+如果root-object持有分布式知识信息，则该字段存在并填充为空DN。
+总结：
+   用于命名 DSE(保存了分布式信息的)；
+   （即，DSE的name）
+   主要用于传达，新的target-object-name；
+   如果root-object持有分布式信息，则该字段存在，并填充为空DN。
 
 ### 3.1.3  ContinuationReference.referenceType
 
-
-   Indicates the DSE Type of the ContinuationReference.localReference.
-   This field may be used to determine how to progress an operations
-   (i.e.  if the value is nonSpecificSubordinate, a search continuation
-   will exclude the ContinuationReference.referenceType).
-
-
-
-
-
-
-Sermersheim              Expires August 26, 2005                [Page 7]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
-
-
+Indicates the DSE Type of the ContinuationReference.localReference. This field may be used to determine how to progress an operations (i.e.  if the value is nonSpecificSubordinate, a search continuation will exclude the ContinuationReference.referenceType).
+表示ContinuationReference.localReference的DSE-Type。
+此字段可用于确定如何进行操作（即，如果该值为 nonSpecificSubordinate，则搜索继续将排除 ContinuationReference.referenceType）。
+总结：
+   表示ContinuationReference.localReference的DSE-Type；
+   （即，DSE的Type）
+   可用于确定如何进行操作。
 
 ### 3.1.4  ContinuationReference.remainingName
 
+In certain scenarios, the localReference does not completely name the DSE to be used as the new target object name.  In these cases, remainingName is populated with the RDNSequence relative to the localReference of the target object name being resolved.  Some examples of these scenarios include (but are not restricted to):
+在某些情况下，localReference不会完全命名DSE(localReference用作新目标对象名称)。
+在这些情况下，remainingName被填充（使用 正在解析的目标对象名称的localReference相关的RDNSequence）。
+这些场景的一些示例包括（但不限于）：
 
-   In certain scenarios, the localReference does not completely name the
-   DSE to be used as the new target object name.  In these cases,
-   remainingName is populated with the RDNSequence relative to the
-   localReference of the target object name being resolved.  Some
-   examples of these scenarios include (but are not restricted to):
+- During name resolution, the name is not fully resolved, but a DSE holding distributed knowledge information is found, causing a ContinuationReference to be generated.
+在名称解析过程中，名称未完全解析，但发现了保存分布式知识信息的DSE，导致生成ContinuationReference。
 
-
-   o  During name resolution, the name is not fully resolved, but a DSE
-      holding distributed knowledge information is found, causing a
-      ContinuationReference to be generated.
-   o  While searching, an alias is dereferenced.  The aliasedObjectName
-      points to a DSE of type glue which is subordinate to a DSE holding
-      distributed knowledge information.
+- While searching, an alias is dereferenced.  The aliasedObjectName points to a DSE of type glue which is subordinate to a DSE holding distributed knowledge information.
+在搜索时，别名被解引用。
+aliasedObjectName 指向一个类型为glue的DSE，它从属于一个持有分布式知识信息的DSE。
 
 
 ### 3.1.5  ContinuationReference.searchScope
 
+Under certain circumstances, when progressing a search operation, a search scope different than that of the original search request must be used.  This field facilitates the conveyance of the proper search scope to be used when progressing the distributed operation.
+在某些情况下，在进行搜索操作时，"必须"使用与原始搜索请求不同的搜索范围。
+该字段有助于 在进行分布式操作时 传递适当的搜索范围。
 
-   Under certain circumstances, when progressing a search operation, a
-   search scope different than that of the original search request must
-   be used.  This field facilitates the conveyance of the proper search
-   scope to be used when progressing the distributed operation.
+The scope of subordinateSubtree has been added to the values allowed by the LDAP SearchRequest.scope field.  This scope includes the subtree of entries below the base DN, but does not include the base DN itself.  This is used here when progressing distributed search operations caused by the existence of a DSE of type nssr.
+subordinateSubtree的scope已添加到LDAP SearchRequest.scope字段允许的值中。
+此scope包括base-DN下条目的子树，但不包括base-DN本身。
+这在进行 由nssr类型的DSE的存在 引起的 分布式搜索操作时使用。
 
+If a referralURI.searchScope is present, it overrides this field while that referralURI is being operated upon.
+如果存在referralURI.searchScope，它会在操作referralURI时覆盖此字段。
 
-   The scope of subordinateSubtree has been added to the values allowed
-   by the LDAP SearchRequest.scope field.  This scope includes the
-   subtree of entries below the base DN, but does not include the base
-   DN itself.  This is used here when progressing distributed search
-   operations caused by the existence of a DSE of type nssr.
-
-
-   If a referralURI.searchScope is present, it overrides this field
-   while that referralURI is being operated upon.
 
 
 ### 3.1.6  ContinuationReference.searchedSubtrees
 
+For ContinuationReferences generated while processing a search operation with a scope of wholeSubtree, each value of this field indicates that a particular subtree below the target object has already been searched.  Consumers of this data use it to cause the progression of the search operation to exclude these subtrees as a mechanism to avoid receiving duplicate entries.
+对于 在处理 scope为wholeSubtree的搜索操作 时 生成的ContinuationReferences，
+该字段的每个值/value，表示已经搜索到了 目标对象/target-object下的特定子树/particular-subtree。
+此数据的使用者，使用它 来使搜索操作的 推进/进行 排除掉这些子树，以此机制来避免接收重复条目。
 
-   For ContinuationReferences generated while processing a search
-   operation with a scope of wholeSubtree, each value of this field
-   indicates that a particular subtree below the target object has
-   already been searched.  Consumers of this data use it to cause the
-   progression of the search operation to exclude these subtrees as a
-   mechanism to avoid receiving duplicate entries.
-
-
-   If a referralURI.searchedSubtrees is present, it overrides this field
-   while that referralURI is being operated upon.
+If a referralURI.searchedSubtrees is present, it overrides this field while that referralURI is being operated upon.
+如果存在referralURI.searchedSubtrees，它会在操作referralURI 时覆盖此字段。
 
 
 ### 3.1.7  ContinuationReference.failedName
 
+When an operation requires that multiple names be resolved (as is the case with the ModifyDN operation), this field is used to specify which name was found to be non-local.
+当操作要求解析多个名称时（如 ModifyDN 操作的情况），此字段用于指定发现哪个名称/name 是 非本地的/non-local。
 
-   When an operation requires that multiple names be resolved (as is the
-   case with the ModifyDN operation), this field is used to specify
-   which name was found to be non-local.
+If a referralURI.failedName is present, it overrides this field while that referralURI is being operated upon.
+如果存在referralURI.failedName，它会在操作该referralURI 时覆盖此字段。
 
-
-
-
-Sermersheim              Expires August 26, 2005                [Page 8]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
-
-
-
-   If a referralURI.failedName is present, it overrides this field while
-   that referralURI is being operated upon.
 
 
 ## 3.2  ChainedRequest
 
-
-   The Chained Request is sent as an LDAP extended operation.  The
-   requestName is IANA-ASSIGNED-OID.1.  The requestValue is the BER
-   encoding of the following ChainedRequestValue ASN.1 definition:
+The Chained Request is sent as an LDAP extended operation.  The requestName is IANA-ASSIGNED-OID.1.  The requestValue is the BER encoding of the following ChainedRequestValue ASN.1 definition:
+Chained Request作为 LDAP-扩展操作 发送。
+requestName  是 IANA-ASSIGNED-OID.1。
+requestValue 是 BER编码的 以下 ASN.1定义的ChainedRequestValue ：
 ```ASN.1
-      ChainedRequestValue ::= SEQUENCE {
-
-
+      ChainedRequestValue ::= SEQUENCE 
+      {
          chainingArguments ChainingArguments,
-         operationRequest  OperationRequest }
+         operationRequest  OperationRequest 
+      }
 
 
-      ChainingArguments ::= SEQUENCE {
-
-
+      ChainingArguments ::= SEQUENCE 
+      {
          targetObject     [0] LDAPDN OPTIONAL,
          referenceType    [1] ReferenceType,
          traceInformation [2] ChainingTraceInformation,
          searchScope      [3] SearchScope OPTIONAL,
-         searchedSubtrees [4] SearchedSubtrees OPTIONAL}
+         searchedSubtrees [4] SearchedSubtrees OPTIONAL
+      }
 
 
       ChainingTraceInformation ::= SET OF LDAPURL
 
 
-      OperationRequest ::= SEQUENCE {
-
-
-         Request ::= CHOICE {
-
-
+      OperationRequest ::= SEQUENCE 
+      {
+         Request ::= CHOICE 
+         {
             bindRequest    BindRequest,
             searchRequest  SearchRequest,
             modifyRequest  ModifyRequest,
@@ -414,87 +388,60 @@ Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
             modDNRequest   ModifyDNRequest,
             compareRequest CompareRequest,
             extendedReq    ExtendedRequest,
-            ...  },
-         controls       [0] Controls COPTIONAL }
-```
-   BindRequest, SearchRequest, ModifyRequest, AddRequest, DelRequest,
-   ModifyDNRequest, CompareRequest, ExtendedRequest and Controls are
-   defined in [RFC2251].
+            ...  
+         },
+         controls       [0] Controls COPTIONAL 
+      }
+``` 
+BindRequest, SearchRequest, ModifyRequest, AddRequest, DelRequest, ModifyDNRequest, CompareRequest, ExtendedRequest and Controls are defined in [RFC2251].
+
 
 
 ### 3.2.1  ChainedRequestValue.chainingArguments
 
-
-   In general, these fields assist in refining the original operation as
-   it is to be executed on the receiving DSA.
-
+In general, these fields assist in refining the original operation as it is to be executed on the receiving DSA.
+通常，这些字段有助于  改进原始操作，因为它要在 接收-DSA 上执行。
 
 
 
+#### 3.2.1.1  ChainedRequestValue.chainingArguments.targetObject
 
-Sermersheim              Expires August 26, 2005                [Page 9]
-Internet-Draft    Distributed Procedures for LDAP Operations  February 2005
+This field contains the new target (or base) DN for the operation.
+此字段包含 操作的new-target(或base)DN。
 
+The sending DSA populates this under different scenarios including the case where an alias has been dereferenced while resolving the DN, and also the case where a referral carries a target name different from the reference object that caused the referral.
+发送-DSA 在不同的情况下填充此信息，包括在解析 DN 时解引用别名的情况，以及引用携带与导致引用的引用对象不同的目标名称的情况。
 
+This field can be omitted only if it would be the the same value as the object or base object parameter in the ChainedRequestValue.operationRequest, in which case its implied value is that value.
+仅当该字段与 ChainedRequestValue.operationRequest 中的对象或基础对象参数的值相同时，才可以省略该字段，在这种情况下，其隐含值就是该值。
 
-3.2.1.1  ChainedRequestValue.chainingArguments.targetObject
-
-
-   This field contains the new target (or base) DN for the operation.
-
-
-   The sending DSA populates this under different scenarios including
-   the case where an alias has been dereferenced while resolving the DN,
-   and also the case where a referral carries a target name different
-   from the reference object that caused the referral.
+The receiving DSA examines this field and (if present) uses it rather than the base DN held in the ChainedRequestValue.operationRequest.
+接收 DSA 检查该字段并（如果存在）使用它而不是 ChainedRequestValue.operationRequest 中保存的基本 DN。
 
 
-   This field can be omitted only if it would be the the same value as
-   the object or base object parameter in the
-   ChainedRequestValue.operationRequest, in which case its implied value
-   is that value.
 
 
-   The receiving DSA examines this field and (if present) uses it rather
-   than the base DN held in the ChainedRequestValue.operationRequest.
+#### 3.2.1.2  ChainedRequestValue.chainingArguments.referenceType
+
+See Section 3.1.3.
+
+If the receiver encounters a value of nonSpecificSubordinate in this field, it indicates that the operation is being chained due to DSE of type nssr.  In this case, the receiver allows (and expects) the base DN to name the immediate superior of a context prefix.
 
 
-3.2.1.2  ChainedRequestValue.chainingArguments.referenceType
 
+#### 3.2.1.3  ChainedRequestValue.chainingArguments.traceInformation
 
-   See Section 3.1.3.
+This contains a set of URIs.  Each value represents the address of a DSA and DN that has already been contacted while attempting to service the operation.  This field is used to detect looping while servicing a distributed operation.
 
-
-   If the receiver encounters a value of nonSpecificSubordinate in this
-   field, it indicates that the operation is being chained due to DSE of
-   type nssr.  In this case, the receiver allows (and expects) the base
-   DN to name the immediate superior of a context prefix.
-
-
-3.2.1.3  ChainedRequestValue.chainingArguments.traceInformation
-
-
-   This contains a set of URIs.  Each value represents the address of a
-   DSA and DN that has already been contacted while attempting to
-   service the operation.  This field is used to detect looping while
-   servicing a distributed operation.
-
-
-   The sending DSA populates this with its own URI, and also the URIs of
-   any DSAs that have already been chained to.  The receiving DSA
-   examines this list of URIs and returns a loopDetect error if it finds
-   that any of the addresses and DNs in the listed URI's represent it's
-   own.
+The sending DSA populates this with its own URI, and also the URIs of any DSAs that have already been chained to.  The receiving DSA examines this list of URIs and returns a loopDetect error if it finds that any of the addresses and DNs in the listed URI's represent it's own.
 
 
 3.2.1.4  ChainedRequestValue.chainingArguments.searchScope
-
 
    See Section 3.1.5.
 
 
 3.2.1.5  ChainedRequestValue.chainingArguments.searchedSubtrees
-
 
    See Section 3.1.6.
 
