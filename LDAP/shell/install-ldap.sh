@@ -28,8 +28,8 @@ sudo yum install -y unixODBC
 # rpm -qa |grep openldap #查看安装了哪些包
 
 #数据库模板初始化
-cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
-chown ldap:ldap /var/lib/ldap/DB_CONFIG
+# cp /usr/share/openldap-servers/DB_CONFIG.example /var/lib/ldap/DB_CONFIG
+# chown ldap:ldap /var/lib/ldap/DB_CONFIG
 
 echo "4 - 关闭防火墙"
 sudo systemctl stop firewalld
@@ -43,7 +43,7 @@ echo "6 - 安装一些小工具"
 sudo yum install -y tree net-tools vim wget
 
 echo "7 - 关闭SELINUX 这个必须重启才能生效 我们把重启放到最后"
-sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
 # sestatus -v 可以查看 SElinux status: disabled
 
 # # echo "8 - 安装openssl"
@@ -87,8 +87,8 @@ sudo systemctl enable httpd
 # mkdir -p /var/lib/mdb
 
 
-echo "重启centos7"
-sudo reboot
+# echo "重启centos7"
+# sudo reboot
 
 
 #client
