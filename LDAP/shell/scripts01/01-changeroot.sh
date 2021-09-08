@@ -10,11 +10,11 @@ echo "admin pass is:  ${admin_pass}"
 sed "s!<pass>!${admin_pass}!g"   01-rootdn.ldif > 01-tmp.ldif
 
 echo "备份默认配置"
-# cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif \
-#    /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.bak01
+cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif \
+   /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{2\}hdb.ldif.bak01
 
-cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{1\}mdb.ldif \
-   /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{1\}mdb.ldif.bak01
+# cp /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{1\}mdb.ldif \
+#    /etc/openldap/slapd.d/cn\=config/olcDatabase\=\{1\}mdb.ldif.bak01
 
 echo "将要修改的内容："
 cat 01-tmp.ldif
