@@ -125,3 +125,13 @@ WHaoL0603
     用户：zhangsan 
 ````
 
+# AD导出位LDIF
+```bash
+ldifde -f testAD.ldif
+
+    -f #指定文件名
+        ldifde -i -f fileName.LDF # 导入
+        ldifde -f fileName.LDF    # 导出
+    
+
+```
