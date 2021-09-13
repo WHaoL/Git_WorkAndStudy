@@ -30,7 +30,7 @@ Copyright Notice
 
 Each attribute stored in a Lightweight Directory Access Protocol (LDAP) directory, whose values may be transferred in the LDAP protocol, has a defined syntax that constrains the structure and format of its values.  The comparison semantics for values of a syntax are not part of the syntax definition but are instead provided through separately defined matching rules.  Matching rules specify an argument, an assertion value, which also has a defined syntax.  This document defines a base set of syntaxes and matching rules for use in defining attributes for LDAP directories.
 存储在LDAP目录中的每个attribute（其value可以在 LDAP 协议中传输）都有一个定义好的语法来约束其值/value的结构/structure和格式/format。 
-值的比较语义语法 不是语法定义的一部分，而是通过单独定义的匹配规则/match-rule提供的。 
+语法值的比较语义语法 不是语法定义的一部分，而是通过单独定义的匹配规则/match-rule提供的。 
 匹配规则 指定一个参数，一个断言值，它也有一个定义好的语法。 
 本文档定义了一组基本的语法和匹配规则，用于定义 LDAP目录的属性。
 
@@ -126,12 +126,12 @@ Table of Contents
 
 Each attribute stored in a Lightweight Directory Access Protocol (LDAP) directory [RFC4510], whose values may be transferred in the LDAP protocol [RFC4511], has a defined syntax (i.e., data type) that constrains the structure and format of its values.  The comparison semantics for values of a syntax are not part of the syntax definition but are instead provided through separately defined matching rules.  Matching rules specify an argument, an assertion value, which also has a defined syntax.  This document defines a base set of syntaxes and matching rules for use in defining attributes for LDAP directories.
 存储在LDAP目录 [RFC4510] 中的每个attribute，其value可以在 LDAP协议 [RFC4511] 中传输，都具有定义好的语法(即，数据类型)来约束其 值/value 的结构/structure和格式/format。
-值的比较语义语法 不是语法定义的一部分，而是通过单独定义的匹配规则提供的。
+语法值的比较语义语法 不是语法定义的一部分，而是通过单独定义的匹配规则提供的。
 匹配规则指定一个参数，一个断言值，它也有一个定义好的语法。
 本文档定义了一组基本的语法和匹配规则，用于定义 LDAP目录的attribute。
 
 Readers are advised to familiarize themselves with the Directory Information Models [RFC4512] before reading the rest of this document.  Section 3 provides definitions for the base set of LDAP syntaxes.  Section 4 provides definitions for the base set of matching rules for LDAP.
-建议读者在阅读本文档的其余部分之前熟悉  目录信息模型[RFC4512]。
+建议读者在阅读本文档的其余部分之前熟悉目录信息模型[RFC4512]。
 第 3 节提供了LDAP语法-基本集的定义。
 第 4 节提供了 LDAP匹配规则-基本集的定义。
 
@@ -147,7 +147,7 @@ RFC 2256 的其余部分已被 [RFC4519] 和 [RFC4512] 废弃。
 
 A number of schema elements that were included in the previous revision of the LDAP technical specification are not included in this revision of LDAP.  Public Key Infrastructure schema elements are now specified in [RFC4523].  Unless reintroduced in future technical specifications, the remainder are to be considered Historic.
 LDAP技术规范的先前修订版中包含的许多模式元素/schema elements 未包含在LDAP的此修订版中。
-公钥-基础设施-模式元素/schema elements 现在在[RFC4523]中指定。
+公钥基础设施/PKI-模式元素/schema elements 现在在[RFC4523]中指定。
 除非在未来的技术规范中重新引入，否则其余部分将被视为历史性的。
 
 The changes with respect to RFC 2252 are described in Appendix B of this document.
@@ -171,13 +171,13 @@ Syntax definitions are written according to the <SyntaxDescription> ABNF [RFC423
 # 3.  Syntaxes
 
 Syntax definitions constrain the structure of attribute values stored in an LDAP directory, and determine the representation of attribute and assertion values transferred in the LDAP protocol.
-语法定义约束存储在 LDAP 目录中的属性值的结构，并确定在 LDAP 协议中传输的属性和断言值的表示。
+语法定义约束了 存储在LDAP目录中的属性值的结构，并确定了 在LDAP协议中传输的属性和断言值的表示。
 
 Syntaxes that are required for directory operation, or that are in common use, are specified in this section.  Servers SHOULD recognize all the syntaxes listed in this document, but are not required to otherwise support them, and MAY recognise or support other syntaxes. However, the definition of additional arbitrary syntaxes is discouraged since it will hinder interoperability.  Client and server implementations typically do not have the ability to dynamically recognize new syntaxes.
 本节指定了 目录操作  所需的或常用的语法。 
 服务器 应该识别本文档中列出的所有语法，但不需要以其他方式支持它们，并且可以识别或支持其他语法。 
 但是，不鼓励定义额外的任意语法，因为它会妨碍互操作性。 
-客户端和服务器实现 通常没有动态识别新语法的能力。
+**客户端和服务器实现 通常没有动态识别新语法的能力。**
 
 
 
@@ -185,11 +185,11 @@ Syntaxes that are required for directory operation, or that are in common use, a
 ## 3.1.  General Considerations
 
 The description of each syntax specifies how attribute or assertion values conforming to the syntax are to be represented when transferred in the LDAP protocol [RFC4511].  This representation is referred to as the LDAP-specific encoding to distinguish it from other methods of encoding attribute values (e.g., the Basic Encoding Rules (BER) encoding [BER] used by X.500 [X.500] directories).
-每个语法的描述, 指定了在LDAP协议[RFC4511]中传输时 如何表示符合语法的属性或断言值。
+每个语法的描述, 指定了/详细说明了 在LDAP协议[RFC4511]中传输时 如何表示符合语法的属性或断言值。
 这种表示被称为 LDAP特定编码，以区别于其他编码属性值的方法（例如，X.500 [X.500] 目录使用的基本编码规则 (BER) 编码 [BER]）。
 
 The LDAP-specific encoding of a given attribute syntax always produces octet-aligned values.  To the greatest extent possible, encoding rules for LDAP syntaxes should produce character strings that can be displayed with little or no translation by clients implementing LDAP.  However, clients MUST NOT assume that the LDAP-specific encoding of a value of an unrecognized syntax is a human-readable character string.  There are a few cases (e.g., the JPEG syntax) when it is not reasonable to produce a human-readable representation.
-给定属性语法的 <font color=red>LDAP特定编码 始终生成 八位字节对齐的值。</font>
+<font color=red> 一个给定的 属性语法的 LDAP特定编码，始终生成 八位字节对齐的值。</font>
 在最大程度上，LDAP语法的编码规则 应该生成字符串 (可以由 实现LDAP的客户端 在很少或无需翻译的情况下 显示这些字符串。)
 但是，客户端不能假设 一个无法识别的语法的值的LDAP特定编码 是人类可读的字符串。
 在某些情况下（例如，JPEG语法）生成人类可读的表示是不合理的。
@@ -220,9 +220,9 @@ The following ABNF rules are used in a number of the syntax definitions in Secti
 ```ABNF
       PrintableCharacter = ALPHA(a-zA-z) / DIGIT(0-9) / SQUOTE(') / LPAREN( ( ) / RPAREN( ) ) /   ;可打印的-字符
                            PLUS(+) / COMMA(,) / HYPHEN(-) / DOT(.) / EQUALS(=) /
-                           SLASH("/") / COLON(没找到) / QUESTION(没找到，推测是"?") / SPACE(" ")
+                           SLASH("/") / COLON(:) / QUESTION("?") / SPACE(" ")
       PrintableString    = 1*PrintableCharacter                         ;可打印的-字符串
-      IA5String          = *(%x00-7F)
+      IA5String          = *(%x00-7F) ;ASCII码的全部取值
       SLASH              = %x2F  ; forward slash ("/")
       COLON              = %x3A  ; colon (":")
       QUESTION           = %x3F  ; question mark ("?")
@@ -263,7 +263,7 @@ This syntax corresponds to the AttributeTypeDescription ASN.1 type from [X.501].
 
 A value of the Bit String syntax is a sequence of binary digits.  The LDAP-specific encoding of a value of this syntax is defined by the following ABNF:
 Bit String语法的值, 是一个二进制数字序列。
-该语法的值的LDAP特定编码由以下ABNF定义:
+此语法值的LDAP特定编码由以下ABNF定义:
 ```ABNF
       BitString    = SQUOTE *binary-digit SQUOTE "B"     ; '二进制数字序列' + "B"
       binary-digit = "0" / "1"                           ; 二进制数字是 0或1
