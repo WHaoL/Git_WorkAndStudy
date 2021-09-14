@@ -107,6 +107,8 @@ This section defines the RECOMMENDED algorithm for converting a distinguished na
 
 总结：RECOMMENDED算法，用于将可分辨名称 从ASN.1结构化表示 转换为 字符串表示。
 
+
+
 ## 2.1.  Converting the RDNSequence(转换RDN序列)
 
 If the RDNSequence is an empty sequence, the result is the empty or zero-length string.
@@ -118,7 +120,11 @@ Otherwise, the output consists of the string encodings of each RelativeDistingui
 The encodings of adjoining RelativeDistinguishedNames are separated by a comma (',' U+002C) character.
 相邻的 RelativeDistinguishedNames 的编码由逗号(',' U+002C)字符分隔。
 
-总结：转换RDNSequence，即为 将RDNSequence中的每个RelativeDistinguishedName的字符串编码 输出。
+总结：
+   将RDNSequence转换为string时，即为 将RDNSequence中的每个RelativeDistinguishedName的字符串编码 输出；
+   相邻的RelativeDistinguishedNames，使用','分隔。
+
+
 
 ## 2.2.  Converting RelativeDistinguishedName
 
@@ -129,52 +135,60 @@ Where there is a multi-valued RDN, the outputs from adjoining AttributeTypeAndVa
 在存在多值 RDN 的情况下，相邻 AttributeTypeAndValues 的输出由加号 ('+' U+002B) 字符分隔。
 
 总结：
-   从ASN.1形式的RelativeDistinguishedName转换为string时，输出每个AttributeTypeAndValue的字符串编码；
+   将ASN.1形式的RelativeDistinguishedName转换为string时，即为 输出每个AttributeTypeAndValue的字符串编码；
    RDN是多值时，AttributeTypeAndValues之间使用'+'分隔。
+
+
 
 ## 2.3.  Converting AttributeTypeAndValue
 
-   The AttributeTypeAndValue is encoded as the string representation of the AttributeType, followed by an equals sign ('=' U+003D) character, followed by the string representation of the AttributeValue.  The encoding of the AttributeValue is given in Section 2.4.
+The AttributeTypeAndValue is encoded as the string representation of the AttributeType, followed by an equals sign ('=' U+003D) character, followed by the string representation of the AttributeValue.  The encoding of the AttributeValue is given in Section 2.4.
+AttributeTypeAndValue 被编码为 AttributeType 的字符串表示形式，
+后跟等号 ('=' U+003D) 字符，然后是 AttributeValue 的字符串表示形式。
+AttributeValue 的编码在第 2.4 节中给出。
 
-   If the AttributeType is defined to have a short name (descriptor) [RFC4512] and that short name is known to be registered [REGISTRY] [RFC4520] as identifying the AttributeType, that short name, a <descr>, is used.  Otherwise the AttributeType is encoded as the dotted-decimal encoding, a <numericoid>, of its OBJECT IDENTIFIER. The <descr> and <numericoid> are defined in [RFC4512].
+If the AttributeType is defined to have a short name (descriptor) [RFC4512] and that short name is known to be registered [REGISTRY] [RFC4520] as identifying the AttributeType, that short name, a <descr>, is used.  Otherwise the AttributeType is encoded as the dotted-decimal encoding, a <numericoid>, of its OBJECT IDENTIFIER. The <descr> and <numericoid> are defined in [RFC4512].
+如果 AttributeType 定义为具有短名称（描述符）[RFC4512]，并且已知该短名称已注册 [REGISTRY] [RFC4520] 作为标识 AttributeType，则使用该短名称，<descr>。
+否则，AttributeType 被编码为它的 OBJECT IDENTIFIER 的点分十进制编码，一个 <numericoid>。
+<descr> 和 <numericoid> 在 [RFC4512] 中定义。
 
-   Implementations are not expected to dynamically update their knowledge of registered short names.  However, implementations SHOULD provide a mechanism to allow their knowledge of registered short names to be updated.
+Implementations are not expected to dynamically update their knowledge of registered short names.  However, implementations SHOULD provide a mechanism to allow their knowledge of registered short names to be updated.
+实现不会动态更新他们对注册短名称的了解。
+但是，实现应该提供一种机制来允许更新他们对注册短名称的了解。
 
-2.4.  Converting an AttributeValue from ASN.1 to a String
+总结：
+   AttributeType 的字符串表示 即为 AttributeTypeAndValue， 后跟'=', 然后是AttributeValue 的字符串表示。
+   如果AttributeType有短名称，那么使用该短名称；否则 被编码为它的 OID。
 
-   If the AttributeType is of the dotted-decimal form, the AttributeValue is represented by an number sign ('#' U+0023) character followed by the hexadecimal encoding of each of the octets of the BER encoding of the X.500 AttributeValue.  This form is also used when the syntax of the AttributeValue does not have an LDAP-specific ([RFC4517], Section 3.1) string encoding defined for it, or the LDAP-specific string encoding is not restricted to UTF-8-encoded Unicode characters.  This form may also be used in other cases, such as when a reversible string representation is desired (see Section 5.2).
 
-   Otherwise, if the AttributeValue is of a syntax that has a LDAP-specific string encoding, the value is converted first to a UTF-8-encoded Unicode string according to its syntax specification (see [RFC4517], Section 3.3, for examples).  If that UTF-8-encoded Unicode string does not have any of the following characters that need escaping, then that string can be used as the string representation of the value.
 
-      - a space (' ' U+0020) or number sign ('#' U+0023) occurring at the beginning of the string;
+## 2.4.  Converting an AttributeValue from ASN.1 to a String
+
+If the AttributeType is of the dotted-decimal form, the AttributeValue is represented by an number sign ('#' U+0023) character followed by the hexadecimal encoding of each of the octets of the BER encoding of the X.500 AttributeValue.  This form is also used when the syntax of the AttributeValue does not have an LDAP-specific ([RFC4517], Section 3.1) string encoding defined for it, or the LDAP-specific string encoding is not restricted to UTF-8-encoded Unicode characters.  This form may also be used in other cases, such as when a reversible string representation is desired (see Section 5.2).
+
+Otherwise, if the AttributeValue is of a syntax that has a LDAP-specific string encoding, the value is converted first to a UTF-8-encoded Unicode string according to its syntax specification (see [RFC4517], Section 3.3, for examples).  If that UTF-8-encoded Unicode string does not have any of the following characters that need escaping, then that string can be used as the string representation of the value.
+
+ - a space (' ' U+0020) or number sign ('#' U+0023) occurring at the beginning of the string;
     
-      - a space (' ' U+0020) character occurring at the end of the string;
+ - a space (' ' U+0020) character occurring at the end of the string;
 
-
-
-
-
-
-Zeilenga                    Standards Track                     [Page 4]
-
-RFC 4514               LDAP: Distinguished Names               June 2006
-
-
-      - one of the characters '"', '+', ',', ';', '<', '>',  or '\' (U+0022, U+002B, U+002C, U+003B, U+003C, U+003E, or U+005C, respectively);
+ - one of the characters '"', '+', ',', ';', '<', '>',  or '\' (U+0022, U+002B, U+002C, U+003B, U+003C, U+003E, or U+005C, respectively);
     
-      - the null (U+0000) character.
+ - the null (U+0000) character.
 
-   Other characters may be escaped.
+Other characters may be escaped.
 
-   Each octet of the character to be escaped is replaced by a backslash and two hex digits, which form a single octet in the code of the character.  Alternatively, if and only if the character to be escaped is one of
+Each octet of the character to be escaped is replaced by a backslash and two hex digits, which form a single octet in the code of the character.  Alternatively, if and only if the character to be escaped is one of
 ```
       ' ', '"', '#', '+', ',', ';', '<', '=', '>', or '\'
       (U+0020, U+0022, U+0023, U+002B, U+002C, U+003B,
        U+003C, U+003D, U+003E, U+005C, respectively)
 ```
-   it can be prefixed by a backslash ('\' U+005C).
+it can be prefixed by a backslash ('\' U+005C).
 
-   Examples of the escaping mechanism are shown in Section 4.
+Examples of the escaping mechanism are shown in Section 4.
+
+
 
 # 3.  Parsing a String Back to a Distinguished Name
 
