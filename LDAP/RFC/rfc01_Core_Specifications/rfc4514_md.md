@@ -10,7 +10,7 @@ Obsoletes: 2253                                                June 2006
 Category: Standards Track
 
 
-# Lightweight Directory Access Protocol (LDAP): String Representation of Distinguished Names
+# Lightweight Directory Access Protocol (LDAP): String Representation of Distinguished Names(DN的字符串表示)
 
 ## Status of This Memo(略)
 
@@ -26,27 +26,54 @@ Category: Standards Track
 
 # Abstract(摘要)
 
-   The X.500 Directory uses distinguished names (DNs) as primary keys to entries in the directory.  This document defines the string representation used in the Lightweight Directory Access Protocol (LDAP) to transfer distinguished names.  The string representation is designed to give a clean representation of commonly used distinguished names, while being able to represent any distinguished name.
+The X.500 Directory uses distinguished names (DNs) as primary keys to entries in the directory.  This document defines the string representation used in the Lightweight Directory Access Protocol (LDAP) to transfer distinguished names.  The string representation is designed to give a clean representation of commonly used distinguished names, while being able to represent any distinguished name.
+X.500目录使用 专有名称(DN) 作为目录中条目的主键。
+本文档定义了 轻量级目录访问协议(LDAP) 中用于传输 专有名称的 字符串表示形式。
+字符串表示旨在提供常用可分辨名称的清晰表示，同时能够表示任何可分辨名称。
 
-1.  Background and Intended Usage
 
-   In X.500-based directory systems [X.500], including those accessed using the Lightweight Directory Access Protocol (LDAP) [RFC4510], distinguished names (DNs) are used to unambiguously refer to directory entries [X.501][RFC4512].
 
-   The structure of a DN [X.501] is described in terms of ASN.1 [X.680]. In the X.500 Directory Access Protocol [X.511] (and other ITU-defined directory protocols), DNs are encoded using the Basic Encoding Rules (BER) [X.690].  In LDAP, DNs are represented in the string form described in this document.
+# 1.  Background and Intended Usage
 
-   It is important to have a common format to be able to unambiguously represent a distinguished name.  The primary goal of this specification is ease of encoding and decoding.  A secondary goal is to have names that are human readable.  It is not expected that LDAP implementations with a human user interface would display these strings directly to the user, but that they would most likely be performing translations (such as expressing attribute type names in the local national language).
+In X.500-based directory systems [X.500], including those accessed using the Lightweight Directory Access Protocol (LDAP) [RFC4510], distinguished names (DNs) are used to unambiguously refer to directory entries [X.501][RFC4512].
+在基于X.500的目录系统[X.500]中，
+包括使用轻量级目录访问协议(LDAP)[RFC4510]访问的目录系统，
+专有名称 (DN) 用于明确地引用目录条目 [X.501][RFC4512] ]。
 
-   This document defines the string representation of Distinguished Names used in LDAP [RFC4511][RFC4517].  Section 2 details the RECOMMENDED algorithm for converting a DN from its ASN.1 structured representation to a string.  Section 3 details how to convert a DN from a string to an ASN.1 structured representation.
+The structure of a DN [X.501] is described in terms of ASN.1 [X.680]. In the X.500 Directory Access Protocol [X.511] (and other ITU-defined directory protocols), DNs are encoded using the Basic Encoding Rules (BER) [X.690].  In LDAP, DNs are represented in the string form described in this document.
+DN[X.501]的结构  根据 ASN.1[X.680] 进行描述。
+在X.500目录访问协议[X.511]（和其他ITU定义的目录协议）中，DN 使用 基本编码规则(BER)[X.690] 进行编码。
+在LDAP中，DN 以  本文档中描述的字符串形式 表示。
 
-   While other documents may define other algorithms for converting a DN from its ASN.1 structured representation to a string, all algorithms MUST produce strings that adhere to the requirements of Section 3.
+It is important to have a common format to be able to unambiguously represent a distinguished name.  The primary goal of this specification is ease of encoding and decoding.  A secondary goal is to have names that are human readable.  It is not expected that LDAP implementations with a human user interface would display these strings directly to the user, but that they would most likely be performing translations (such as expressing attribute type names in the local national language).
+重要的是 有一个通用格式 能够明确地表示一个专有名称。
+本规范的主要目标是：易于编码和解码。
+第二个目标是：拥有人类可读的名称。
+带有人工用户界面的LDAP实现 不会直接向用户显示这些字符串，但它们很可能会执行翻译（例如用当地国家语言表达属性类型名称）。
 
-   This document does not define a canonical string representation for DNs.  Comparison of DNs for equality is to be performed in accordance with the distinguishedNameMatch matching rule [RFC4517].
+This document defines the string representation of Distinguished Names used in LDAP [RFC4511][RFC4517].  Section 2 details the RECOMMENDED algorithm for converting a DN from its ASN.1 structured representation to a string.  Section 3 details how to convert a DN from a string to an ASN.1 structured representation.
+本文档定义了 LDAP [RFC4511][RFC4517] 中使用的专有名称的字符串表示。
+第 2 节详细介绍了  RECOMMENDED算法： 将DN 从其 ASN.1结构化表示 转换为字符串。
+第 3 节详细介绍了：如何将DN 从字符串 转换为 ASN.1结构化表示。
 
-   This document is a integral part of the LDAP technical specification [RFC4510], which obsoletes the previously defined LDAP technical specification, RFC 3377, in its entirety.  This document obsoletes RFC 2253.  Changes since RFC 2253 are summarized in Appendix B.
+While other documents may define other algorithms for converting a DN from its ASN.1 structured representation to a string, all algorithms MUST produce strings that adhere to the requirements of Section 3.
+虽然其他文档可能定义其他算法：将DN 从其ASN.1结构化表示  转换为字符串，
+但所有算法都必须生成符合第 3 节要求的字符串。
 
-   This specification assumes familiarity with X.500 [X.500] and the concept of Distinguished Name [X.501][RFC4512].
+This document does not define a canonical string representation for DNs.  Comparison of DNs for equality is to be performed in accordance with the distinguishedNameMatch matching rule [RFC4517].
+本文档未定义 DN的 规范化字符串表示。
+DN的相等性比较将根据 distinctNameMatch 匹配规则 [RFC4517] 执行。
 
-1.1.  Conventions
+This document is a integral part of the LDAP technical specification [RFC4510], which obsoletes the previously defined LDAP technical specification, RFC 3377, in its entirety.  This document obsoletes RFC 2253.  Changes since RFC 2253 are summarized in Appendix B.
+本文档是 LDAP 技术规范 [RFC4510] 的组成部分，它完全废弃了先前定义的 LDAP技术规范 RFC 3377。
+本文档废弃了 RFC 2253。
+附录 B 总结了自 RFC 2253 以来的变化。
+
+This specification assumes familiarity with X.500 [X.500] and the concept of Distinguished Name [X.501][RFC4512].
+本规范假定熟悉 X.500[X.500] 和专有名称[X.501][RFC4512] 的概念。
+
+
+## 1.1.  Conventions(略)
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 [RFC2119].
 
@@ -56,10 +83,11 @@ Category: Standards Track
 
 
 
-2.  Converting DistinguishedName from ASN.1 to a String
+# 2.  Converting DistinguishedName from ASN.1 to a String(将DN从ASN.1转换为string)
 
-   X.501 [X.501] defines the ASN.1 [X.680] structure of distinguished
-   name.  The following is a variant provided for discussion purposes.
+X.501 [X.501] defines the ASN.1 [X.680] structure of distinguished name.  The following is a variant provided for discussion purposes.
+X.501[X.501] 定义了 可分辨名称(DN)的 ASN.1[X.680]结构。以下是为讨论目的而提供的变体。
+
 ```
       DistinguishedName ::= RDNSequence
 
@@ -72,24 +100,39 @@ Category: Standards Track
           type  AttributeType,
           value AttributeValue }
 ```
-   This section defines the RECOMMENDED algorithm for converting a distinguished name from an ASN.1-structured representation to a UTF-8 [RFC3629] encoded Unicode [Unicode] character string representation. Other documents may describe other algorithms for converting a distinguished name to a string, but only strings that conform to the grammar defined in Section 3 SHALL be produced by LDAP
-   implementations.
+This section defines the RECOMMENDED algorithm for converting a distinguished name from an ASN.1-structured representation to a UTF-8 [RFC3629] encoded Unicode [Unicode] character string representation. Other documents may describe other algorithms for converting a distinguished name to a string, but only strings that conform to the grammar defined in Section 3 SHALL be produced by LDAP   implementations.
+本节定义了RECOMMENDED算法，用于将可分辨名称 从ASN.1结构化表示 转换为 UTF-8[RFC3629]编码的Unicode[Unicode]字符串表示。
+其他文档可能会描述 将专有名称转换为字符串 的其他算法，
+但只有符合第 3 节中定义的语法的字符串 才能由LDAP实现生成。
 
-2.1.  Converting the RDNSequence
+总结：RECOMMENDED算法，用于将可分辨名称 从ASN.1结构化表示 转换为 字符串表示。
 
-   If the RDNSequence is an empty sequence, the result is the empty or zero-length string.
+## 2.1.  Converting the RDNSequence(转换RDN序列)
 
-   Otherwise, the output consists of the string encodings of each RelativeDistinguishedName in the RDNSequence (according to Section 2.2), starting with the last element of the sequence and moving backwards toward the first.
+If the RDNSequence is an empty sequence, the result is the empty or zero-length string.
+如果RDNSequence是空序列，则结果是 空字符串或零长度字符串。
 
-   The encodings of adjoining RelativeDistinguishedNames are separated by a comma (',' U+002C) character.
+Otherwise, the output consists of the string encodings of each RelativeDistinguishedName in the RDNSequence (according to Section 2.2), starting with the last element of the sequence and moving backwards toward the first.
+否则，输出由RDNSequence中每个 RelativeDistinguishedName的字符串编码 组成(根据第2.2节)，从序列的最后一个元素开始，向后移动到第一个元素。
 
-2.2.  Converting RelativeDistinguishedName
+The encodings of adjoining RelativeDistinguishedNames are separated by a comma (',' U+002C) character.
+相邻的 RelativeDistinguishedNames 的编码由逗号(',' U+002C)字符分隔。
 
-   When converting from an ASN.1 RelativeDistinguishedName to a string, the output consists of the string encodings of each AttributeTypeAndValue (according to Section 2.3), in any order.
+总结：转换RDNSequence，即为 将RDNSequence中的每个RelativeDistinguishedName的字符串编码 输出。
 
-   Where there is a multi-valued RDN, the outputs from adjoining AttributeTypeAndValues are separated by a plus sign ('+' U+002B) character.
+## 2.2.  Converting RelativeDistinguishedName
 
-2.3.  Converting AttributeTypeAndValue
+When converting from an ASN.1 RelativeDistinguishedName to a string, the output consists of the string encodings of each AttributeTypeAndValue (according to Section 2.3), in any order.
+当从 ASN.1 RelativeDistinguishedName 转换为字符串时，输出由每个 AttributeTypeAndValue的字符串编码组成（根据第 2.3 节），按任何顺序排列。
+
+Where there is a multi-valued RDN, the outputs from adjoining AttributeTypeAndValues are separated by a plus sign ('+' U+002B) character.
+在存在多值 RDN 的情况下，相邻 AttributeTypeAndValues 的输出由加号 ('+' U+002B) 字符分隔。
+
+总结：
+   从ASN.1形式的RelativeDistinguishedName转换为string时，输出每个AttributeTypeAndValue的字符串编码；
+   RDN是多值时，AttributeTypeAndValues之间使用'+'分隔。
+
+## 2.3.  Converting AttributeTypeAndValue
 
    The AttributeTypeAndValue is encoded as the string representation of the AttributeType, followed by an equals sign ('=' U+003D) character, followed by the string representation of the AttributeValue.  The encoding of the AttributeValue is given in Section 2.4.
 
@@ -133,7 +176,7 @@ RFC 4514               LDAP: Distinguished Names               June 2006
 
    Examples of the escaping mechanism are shown in Section 4.
 
-3.  Parsing a String Back to a Distinguished Name
+# 3.  Parsing a String Back to a Distinguished Name
 
    The string representation of Distinguished Names is restricted to UTF-8 [RFC3629] encoded Unicode [Unicode] characters.  The structure of this string representation is specified using the following Augmented BNF [RFC4234] grammar:
 ```ABNF
@@ -216,7 +259,7 @@ RFC 4514               LDAP: Distinguished Names               June 2006
 
    Implementations MAY recognize other DN string representations. However, as there is no requirement that alternative DN string representations be recognized (and, if so, how), implementations SHOULD only generate DN strings in accordance with Section 2 of this document.
 
-4.  Examples
+# 4.  Examples
 
    This notation is designed to be convenient for common forms of name. This section gives a few examples of distinguished names written using this notation.  First is a name containing three relative distinguished names (RDNs):
 ```
@@ -261,7 +304,7 @@ RFC 4514               LDAP: Distinguished Names               June 2006
 ```
       CN=Lu\C4\8Di\C4\87
 ```
-5.  Security Considerations
+# 5.  Security Considerations
 
    The following security considerations are specific to the handling of
    distinguished names.  LDAP security considerations are discussed in
