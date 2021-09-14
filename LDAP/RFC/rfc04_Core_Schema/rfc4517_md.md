@@ -485,7 +485,7 @@ DN 语法的 LDAP定义是：
 ```
 The DN syntax corresponds to the DistinguishedName ASN.1 type from [X.501].  Note that a BER encoded distinguished name (as used by X.500) re-encoded into the LDAP-specific encoding is not necessarily reversible to the original BER encoding since the chosen string type in any DirectoryString components of the distinguished name is not indicated in the LDAP-specific encoding of the distinguished name (see Section 3.3.6).
 DN 语法对应于 [X.501] 中的 DistinguishedName ASN.1 类型。
-请注意，BER编码DN（如X.500所用） 重新编码为 LDAP特定编码 不一定可逆为原始BER编码，
+请注意， 重新编码为 LDAP特定编码 的 BER编码DN（如X.500所用）  不一定可逆为原始BER编码，
 因为在DN的任何 DirectoryString组件中选择的字符串类型 并不表示 DN的LDAP特定编码（请参阅第 3.3.6 节）。
 
 
