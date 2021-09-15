@@ -1,3 +1,19 @@
+# openldap-2.4.49+dfsg-debian-源码阅读
+
+```bash
+$ apt source openldap
+
+$ ll
+drwxrwxr-x 12 gos gos    4096 9月   8 09:50 openldap-2.4.49+dfsg/
+-rw-r--r--  1 gos gos  187956 4月  15 07:33 openldap_2.4.49+dfsg-2ubuntu1.8.debian.tar.xz
+-rw-r--r--  1 gos gos    3136 4月  15 07:33 openldap_2.4.49+dfsg-2ubuntu1.8.dsc
+-rw-r--r--  1 gos gos 4844726 2月  10  2020 openldap_2.4.49+dfsg.orig.tar.gz
+```
+
+
+
+
+
 # schema
 
 
@@ -110,13 +126,76 @@ Substring indexing:
 
 # DN
 
+### /servers/slapd/dn.c
+
+```c
+//-------------------------------------------------------------------------------
+
+/*
+The DN syntax-related functions take advantage of the dn representation
+ * handling functions ldap_str2dn/ldap_dn2str.  The latter are not schema-
+ * aware, so the attributes and their values need be validated (and possibly
+ * normalized).  In the current implementation the required validation/nor-
+ * malization/"pretty"ing are done on newly created DN structural represen-
+ * tations; however the idea is to move towards DN handling in structural
+ * representation instead of the current string representation.  To this
+ * purpose, we need to do only the required operations and keep track of
+ * what has been done to minimize their impact on performances.
+与DN语法相关的函数利用  DN表示处理函数ldap_str2dn/ldap_dn2str。
+后者不支持schema识别，因此需要验证属性及其值(可能还需要规范化)。
+
+在当前的实现中，需要 对新创建的DN结构表示 进行验证/正规化/美化;
+然而，其想法是在结构表示中转向DN处理，而不是当前的字符串表示。
+为了达到这个目的，我们只需要执行所需的操作，并跟踪已经完成的操作，以最小化它们对性能的影响。
+
+Developers are strongly encouraged to use this feature, to speed-up its stabilization.
+强烈鼓励开发人员使用这个特性，以加快其稳定性。
+ */
+
+static int LDAPRDN_validate( LDAPRDN rdn );//验证每个RDN的有效性
+
+/*
+In-place, schema-aware validation of the structural representation of a distinguished name.
+对DN的结构化表示进行schema识别 的就地验证
+ */
+static int LDAPDN_validate( LDAPDN dn );//验证DN的有效性，-->> 验证每个RDN的有效性
+
+
+
+```
+
+
+
+
+
+
+
 ## /libraries/libldap/getdn.c
 
 ```c
+
+
+
+
+
+
+
+//-------------------------------------------------------------------------------
+
+
+//-------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------
+
+
+
+//-------------------------------------------------------------------------------
 /*
 Converts a string representation of a DN (in LDAPv3, LDAPv2 or DCE) into a structural representation of the DN, by separating attribute types and values encoded in the more appropriate form, which is string or OID for attribute types and binary form of the BER encoded value or Unicode string. Formats different from LDAPv3 are parsed according to their own rules and turned into the more appropriate form according to LDAPv3. 
- 将 字符串表示的DN(LDAPv3 LDAPv2或DCE)转换成 结构化表示的DN,
- 通过 分隔属性类型和值 以更合适的形式编码 ,
+ 将 字符串(string)表示的DN(LDAPv3 LDAPv2或DCE)转换成 结构化表示的DN,
+ 通过 分隔 属性类型和值 以更合适的形式编码 ,
  这是属性类型 的字符串或OID形式 和 BER编码值或者Unicode字符串 的二进制形式。
  不同于LDAPv3的格式将根据它们自己的规则进行解析，并根据LDAPv3将其转换为更合适的形式。
 
@@ -141,12 +220,29 @@ int ldap_bv2dn_x( struct berval *bvin, LDAPDN *dn, unsigned flags, void *ctx )
     	//首先进行 有效性判断
     	// 判断LDAP的协议版本
 
+    
+//-------------------------------------------------------------------------------
+    
+    
+    
+//-------------------------------------------------------------------------------
+    /string     
 
 ```
 
 
 
-- AVA RND DN的定义 
+
+
+
+
+
+
+
+
+# 数据类型
+
+## AVA RND DN的定义
 
 ```c
 // /include/ldap.h
@@ -171,6 +267,31 @@ typedef LDAPRDN* LDAPDN; // DN是个数组，每个元素是个RDN，每个RDN�
 
 
 ```
+
+
+
+## struct berval
+
+```c
+/* 
+structure for returning a sequence of octet strings + length 
+ 对 返回的8位字节序列 结构化，
+ {
+  length ; 
+  string ;
+  }
+*/
+typedef struct berval {
+	ber_len_t	bv_len;
+	char		*bv_val;
+} BerValue;
+
+typedef BerValue *BerVarray;	/* To distinguish from a single bv */
+
+/* this should be moved to lber-int.h */
+```
+
+
 
 
 
