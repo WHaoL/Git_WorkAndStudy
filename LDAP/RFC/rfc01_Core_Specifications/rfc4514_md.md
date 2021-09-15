@@ -148,9 +148,9 @@ AttributeType的字符串表示形式，后跟等号('=' U+003D)字符，然后�
 AttributeValue 的编码在第 2.4 节中给出。
 
 If the AttributeType is defined to have a short name (descriptor) [RFC4512] and that short name is known to be registered [REGISTRY] [RFC4520] as identifying the AttributeType, that short name, a <descr>, is used.  Otherwise the AttributeType is encoded as the dotted-decimal encoding, a <numericoid>, of its OBJECT IDENTIFIER. The <descr> and <numericoid> are defined in [RFC4512].
-如果 AttributeType 定义为具有短名称（描述符）[RFC4512]，并且已知 该短名称已注册[REGISTRY] [RFC4520]作为标识 AttributeType，则使用该短名称，<descr>。
-否则，AttributeType 被编码为它的 OBJECT IDENTIFIER 的点分十进制编码，一个 <numericoid>。
-<descr> 和 <numericoid> 在 [RFC4512] 中定义。
+如果 AttributeType 定义为具有短名称（描述符）[RFC4512]，并且已知 该短名称已注册[REGISTRY] [RFC4520]作为标识 AttributeType，则使用该短名称，`<descr>`。
+否则，AttributeType 被编码为它的 OBJECT IDENTIFIER 的点分十进制编码，一个`<numericoid>`。
+`<descr>` 和 `<numericoid>` 在 [RFC4512] 中定义。
 
 Implementations are not expected to dynamically update their knowledge of registered short names.  However, implementations SHOULD provide a mechanism to allow their knowledge of registered short names to be updated.
 实现不会动态更新他们对注册短名称的了解。
@@ -253,17 +253,27 @@ The string representation of Distinguished Names is restricted to UTF-8 [RFC3629
    attributeTypeAndValue = attributeType '=' attributeValue
    attributeType = descr(短名称) / numericoid(点分十进制OID)
    attributeValue = string(字符串) / hexstring()
-      如果attributeType是 点分十进制，
+      1)如果attributeType是点分十进制(即为 类型无法识别)，
          那么AttributeValue= '#' 后跟 AttributeValue的BER编码的16进制表示
+      2)对attributeValue进行编码时
+         如果 没有为其定义 特定于LDAP的字符串编码，
+         或 特定于LDAP的编码不限于UTF-8编码的Unicode字符
+            则 --> 使用1)的规则 ('#' 后跟 AttributeValue的BER编码的16进制表示)
+      3)如果AttributeValue的语法具有 LDAP特定的字符串编码 ，
+         则首先根据其语法规范 转换为 UTF-8编码的Unicode字符串。
+         如果该 UTF-8编码的Unicode字符串没有任何需要转义的字符，则该字符串可用作该值的字符串表示形式。
+   
+   关于转义：
+      对于每个需要转义的 8位字节字符，被替换为: 一个反斜杠和两个十六进制数字
 ```
-where the productions <descr>, <numericoid>, <COMMA>, <DQUOTE>, <EQUALS>, <ESC>, <HEX>, <LANGLE>, <NULL>, <PLUS>, <RANGLE>, <SEMI>, <SPACE>, <SHARP>, and <UTFMB> are defined in [RFC4512].
+where the productions `<descr>, <numericoid>, <COMMA>, <DQUOTE>, <EQUALS>, <ESC>, <HEX>, <LANGLE>, <NULL>, <PLUS>, <RANGLE>, <SEMI>, <SPACE>, <SHARP>, and <UTFMB> `are defined in [RFC4512].
 ...在 [RFC4512] 中定义。
 COMMA是','
 
-Each <attributeType>, either a <descr> or a <numericoid>, refers to an attribute type of an attribute value assertion (AVA).  The <attributeType> is followed by an <EQUALS> and an <attributeValue>. The <attributeValue> is either in <string> or <hexstring> form.
-每个<attributeType>，无论是<descr> 还是<numericoid>，都指代一个属性值断言(AVA)的属性类型。
-<attributeType> 后跟一个 <EQUALS> 和一个 <attributeValue>。
-<attributeValue> 采用 <string> 或 <hexstring> 形式。
+`Each <attributeType>, either a <descr> or a <numericoid>, refers to an attribute type of an attribute value assertion (AVA).  The <attributeType> is followed by an <EQUALS> and an <attributeValue>. The <attributeValue> is either in <string> or <hexstring> form.`
+`每个<attributeType>，无论是<descr> 还是<numericoid>，都指代一个属性值断言(AVA)的属性类型。`
+`<attributeType> 后跟一个 <EQUALS> 和一个 <attributeValue>。`
+`<attributeValue> 采用 <string> 或 <hexstring> 形式。`
 
 If in <string> form, a LDAP string representation asserted value can be obtained by replacing (left to right, non-recursively) each <pair> appearing in the <string> as follows:
 如果采用 <string> 形式，可以通过替换(从左到右，非递归)出现在<string>中的每个<pair> 来获得LDAP字符串表示断言值，
@@ -277,10 +287,10 @@ If in <hexstring> form, a BER representation can be obtained from converting eac
 如果采用 <hexstring> 形式，则可以通过将 <hexstring> 的每个 <hexpair> 转换为 <hexpair> 指示的八位字节来获得 BER 表示。
 
 There is one or more attribute value assertions, separated by <PLUS>, for a relative distinguished name.
-对于相对专有名称，有一个或多个属性值断言，由 <PLUS> 分隔。
+对于相对专有名称，有一个或多个属性值断言，由 `<PLUS>+` 分隔。
 
 There is zero or more relative distinguished names, separated by <COMMA>, for a distinguished name.
-对于一个专有名称，有零个或多个相对专有名称，由 <COMMA> 分隔。
+对于一个专有名称，有零个或多个相对专有名称，由 `<COMMA>,` 分隔。
 
 Implementations MUST recognize AttributeType name strings (descriptors) listed in the following table, but MAY recognize other name strings.
 实现必须识别  下表中列出的 AttributeType名称字符串（描述符）(即 短名称)，但可以识别其他名称字符串。
@@ -302,7 +312,7 @@ These attribute types are described in [RFC4519].
 
 Implementations MAY recognize other DN string representations. However, as there is no requirement that alternative DN string representations be recognized (and, if so, how), implementations SHOULD only generate DN strings in accordance with Section 2 of this document.
 实现可以识别 其他DN字符串表示。
-然而，不要求识别 替代的 DN字符串表示（以及，如果是，如何识别），
+然而，不要求识别 (可)替代的/可选的 DN字符串表示（以及，如果是，如何识别），
 实现应该只根据本文档的第2节 生成 DN字符串。
 
 
@@ -325,13 +335,13 @@ Here is an example of a name containing three RDNs, in which the first RDN is mu
 ```
 
 This example shows the method of escaping of a special characters appearing in a common name:
-此示例显示了对常见名称中出现的特殊字符进行转义的方法：
+此示例显示了 对常见名称(common name)中出现的特殊字符进行转义的方法：
 ```
       CN=James \"Jim\" Smith\, III,DC=example,DC=net
 ```
 
 The following shows the method for encoding a value that contains a carriage return character:
-下面显示了对 包含回车符的值 进行编码的方法：
+下面显示了对 包含回车符的值(0x0D) 进行编码的方法：
 ```
       CN=Before\0dAfter,DC=example,DC=net
 ```
@@ -407,7 +417,10 @@ Applications that require the reconstruction of the DER form of the value SHOULD
 在将专有名称转换为 LDAP格式时，需要重构 值的DER形式 的应用程序 不应使用属性语法的字符串表示。
 相反，它们应该使用以数字符号 ('#' U+0023) 为前缀的十六进制形式，如第 2.4 节的第一段中所述。
 
-
+注意：
+   当将DN转换为LDAP格式时，如果需要重构值的DER形式，
+   那么不应该使用 属性语法的字符串表示，
+   应该使用以'#'为前缀的十六进制形式。
 
 # 6.  Acknowledgements(略)
 
