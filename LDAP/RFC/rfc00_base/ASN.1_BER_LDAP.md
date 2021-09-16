@@ -22,7 +22,7 @@ In ASN.1 BER, each piece of data is called an element, and each BER element has 
 ​	<font color=red>在ASN.1 BER中，每条数据称为一个元素</font>，每个BER元素由三部分组成：类型、长度和值。 让我们仔细看看这些组件中的每一个。
 
 总结： 
-​	我们只需要了解 ASN.1的BER中(LDAP用到的那部分)
+​	我们只需要了解 ASN.1的BER中(LDAP用到的那部分);
 ​	<font color=red>每个BER elements由3部分构成：type/length/value</font>
 
 
@@ -54,7 +54,8 @@ Using these seven types, we can construct any kind of LDAP request or response.
 
 Because BER is a compact binary protocol, it uses a compact binary representation for an element’s type. Although general-purpose BER supports types that span multiple bytes, it is highly unlikely that you’ll ever encounter a BER element in an LDAP message that uses more than one byte for its type. And that byte is laid out as follows:
 
-因为 BER 是一种紧凑的二进制协议，它对element's type使用紧凑的二进制表示。 尽管 通用目的的BER 支持`跨越多个字节的类型`，但您极不可能在 LDAP 消息中遇到使用多个字节作为其类型的 BER 元素。 该字节的布局如下：
+因为 BER 是一种紧凑的二进制协议，它对element's type使用紧凑的二进制表示。 尽管 通用目的的BER 支持`跨越多个字节的类型`，但您极不可能在 LDAP 消息中遇到使用多个字节作为其类型的 BER 元素。 
+该字节（单字节BER Type）的布局如下：
 
 | Bits/位 | 8     | 7    | 6                         | 5          | 4    | 3    | 2    | 1    |
 | ------- | ----- | ---- | ------------------------- | ---------- | ---- | ---- | ---- | ---- |
@@ -90,15 +91,15 @@ The two most significant bits in this byte (i.e., the two leftmost bits in the b
 #### 1.2 The BER Type Primitive/Constructed Bit(BER-type's byte的第三位)
 
 The third most significant bit in a BER type is used to indicate whether the element is primitive or constructed. If this bit is set to one, then it means that the element is constructed and that its value is comprised of a concatenation of zero or more encoded BER elements. Sequences and sets, which encapsulate elements, are constructed. On the other hand, if this third bit is set to zero, then it means that the element is primitive and that its value should not be assumed to be comprised of encoded elements. Null, Boolean, integer, octet string, and enumerated elements are all primitive.
-BER type中的第三个最高有效位 用于指示元素是 primitive/原始的 还是 constructed/构造的。 如果该位设置为 1，则表示该元素是constructed并且其值由0个或多个编码后的 BER element的串联组成。 sequence和set封装的元素是constructed/构造的。 另一方面，如果第三位设置为1，则意味着该元素是primitive/原始的，并且不应假定其值由(各种)编码元素组(合)成。 空值/null、布尔值/boolean、整数/integer、八位字节字符串/octet-string 和 枚举/enumerated 元素都是 primitive/原始的。
+BER type中的第三个最高有效位 用于指示元素是 primitive/原始的 还是 constructed/构造的。 如果该位设置为 1，则表示该元素是constructed并且其值由0个或多个编码后的 BER element的串联组成。 sequence和set封装的元素是constructed/构造的。 另一方面，如果第三位设置为0，则意味着该元素是primitive/原始的，并且不应假定其值由(各种)编码元素组(合)成。 空值/null、布尔值/boolean、整数/integer、八位字节字符串/octet-string 和 枚举/enumerated 元素都是 primitive/原始的。
 
 总结: 
 	<font color=red>BER-element's type中的第三个最高有效位  用于指示 element是 primitive 还是 constructed。</font>
 	<font color=red>该位设置为1，表示该element是constructed/构造的 其值是 0个或多个 编码后的BER element的串联组成；sequence和se元素是constructed。</font>
-	<font color=red>该位设置为0，表示element是primitive/原始的，其值不是由各种元素组合成: Null, Boolean, integer, octet string,  enumerated元素，都是primitive</font>
+	<font color=red>该位设置为0，表示element是primitive/原始的，其值不是由各种元素组合成: Null, Boolean, integer, octet string,  enumerated元素，都是primitive 。</font>
 	关于 primitive和constructed： 
-			<font color=red>primitive即表示       该元素/element是原始的，仅仅是本element-type自己</font>
-			<font color=red>constructed即表示 该元素/element是构造的，是由 其他元素/element 组合而成</font>
+			<font color=red>primitive即表示       该元素/element是原始的，仅仅是本element-type自己</font>，
+			<font color=red>constructed即表示 该元素/element是构造的，是由 其他元素/element 组合而成</font>。
 
 
 
@@ -130,14 +131,15 @@ The following are the BER types in the universal class that you’re likely to e
 | Set          | 00110001        | 0x31         |
 
 总结： 
-	上表是在 universal-class 范围中的 BER-type
-				<font color=red>sequence/set 是：universal-`constructed`-tagNumber</font>
-				<font color=red>其他的都是          ：universal-`prmitive`-tagNumber</font>
+	上表是在 universal-class 范围中的 BER-type。
+				<font color=red>此处的sequence/set 是：universal-`constructed`-tagNumber</font>
+				<font color=red>其他的都是           ：universal-`prmitive`-tagNumber</font>
 				<font color=red>(7种基本类型，大多数是 universal-primitive)</font>
 	Universal BER Types：即 被划分为Universal class的BER Types	
 
 
-
+注意：
+     在LDAP中 Boolean，Integer，Octet String ，Null，Enumerated 只允许是primitive的！！！
 
 
 #### 1.5 The Application BER Types Used in LDAP(Application BER Types)
@@ -145,30 +147,30 @@ The following are the BER types in the universal class that you’re likely to e
 The following are the BER types in the application class that are defined for LDAP:
 以下是为LDAP定义的   (application class)应用程序类 中的 BER type：
 
-| Element Type                        | Binary Encoding | Hex Encoding |
-| ----------------------------------- | --------------- | ------------ |
-|                                     |                 |              |
-| Bind Request Protocol Op            | 01100000        | 0x60         |
-| Bind Response Protocol Op           | 01100001        | 0x61         |
-| Unbind Request Protocol Op          | 01000010        | 0x42         |
-| Search Request Protocol Op          | 01100011        | 0x63         |
-| Search Result Entry Protocol Op     | 01100100        | 0x64         |
-| Search Result Done Protocol Op      | 01100101        | 0x65         |
-| Modify Request Protocol Op          | 01100110        | 0x66         |
-| Modify Response Protocol Op         | 01100111        | 0x67         |
-| Add Request Protocol Op             | 01101000        | 0x68         |
-| Add Response Protocol Op            | 01101001        | 0x69         |
-| Delete Request Protocol Op          | 01001010        | 0x4a         |
-| Delete Response Protocol Op         | 01101011        | 0x6b         |
-| Modify DN Request Protocol Op       | 01101100        | 0x6c         |
-| Modify DN Response Protocol Op      | 01101101        | 0x6d         |
-| Compare Request Protocol Op         | 01101110        | 0x6e         |
-| Compare Response Protocol Op        | 01101111        | 0x6f         |
-| Abandon Request Protocol Op         | 01010000        | 0x50         |
-| Search Result Reference Protocol Op | 01110011        | 0x73         |
-| Extended Request Protocol Op        | 01110111        | 0x77         |
-| Extended Response Protocol Op       | 01111000        | 0x78         |
-| Intermediate Response Protocol Op   | 01111001        | 0x79         |
+| Element Type                        | Binary Encoding | Hex Encoding | type |
+| ----------------------------------- | --------------- | ------------ |------|
+|                                     |                 |              |      |
+| Bind Request Protocol Op            | 01100000        | 0x60         |      |
+| Bind Response Protocol Op           | 01100001        | 0x61         |      |
+| Unbind Request Protocol Op          | 01000010        | 0x42         | null |
+| Search Request Protocol Op          | 01100011        | 0x63         |      |
+| Search Result Entry Protocol Op     | 01100100        | 0x64         |      |
+| Search Result Done Protocol Op      | 01100101        | 0x65         |      |
+| Modify Request Protocol Op          | 01100110        | 0x66         |      |
+| Modify Response Protocol Op         | 01100111        | 0x67         |      |
+| Add Request Protocol Op             | 01101000        | 0x68         |      |
+| Add Response Protocol Op            | 01101001        | 0x69         |      |
+| Delete Request Protocol Op          | 01001010        | 0x4a         |      |
+| Delete Response Protocol Op         | 01101011        | 0x6b         |      |
+| Modify DN Request Protocol Op       | 01101100        | 0x6c         |      |
+| Modify DN Response Protocol Op      | 01101101        | 0x6d         |      |
+| Compare Request Protocol Op         | 01101110        | 0x6e         |      |
+| Compare Response Protocol Op        | 01101111        | 0x6f         |      |
+| Abandon Request Protocol Op         | 01010000        | 0x50         |      |
+| Search Result Reference Protocol Op | 01110011        | 0x73         |      |
+| Extended Request Protocol Op        | 01110111        | 0x77         |      |
+| Extended Response Protocol Op       | 01111000        | 0x78         |      |
+| Intermediate Response Protocol Op   | 01111001        | 0x79         |      |
 
 The unbind request, delete request, and abandon request protocol op types are primitive, while all the rest are constructed. This explains why their hexadecimal representations are so out-of-line with their neighboring values. The unbind request protocol op is a null element, the delete request protocol op is an octet string element, the abandon request protocol op is an integer element, and all other types are sequence elements.
 <font color=red>unbind request, delete request, abandon request协议操作类型是 primitive/原始的，而其余的都是 constructed/构造的。 </font>
@@ -176,38 +178,37 @@ The unbind request, delete request, and abandon request protocol op types are pr
 <font color=red>unbind request protocol op为null元素，delete request protocol op为octet string元素，abandon request protocol op为integer元素，其他类型均为sequence元素。</font>
 
 总结： 
-​	上表是在 application-class 范围中的 BER-type
-​			unbind-request/delete-request/abandon-request是：application-`primitive`-tagNumber		
-​			其他的都是																		 ：application-`constructed`-tagNumber
-​			(大多数是application-constructed)		
-​	Application BER Types：即被划分为Application class的BER Types
-​	其中的 3个BER-type 	
-​		unbind request,     的protocol op是null element，             是primitive的
-​		delete request,       的protocol op是octet string element，是primitive的
-​		abandon request，的protocol op是integer element，       是primitive的
-​	其他的BER type           的protocol op 都是`sequence` element，是constructed
-
-
+​	上表是在 application-class 范围中的 BER-type。
+​		unbind-request/delete-request/abandon-request是：application-`primitive`-tagNumber；	
+​		其他的都是：application-`constructed`-tagNumber；
+​			(大多数是application-constructed)。		
+​	Application BER Types：即被划分为Application class的BER Types。
+​	其中的 3个BER-type： 	
+​		unbind request,     的protocol op是null element，             是primitive的；
+​		delete request,       的protocol op是octet string element，是primitive的；
+​		abandon request，的protocol op是integer element，       是primitive的；
+​	其他的BER type           的protocol op 都是`sequence` element，是constructed。
 
 
 
 ### 2.BER Lengths(BER-element's Length)
 
 A BER element’s length specifies the number of bytes in the value. There are two ways to encode the length: a single-byte representation for values of up to 127 bytes, and a multi-byte representation for values of any size.
-<font color=red>BER element''s length 指定/指出：value占用的字节数。</font> 有两种方法可以对长度进行编码：最多 127 个字节值的单字节表示，以及任意大小值的多字节表示。  
+<font color=red>BER element's length 指定/指出：value占用的字节数。</font> 有两种方法可以对长度进行编码：最多 127 个字节值的单字节表示，以及任意大小值的多字节表示。  
 
 In the single-byte representation, the length is just encoded using the binary representation of the number of bytes in the value. For example, if the value is zero bytes long (which will be the case for a null element, for a zero-byte octet string, or an empty sequence or set), then the length is encoded as `00000000` binary or `0x00` hex. If the value is five bytes long, then the length is encoded as `00000101` binary or `0x05` hex. And a value that is 123 bytes long would be encoded as `01111011` binary or `0x7b` hex.
-在<font color=red>单字节表示</font>中，<font color=red>长度只是使用value占用字节数的二进制表示进行编码</font>。 例如，如果值是零字节长（对于空元素、零字节八位字节字符串或空序列或空集合就是这种情况），则长度被编码为“00000000”二进制或“0x00” `十六进制。 如果该值是五个字节长，则该长度被编码为“00000101”二进制或“0x05”十六进制。 123 字节长的值将被编码为“01111011”二进制或“0x7b”十六进制。
+在<font color=red>单字节表示</font>中，<font color=red>长度只是对 value占用字节数的二进制表示 进行编码</font>。 例如，如果值是零字节长（对于空元素、零字节八位字节字符串或空序列或空集合就是这种情况），则长度被编码为“00000000”二进制或“0x00” `十六进制。 如果该值是五个字节长，则该长度被编码为“00000101”二进制或“0x05”十六进制。 123 字节长的值将被编码为“01111011”二进制或“0x7b”十六进制。
 
 In the multi-byte representation, the first byte has its most significant bit set to one, and the lower seven bits are used to indicate how many bytes are required to represent the length. For example, let’s say that you want to encode the length for a value that is 1234 bytes long. The binary representation of 1234 is `10011010010` (`0x4d2` hex), which is large enough that it will require two bytes. And then we’ll need to precede those two bytes with a third byte that has its leftmost bit set to one and the right seven bits used to hold the binary representation of the number two. So the full binary representation of a BER length for a 1234-byte-long value is `100000100000010011010010` (`0x8204d2` hex).
-在<font color=red>多字节表示</font>中，<font color=red>第一个字节的最高有效位设置为1，低七位用于表示(需要多少字节来表示)长度。</font> 例如，假设您想对 1234 字节长的值的长度进行编码。 1234 的二进制表示是“10011010010”（“0x4d2”十六进制），它足够大，需要两个字节。 然后我们需要在这两个字节之前添加第三个字节，该字节的最左边的位设置为 1，右边的 7 位用于保存数字1234的二进制表示。 因此，1234 字节长值的 BER 长度的完整二进制表示为“100000100000010011010010”（“0x8204d2”十六进制）。
+在<font color=red>多字节表示</font>中，<font color=red>第一个字节的最高有效位设置为1，低七位用于表示(需要多少字节来表示)长度。</font> 例如，假设您想对 1234 字节长的值的长度进行编码。 1234 的二进制表示是“10011010010”（“0x4d2”十六进制），它足够大，需要两个字节。 然后我们需要在这两个字节之前添加第三个字节，该字节的最左边的位设置为 1，右边的 7 位用于保存数字1234的二进制表示。 因此，1234 字节长值的 BER 长度的完整二进制表示为
+“1 0000010 0000010011010010”（“0x8204d2”十六进制）。
 
 总结： 
 	BER element's length 指出了value占用的字节数；
-	有两种对length进行编码的方式：最多127字节的单字节表示，任意大小的多字节表示；
-		单字节表示：直接对 value/值 所占字节数的二进制进行编码；
-		多字节表示：第一个字节的最高位为1 第一个字节的低7位表示 value/值 所占用的字节数
-			多字节表示：即 0x8n 1 2 .. n   （0x8n表示后面占用n字节，1 2 ... n  n个字节组成的数字即为value的字节数的length）     
+	有两种对length进行编码的方式：最多127字节的单字节表示，任意大小的多字节表示。
+	单字节表示：直接对 value/值 所占字节数的二进制 进行编码；
+	多字节表示：第一个字节的最高位为1 第一个字节的低7位表示 value/值 所占用的字节数，
+		多字节表示：即 0x8n 1 2 .. n（0x8n表示后面占用n字节，1 2 ... n  n个字节组成的数字即为value的字节数的length）。     
 
 
 
@@ -216,7 +217,7 @@ In the multi-byte representation, the first byte has its most significant bit se
 使用多于必需的字节数对 BER length/长度 进行编码
 
 Although the above BER doesn’t require you to encode the length in the smallest possible number of bytes. You can use a multi-byte representation for lengths that could be encoded in just a single byte, and you can use more bytes than necessary in a multi-byte representation. For example, all of the following hexadecimal encodings are valid ways to represent a BER length of ten bytes:
-尽管上述 BER 不要求您以尽可能少的字节数对 length/长度进行编码。 对于可以仅用单个字节编码的长度，您可以使用多字节表示，并且您可以在多字节表示中使用比所需更多的字节。 例如，以下所有十六进制编码都是表示10字节 BER length的有效方式：
+尽管上述 BER 不要求您以尽可能少的字节数对 length/长度进行编码。 对于可以仅用单个字节编码的长度，您可以使用多字节表示，并且您可以在多字节表示中使用比所需更多的字节。 例如，以下所有十六进制编码都是表示 10字节 BER length的有效方式：
 
 - `0a`
 - `81 0a`
@@ -255,7 +256,7 @@ BER actually offers a third way to represent the length of an element. This is c
 BER 实际上提供了第三种表示元素长度的方法。 这称为不定形式，它在开头使用一个特殊标记来指示使用不定形式的值的开始，然后在值的结尾之后使用另一个特殊标记。 这对于可能事先不知道元素大小的情况（例如，在不知道将向该序列添加多少元素的情况下启动序列时）可能很有用。 但是，您不会在 LDAP 中遇到不定长形式，因为 [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) 第 5.1 节明确禁止使用它，所以我不会讨论任何 关于它的更多细节在这里。
 
 总结： 
-	第3种表示 element length的方法：不定长形式
+	第3种表示 element length的方法：不定长形式；
 	[RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) 第 5.1 节明确禁止使用 	不定长形式，所以我们不讨论它的细节！
 
 
@@ -490,78 +491,59 @@ LDAP makes heavy use of sequence elements. Every LDAP request and response is en
 LDAP 大量使用序列元素。 每个 LDAP 请求和响应都封装在一个称为 LDAP 消息的元素中，该元素是一个序列，其中包含消息 ID（它是一个整数）、一个协议操作（它有所不同，但通常是一个序列）和一个可选的列表 控件（如果存在，则是一个序列序列）。
 
 总结： 
-
 ​	sequence element是一个容器，0个/多个元素，元素在sequence中的顺序是重要的；
-
 ​	sequence element总是constructed；
-
 ​	sequence element的universal BER type是0x30；	00 1 10000
-
-​	LDAP大量使用sequence element
-
-​			每一个LDAP request和response都被封装在一个LDAP message元素中；
-
-​			LDAP message元素是一个sequence，
-
-​				包含一个messageID(整数)，
-
-​				包含一个protocolOp(通常是一个sequence)
-
-​				一个可选的controls列表(is a sequence of sequences)
+​	LDAP大量使用sequence element！！！
+​		每一个LDAP request和response都被封装在一个LDAP message元素中；
+​		LDAP message元素是一个sequence，
+​			包含一个messageID(整数)，
+​			包含一个protocolOp(通常是一个sequence)
+​			一个可选的controls列表(is a sequence of sequences)
 
 
 
 #### 3.7 Set Values
 
 A set element is also a container that holds zero or more other elements, and it’s encoded in exactly the same way as a sequence. The only real differences between a sequence and a set are that the order of elements in a set is not considered significant and that the universal BER type for a set is `0x31` instead of the `0x30` type used for a universal sequence.
-
 集合元素也是一个包含零个或多个其他元素的容器，它的编码方式与序列完全相同。 序列和集合之间唯一真正的区别是集合中元素的顺序并不重要，并且集合的通用 BER 类型是“0x31”而不是用于通用序列的“0x30”类型。
 
 LDAP does not use sets nearly as much as it does for sequences. The only place that sets are used in the core LDAP protocol specification ([RFC 4511](https://docs.ldap.com/specs/rfc4511.txt)) are to hold a collection of values for an attribute, and to hold the components inside an AND or OR search filter.
-
 LDAP 不像使用序列那样使用集合。 核心 LDAP 协议规范 ([RFC 4511]) 中唯一使用集合的地方是保存属性值的集合，并将组件保存在 AND 或 OR 搜索过滤器中。
 
 总结： 
-
 ​	set element是一个容器，0个/多个元素，元素在set中的顺序不重要 (这是set和sequence的唯一区别)；
-
 ​	set element的universal BER type是0x31；    00 1 10001
-
 ​	LDAP核心协议规范[RFC4511]中唯一使用set 的地方是：
-
-​			保存 attribute 的 value集合，
-
-​			并将组件保存在AND或OR搜索过滤器中
+​		保存 attribute 的 value集合，
+​		并将组件保存在AND或OR搜索过滤器中
 
 
 
 ### 4. The String Representation of ASN.1 Elements(ASN.1 element的string表示)
 
 The X.680 standard, titled “Information technology — Abstract Syntax Notation One (ASN.1): Specification of basic notation”, defines a syntax for representing ASN.1 elements as strings. As with many things related to the ASN.1, the complete syntax is long and complicated, but if you just constrain yourself to what you need to understand to get by in LDAP, it’s pretty manageable.
-
 X.680 标准，标题名为《信息技术 — 抽象语法表示法一 (ASN.1)：基本表示法规范》，定义了将 ASN.1 元素表示为字符串的语法。 与 ASN.1 相关的许多内容一样，完整的语法又长又复杂，但如果您只限于在 LDAP 中需要了解的内容，那么它是非常易于管理的。
 
 The string representation of an ASN.1 element is comprised of the following components:
-
 ASN.1 element 的string/字符串表示由以下 component/组件 组成：
 
 1. An optional set of whitespace characters and comments. What exactly constitutes whitespace and comments will be described below.
-   1. 一组可选的空白字符和注释。 下面将描述空白和注释的确切构成。
+一组可选的空白字符和注释。 下面将描述空白和注释的确切构成。
 2. The name of the element. This is technically called a “type reference”. This must start with a letter, and it must consist of one or more letters, digits, and hyphens. It must not end with a hyphen, and it must not contain consecutive hyphens.
-   1. 元素的名称。 这在技术上称为“type reference/类型引用”。 这必须以字母开头，并且必须由一个或多个字母、数字和连字符组成。 它不能以连字符结尾，并且不能包含连续的连字符。
+元素的名称。 这在技术上称为“type reference/类型引用”。 这必须以字母开头，并且必须由一个或多个字母、数字和连字符组成。 它不能以连字符结尾，并且不能包含连续的连字符。
 3. An optional set of whitespace characters and comments.
-   1. 一组可选的空白字符和注释。
+一组可选的空白字符和注释。
 4. The assignment operator “`::=`”.
-   1. 赋值运算符“`::=`”。
+赋值运算符“`::=`”。
 5. An optional set of whitespace characters and comments.
-   1. 一组可选的空白字符和注释。
+一组可选的空白字符和注释。
 6. An indication of the type of the element. This can be as simple as the name of the value type (for example, `BOOLEAN` or `OCTET STRING`), but it can be substantially more involved. We’ll get into this in more detail below.
-   1. 元素类型的指示。 这可以像值类型的名称一样简单（例如，`BOOLEAN` 或`OCTET STRING`），但它可能涉及更多。 我们将在下面更详细地介绍这一点。
+元素类型的指示。 这可以像值类型的名称一样简单（例如，`BOOLEAN` 或`OCTET STRING`），但它可能涉及更多。 我们将在下面更详细地介绍这一点。
 7. An optional set of whitespace characters and comments.
-   1. 一组可选的空白字符和注释。
+一组可选的空白字符和注释。
 
 For example, a simple ASN.1 element definition might look like:
-
 例如，一个简单的 ASN.1 element定义可能如下所示：
 
 ```ASN.1
@@ -569,14 +551,9 @@ AttributeValue ::= OCTET STRING
 ```
 
 总结： 
-
 ​	X.680定义了 将ASN.1 element表示为string的语法；
-
 ​	ASN.1 element的string表示由以下组件组成： 
-
-​			element‘s name  ::=  element‘s type indication(value type 's name)
-
-​	
+​		element‘s name  ::=  element‘s type indication(BER Type)(value-type's name)
 
 
 
@@ -585,7 +562,6 @@ AttributeValue ::= OCTET STRING
 ASN.1 element的 string/字符串 表示中的 空格
 
 In the string representation of ASN.1 elements, whitespace consists of one or more of the following characters:
-
 在 ASN.1 element的string表示中，空格由以下一个或多个字符组成：
 
 | Description             | UTF-8 Encoding (hexadecimal) |
@@ -599,7 +575,6 @@ In the string representation of ASN.1 elements, whitespace consists of one or mo
 | Carriage return         | 0d                           |
 
 总结： 
-
 ​	ASN.1 element的string 表示中，空格 由上表中的一个或多个字符组成。
 
 
@@ -609,7 +584,6 @@ In the string representation of ASN.1 elements, whitespace consists of one or mo
 ASN.1 element的 string/字符串 表示中的 注释
 
 There are two ways to specify comments in the string representation of ASN.1 elements:
-
 有两种方法可以在 ASN.1 element的string表示中指定注释：
 
 - A comment can start with two consecutive hyphen characters, “`--`”, and it will continue either until the next occurrence of “`--`”, or until the end of the line, whichever comes first.
