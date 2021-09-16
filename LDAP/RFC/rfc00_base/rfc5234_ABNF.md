@@ -225,7 +225,9 @@ So that the rule <mumble> matches the lowercase string "aba".
 
 
 Linear white space: Concatenation is at the core of the ABNF parsing model.  A string of contiguous characters (values) is parsed according to the rules defined in ABNF.  For Internet specifications, there is some history of permitting linear white space (space and horizontal tab) to be freely and implicitly interspersed around major constructs, such as delimiting special characters or atomic strings.
-线性空白：连接是 ABNF 解析模型的核心。 根据 ABNF 中定义的规则解析一串连续字符（值）。 对于 Internet 规范，有一些历史允许线性空白（空格和水平制表符）自由且隐式地散布在主要结构周围，例如分隔特殊字符或原子字符串。
+线性空白：拼接/级联 是ABNF解析模型的核心。 
+根据 ABNF中定义的规则 解析一串连续字符（值）。 
+对于 Internet 规范，有一些历史允许线性空白（空格和水平制表符）自由且隐式地散布在主要结构周围，例如分隔特殊字符或原子字符串。
 
 NOTE: This specification for ABNF does not provide for implicit specification of linear white space.
 注意：该 ABNF 规范不提供线性空白的隐式规范。
@@ -304,7 +306,7 @@ Concatenated numeric values and numeric value ranges cannot be specified in the 
 
 总结： 
 ​	数值可以用`.`连接；
-​	可以用`-`指定一个数值范围；即%c##-##  (其中c 代表了 几进制)  ；并在行尾和序列之间指定一个可打印字符  （%x0D表示 回车）
+​	可以用`-`指定一个数值范围；即%c##-##  (其中c 代表了 几进制)  ；并在行尾和序列之间指定一个可打印字符  （%x0D是回车键 0x0A是换行键）
 
 
 
@@ -406,7 +408,7 @@ A semicolon starts a comment that continues to the end of line.  This is a simpl
 
 The various mechanisms described above have the following precedence, from highest (binding tightest) at the top, to lowest (loosest) at the bottom:
 上述各种机制具有以下优先级，从顶部最高（绑定最紧密）到底部最低（最松散）：
-
+```
       Rule name, prose-val, Terminal value
     
       Comment注释
@@ -420,7 +422,7 @@ The various mechanisms described above have the following precedence, from highe
       Concatenation 串联(连续摆放 空格分隔开 即为串联)
     
       Alternative   备选`/`
-
+```
 Use of the alternative operator, freely mixed with concatenations, can be confusing.
 使用与串联随意混合的`/`运算符可能会令人困惑。
 
