@@ -14,6 +14,54 @@ drwxrwxr-x 12 gos gos    4096 9月   8 09:50 openldap-2.4.49+dfsg/
 
 
 
+# BER
+
+/include/lber.h
+
+```c
+//-------------------------------------------------------------------------------
+//openLDAPdebian/openldap-2.4.49+dfsg/include/lber.h
+/*
+ * ber_tag_t represents the identifier octets at the beginning of BER
+ * elements.  OpenLDAP treats them as mere big-endian unsigned integers.
+ * ber_tag_t表示 BER元素开始处的 8位字节标识符。
+ * OpenLDAP将它们仅仅看作大端无符号整数。
+ *
+ * Actually the BER identifier octets look like this:
+ * 实际上，BER标识的 所谓8位字节 看起来是这样的：
+ *
+ *	Bits of 1st octet:
+ *	______
+ *	8 7 | CLASS
+ *	0 0 = UNIVERSAL
+ *	0 1 = APPLICATION
+ *	1 0 = CONTEXT-SPECIFIC
+ *	1 1 = PRIVATE
+ *		_____
+ *		| 6 | DATA-TYPE
+ *		  0 = PRIMITIVE
+ *		  1 = CONSTRUCTED
+ *			___________
+ *			| 5 ... 1 | TAG-NUMBER
+ *
+ *  For ASN.1 tag numbers >= 0x1F, TAG-NUMBER above is 0x1F and the next
+ *  BER octets contain the actual ASN.1 tag number:  Big-endian, base
+ *  128, 8.bit = 1 in all but the last octet, minimum number of octets.
+ *  对于ASN.1 tag number >= 0x1F，
+ *  	TAG-NUMBER的开头是0x1F，下一个BER 8位字节包含实际的ASN.1 tag number:
+ *			Big-endian, base 128, 8。
+ *  除了最后一个8位字节外，所有位都是1，这是最小的8位字节数。
+ */
+ 
+
+```
+
+
+
+
+
+
+
 # schema
 
 
@@ -270,6 +318,39 @@ typedef LDAPRDN* LDAPDN; // DN是个数组，每个元素是个RDN，每个RDN�
 
 
 
+
+
+
+
+## ber_tag_t
+
+```c
+// openLDAPdebian/openldap-2.4.49+dfsg/doc/man/man3/lber-types.3
+typedef impl_tag_t ber_tag_t; 
+
+// openLDAPdebian/openldap-2.4.49+dfsg/include/lber_types.hin
+/* tags */
+typedef unsigned LBER_TAG_T ber_tag_t;
+
+// openLDAPdebian/openldap-2.4.49+dfsg/configure
+$as_echo "#define LBER_TAG_T long" >>confdefs.h
+#define LBER_TAG_T long
+
+// openLDAPdebian/openldap-2.4.49+dfsg/configure.in
+AC_DEFINE(LBER_TAG_T,long,[define to large integer type])
+
+// -->> ber_tag_t 即为 unsigned long
+
+```
+
+
+
+
+
+
+
+
+
 ## struct berval
 
 ```c
@@ -292,6 +373,32 @@ typedef BerValue *BerVarray;	/* To distinguish from a single bv */
 ```
 
 
+
+
+
+## struct AttributeDescription
+
+```c
+//openLDAPdebian/openldap-2.4.49+dfsg/servers/slapd/slap.h
+/* Represents a recognized attribute description ( type + options ). */
+struct AttributeDescription {
+	AttributeDescription	*ad_next;
+	AttributeType		*ad_type;	/* attribute type, must be specified */
+	struct berval		ad_cname;	/* canonical name, must be specified */
+	struct berval		ad_tags;	/* empty if no tagging options */
+	unsigned ad_flags;
+#define SLAP_DESC_NONE		0x00U
+#define SLAP_DESC_BINARY	0x01U
+#define SLAP_DESC_TAG_RANGE	0x80U
+#define SLAP_DESC_TEMPORARY	0x1000U
+	unsigned ad_index;
+};
+
+
+//
+typedef struct AttributeDescription AttributeDescription;
+
+```
 
 
 
