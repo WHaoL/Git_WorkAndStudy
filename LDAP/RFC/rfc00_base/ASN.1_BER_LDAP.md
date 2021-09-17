@@ -553,7 +553,7 @@ AttributeValue ::= OCTET STRING
 总结： 
 ​	X.680定义了 将ASN.1 element表示为string的语法；
 ​	ASN.1 element的string表示由以下组件组成： 
-​		element‘s name  ::=  element‘s type indication(BER Type)(value-type's name)
+​		the name of the element  ::=  the type of the element(BER Type)(value-type's name)
 
 
 
@@ -602,87 +602,56 @@ There are two ways to specify comments in the string representation of ASN.1 ele
 在ASN.1 element 的string表示中 指定 BER Type
 
 You can specify the BER type for an ASN.1 element by enclosing it in square brackets in front of the name of the value type. The square brackets should include at least the tag number for the BER type, but may also contain a string that indicates the class for the type.
-
 您可以在 value-type's name 前面的方括号中 指定 ASN.1 elemeny的 BER type。 方括号应至少包含 BER type的tag number，但也可以包含指示type's class的字符串。
 
 To indicate that an element should have a BER type in the universal class, you can use the string “`UNIVERSAL`” inside the square brackets, followed by whitespace and the tag number for that type of element. For example:
-
 要指示 universal class/通用类中的 element/元素 应具有 BER type，您可以在方括号内使用字符串“`UNIVERSAL`”，后跟空格和该类型元素的标记号/tag number。 例如：
-
 ```ASN.1
 AttributeValue ::= [UNIVERSAL 4] OCTET STRING
 ```
 
 But this is a rare occurrence because you can omit the type specification if the element is in the universal class. So the above is equivalent to:
-
 但这种情况很少见，因为如果元素在通用类中，您可以省略类型说明。 所以上面的等价于：
-
 ```ASN.1
 AttributeValue ::= OCTET STRING
 ```
 
 To indicate that an element should have a BER type in the application class, use the string “`APPLICATION`” inside the square brackets, followed by whitespace and the tag number. For example:
-
 要指示 aplication class/应用程序类中的 element/元素 应具有 BER type，请在方括号内使用字符串“`APPLICATION`”，后跟空格和标签编号。 例如：
-
 ```ASN.1
 UnbindRequest ::= [APPLICATION 2] NULL
 ```
 
 To indicate that an element should have a BER type in the context-specific class, simply place the tag number inside the square brackets without any other text. For example:
-
 要指示 context-specific class/特定于上下文类中的 element/元素 应具有BEER type，只需将标签编号放在方括号内，无需任何其他文本。 例如：
-
 ```ASN.1
 HypotheticalContextSpecificElement ::= [0] INTEGER
 ```
 
 And although you’ll probably never encounter it in LDAP, if you want to indicate that an element should have a BER type in the private class, use the string “`PRIVATE`” inside the square brackets before the tag number, like:
-
 虽然您可能永远不会在 LDAP 中遇到它，但如果您想指示一个元素在private class/私有类中应该具有 BER 类型，请在标签号之前的方括号内使用字符串“`PRIVATE`”，例如：
-
 ```ASN.1
 HypotheticalPrivateElement ::= [PRIVATE 5] BOOLEAN
 ```
-
 总结： 
-
-​	在 ASN.1 element的string表示中指定 BER Type.
-
+​	在 ASN.1 element的string表示中指定 BER Type。
 ​	在value type‘s name前的 方括号中 指定 ASN.1 element的BER type；
-
 ​		方括号中至少包含 BER type的tag number/标签编号，(也可以包含 指示type的class的string)，
-
-​				-->>  即： [class  tag-number]  BER-type
-
+​				-->>  即： [class  tag-number]  BER-type。
 ​	1) 要指示universal class中的element应该有一个BER type，
-
-​		在方括号中： "UNIVERSAL" + 空格 + element type的tag number
-
-​			例如： AttributeValue ::= [UNIVERSAL 4] OCTET STRING
-
-​		但是，在universal class中的element通常 省略 类型说明
-
-​			所以，等价于 AttributeValue ::= OCTET STRING
-
+​		在方括号中： "UNIVERSAL" + 空格 + element type的tag number，
+​			例如： AttributeValue ::= [UNIVERSAL 4] OCTET STRING；
+​		但是，在universal class中的element通常 省略 类型说明，
+​			所以，等价于 AttributeValue ::= OCTET STRING。
 ​	2) 要指示application class中的element应该有一个BER type，
-
 ​		在方括号中： "APPLICATION" + 空格 + element type的tag number，
-
-​			例如： UnbindRequest ::= [APPLICATION 2] NULL
-
+​			例如： UnbindRequest ::= [APPLICATION 2] NULL。
 ​	3)要指示context-specific class中的element应该有一个BER type，
-
-​		在方括号中：只需包含  element type的tag number，
-
+​		在方括号中：只需包含  element type的tag number。
 ​	4) 要指示private class中的element应该有一个BER type，
-
-​		您永远不会再LDAP中遇到......
-
+​		您永远不会再LDAP中遇到......。
 ​	<font color=red >注意：</font>
-
 ​		<font color=red >在ASN.1 element 的string表示中的 tag-number 是6位的，</font>
-
 ​		<font color=red >即  此处的tag-number == primitive/constructed  + tagNumber</font>
 
 
@@ -690,39 +659,28 @@ HypotheticalPrivateElement ::= [PRIVATE 5] BOOLEAN
 #### 4.4 Specifying Null Values(ASN.1 element中 指定 空值)
 
 Since null elements don’t have values, there isn’t much variation in the string representation of null values. You just use the string “`NULL`”, optionally preceded by the type specification in square brackets. For example:
-
 由于空元素没有值，因此空值的字符串表示形式没有太大变化。 您只需使用字符串“`NULL`”，可选地以方括号中的类型规范开头。 例如：
-
 ```ASN.1
 UnbindRequest ::= [APPLICATION 2] NULL
 ```
-
 总结： 
-
 ​	指定element value的type是null element。
-
 ​	null element的值，只需使用"NULL"( 可选的：方括号中指定type [class类型  type的tag-number] )
-
 ​	例如： UnbindRequest ::= [APPLICATION 2] NULL
+
 
 
 
 #### 4.5 Specifying Boolean Values(ASN.1 element中 指定布尔值)
 
 Unlike null elements, Boolean elements do have values. But since a Boolean value is so simple, there aren’t any constraints that you can impose, so the string representation of a Boolean value is just the string “`BOOLEAN`”, optionally including the type in square brackets. For example:
-
 与空元素不同，布尔元素确实有值。 但是由于布尔值非常简单，因此没有任何可以强加的约束，因此布尔值的字符串表示只是字符串“`BOOLEAN`”，可选地包括方括号中的类型。 例如：
-
 ```ASN.1
 HypotheticalBooleanElement ::= [1] BOOLEAN
 ```
-
 总结： 
-
 ​	指定element value的type是boolean element
-
 ​	boolean element的值: 是 (可选的[ ]中的type  + ) "BOOLEAN"   ) 
-
 ​		我认为，上述也可以写为： HypotheticalBooleanElement ::= [UNIVERSAL 1] BOOLEAN
 
 
@@ -730,52 +688,38 @@ HypotheticalBooleanElement ::= [1] BOOLEAN
 #### 4.6 Specifying Octet String Values(指定字符串的值)
 
 The string representation of an octet string element uses the string “`OCTET STRING`”, optionally preceded by the BER type specification. For example:
-
 八位字节字符串元素 的 string/字符串表示 使用字符串“`OCTET STRING`”，可选地以 BER type规范开头。 例如：
-
 ```ASN.1
 AttributeValue ::= OCTET STRING
 ```
 
 Octet string elements can have any kind of value since the value is just a collection of zero or more bytes. However, just because a general-purpose octet string can have any kind of value, that doesn’t mean that every octet string element should be treated as a free-for-all. A particular octet string element might be indented to hold a particular kind of value, and therefore you might want to indicate that there should be certain constraints on the value of that element.
-
 八位字节字符串元素可以具有任何类型的值，因为该值只是0个或多个字节的集合。 然而，仅仅因为通用八位字节字符串可以具有任何类型的值，这并不意味着每个八位字节字符串元素都应该被视为免费的。 特定的八位字节字符串元素可能会缩进以保存特定类型的值，因此您可能希望表明对该元素的值应该有某些限制。
 
 If an octet string’s value should have a specific size, you can indicate that with the SIZE constraint with the allowed number of bytes specified in parentheses, like:
-
 如果八位字节字符串值应具有特定大小，则可以使用括号中指定的允许字节数来指示 SIZE 约束，例如：
-
 ```ASN.1
 FiveByteOctetString ::= OCTET STRING SIZE(5)
 ```
 
 And if the value’s size should be within a specified range, you can indicate that range by separating the upper and lower bounds with two periods, like:
-
 如果值大小应该在指定范围内，您可以通过用两个句点分隔上限和下限来指示该范围，例如：
-
 ```ASN.1
 FiveToTenByteOctetString ::= OCTET STRING SIZE(5..10)
 ```
 
 If you need to specify a constraint that is more complex than just restricting the number of bytes that can be in the value, then you can just use a comment to specify what that constraint is. For example:
-
 如果您需要指定一个比限制值中可以包含的字节数更复杂的约束，那么您可以只使用注释来指定该约束是什么。 例如：
-
 ```ASN.1
 LDAPString ::= OCTET STRING -- UTF-8 encoded,
               -- [ISO10646] characters
 ```
 
 总结： 
-
-​	指定element value的type是octet string element
-
+​	指定element value的type是octet string element：
 ​	Octet String可以保存 任何类型的值；
-
 ​	可以在'( )'中 指定Octet String确切的 字节数；
-
 ​	可以在'( )'中 指定Octet String允许的  字节数的范围；
-
 ​	可以对Octet String指定更复杂的约束，使用注释指定该约束是什么；
 
 
@@ -783,63 +727,42 @@ LDAPString ::= OCTET STRING -- UTF-8 encoded,
 #### 4.7 Specifying Integer Values(指定整数值)
 
 To indicate that an element has a value that is an integer, use the string “`INTEGER`”, like:
-
 要指示元素具有整数值，请使用字符串“`INTEGER`”，例如：
-
 ```ASN.1
 SomeNumber ::= INTEGER
 ```
 
 You can specify a range of valid values by separating the upper and lower bounds with two periods and enclosing that range in parentheses, like:
-
 您可以通过用两个句点分隔上限和下限并将该范围括在括号中来指定有效值的范围，例如：
-
 ```ASN.1
 NumberBetweenOneAndTen ::= INTEGER (1..10)
 ```
 
 You can also define an integer constant, which is a named representation of a fixed value. For example, the LDAP specification defines a maxInt constant with a value of 2147483647, and it uses that constant in various places. For example:
-
 您还可以定义一个整数常量，它是一个固定值的命名表示。 例如，LDAP 规范定义了一个值为 2147483647 的 maxInt 常量，并且它在不同的地方使用了这个常量。 例如：
-
 ```ASN.1
 MessageID ::= INTEGER (0..maxInt)
 maxInt INTEGER ::= 2147483647 -- (2^^31 - 1) --
 ```
 
 总结: 
-
-​	指定element value的type是integer element
-
-​	指示element具有整数值，使用"INTEGER"
-
-​			SomeNumber ::= INTEGER
-
-​	指定值的范围
-
-​			NumberBetweenOneAndTen ::= INTEGER (1..10)
-
-​	可以定义 整数常量(类似于C语言中的 #define)，它表示了一个固定值
-
-​			MessageID ::= INTEGER (0..maxInt)
+​	指定element value的type是integer element。
+​	指示element具有整数值，使用"INTEGER"： SomeNumber ::= INTEGER；
+​	指定值的范围：NumberBetweenOneAndTen ::= INTEGER (1..10)；
+​	可以定义 整数常量(类似于C语言中的 #define)，它表示了一个固定值：
+​			MessageID ::= INTEGER (0..maxInt)            -- 
 ​			maxInt INTEGER ::= 2147483647 -- (2^^31 - 1) --	
-
-
 
 
 
 #### 4.8 Specifying Enumerated Values(指定枚举值)
 
 An enumerated element has exactly the same encoded representation as an integer element, but they have very different string representations. That’s because each of the possible numeric values for an enumerated element has a specific name that indicates its meaning, and the string representation correlates the name with its numeric value.
-
 枚举元素具有与整数元素完全相同的编码表示，但它们具有非常不同的字符串表示。 这是因为枚举元素的每个可能的数值都有一个表示其含义的特定名称，并且字符串表示将名称与其数值相关联。
 
 The string representation of an enumerated element starts with the string “`ENUMERATED`” (optionally preceded by the type specification in square brackets), followed by an opening curly brace. It then includes a number of name-value pairs in which the name for each pair follows the same syntax as a "type reference" (it must start with a letter, must not contain consecutive hyphens, must not end with a hyphen, and must contain only letters, digits, and hyphens), and the numeric value follows that name in parentheses. Each name-value pair except for the last one is followed by a comma, and the last one is followed by a closing curly brace. For example:
-
-枚举元素的字符串表示以字符串“`ENUMERATED`”开头（可选地以方括号中的类型规范开头），后跟左花括号。 然后它包含多对name-value，其中每对的name遵循与"type reference"相同的语法（它必须以字母开头，不得包含连续的连字符，不得以连字符结尾，并且必须仅包含 字母、数字和连字符），数值 跟在括号中的名称后面。 除了最后一个name-value对之外，每个name-value对后跟一个逗号，最后一个后跟一个右花括号。 例如：
-
+枚举元素的字符串表示以字符串“`ENUMERATED`”开头（可选地以方括号中的类型规范开头），后跟左花括号。 然后它包含多对name-value，其中每对的name遵循与"type reference"相同的语法（它必须以字母开头，不得包含连续的连字符，不得以连字符结尾，并且必须仅包含 字母、数字和连字符），value/数值 跟在括号中的名称后面。 除了最后一个name-value对之外，每个name-value对后跟一个逗号，最后一个后跟一个右花括号。 例如：
 总结： 基本形式如下所示；
-
 ```ASN.1
 TrafficLightColor ::= ENUMERATED {
      red        (0),
@@ -847,14 +770,9 @@ TrafficLightColor ::= ENUMERATED {
      green      (2) }
 ```
 
-
-
 The string representation of an enumerated element typically lists the values in ascending order, but those values don’t have to represent a contiguous range, and there is no set minimum or maximum value. For example:
-
 枚举元素 的字符串表示 通常按 升序 列出 值，但这些值不必表示连续范围，并且没有设置最小值或最大值。 例如：
-
 总结：值是升序列出，但是并不要求连续；
-
 ```ASN.1
 SparseValues ::= ENUMERATED {
      smallestValue     (5),
@@ -863,13 +781,9 @@ SparseValues ::= ENUMERATED {
 ```
 
 
-
 There may also be cases in which you want to define a given set of allowed values now, but also permit defining additional values that can be used in the future. For example, the LDAP protocol specification uses an enumerated element to define a number of possible result code values, but it also allows for other result codes to be defined in other specifications or by specific vendors. To indicate that this should be allowed, use three periods to create an ellipsis, typically at the end of the list of possible values, like:
-
 在某些情况下，您现在可能想要定义一组给定的允许值，但也允许定义将来可以使用的其他值。 例如，LDAP 协议规范使用枚举元素来定义许多可能的result code值，但它也允许在其他规范中或由特定供应商定义其他result code。 为了表明应该允许这样做，请使用三个句点来创建省略号，通常位于可能值列表的末尾，例如：
-
 总结：name-value末尾的 "..." 表示允许定义其他扩展；
-
 ```ASN.1
 MayIncludeAdditionalValues ::= ENUMERATED {
      first      (1),
@@ -879,13 +793,10 @@ MayIncludeAdditionalValues ::= ENUMERATED {
 ```
 
 This indicates that the three specified values are known at the time the specification was created, but that an application should be prepared to encounter other values. The application may not necessarily be able to interpret those values correctly, and it may return an error if it encounters an unrecognized value, but at least that error shouldn’t result from an inability to decode the element.
-
 这表明三个指定的值在创建规范时是已知的，但应用程序应该准备好遇到其他值。 应用程序可能不一定能够正确解释这些值，如果遇到无法识别的值，它可能会返回错误，但至少该错误不应该是由于无法解码元素而导致的。
 
 For example, [RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) section 4.5.1 specification defines three possible search scope values but uses an ellipsis to indicate that there may be additional scopes defined in the future. It does this like:
-
 例如，[RFC 4511](https://docs.ldap.com/specs/rfc4511.txt) 第 4.5.1 节规范定义了三个可能的搜索范围值，但使用省略号来表示可能在未来扩展scope。 它这样做：
-
 ```ASN.1
 scope ::= ENUMERATED {
      baseObject       (0),
@@ -895,35 +806,23 @@ scope ::= ENUMERATED {
 ```
 
 And in fact the [draft-sermersheim-ldap-subordinate-scope](https://docs.ldap.com/specs/draft-sermersheim-ldap-subordinate-scope-02.txt) specification does propose a fourth scope, `subordinateSubtree`, with a numeric value of 3.
-
 事实上，[draft-sermersheim-ldap-subordinate-scope])规范确实提出了第四个范围，`subordinate Subtree`，其数值为 3。
 
 总结: 
-
-​	基本形式： 
-
-​			"ENUMERATED"   '{'   name-value, [name-value]  '}'
-
-​			值是升序列出，但是并不要求连续；
-
-​			name-value末尾的 "..." 表示允许定义其他扩展；
-
-​			
+​	基本形式： "ENUMERATED"   '{'   name-value, (name-value)  '}' 。
+​	值是升序列出，但是并不要求连续；
+​	name-value末尾的 "..." 表示允许定义其他扩展。​			
 
 
 
 #### 4.9 Specifying Sequence Values(指定sequence的值)
 
 There are two basic kinds of sequences: those that have a well-defined set of elements, and those that have an arbitrary number of elements that are all of the same type. The first is primarily used as a data structure to represent some entity with multiple components, while the second is primarily used to hold a bunch of the same kind of thing.
-
 有两种基本类型的序列：具有明确定义的元素集的序列，以及具有任意数量的相同类型元素的序列。 第一个主要用作数据结构来表示具有多个组件的某个实体，而第二个主要用于保存一堆相同类型的东西。
 
 总结：
-
 ​	两种sequence： 
-
-​		1) 具有明确定义的各种元素的集合，用作数据结构 表示具有多个组件的某个实体； 
-
+​		1) 具有明确定义的各种元素的集合，用作数据结构，表示具有多个组件的某个实体； 
 ​		2) 任意数量的相同类型元素的集合，用于保存一堆相同类型的东西。
 
 
@@ -933,7 +832,6 @@ There are two basic kinds of sequences: those that have a well-defined set of el
 使用 预定义的 元素类型/element type   指定 序列/sequence
 
 The string representation of a sequence element with a specific number and type of elements is similar to that of an enumerated element. It starts with the “`SEQUENCE`” keyword (optionally preceded by the type specification in square brackets), followed by an opening curly brace, a comma-delimited list of the allowed elements, and a closing curly brace. Each item in the comma-delimited list of elements consists of a name, some whitespace, and the value specifier. For example:
-
 具有 特定数量和元素类型的 序列元素的 字符串表示 类似于枚举元素的字符串表示。 它以“`SEQUENCE`”关键字开头（可选地以方括号中的类型规范开头），然后是左花括号、逗号分隔的允许元素列表和右花括号。 逗号分隔的元素列表中的每一项都包含一个name/名称、一些空格和 value/值说明符。 例如：
 
 ```ASN.1
@@ -956,23 +854,17 @@ Date ::= SEQUENCE {
 ```
 
 总结：
-
 ​	sequence element的string表示 类似于 enumerated element的string表示。
-
-​	"SEQUENCE"   +   "{"   +  逗号分割的元素列表  +   "}"
-
-​		元素列表中的每一项: name  value-type(的说明)
+​	"SEQUENCE"   +   "{"   +  逗号分割的元素列表  +   "}"；
+​		元素列表中的每一项: name  value-type(的说明)。
 
 
 
 All of the constraints that you can define for the elements on their own are also available for those elements in a sequence (for example, the above constraint that only allows the `dayOfMonth` value to be between 1 and 31). But there are also additional constraints that you can define for elements in a sequence. These include the `OPTIONAL` and `DEFAULT` constraints.
-
 您 为元素自定义的所有约束 也可用于 sequence/序列中的这些元素（例如，上述约束只允许 `dayOfMonth` 值介于 1 和 31 之间）。 但是，您还可以为sequence/序列中的元素定义其他约束。 其中包括“OPTIONAL” 和 “DEFAULT” 约束。
 
 The `OPTIONAL` constraint indicates that the specified element is optional and doesn’t have to be present. For example, the following sequence defines a data structure for specifying the time of the day in which the hour and minute are required, but the second is optional:
-
 `OPTIONAL` 约束表示指定的元素是可选的，不是必须存在。 例如，以下序列定义了一个数据结构，用于指定需要一天中小时和分钟的的时间，但第二个是可选的：
-
 ```ASN.1
 TimeOfDay ::= SEQUENCE {
      hour       INTEGER (0..23),
@@ -981,9 +873,7 @@ TimeOfDay ::= SEQUENCE {
 ```
 
 The `DEFAULT` constraint is like the `OPTIONAL` constraint in that it indicates that the specified element doesn’t have to be there, but the `DEFAULT` constraint also specifies what value should be assumed if that element isn’t present by following that keyword with whitespace and the default value that should be used. For example:
-
 `DEFAULT` 约束类似于 `OPTIONAL` 约束，因为它表明指定的元素不是必须存在，但 `DEFAULT` 约束还指定如果该元素不存在，则应采用以下值: 带有空格的关键字和应该使用的默认值。 例如：
-
 ```ASN.1
 Control ::= SEQUENCE {
      controlType      LDAPOID,
@@ -992,21 +882,15 @@ Control ::= SEQUENCE {
 ```
 
 总结： 
-
 ​	可以为sequence中的元素自定义约束；
-
 ​	其他约束：
-
-​		OPTIONAL：不是必须存在，是可选的
-
-​		DEFAULT：  不是必须存在，  是可选的  -- 当没有指定值时使用默认值
+​		OPTIONAL：  不是必须存在，  是可选的；
+​		DEFAULT ：  不是必须存在，  是可选的  -- 当没有指定值时使用默认值。
 
 
 
 As with an enumerated element, you may want to define a sequence that has a defined set of elements right now, but that may also have additional elements in the future. In that case, you can use the ellipsis (`...`) at the end of the sequence before the closing curly brace, just like you can in an enumerated element. For example:
-
 与枚举元素一样，您可能希望定义一个序列，该序列现在具有一组已定义的元素，但将来可能还有其他元素。 在这种情况下，您可以在序列末尾的大括号之前使用省略号 (`...`)，就像在枚举元素中一样。 例如：
-
 ```ASN.1
 ExtendableSequence ::= SEQUENCE {
      element1     OCTET STRING,
@@ -1016,15 +900,12 @@ ExtendableSequence ::= SEQUENCE {
 ```
 
 总结： 
-
 ​	sequence末尾的 "}"之前，使用 省略号...   表明允许以后扩展。
 
 
 
 Because the order of elements in a sequence is significant, you can often use the positions of each element to determine what they represent. In the `ExtendableSequence` defined above, the first element in the sequence corresponds to `element1` in the definition, the second corresponds to `element2`, and the third corresponds to `element3`. However, this may not work if a sequence contains non-required elements. For example, consider the following:
-
 由于序列中元素的顺序很重要，因此您通常可以使用每个元素的位置来确定它们代表什么。 在上面定义的`ExtendableSequence`中，序列中的第一个元素对应于定义中的`element1`，第二个对应于`element2`，第三个对应于`element3`。 但是，如果序列包含非必需元素，这可能不起作用。 例如，请考虑以下情况：
-
 ```ASN.1
 AnInvalidSequenceDefinition ::= SEQUENCE {
      element1     OCTET STRING OPTIONAL,
@@ -1033,7 +914,6 @@ AnInvalidSequenceDefinition ::= SEQUENCE {
 ```
 
 The above sequence is not valid because, if any of the elements is omitted, it’s not possible to determine which one it was. To deal with this, you need to ensure that all of the elements (or at least all of the elements starting with the first non-required element) have a unique BER type so that you can use the type to determine which elements are present and which are absent. For example, the following is valid because even if one or two elements are missing, you can use the BER types of the elements that are present to figure out which ones they are:
-
 上述序列是无效的，因为如果省略了任何元素，则无法确定它是哪个元素。 为了解决这个问题，您需要确保所有元素（或至少从第一个非必需元素开始的所有元素）都具有唯一的 BER 类型，以便您可以使用该类型来确定存在哪些元素以及 哪些是缺席的。 例如，以下内容是有效的，因为即使缺少一两个元素，您也可以使用存在的元素的 BER 类型来确定它们是哪些：
 
 ```ASN.1
@@ -1044,9 +924,7 @@ AValidSequenceDefinition ::= SEQUENCE {
 ```
 
 But what if you want a sequence to have multiple elements with the same data type? This is when you specify an explicit BER type (usually in the context-specific class) so that you can use it to tell the difference between them. So the following is valid:
-
 但是，如果您希望序列具有多个具有相同数据类型的元素怎么办？ 这是当您指定显式 BER 类型时（通常在特定于上下文的类中），以便您可以使用它来区分它们之间的区别。 所以以下是有效的：
-
 ```ASN.1
 AnotherValidSequenceDefinition ::= SEQUENCE {
      element1     [1] OCTET STRING OPTIONAL,
@@ -1055,11 +933,8 @@ AnotherValidSequenceDefinition ::= SEQUENCE {
 ```
 
 总结： 
-
 ​	sequence中元素的顺序是重要的，为了确定每个位置的元素代表什么，有两种方式： 
-
 ​			1) 从第一个`OPTIONAL`(可选的/非必须出现的) 元素开始的所有元素，都有唯一BER类型；
-
 ​			2) 当希望具有同一数据类型的多个元素时，显示指定BER类型；
 
 
@@ -1069,26 +944,19 @@ AnotherValidSequenceDefinition ::= SEQUENCE {
 使用任意数量的同类元素指定序列
 
 Sometimes you want to have a sequence that is just a list containing some number of elements of a given kind, and you may or may not know how many elements should be in that list. You can indicate this with “`SEQUENCE OF`” followed by the type of element that should be contained in the list. For example:
-
 有时您想要一个序列，它只是一个包含 一定数量的给定类型元素的 列表，您可能知道也可能不知道该列表中应该有多少元素。 您可以使用“`SEQUENCE OF`”后跟应包含在列表中的元素类型来表示。 例如：
-
 ```ASN.1
 ListOfIntegers ::= SEQUENCE OF listItem INTEGER
 -- name       赋值 "SEQUENCE OF"  type's-name  type
 ```
-
 总结： 
-
 ​	使用 任意数量的 同类元素 来 指定 sequence/序列。
-
 ​	1) 当不知道sequence中有多少个这种元素时，举例如下： 
-
-​			ListOfIntegers ::= SEQUENCE OF listItem INTEGER		
+​		ListOfIntegers ::= SEQUENCE OF listItem INTEGER		
 
 
 
 If you want to restrict the number of elements in the sequence, you can use the `SIZE` constraint. In this case, the word `SIZE` comes immediately after the word `SEQUENCE` and is followed by either a single number in parentheses (to indicate exactly how many elements should be present) or a pair of numbers separated by two periods (to indicate that the number of elements should fall within a specified range). For example:
-
 如果要限制序列中元素的数量，可以使用“SIZE”约束。 在这种情况下，单词“SIZE”紧跟在单词“SEQUENCE”之后，后跟括号中的单个数字（以准确表示应该存在多少个元素）或由两个句点分隔的一对数字（以表示 元素的数量应该在指定的范围内）。 例如：
 
 ```ASN.1
@@ -1096,30 +964,21 @@ ListOfThreeIntegers ::= SEQUENCE SIZE (3) OF listItem INTEGER
 
 ListOfFiveOrSixIntegers ::= SEQUENCE SIZE (5..6) OF listItem INTEGER
 ```
-
 总结： 
-
 ​	2) 当需要限制 sequence中这种元素的确切个数 或 范围 时，使用`SIZE` 约束，举例如下： 
-
-​			ListOfThreeIntegers ::= SEQUENCE SIZE (3) OF listItem INTEGER								
-
-​			ListOfFiveOrSixIntegers ::= SEQUENCE SIZE (5..6) OF listItem INTEGER
+​		ListOfThreeIntegers ::= SEQUENCE SIZE (3) OF listItem INTEGER		；			
+​		ListOfFiveOrSixIntegers ::= SEQUENCE SIZE (5..6) OF listItem INTEGER  。
 
 
 
 If there is a lower bound on the number of items but no upper bound, you can use the word `MAX` in place of the upper bound in the range, like:
-
 如果项目数量有下限但没有上限，则可以使用“MAX”一词代替范围内的上限，例如：
-
 ```ASN.1
 NonEmptyListOfIntegers ::= SEQUENCE SIZE (1..MAX) OF listItem INTEGER
 ```
-
 总结： 
-
 ​	3) 当sequence中这种元素的个数 有下限 但是没有上限时，使用`MAX`表示不限制上限，举例如下： 
-
-​			NonEmptyListOfIntegers ::= SEQUENCE SIZE (1..MAX) OF listItem INTEGER
+​		NonEmptyListOfIntegers ::= SEQUENCE SIZE (1..MAX) OF listItem INTEGER
 
 
 
@@ -1128,9 +987,7 @@ NonEmptyListOfIntegers ::= SEQUENCE SIZE (1..MAX) OF listItem INTEGER
 从现有sequence/序列继承
 
 Sometimes, you may want to create one sequence that contains all of the elements of another sequence, but that also allows additional elements not in the original sequence. For example, most response messages for LDAP operations allow for a result code, matched DN, diagnostic message, and a list of referral URLs, and these are all contained in an `LDAPResult` sequence, which is defined as follows:
-
 有时，您可能希望创建一个包含另一个序列的所有元素的序列，但同时也允许添加不在原始序列中的元素。 例如，大多数 LDAP operation的response-message/响应消息  允许：result-code/结果代码、matched-DN/匹配的DN、diagnostic-message/诊断消息和 list-of-referral-URLs/引用 URL 列表，这些都包含在`LDAPResult`序列中，其定义如下：
-
 ```ASN.1
 LDAPResult ::= SEQUENCE {
      resultCode         ENUMERATED {
@@ -1192,13 +1049,10 @@ URI ::= LDAPString     -- limited to characters permitted in
 ```
 
 But an LDAP bind response can include all of these `LDAPResult` elements, plus an additional octet string element used to hold server SASL credentials. And an LDAP extended response can include all of the `LDAPResult` elements, plus an additional octet string for the response OID and an additional octet string for the response value.
-
 但是一个 `LDAP bind response` 可以包含`LDAPResult`的所有这些元素，以及用于保存服务器 SASL 证书的额外octet string元素。 一个 `LDAP extended response`可以包括 `LDAPResult`的所有元素，加上一个额外的octet string 作为response-OID 和一个额外的octet string作为response-value。
 
 Rather than duplicating the entire `LDAPResult` element and making the desired changes, you can use the “`COMPONENTS OF`” keyword followed by the name of the sequence whose elements you want to import. For example:
-
 您可以使用`COMPONENTS OF`关键字后跟要导入其元素的序列名称，而不是复制整个`LDAPResult`的元素并进行所需的更改。 例如：
-
 ```ASN.1
 BindResponse ::= [APPLICATION 1] SEQUENCE {
      COMPONENTS OF LDAPResult,
@@ -1211,21 +1065,14 @@ ExtendedResponse ::= [APPLICATION 24] SEQUENCE {
 ```
 
 总结： 
-
 ​	如何在一个sequence中包含另一个sequence中的全部元素，有两种方法：
-
 ​	1) 一个sequence可以继承自另一个sequence(继承了全部的元素列表)，并且可以扩展额外的元素；
-
-​	    (类似于C++的继承)(是复制)
-
-​	`LDAPResult` = resultCode + matchedDN + diagnosticMessage + referral
-
-​	 `LDAP bind response` == `LDAPResult` + SASL证书(octet string)
-
-​	`LDAP extended response` == `LDAPResult` + response-OID(octet string) + response-value(octet string)
+​	    (类似于C++的继承)(此处是 复制)。
+​	`LDAPResult` = resultCode + matchedDN + diagnosticMessage + referral ；
+​	`LDAP bind response` == `LDAPResult` + SASL证书(octet string) ；
+​	`LDAP extended response` == `LDAPResult` + response-OID(octet string) + response-value(octet string) ；
 
 ​	2) 可以 使用`COMPONENTS OF`导入某个sequence的所有元素；(是导入，不是复制)  (推荐！！！)
-
 ​			BindResponse ::= [APPLICATION 1] SEQUENCE {
 ​     			COMPONENTS OF LDAPResult,
 ​     			serverSaslCreds    [7] OCTET STRING OPTIONAL }		
@@ -1240,13 +1087,9 @@ ExtendedResponse ::= [APPLICATION 24] SEQUENCE {
 #### 4.10 Specifying Set Values(指定set的值)
 
 The string representation of set elements is virtually identical to that of sequence elements. Just replace “`SEQUENCE`” with “`SET`”, and “`SEQUENCE OF`” with “`SET OF`”. However, given that the order of elements in a set is not considered significant, you are more likely to encounter the “`SET OF`” variant.
-
 集合元素的字符串表示实际上与序列元素的字符串表示相同。 只需将“`SEQUENCE`”替换为“`SET`”，将“`SEQUENCE OF`”替换为“`SET OF`”。 但是，考虑到集合中元素的顺序并不重要，您更有可能遇到“`SET OF`”变体。
-
 总结： 
-
 ​	set的string表示和sequence的string表示相同，只需要将：`SEQUENCE`替换为`SET` ，将`SEQUENCE OF`替换为`SET OF`；
-
 ​	但是set中的元素的顺序并不重要；
 
 
@@ -1254,7 +1097,6 @@ The string representation of set elements is virtually identical to that of sequ
 #### 4.11 Specifying Choice Values(指定choice的值)
 
 There may be cases in which you want to allow for one of several elements in a given slot in a sequence or set. You can accomplish that with a choice. The string representation of a choice element is very much like a sequence or a set, except that the encoded element can only contain one of the elements. For example:
-
 在某些情况下，您可能希望  允许在sequence或set中包含  给定slot/槽 中的多个元素之一。 您可以通过choice/选择来实现这一点。 choice element的string表示非常类似于sequence或set，不同之处在于 编码时只能包含其中一个元素。 例如：
 
 ```ASN.1
@@ -1267,9 +1109,7 @@ NameValuePair ::= SEQUENCE {
 ```
 
 Most of the time, the encoded representation of the choice element is just the encoded representation of the element that is selected. For example, the encoded representation of the above sequence with a name of “age” and an integer value of 35 would be:
-
 大多数时候，choice element的编码表示 只是被选择元素的编码表示。 例如，上述name为`age`且integerValue为 35 的sequence的编码表示为：
-
 ```ASN.1
 30 08 -- Begin a universal sequence with a total value size of 8 bytes
    04 03 61 67 65 -- The universal octet string age
@@ -1277,9 +1117,7 @@ Most of the time, the encoded representation of the choice element is just the e
 ```
 
 This even works for most choice elements with custom element types. For example:
-
 这甚至适用于 具有自定义元素类型的 大多数choice element。 例如：
-
 ```ASN.1
 NameAndOctetStringValue ::= SEQUENCE {
      name      OCTET STRING,
@@ -1289,9 +1127,7 @@ NameAndOctetStringValue ::= SEQUENCE {
 ```
 
 In this case, if you have a name of “hello” and a string value of “there” then the encoded representation would be:
-
 在这种情况下，如果您有一个name=“hello”和stringValue=“there”，那么编码表示将是：
-
 ```ASN.1
 30 0e -- Begin a universal sequence with a total value size of 14 bytes
    04 05 68 65 6c 6c 6f -- The universal octet string hello
@@ -1299,9 +1135,7 @@ In this case, if you have a name of “hello” and a string value of “there�
 ```
 
 However, there is a case in which this doesn’t work, and that is the case in which the choice element itself is defined with a custom BER type. For example:
-
 但是，在某些情况下这不起作用，即choice element本身使用自定义 BER 类型定义的情况。 例如：
-
 ```ASN.1
 NameAndOptionalValue ::= SEQUENCE {
      name      [0] OCTET STRING,
@@ -1313,7 +1147,6 @@ NameAndOptionalValue ::= SEQUENCE {
 ```
 
 In this case, the choice element is encoded as a constructed element, with a value that is the full encoding of the selected element inside that choice. For example, if you have a name of “state” and a string value of “Texas”, the encoding would be:
-
 在这种情况下，choice element被编码为一个constructed元素，其值是该choice 中所选元素的完整编码。 例如，如果您的name为“state”，string值为“Texas”，则编码为：
 
 ```ASN.1
